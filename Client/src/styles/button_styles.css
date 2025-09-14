@@ -1,0 +1,61 @@
+@import "./config.css";
+
+/* Base button component */
+@layer components {
+  .btn {
+    @apply tracking-widest leading-tight active:scale-95 transition-colors duration-[180] rounded-md flex 
+    items-center gap-1 border-2 font-semibold whitespace-nowrap;
+  }
+}
+
+/* Size utilities */
+@utility sm {
+  @apply p-1 px-2 text-sm;
+}
+@utility md {
+  @apply p-1 px-4 text-sm;
+}
+@utility lg {
+  @apply p-2 px-4 text-base;
+}
+@utility xl {
+  @apply p-2 px-6 text-base;
+}
+
+@utility accent {
+  @apply bg-accent border-accent-dark;
+
+  &:hover,
+  &:focus {
+    @apply bg-accent-light text-white;
+  }
+}
+@utility primary {
+  @apply bg-secondary border-secondary-dark;
+}
+@utility danger {
+  @apply bg-error border-error-dark;
+}
+
+/* Variant utilities */
+@utility contained {
+  @apply bg-secondary-light hover:bg-secondary-lightest text-slate-100;
+
+  &.primary {
+    @apply primary;
+  }
+  &.accent {
+    @apply accent;
+  }
+  &.danger {
+    @apply danger;
+  }
+}
+
+@utility outlined {
+  @apply bg-transparent shadow-none border-secondary;
+
+  &:hover {
+    @apply bg-secondary-light text-white border-secondary-dark;
+  }
+}

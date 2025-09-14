@@ -1,0 +1,2068 @@
+[
+  {
+    "id": "a634c271-d4eb-4ca4-94f6-93cc521e7cb3",
+    "name": "Julia Hammond",
+    "primarySpecialization": "Neurology",
+    "credentials": "MD (Urology), DMRCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Endocrinology", "Radiology"],
+    "clinics": [
+      {
+        "name": "City General Hospital",
+        "fee": { "inPerson": 202, "online": 131 },
+        "contact": "(746) 484-4383",
+        "address": "1390 Lilbuc Extension",
+        "dayTime": ["Wednesday", "Thursday", "Friday"],
+        "whatsApp": "(967) 838-9083",
+        "location": { "lat": 19.53339, "lng": 21.30683 }
+      },
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 457, "online": 409 },
+        "contact": "(226) 865-4331",
+        "address": "1122 Wike Point",
+        "dayTime": ["Thursday", "Sunday", "Friday", "Thursday"],
+        "whatsApp": "(943) 354-6348",
+        "location": { "lat": -36.20988, "lng": 56.45814 }
+      }
+    ],
+    "experience": 24,
+    "verified": false,
+    "onlineConsult": false,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 475, "online": 424 },
+    "rating": 3.9,
+    "reviews": 43,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580834,
+    "status": "busy",
+    "avgConsultTime": 46,
+    "queuedPatients": 1
+  },
+  {
+    "id": "f8213970-28b3-461f-9b1a-f0c03dd848f1",
+    "name": "Michael Hunter",
+    "primarySpecialization": "Orthopedics",
+    "credentials": "MD (Rheumatology), DMRCC",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Endocrinology", "Pulmonology", "Pulmonology"],
+    "clinics": [
+      {
+        "name": "City General Hospital",
+        "fee": { "inPerson": 102, "online": 72 },
+        "contact": "(255) 613-1924",
+        "address": "783 Lilno Lane",
+        "dayTime": ["Wednesday"],
+        "whatsApp": "(768) 698-1601",
+        "location": { "lat": 44.0012, "lng": 75.92351 }
+      },
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 124, "online": 167 },
+        "contact": "(639) 810-5513",
+        "address": "253 Annak Key",
+        "dayTime": ["Friday", "Saturday", "Monday", "Saturday", "Thursday"],
+        "whatsApp": "(775) 831-1305",
+        "location": { "lat": 46.38318, "lng": -104.29608 }
+      }
+    ],
+    "experience": 7,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 315, "online": 399 },
+    "rating": 4.6,
+    "reviews": 326,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580834,
+    "status": "available",
+    "avgConsultTime": 52,
+    "queuedPatients": 20
+  },
+  {
+    "id": "4039e03d-f6b7-4b32-9c40-c77dd8cdd0a5",
+    "name": "Dora Salazar",
+    "primarySpecialization": "Oncology",
+    "credentials": "MD (Psychiatry), DPM",
+    "currentlyAvailable": false,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "Unity Healthcare",
+        "fee": { "inPerson": 366, "online": 380 },
+        "contact": "(761) 869-6393",
+        "address": "93 Otesag Road",
+        "dayTime": ["Wednesday"],
+        "whatsApp": "(387) 694-4017",
+        "location": { "lat": -68.08117, "lng": -56.16966 }
+      }
+    ],
+    "experience": 28,
+    "verified": true,
+    "onlineConsult": false,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 177, "online": 83 },
+    "rating": 5,
+    "reviews": 314,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580834,
+    "status": "away",
+    "avgConsultTime": 17,
+    "queuedPatients": 3
+  },
+  {
+    "id": "c7181008-570a-48ec-a118-628c355c172e",
+    "name": "Mike Sanchez",
+    "primarySpecialization": "Obstetrics & Gynecology",
+    "credentials": "MD (Gastroenterology), DMCR",
+    "currentlyAvailable": true,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 166, "online": 395 },
+        "contact": "(707) 778-2709",
+        "address": "1867 Daub Plaza",
+        "dayTime": ["Thursday", "Monday"],
+        "whatsApp": "(638) 482-7014",
+        "location": { "lat": 59.44638, "lng": -25.83405 }
+      },
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 322, "online": 156 },
+        "contact": "(632) 657-9001",
+        "address": "82 Wopre Boulevard",
+        "dayTime": [
+          "Tuesday",
+          "Thursday",
+          "Wednesday",
+          "Wednesday",
+          "Wednesday"
+        ],
+        "whatsApp": "(303) 493-4417",
+        "location": { "lat": 64.15106, "lng": -76.63476 }
+      }
+    ],
+    "experience": 14,
+    "verified": false,
+    "onlineConsult": false,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 482, "online": 203 },
+    "rating": 3.7,
+    "reviews": 684,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580834,
+    "status": "unknown",
+    "avgConsultTime": 30,
+    "queuedPatients": 5
+  },
+  {
+    "id": "df7dc97e-7ad5-4022-806c-6b82a21e04bc",
+    "name": "Cornelia Woods",
+    "primarySpecialization": "Psychiatry",
+    "credentials": "MD (Cardiology), DMCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": [
+      "Obstetrics & Gynecology",
+      "Dermatology",
+      "Internal Medicine"
+    ],
+    "clinics": [
+      {
+        "name": "Unity Healthcare",
+        "fee": { "inPerson": 438, "online": 441 },
+        "contact": "(933) 536-1849",
+        "address": "1204 Basci Trail",
+        "dayTime": ["Wednesday", "Sunday", "Wednesday"],
+        "whatsApp": "(582) 526-1985",
+        "location": { "lat": -64.10581, "lng": -59.73024 }
+      },
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 369, "online": 250 },
+        "contact": "(909) 466-5260",
+        "address": "1754 Racus Lane",
+        "dayTime": ["Monday", "Wednesday"],
+        "whatsApp": "(223) 304-9497",
+        "location": { "lat": 35.82354, "lng": 34.02505 }
+      },
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 315, "online": 113 },
+        "contact": "(226) 604-7894",
+        "address": "523 Ivecaw Manor",
+        "dayTime": ["Monday", "Tuesday", "Saturday", "Tuesday", "Thursday"],
+        "whatsApp": "(486) 573-8623",
+        "location": { "lat": 78.1747, "lng": 44.17777 }
+      }
+    ],
+    "experience": 26,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 369, "online": 80 },
+    "rating": 4.3,
+    "reviews": 682,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 27,
+    "queuedPatients": 18
+  },
+  {
+    "id": "4d1af3a4-ad28-49b5-b0cb-1a8779bd6ffe",
+    "name": "Mamie Norman",
+    "primarySpecialization": "Dermatology",
+    "credentials": "MD (Pediatrics), DMP",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Pulmonology", "Ophthalmology"],
+    "clinics": [
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 177, "online": 147 },
+        "contact": "(619) 697-3400",
+        "address": "208 Wigmut Place",
+        "dayTime": ["Wednesday"],
+        "whatsApp": "(900) 464-2527",
+        "location": { "lat": 73.66202, "lng": 87.77641 }
+      },
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 385, "online": 441 },
+        "contact": "(747) 789-9844",
+        "address": "1567 Cuvim Extension",
+        "dayTime": ["Monday"],
+        "whatsApp": "(804) 278-7186",
+        "location": { "lat": 84.50889, "lng": -176.91301 }
+      },
+      {
+        "name": "Metropolitan Medical Center",
+        "fee": { "inPerson": 215, "online": 406 },
+        "contact": "(343) 887-4329",
+        "address": "973 Miid Heights",
+        "dayTime": ["Sunday"],
+        "whatsApp": "(640) 441-9937",
+        "location": { "lat": -75.42459, "lng": 71.62357 }
+      }
+    ],
+    "experience": 20,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 83, "online": 235 },
+    "rating": 4.6,
+    "reviews": 295,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "busy",
+    "avgConsultTime": 33,
+    "queuedPatients": 4
+  },
+  {
+    "id": "4c4c5bf6-1147-4383-b184-5d4db4963811",
+    "name": "Lucille Medina",
+    "primarySpecialization": "Family Medicine",
+    "credentials": "MD (Hematology), DMRCC",
+    "currentlyAvailable": true,
+    "secondarySpecializations": [
+      "Internal Medicine",
+      "Surgery",
+      "Gastroenterology"
+    ],
+    "clinics": [
+      {
+        "name": "Unity Healthcare",
+        "fee": { "inPerson": 407, "online": 236 },
+        "contact": "(575) 386-3904",
+        "address": "1999 Ofup Point",
+        "dayTime": ["Thursday"],
+        "whatsApp": "(488) 466-5309",
+        "location": { "lat": 87.14437, "lng": 155.9359 }
+      }
+    ],
+    "experience": 33,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 66, "online": 92 },
+    "rating": 3.5,
+    "reviews": 780,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "unknown",
+    "avgConsultTime": 58,
+    "queuedPatients": 14
+  },
+  {
+    "id": "a0704852-4915-4e0c-93bc-437e899285ba",
+    "name": "Donald Cunningham",
+    "primarySpecialization": "Rheumatology",
+    "credentials": "MD (Cardiology), DMCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Family Medicine", "Radiology"],
+    "clinics": [
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 463, "online": 410 },
+        "contact": "(306) 820-1943",
+        "address": "456 Jogvat Center",
+        "dayTime": ["Tuesday"],
+        "whatsApp": "(521) 892-1379",
+        "location": { "lat": 29.48055, "lng": 104.40513 }
+      }
+    ],
+    "experience": 29,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 441, "online": 273 },
+    "rating": 4.6,
+    "reviews": 40,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 53,
+    "queuedPatients": 4
+  },
+  {
+    "id": "dcd2c6bb-4931-4547-a7e6-d022f80972ff",
+    "name": "Dollie Parks",
+    "primarySpecialization": "Family Medicine",
+    "credentials": "MD (Internal Medicine), MRCP",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Surgery"],
+    "clinics": [
+      {
+        "name": "City General Hospital",
+        "fee": { "inPerson": 444, "online": 88 },
+        "contact": "(841) 789-2746",
+        "address": "751 Taic Parkway",
+        "dayTime": ["Wednesday", "Tuesday"],
+        "whatsApp": "(940) 649-6365",
+        "location": { "lat": 41.2604, "lng": 157.25505 }
+      }
+    ],
+    "experience": 6,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 483, "online": 305 },
+    "rating": 4.7,
+    "reviews": 308,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "busy",
+    "avgConsultTime": 35,
+    "queuedPatients": 8
+  },
+  {
+    "id": "1d5aee0a-c8cc-4567-9d56-0ec7e2ad56c9",
+    "name": "Maggie Holmes",
+    "primarySpecialization": "Orthopedics",
+    "credentials": "MD (Radiology), DMRD",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Cardiology", "Urology"],
+    "clinics": [
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 347, "online": 423 },
+        "contact": "(841) 295-8627",
+        "address": "714 Wulom Point",
+        "dayTime": ["Thursday"],
+        "whatsApp": "(231) 453-7351",
+        "location": { "lat": -56.59003, "lng": 114.18785 }
+      }
+    ],
+    "experience": 17,
+    "verified": false,
+    "onlineConsult": false,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 373, "online": 136 },
+    "rating": 4.4,
+    "reviews": 13,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "unknown",
+    "avgConsultTime": 25,
+    "queuedPatients": 12
+  },
+  {
+    "id": "f717e5fb-091f-4403-b020-ede8e3a134b5",
+    "name": "William Thomas",
+    "primarySpecialization": "Psychiatry",
+    "credentials": "MD (Cardiology), DMCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": [
+      "Ophthalmology",
+      "Family Medicine",
+      "Family Medicine"
+    ],
+    "clinics": [
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 111, "online": 50 },
+        "contact": "(973) 521-4631",
+        "address": "739 Fezhe Trail",
+        "dayTime": ["Tuesday", "Tuesday", "Friday", "Thursday", "Sunday"],
+        "whatsApp": "(470) 443-7538",
+        "location": { "lat": 84.45102, "lng": 91.38629 }
+      },
+      {
+        "name": "Metropolitan Medical Center",
+        "fee": { "inPerson": 399, "online": 88 },
+        "contact": "(282) 212-2653",
+        "address": "1229 Basgon Center",
+        "dayTime": ["Thursday", "Friday", "Wednesday", "Friday"],
+        "whatsApp": "(576) 218-2187",
+        "location": { "lat": 37.10814, "lng": 14.50727 }
+      },
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 335, "online": 171 },
+        "contact": "(253) 476-3861",
+        "address": "1531 Toer Heights",
+        "dayTime": ["Sunday", "Thursday", "Tuesday"],
+        "whatsApp": "(887) 233-3745",
+        "location": { "lat": -17.0433, "lng": 94.20675 }
+      }
+    ],
+    "experience": 35,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 123, "online": 380 },
+    "rating": 4.1,
+    "reviews": 472,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "unknown",
+    "avgConsultTime": 58,
+    "queuedPatients": 3
+  },
+  {
+    "id": "3df57d23-a912-4cae-a556-e3e87f73c857",
+    "name": "Brent Pena",
+    "primarySpecialization": "Cardiology",
+    "credentials": "MD (Ophthalmology), DMO",
+    "currentlyAvailable": false,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 132, "online": 394 },
+        "contact": "(278) 584-6822",
+        "address": "1818 Edowog Street",
+        "dayTime": ["Thursday", "Saturday"],
+        "whatsApp": "(229) 748-4750",
+        "location": { "lat": 16.85262, "lng": -36.88026 }
+      }
+    ],
+    "experience": 19,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 466, "online": 118 },
+    "rating": 3.8,
+    "reviews": 180,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "busy",
+    "avgConsultTime": 58,
+    "queuedPatients": 11
+  },
+  {
+    "id": "8cdc822c-52ac-4d84-9629-99099132d030",
+    "name": "Alta Young",
+    "primarySpecialization": "Endocrinology",
+    "credentials": "MD (Dermatology), DDVL",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Ophthalmology", "Pulmonology"],
+    "clinics": [
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 496, "online": 242 },
+        "contact": "(375) 259-5487",
+        "address": "1641 Putav Place",
+        "dayTime": ["Wednesday", "Friday", "Thursday", "Tuesday", "Thursday"],
+        "whatsApp": "(840) 680-1632",
+        "location": { "lat": -60.77912, "lng": 12.73357 }
+      }
+    ],
+    "experience": 5,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 260, "online": 474 },
+    "rating": 4.2,
+    "reviews": 772,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "available",
+    "avgConsultTime": 35,
+    "queuedPatients": 15
+  },
+  {
+    "id": "1c03e2b4-1d22-4788-9ce8-3bae09246e1d",
+    "name": "Ethan Curtis",
+    "primarySpecialization": "Ophthalmology",
+    "credentials": "MD (Hematology), DMRCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": [
+      "Oncology",
+      "Gastroenterology",
+      "Rheumatology"
+    ],
+    "clinics": [
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 211, "online": 126 },
+        "contact": "(972) 532-3341",
+        "address": "113 Zuznu Pass",
+        "dayTime": ["Tuesday", "Wednesday", "Friday"],
+        "whatsApp": "(832) 888-5645",
+        "location": { "lat": 5.53192, "lng": 72.35089 }
+      },
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 68, "online": 435 },
+        "contact": "(355) 435-9907",
+        "address": "1148 Ugme River",
+        "dayTime": ["Thursday", "Wednesday"],
+        "whatsApp": "(834) 955-3075",
+        "location": { "lat": 72.96179, "lng": 34.47856 }
+      }
+    ],
+    "experience": 16,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 409, "online": 158 },
+    "rating": 3.5,
+    "reviews": 197,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 27,
+    "queuedPatients": 5
+  },
+  {
+    "id": "6e6be7ec-04fc-4deb-a3b4-f13bd875d688",
+    "name": "Mae Ford",
+    "primarySpecialization": "Internal Medicine",
+    "credentials": "MD (Internal Medicine), DMPA",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Gastroenterology", "Rheumatology"],
+    "clinics": [
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 50, "online": 246 },
+        "contact": "(636) 956-8524",
+        "address": "1315 Gara Key",
+        "dayTime": ["Sunday"],
+        "whatsApp": "(722) 522-9985",
+        "location": { "lat": 36.5184, "lng": 54.96977 }
+      }
+    ],
+    "experience": 32,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 203, "online": 229 },
+    "rating": 4.7,
+    "reviews": 868,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 20,
+    "queuedPatients": 0
+  },
+  {
+    "id": "05e9faf3-d172-47b8-aff6-930cab17f7be",
+    "name": "Shawn Massey",
+    "primarySpecialization": "Pediatrics",
+    "credentials": "MD (Cardiology), DMCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Surgery", "Orthopedics"],
+    "clinics": [
+      {
+        "name": "Unity Healthcare",
+        "fee": { "inPerson": 313, "online": 177 },
+        "contact": "(459) 601-4301",
+        "address": "1015 Hino Manor",
+        "dayTime": ["Wednesday", "Saturday", "Wednesday", "Sunday", "Sunday"],
+        "whatsApp": "(364) 626-7744",
+        "location": { "lat": -77.09986, "lng": -26.762 }
+      },
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 207, "online": 485 },
+        "contact": "(270) 449-4474",
+        "address": "357 Ibsuw River",
+        "dayTime": ["Tuesday"],
+        "whatsApp": "(581) 869-2369",
+        "location": { "lat": 55.29251, "lng": 45.20924 }
+      },
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 407, "online": 143 },
+        "contact": "(563) 464-4459",
+        "address": "383 Muli Parkway",
+        "dayTime": ["Friday", "Friday", "Monday"],
+        "whatsApp": "(463) 853-4957",
+        "location": { "lat": -88.17061, "lng": 164.0058 }
+      }
+    ],
+    "experience": 22,
+    "verified": true,
+    "onlineConsult": false,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 75, "online": 73 },
+    "rating": 5,
+    "reviews": 925,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "available",
+    "avgConsultTime": 28,
+    "queuedPatients": 0
+  },
+  {
+    "id": "04a2629f-9131-4dc4-b963-2700031ee322",
+    "name": "Edgar Gomez",
+    "primarySpecialization": "Endocrinology",
+    "credentials": "MD (Ophthalmology), DMO",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Endocrinology"],
+    "clinics": [
+      {
+        "name": "City General Hospital",
+        "fee": { "inPerson": 342, "online": 55 },
+        "contact": "(258) 737-6234",
+        "address": "1586 Dulufo Highway",
+        "dayTime": ["Saturday", "Thursday", "Wednesday", "Wednesday"],
+        "whatsApp": "(381) 506-5492",
+        "location": { "lat": 84.74845, "lng": -170.9569 }
+      },
+      {
+        "name": "Unity Healthcare",
+        "fee": { "inPerson": 235, "online": 187 },
+        "contact": "(705) 972-9346",
+        "address": "1082 Gepkit View",
+        "dayTime": ["Saturday", "Friday", "Thursday"],
+        "whatsApp": "(617) 850-4484",
+        "location": { "lat": 47.08547, "lng": -96.40626 }
+      },
+      {
+        "name": "Metropolitan Medical Center",
+        "fee": { "inPerson": 439, "online": 111 },
+        "contact": "(469) 996-5049",
+        "address": "1854 Ulih Parkway",
+        "dayTime": ["Sunday", "Saturday", "Saturday", "Saturday", "Monday"],
+        "whatsApp": "(437) 712-4577",
+        "location": { "lat": -28.09108, "lng": 104.73746 }
+      }
+    ],
+    "experience": 34,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 470, "online": 451 },
+    "rating": 3.9,
+    "reviews": 633,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "unknown",
+    "avgConsultTime": 50,
+    "queuedPatients": 1
+  },
+  {
+    "id": "1c252459-ebf6-4e62-a492-0ce085aba3be",
+    "name": "Adelaide Murphy",
+    "primarySpecialization": "Pulmonology",
+    "credentials": "MD (Hematology), DMRCC",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Dermatology"],
+    "clinics": [
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 416, "online": 129 },
+        "contact": "(315) 753-2252",
+        "address": "1442 Suffud View",
+        "dayTime": ["Tuesday", "Thursday", "Thursday", "Sunday", "Saturday"],
+        "whatsApp": "(833) 896-2456",
+        "location": { "lat": -81.20384, "lng": 62.56497 }
+      }
+    ],
+    "experience": 22,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 140, "online": 411 },
+    "rating": 3.5,
+    "reviews": 145,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "unknown",
+    "avgConsultTime": 47,
+    "queuedPatients": 17
+  },
+  {
+    "id": "ef583545-365a-48db-a7cf-f17e0fa3ffa2",
+    "name": "Julia Myers",
+    "primarySpecialization": "Dermatology",
+    "credentials": "MD (Obstetrics & Gynecology), DMOH",
+    "currentlyAvailable": true,
+    "secondarySpecializations": [
+      "Urology",
+      "Obstetrics & Gynecology",
+      "Gastroenterology"
+    ],
+    "clinics": [
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 372, "online": 418 },
+        "contact": "(327) 872-3311",
+        "address": "1181 Kivo Way",
+        "dayTime": ["Saturday"],
+        "whatsApp": "(863) 283-5749",
+        "location": { "lat": 9.18403, "lng": 16.27687 }
+      },
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 352, "online": 354 },
+        "contact": "(429) 853-8219",
+        "address": "189 Winen View",
+        "dayTime": ["Tuesday", "Friday", "Wednesday", "Tuesday"],
+        "whatsApp": "(630) 785-7498",
+        "location": { "lat": 1.91753, "lng": 39.6888 }
+      }
+    ],
+    "experience": 9,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 390, "online": 333 },
+    "rating": 3.9,
+    "reviews": 515,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "available",
+    "avgConsultTime": 46,
+    "queuedPatients": 15
+  },
+  {
+    "id": "c375f5cd-48f2-4fa8-8802-b036305a1942",
+    "name": "Howard Wood",
+    "primarySpecialization": "Dermatology",
+    "credentials": "MD (Hematology), DMRCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 199, "online": 176 },
+        "contact": "(501) 809-8675",
+        "address": "1306 Pise Lane",
+        "dayTime": ["Friday", "Saturday", "Saturday"],
+        "whatsApp": "(677) 338-9974",
+        "location": { "lat": -10.52157, "lng": -89.36711 }
+      }
+    ],
+    "experience": 3,
+    "verified": false,
+    "onlineConsult": false,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 466, "online": 95 },
+    "rating": 4,
+    "reviews": 558,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 21,
+    "queuedPatients": 13
+  },
+  {
+    "id": "ec9f7bc6-2e60-4b2d-a87d-db97d3bf0aef",
+    "name": "Glenn Murphy",
+    "primarySpecialization": "Radiology",
+    "credentials": "MD (Obstetrics & Gynecology), DMOH",
+    "currentlyAvailable": false,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 356, "online": 450 },
+        "contact": "(662) 741-9417",
+        "address": "1612 Uzose Plaza",
+        "dayTime": ["Monday"],
+        "whatsApp": "(415) 744-4459",
+        "location": { "lat": -83.77006, "lng": 168.20769 }
+      },
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 467, "online": 500 },
+        "contact": "(311) 551-5321",
+        "address": "1570 Guud Circle",
+        "dayTime": ["Friday"],
+        "whatsApp": "(765) 621-6044",
+        "location": { "lat": 7.58729, "lng": 37.47693 }
+      },
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 187, "online": 140 },
+        "contact": "(845) 666-5148",
+        "address": "815 Buzom Turnpike",
+        "dayTime": ["Thursday"],
+        "whatsApp": "(321) 722-6402",
+        "location": { "lat": 53.27982, "lng": -49.43586 }
+      }
+    ],
+    "experience": 27,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 408, "online": 122 },
+    "rating": 4.8,
+    "reviews": 974,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "unknown",
+    "avgConsultTime": 51,
+    "queuedPatients": 0
+  },
+  {
+    "id": "45f1a6bd-9b25-40b7-9187-bc22782a7fe2",
+    "name": "Josie Morrison",
+    "primarySpecialization": "Orthopedics",
+    "credentials": "MD (Neurology), DMCR",
+    "currentlyAvailable": true,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 67, "online": 402 },
+        "contact": "(757) 736-9942",
+        "address": "770 Ipgip Grove",
+        "dayTime": ["Monday", "Tuesday"],
+        "whatsApp": "(434) 601-7996",
+        "location": { "lat": 62.99201, "lng": 14.14371 }
+      },
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 80, "online": 140 },
+        "contact": "(642) 615-6557",
+        "address": "721 Ocoili Square",
+        "dayTime": ["Friday", "Tuesday", "Thursday"],
+        "whatsApp": "(830) 457-6517",
+        "location": { "lat": -20.05444, "lng": -56.27565 }
+      }
+    ],
+    "experience": 23,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 180, "online": 191 },
+    "rating": 4.5,
+    "reviews": 874,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 54,
+    "queuedPatients": 8
+  },
+  {
+    "id": "d9c0b344-ac1f-4b9e-8b48-ceea90254f55",
+    "name": "Ian Lynch",
+    "primarySpecialization": "Cardiology",
+    "credentials": "MD (Gastroenterology), DMCR",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Hematology", "Cardiology"],
+    "clinics": [
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 140, "online": 407 },
+        "contact": "(457) 621-1271",
+        "address": "523 Nawon Junction",
+        "dayTime": ["Friday", "Sunday", "Sunday", "Friday", "Tuesday"],
+        "whatsApp": "(205) 837-5971",
+        "location": { "lat": 58.64565, "lng": -67.85958 }
+      },
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 105, "online": 73 },
+        "contact": "(980) 552-2093",
+        "address": "1554 Uhigip Drive",
+        "dayTime": ["Sunday", "Wednesday", "Wednesday", "Tuesday"],
+        "whatsApp": "(350) 653-2729",
+        "location": { "lat": 87.34737, "lng": -9.94404 }
+      },
+      {
+        "name": "City General Hospital",
+        "fee": { "inPerson": 373, "online": 406 },
+        "contact": "(265) 955-8896",
+        "address": "232 Ecluf Park",
+        "dayTime": ["Thursday", "Sunday"],
+        "whatsApp": "(302) 646-5217",
+        "location": { "lat": 31.99259, "lng": 24.30287 }
+      }
+    ],
+    "experience": 25,
+    "verified": false,
+    "onlineConsult": false,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 171, "online": 489 },
+    "rating": 4.2,
+    "reviews": 59,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "busy",
+    "avgConsultTime": 18,
+    "queuedPatients": 3
+  },
+  {
+    "id": "f3e8f259-9777-49dc-8035-7177a0d32f9f",
+    "name": "Polly Taylor",
+    "primarySpecialization": "Oncology",
+    "credentials": "MD (Pulmonology), DMRCP",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Obstetrics & Gynecology"],
+    "clinics": [
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 109, "online": 167 },
+        "contact": "(924) 539-8619",
+        "address": "1115 Recnu Mill",
+        "dayTime": ["Saturday", "Friday"],
+        "whatsApp": "(971) 731-1563",
+        "location": { "lat": -42.90859, "lng": -154.4733 }
+      },
+      {
+        "name": "Metropolitan Medical Center",
+        "fee": { "inPerson": 379, "online": 305 },
+        "contact": "(321) 614-5334",
+        "address": "996 Kebmah Road",
+        "dayTime": ["Monday", "Tuesday", "Monday"],
+        "whatsApp": "(246) 473-6506",
+        "location": { "lat": 13.34969, "lng": -49.50341 }
+      }
+    ],
+    "experience": 30,
+    "verified": true,
+    "onlineConsult": false,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 493, "online": 331 },
+    "rating": 4.2,
+    "reviews": 930,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 24,
+    "queuedPatients": 15
+  },
+  {
+    "id": "24ad1364-20dc-49ab-9990-6eb717c22d22",
+    "name": "Hester Flowers",
+    "primarySpecialization": "Obstetrics & Gynecology",
+    "credentials": "MD (Internal Medicine), MRCP",
+    "currentlyAvailable": false,
+    "secondarySpecializations": [
+      "Endocrinology",
+      "Gastroenterology",
+      "Dermatology"
+    ],
+    "clinics": [
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 259, "online": 399 },
+        "contact": "(370) 744-9595",
+        "address": "1600 Vurzo Road",
+        "dayTime": ["Saturday", "Sunday"],
+        "whatsApp": "(605) 714-5644",
+        "location": { "lat": -37.114, "lng": -54.38521 }
+      },
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 363, "online": 329 },
+        "contact": "(910) 762-2846",
+        "address": "1477 Nufu Grove",
+        "dayTime": ["Wednesday", "Thursday", "Wednesday"],
+        "whatsApp": "(723) 588-8069",
+        "location": { "lat": -78.85001, "lng": 86.17123 }
+      },
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 349, "online": 190 },
+        "contact": "(571) 938-5019",
+        "address": "102 Kutaj Center",
+        "dayTime": ["Friday", "Saturday"],
+        "whatsApp": "(619) 287-2608",
+        "location": { "lat": -83.55716, "lng": -44.8533 }
+      }
+    ],
+    "experience": 18,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 86, "online": 484 },
+    "rating": 4,
+    "reviews": 924,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "available",
+    "avgConsultTime": 27,
+    "queuedPatients": 6
+  },
+  {
+    "id": "e8ac98e5-36e7-4e12-a601-79d48b7fb95a",
+    "name": "Madge Howard",
+    "primarySpecialization": "Family Medicine",
+    "credentials": "MD (Urology), DMRCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 325, "online": 383 },
+        "contact": "(505) 780-5152",
+        "address": "531 Ucedon Way",
+        "dayTime": ["Wednesday", "Saturday"],
+        "whatsApp": "(525) 425-9399",
+        "location": { "lat": 47.92019, "lng": 73.57836 }
+      },
+      {
+        "name": "City General Hospital",
+        "fee": { "inPerson": 435, "online": 374 },
+        "contact": "(420) 594-3857",
+        "address": "204 Kesoz Lane",
+        "dayTime": ["Monday", "Monday", "Monday", "Thursday", "Monday"],
+        "whatsApp": "(380) 572-3235",
+        "location": { "lat": 58.0872, "lng": -159.7146 }
+      }
+    ],
+    "experience": 27,
+    "verified": false,
+    "onlineConsult": false,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 328, "online": 417 },
+    "rating": 5,
+    "reviews": 96,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "busy",
+    "avgConsultTime": 16,
+    "queuedPatients": 5
+  },
+  {
+    "id": "8e6f23a4-b994-47bf-ac35-d668957ebd30",
+    "name": "Ronald Lindsey",
+    "primarySpecialization": "Obstetrics & Gynecology",
+    "credentials": "MD (Dermatology), DDVL",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Obstetrics & Gynecology"],
+    "clinics": [
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 404, "online": 426 },
+        "contact": "(506) 729-9691",
+        "address": "1716 Cigta Square",
+        "dayTime": ["Monday", "Friday"],
+        "whatsApp": "(712) 638-2818",
+        "location": { "lat": -12.52594, "lng": 13.88628 }
+      },
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 71, "online": 328 },
+        "contact": "(571) 696-8736",
+        "address": "388 Togib Key",
+        "dayTime": ["Monday"],
+        "whatsApp": "(618) 358-9157",
+        "location": { "lat": -53.54792, "lng": -179.58001 }
+      }
+    ],
+    "experience": 7,
+    "verified": false,
+    "onlineConsult": false,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 264, "online": 454 },
+    "rating": 4.3,
+    "reviews": 873,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 23,
+    "queuedPatients": 1
+  },
+  {
+    "id": "0b94a6a6-6d3e-4330-bf51-68b49b9190a2",
+    "name": "Curtis Cox",
+    "primarySpecialization": "Surgery",
+    "credentials": "MD (Surgery), DMS",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Rheumatology", "Surgery", "Rheumatology"],
+    "clinics": [
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 339, "online": 486 },
+        "contact": "(302) 668-3622",
+        "address": "1841 Dehmid Pike",
+        "dayTime": ["Friday", "Saturday"],
+        "whatsApp": "(324) 821-4959",
+        "location": { "lat": 79.70637, "lng": -158.21888 }
+      }
+    ],
+    "experience": 33,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 291, "online": 496 },
+    "rating": 4.7,
+    "reviews": 814,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "unknown",
+    "avgConsultTime": 54,
+    "queuedPatients": 12
+  },
+  {
+    "id": "f5b3c485-0415-475c-acdd-b387cffec5a2",
+    "name": "Jesus Holmes",
+    "primarySpecialization": "Hematology",
+    "credentials": "MD (Psychiatry), DPM",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Neurology", "Neurology"],
+    "clinics": [
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 441, "online": 296 },
+        "contact": "(980) 962-5909",
+        "address": "219 Wufol Loop",
+        "dayTime": ["Wednesday", "Friday", "Sunday"],
+        "whatsApp": "(477) 703-6581",
+        "location": { "lat": 31.59771, "lng": -113.86224 }
+      },
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 381, "online": 142 },
+        "contact": "(412) 301-5031",
+        "address": "1728 Kucu Boulevard",
+        "dayTime": ["Wednesday", "Friday", "Saturday"],
+        "whatsApp": "(951) 598-2471",
+        "location": { "lat": -49.91433, "lng": 47.21937 }
+      }
+    ],
+    "experience": 35,
+    "verified": true,
+    "onlineConsult": false,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 150, "online": 186 },
+    "rating": 4.7,
+    "reviews": 67,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 23,
+    "queuedPatients": 6
+  },
+  {
+    "id": "fbaed6b3-16cb-48ea-9f39-00214aed503e",
+    "name": "Rhoda Salazar",
+    "primarySpecialization": "Psychiatry",
+    "credentials": "MD (Obstetrics & Gynecology), DMOH",
+    "currentlyAvailable": true,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 355, "online": 319 },
+        "contact": "(725) 662-1987",
+        "address": "1934 Afbub Highway",
+        "dayTime": ["Monday"],
+        "whatsApp": "(347) 363-4244",
+        "location": { "lat": 45.78137, "lng": 83.84432 }
+      },
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 184, "online": 269 },
+        "contact": "(425) 540-9489",
+        "address": "1748 Faho Center",
+        "dayTime": ["Tuesday", "Wednesday", "Thursday"],
+        "whatsApp": "(710) 664-3757",
+        "location": { "lat": -15.62205, "lng": 66.84355 }
+      },
+      {
+        "name": "City General Hospital",
+        "fee": { "inPerson": 58, "online": 60 },
+        "contact": "(705) 951-5847",
+        "address": "120 Amjo Center",
+        "dayTime": ["Thursday"],
+        "whatsApp": "(700) 752-5178",
+        "location": { "lat": 9.99026, "lng": 62.70503 }
+      }
+    ],
+    "experience": 32,
+    "verified": true,
+    "onlineConsult": false,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 55, "online": 117 },
+    "rating": 4.4,
+    "reviews": 276,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "unknown",
+    "avgConsultTime": 29,
+    "queuedPatients": 14
+  },
+  {
+    "id": "3406d81b-8d0e-47f4-944e-bce70e6ba7ec",
+    "name": "Lola West",
+    "primarySpecialization": "Pediatrics",
+    "credentials": "MD (Pulmonology), DMRCP",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Ophthalmology"],
+    "clinics": [
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 337, "online": 54 },
+        "contact": "(822) 511-8784",
+        "address": "42 Nuknah Street",
+        "dayTime": ["Tuesday", "Saturday"],
+        "whatsApp": "(280) 682-9145",
+        "location": { "lat": -38.20585, "lng": 135.66781 }
+      },
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 207, "online": 68 },
+        "contact": "(641) 315-4399",
+        "address": "536 Ginu Circle",
+        "dayTime": ["Thursday", "Sunday", "Tuesday"],
+        "whatsApp": "(210) 292-7799",
+        "location": { "lat": 59.90136, "lng": 172.26901 }
+      }
+    ],
+    "experience": 12,
+    "verified": false,
+    "onlineConsult": false,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 104, "online": 76 },
+    "rating": 3.9,
+    "reviews": 250,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "available",
+    "avgConsultTime": 18,
+    "queuedPatients": 8
+  },
+  {
+    "id": "9fd3870e-e014-46ec-bd83-b2e6ea847315",
+    "name": "Angel Pearson",
+    "primarySpecialization": "Psychiatry",
+    "credentials": "MD (Obstetrics & Gynecology), DMOH",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Orthopedics"],
+    "clinics": [
+      {
+        "name": "City General Hospital",
+        "fee": { "inPerson": 63, "online": 339 },
+        "contact": "(557) 871-9603",
+        "address": "122 Rabi Court",
+        "dayTime": ["Sunday", "Sunday", "Wednesday", "Sunday", "Friday"],
+        "whatsApp": "(820) 234-4720",
+        "location": { "lat": 69.71163, "lng": -177.78686 }
+      },
+      {
+        "name": "City General Hospital",
+        "fee": { "inPerson": 239, "online": 358 },
+        "contact": "(569) 386-8031",
+        "address": "160 Ceake Point",
+        "dayTime": ["Wednesday", "Wednesday", "Sunday"],
+        "whatsApp": "(974) 488-6950",
+        "location": { "lat": -13.82924, "lng": -159.46681 }
+      }
+    ],
+    "experience": 22,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 443, "online": 272 },
+    "rating": 5,
+    "reviews": 989,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 30,
+    "queuedPatients": 0
+  },
+  {
+    "id": "fa2c3d40-9486-460b-9577-8df361ea6924",
+    "name": "Amelia Russell",
+    "primarySpecialization": "Pulmonology",
+    "credentials": "MD (Internal Medicine), DMPA",
+    "currentlyAvailable": false,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 207, "online": 155 },
+        "contact": "(610) 293-9278",
+        "address": "702 Ecovu Heights",
+        "dayTime": ["Tuesday", "Friday"],
+        "whatsApp": "(220) 462-5207",
+        "location": { "lat": 70.47876, "lng": 15.27838 }
+      },
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 246, "online": 412 },
+        "contact": "(708) 866-6311",
+        "address": "468 Hodina Way",
+        "dayTime": ["Friday", "Wednesday", "Sunday"],
+        "whatsApp": "(548) 837-3296",
+        "location": { "lat": 37.5523, "lng": 66.60353 }
+      },
+      {
+        "name": "Unity Healthcare",
+        "fee": { "inPerson": 433, "online": 84 },
+        "contact": "(477) 308-2878",
+        "address": "782 Utiet Street",
+        "dayTime": ["Tuesday", "Thursday", "Friday", "Sunday", "Saturday"],
+        "whatsApp": "(581) 697-1958",
+        "location": { "lat": -54.59201, "lng": -100.01338 }
+      }
+    ],
+    "experience": 14,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 463, "online": 104 },
+    "rating": 3.9,
+    "reviews": 930,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "busy",
+    "avgConsultTime": 51,
+    "queuedPatients": 17
+  },
+  {
+    "id": "17e19c11-d77e-48b5-ac30-17550ff28e65",
+    "name": "Lucas Armstrong",
+    "primarySpecialization": "Radiology",
+    "credentials": "MD (Urology), DMRCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Ophthalmology", "Neurology"],
+    "clinics": [
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 426, "online": 415 },
+        "contact": "(507) 975-5933",
+        "address": "900 Livmut Plaza",
+        "dayTime": ["Sunday", "Thursday", "Monday", "Friday", "Saturday"],
+        "whatsApp": "(513) 364-2195",
+        "location": { "lat": 1.7523, "lng": -176.60103 }
+      },
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 248, "online": 435 },
+        "contact": "(779) 822-6584",
+        "address": "1151 Tejo Terrace",
+        "dayTime": ["Monday"],
+        "whatsApp": "(503) 804-7303",
+        "location": { "lat": 66.87008, "lng": 59.97539 }
+      }
+    ],
+    "experience": 16,
+    "verified": false,
+    "onlineConsult": false,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 277, "online": 318 },
+    "rating": 4.2,
+    "reviews": 907,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 28,
+    "queuedPatients": 3
+  },
+  {
+    "id": "35e21cd1-7e71-4e36-8b63-855bbb8423f9",
+    "name": "Hulda Daniel",
+    "primarySpecialization": "Rheumatology",
+    "credentials": "MD (Urology), DMRCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Surgery", "Radiology"],
+    "clinics": [
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 286, "online": 425 },
+        "contact": "(207) 315-2688",
+        "address": "1727 Kehlu Junction",
+        "dayTime": ["Monday", "Wednesday", "Tuesday", "Tuesday"],
+        "whatsApp": "(859) 845-8738",
+        "location": { "lat": 13.90739, "lng": 29.31399 }
+      },
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 399, "online": 150 },
+        "contact": "(351) 599-6405",
+        "address": "1717 Vemrev Turnpike",
+        "dayTime": ["Thursday"],
+        "whatsApp": "(654) 936-5986",
+        "location": { "lat": -35.74157, "lng": 126.24357 }
+      },
+      {
+        "name": "City General Hospital",
+        "fee": { "inPerson": 345, "online": 217 },
+        "contact": "(718) 497-1570",
+        "address": "846 Diju View",
+        "dayTime": ["Tuesday", "Sunday"],
+        "whatsApp": "(252) 376-4147",
+        "location": { "lat": -22.10469, "lng": -35.30676 }
+      }
+    ],
+    "experience": 21,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 358, "online": 411 },
+    "rating": 4.7,
+    "reviews": 961,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "available",
+    "avgConsultTime": 28,
+    "queuedPatients": 13
+  },
+  {
+    "id": "38a2fd58-3e66-4585-87fb-038b37c4c338",
+    "name": "Seth Allison",
+    "primarySpecialization": "Urology",
+    "credentials": "MD (Psychiatry), DPM",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Family Medicine", "Family Medicine"],
+    "clinics": [
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 179, "online": 152 },
+        "contact": "(416) 982-9479",
+        "address": "1566 Ekwa Turnpike",
+        "dayTime": ["Tuesday", "Thursday", "Friday", "Saturday"],
+        "whatsApp": "(770) 458-4406",
+        "location": { "lat": 2.21665, "lng": 109.26375 }
+      },
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 375, "online": 346 },
+        "contact": "(288) 642-8408",
+        "address": "1144 Kavok Court",
+        "dayTime": ["Friday", "Monday", "Thursday"],
+        "whatsApp": "(889) 887-7456",
+        "location": { "lat": -38.51593, "lng": -116.81969 }
+      }
+    ],
+    "experience": 33,
+    "verified": true,
+    "onlineConsult": false,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 178, "online": 243 },
+    "rating": 5,
+    "reviews": 954,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 49,
+    "queuedPatients": 2
+  },
+  {
+    "id": "6ce9b258-a2cf-4619-8bff-a80423f1c2ac",
+    "name": "Ida Summers",
+    "primarySpecialization": "Orthopedics",
+    "credentials": "MD (Internal Medicine), MRCP",
+    "currentlyAvailable": true,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 431, "online": 436 },
+        "contact": "(939) 230-8139",
+        "address": "319 Idlig Ridge",
+        "dayTime": ["Wednesday", "Tuesday"],
+        "whatsApp": "(256) 316-7180",
+        "location": { "lat": 89.51721, "lng": 25.12234 }
+      },
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 351, "online": 83 },
+        "contact": "(973) 455-7691",
+        "address": "1507 Kigguf Pass",
+        "dayTime": ["Monday"],
+        "whatsApp": "(607) 865-6516",
+        "location": { "lat": -12.0592, "lng": 107.18098 }
+      },
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 242, "online": 129 },
+        "contact": "(356) 958-8043",
+        "address": "1735 Docudo Heights",
+        "dayTime": ["Monday", "Monday", "Wednesday", "Wednesday", "Monday"],
+        "whatsApp": "(840) 478-6350",
+        "location": { "lat": -65.95502, "lng": -110.6136 }
+      }
+    ],
+    "experience": 24,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 317, "online": 353 },
+    "rating": 3.9,
+    "reviews": 902,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "available",
+    "avgConsultTime": 47,
+    "queuedPatients": 18
+  },
+  {
+    "id": "b1746f8d-bbba-41b6-8be2-c8a6db56b5cf",
+    "name": "Jackson Burgess",
+    "primarySpecialization": "Endocrinology",
+    "credentials": "MD (Radiology), DMRD",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Internal Medicine", "Rheumatology"],
+    "clinics": [
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 329, "online": 247 },
+        "contact": "(952) 282-7644",
+        "address": "1251 Geofu Plaza",
+        "dayTime": ["Saturday", "Tuesday", "Monday", "Monday"],
+        "whatsApp": "(830) 484-7940",
+        "location": { "lat": -35.12012, "lng": -57.81837 }
+      },
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 79, "online": 331 },
+        "contact": "(744) 244-9653",
+        "address": "410 Ebupe Drive",
+        "dayTime": ["Saturday", "Friday", "Sunday", "Thursday"],
+        "whatsApp": "(513) 664-6580",
+        "location": { "lat": 37.53693, "lng": -82.60384 }
+      },
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 223, "online": 80 },
+        "contact": "(631) 795-9094",
+        "address": "858 Kujib Road",
+        "dayTime": ["Tuesday", "Thursday", "Friday"],
+        "whatsApp": "(747) 692-3311",
+        "location": { "lat": 54.31474, "lng": -58.97519 }
+      }
+    ],
+    "experience": 12,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 294, "online": 384 },
+    "rating": 4.3,
+    "reviews": 965,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "available",
+    "avgConsultTime": 53,
+    "queuedPatients": 6
+  },
+  {
+    "id": "1af68749-27bb-40ae-9f24-51df42168756",
+    "name": "Jack Parks",
+    "primarySpecialization": "Gastroenterology",
+    "credentials": "MD (Ophthalmology), DMO",
+    "currentlyAvailable": true,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "Central Hospital",
+        "fee": { "inPerson": 243, "online": 339 },
+        "contact": "(652) 823-8107",
+        "address": "1299 Wupid Turnpike",
+        "dayTime": ["Sunday", "Monday", "Sunday", "Thursday", "Sunday"],
+        "whatsApp": "(860) 511-6197",
+        "location": { "lat": -59.8192, "lng": -48.04225 }
+      }
+    ],
+    "experience": 11,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 266, "online": 69 },
+    "rating": 5,
+    "reviews": 902,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "available",
+    "avgConsultTime": 50,
+    "queuedPatients": 14
+  },
+  {
+    "id": "02e80083-a9d4-4d71-9a32-b025c50156c8",
+    "name": "Frank Jacobs",
+    "primarySpecialization": "Family Medicine",
+    "credentials": "MD (Internal Medicine), MRCP",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Oncology", "Urology"],
+    "clinics": [
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 422, "online": 441 },
+        "contact": "(849) 717-2974",
+        "address": "1408 Becrir Key",
+        "dayTime": ["Wednesday", "Sunday", "Sunday", "Wednesday"],
+        "whatsApp": "(218) 561-7684",
+        "location": { "lat": -28.26985, "lng": -130.43647 }
+      },
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 284, "online": 86 },
+        "contact": "(950) 303-2465",
+        "address": "936 Jibve Street",
+        "dayTime": ["Thursday", "Sunday", "Sunday", "Monday"],
+        "whatsApp": "(977) 813-4082",
+        "location": { "lat": -73.57284, "lng": 115.50356 }
+      },
+      {
+        "name": "Unity Healthcare",
+        "fee": { "inPerson": 223, "online": 307 },
+        "contact": "(285) 514-7059",
+        "address": "1095 Golir Pike",
+        "dayTime": ["Saturday", "Tuesday", "Sunday", "Saturday"],
+        "whatsApp": "(981) 957-8805",
+        "location": { "lat": -26.3572, "lng": -168.60338 }
+      }
+    ],
+    "experience": 23,
+    "verified": false,
+    "onlineConsult": false,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 213, "online": 496 },
+    "rating": 4.1,
+    "reviews": 155,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580835,
+    "status": "away",
+    "avgConsultTime": 49,
+    "queuedPatients": 20
+  },
+  {
+    "id": "61cd047d-96ff-47b8-a33a-ef09f677c299",
+    "name": "Katie Fernandez",
+    "primarySpecialization": "Internal Medicine",
+    "credentials": "MD (Dermatology), DDVL",
+    "currentlyAvailable": true,
+    "secondarySpecializations": [],
+    "clinics": [
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 365, "online": 390 },
+        "contact": "(346) 212-8197",
+        "address": "1141 Cazet Court",
+        "dayTime": ["Wednesday"],
+        "whatsApp": "(679) 630-1260",
+        "location": { "lat": -79.79719, "lng": 51.18672 }
+      },
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 100, "online": 219 },
+        "contact": "(965) 370-1904",
+        "address": "1983 Linu Highway",
+        "dayTime": ["Tuesday", "Sunday"],
+        "whatsApp": "(428) 292-6728",
+        "location": { "lat": -69.23882, "lng": -64.66314 }
+      }
+    ],
+    "experience": 23,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 437, "online": 303 },
+    "rating": 4.7,
+    "reviews": 254,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580836,
+    "status": "unknown",
+    "avgConsultTime": 46,
+    "queuedPatients": 13
+  },
+  {
+    "id": "41ceb885-67ff-41bd-bcf3-9494b3d7dfbf",
+    "name": "Luke Bowen",
+    "primarySpecialization": "Surgery",
+    "credentials": "MD (Radiology), DMRD",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Gastroenterology", "Cardiology"],
+    "clinics": [
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 58, "online": 424 },
+        "contact": "(987) 362-8496",
+        "address": "117 Ijogin Loop",
+        "dayTime": ["Saturday", "Monday", "Saturday", "Thursday", "Saturday"],
+        "whatsApp": "(317) 333-5499",
+        "location": { "lat": -41.56364, "lng": -141.40625 }
+      },
+      {
+        "name": "St. Mary's Hospital",
+        "fee": { "inPerson": 351, "online": 204 },
+        "contact": "(415) 351-6466",
+        "address": "1211 Falu Plaza",
+        "dayTime": ["Tuesday", "Tuesday", "Wednesday", "Saturday"],
+        "whatsApp": "(817) 967-2453",
+        "location": { "lat": 12.62388, "lng": -2.53583 }
+      },
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 383, "online": 247 },
+        "contact": "(479) 226-9437",
+        "address": "1681 Jesap Pass",
+        "dayTime": ["Tuesday", "Tuesday"],
+        "whatsApp": "(805) 287-1996",
+        "location": { "lat": -70.9415, "lng": 112.64739 }
+      }
+    ],
+    "experience": 11,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 85, "online": 148 },
+    "rating": 4.3,
+    "reviews": 411,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580836,
+    "status": "available",
+    "avgConsultTime": 24,
+    "queuedPatients": 8
+  },
+  {
+    "id": "ef2c4e7a-f27b-4139-a0eb-f0a450ec0919",
+    "name": "Randy Burgess",
+    "primarySpecialization": "Radiology",
+    "credentials": "MD (Oncology), DMCH",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Hematology"],
+    "clinics": [
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 304, "online": 102 },
+        "contact": "(238) 812-9731",
+        "address": "365 Loim Avenue",
+        "dayTime": ["Wednesday"],
+        "whatsApp": "(460) 832-9275",
+        "location": { "lat": 79.04677, "lng": -90.26928 }
+      },
+      {
+        "name": "Metropolitan Medical Center",
+        "fee": { "inPerson": 475, "online": 225 },
+        "contact": "(657) 436-3851",
+        "address": "979 Uzrek Key",
+        "dayTime": ["Friday", "Saturday", "Wednesday", "Sunday"],
+        "whatsApp": "(300) 449-9169",
+        "location": { "lat": 39.68445, "lng": 78.54169 }
+      },
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 397, "online": 371 },
+        "contact": "(538) 281-4830",
+        "address": "37 Kijo Circle",
+        "dayTime": ["Sunday", "Tuesday"],
+        "whatsApp": "(619) 897-1920",
+        "location": { "lat": 56.88182, "lng": -43.25758 }
+      }
+    ],
+    "experience": 28,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 222, "online": 179 },
+    "rating": 3.6,
+    "reviews": 533,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580836,
+    "status": "busy",
+    "avgConsultTime": 38,
+    "queuedPatients": 14
+  },
+  {
+    "id": "2b5244c8-65ea-454d-995d-aa05c8e4e18c",
+    "name": "Hattie Howard",
+    "primarySpecialization": "Urology",
+    "credentials": "MD (Rheumatology), DMRCC",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Neurology", "Radiology", "Ophthalmology"],
+    "clinics": [
+      {
+        "name": "Unity Healthcare",
+        "fee": { "inPerson": 205, "online": 89 },
+        "contact": "(206) 957-6822",
+        "address": "1918 Mezej View",
+        "dayTime": ["Thursday", "Friday", "Thursday"],
+        "whatsApp": "(760) 700-5423",
+        "location": { "lat": -44.30172, "lng": 8.05479 }
+      },
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 116, "online": 296 },
+        "contact": "(861) 468-5968",
+        "address": "414 Guwa Plaza",
+        "dayTime": ["Thursday"],
+        "whatsApp": "(639) 524-7256",
+        "location": { "lat": 6.65099, "lng": -98.71328 }
+      },
+      {
+        "name": "University Medical Center",
+        "fee": { "inPerson": 246, "online": 290 },
+        "contact": "(812) 537-9204",
+        "address": "1561 Hizhe Junction",
+        "dayTime": ["Tuesday", "Monday", "Wednesday"],
+        "whatsApp": "(348) 941-4532",
+        "location": { "lat": 27.32054, "lng": 97.98857 }
+      }
+    ],
+    "experience": 10,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 55, "online": 66 },
+    "rating": 3.8,
+    "reviews": 71,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580836,
+    "status": "busy",
+    "avgConsultTime": 53,
+    "queuedPatients": 13
+  },
+  {
+    "id": "a110544d-d90c-4539-bfce-6f554552d845",
+    "name": "Mathilda Bryan",
+    "primarySpecialization": "Neurology",
+    "credentials": "MD (Family Medicine), DMPH",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Surgery", "Pediatrics"],
+    "clinics": [
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 380, "online": 283 },
+        "contact": "(668) 580-5185",
+        "address": "643 Vavta Extension",
+        "dayTime": ["Sunday", "Thursday"],
+        "whatsApp": "(583) 528-7708",
+        "location": { "lat": 41.15684, "lng": 22.79819 }
+      },
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 429, "online": 69 },
+        "contact": "(916) 774-6073",
+        "address": "1723 Movun Mill",
+        "dayTime": ["Sunday", "Monday", "Tuesday", "Monday", "Monday"],
+        "whatsApp": "(270) 907-2085",
+        "location": { "lat": -36.5029, "lng": -44.4167 }
+      },
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 471, "online": 270 },
+        "contact": "(334) 204-3738",
+        "address": "709 Ezar Loop",
+        "dayTime": ["Wednesday", "Tuesday"],
+        "whatsApp": "(839) 418-5794",
+        "location": { "lat": -21.50839, "lng": 164.42051 }
+      }
+    ],
+    "experience": 17,
+    "verified": true,
+    "onlineConsult": false,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 135, "online": 77 },
+    "rating": 3.6,
+    "reviews": 882,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580836,
+    "status": "available",
+    "avgConsultTime": 53,
+    "queuedPatients": 20
+  },
+  {
+    "id": "6eeb3a30-af46-4498-8955-b15894ea03d1",
+    "name": "Richard Swanson",
+    "primarySpecialization": "Hematology",
+    "credentials": "MD (Internal Medicine), MRCP",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Ophthalmology", "Gastroenterology"],
+    "clinics": [
+      {
+        "name": "Mercy Hospital",
+        "fee": { "inPerson": 222, "online": 303 },
+        "contact": "(734) 268-7116",
+        "address": "129 Cozes Circle",
+        "dayTime": ["Sunday", "Saturday", "Sunday"],
+        "whatsApp": "(743) 967-4523",
+        "location": { "lat": -30.278, "lng": -23.54319 }
+      }
+    ],
+    "experience": 29,
+    "verified": true,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 295, "online": 156 },
+    "rating": 5,
+    "reviews": 762,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580836,
+    "status": "busy",
+    "avgConsultTime": 43,
+    "queuedPatients": 8
+  },
+  {
+    "id": "18792135-212c-4e2d-9031-258eb4bc45b9",
+    "name": "Ralph Ramsey",
+    "primarySpecialization": "Ophthalmology",
+    "credentials": "MD (Internal Medicine), MRCP",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Cardiology"],
+    "clinics": [
+      {
+        "name": "Metropolitan Medical Center",
+        "fee": { "inPerson": 476, "online": 357 },
+        "contact": "(207) 958-3129",
+        "address": "248 Egzup Pike",
+        "dayTime": ["Wednesday", "Thursday", "Tuesday", "Sunday"],
+        "whatsApp": "(610) 718-6430",
+        "location": { "lat": 34.56625, "lng": 175.86537 }
+      },
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 443, "online": 259 },
+        "contact": "(470) 899-4511",
+        "address": "98 Mopo Junction",
+        "dayTime": ["Tuesday", "Tuesday", "Sunday", "Friday", "Friday"],
+        "whatsApp": "(282) 434-5579",
+        "location": { "lat": -43.1142, "lng": 15.76421 }
+      },
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 467, "online": 464 },
+        "contact": "(331) 513-3612",
+        "address": "1534 Vanjo Court",
+        "dayTime": ["Saturday", "Friday"],
+        "whatsApp": "(428) 565-4578",
+        "location": { "lat": 58.74296, "lng": -62.68722 }
+      }
+    ],
+    "experience": 13,
+    "verified": true,
+    "onlineConsult": false,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 275, "online": 271 },
+    "rating": 4.7,
+    "reviews": 763,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580836,
+    "status": "available",
+    "avgConsultTime": 23,
+    "queuedPatients": 5
+  },
+  {
+    "id": "c45554f6-9b76-4114-84b7-570011d6a077",
+    "name": "Billy Marsh",
+    "primarySpecialization": "Cardiology",
+    "credentials": "MD (Radiology), DMRD",
+    "currentlyAvailable": true,
+    "secondarySpecializations": ["Rheumatology", "Orthopedics"],
+    "clinics": [
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 172, "online": 198 },
+        "contact": "(587) 433-6408",
+        "address": "1034 Vudded Turnpike",
+        "dayTime": ["Friday", "Saturday", "Monday", "Saturday"],
+        "whatsApp": "(560) 603-7410",
+        "location": { "lat": 1.95222, "lng": -93.50149 }
+      },
+      {
+        "name": "Regional Medical Center",
+        "fee": { "inPerson": 284, "online": 476 },
+        "contact": "(458) 282-6544",
+        "address": "400 Tahvi Junction",
+        "dayTime": ["Tuesday"],
+        "whatsApp": "(912) 644-1651",
+        "location": { "lat": -78.22926, "lng": -156.11977 }
+      }
+    ],
+    "experience": 28,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": false,
+    "fee": { "inPerson": 280, "online": 125 },
+    "rating": 3.6,
+    "reviews": 883,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580836,
+    "status": "unknown",
+    "avgConsultTime": 28,
+    "queuedPatients": 19
+  },
+  {
+    "id": "0b2e8723-3550-4a25-8c63-f8c3b775973e",
+    "name": "Alex Wong",
+    "primarySpecialization": "Orthopedics",
+    "credentials": "MD (Pulmonology), DMRCP",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Ophthalmology", "Rheumatology"],
+    "clinics": [
+      {
+        "name": "Community Health Center",
+        "fee": { "inPerson": 440, "online": 177 },
+        "contact": "(748) 799-2623",
+        "address": "75 Robmu Glen",
+        "dayTime": ["Wednesday", "Wednesday"],
+        "whatsApp": "(735) 375-7918",
+        "location": { "lat": -0.06676, "lng": -126.20225 }
+      }
+    ],
+    "experience": 12,
+    "verified": false,
+    "onlineConsult": true,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 208, "online": 279 },
+    "rating": 5,
+    "reviews": 275,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580836,
+    "status": "busy",
+    "avgConsultTime": 57,
+    "queuedPatients": 7
+  },
+  {
+    "id": "bb133137-17e8-4505-8b0c-7d6a23710377",
+    "name": "Ronnie Aguilar",
+    "primarySpecialization": "Pediatrics",
+    "credentials": "MD (Rheumatology), DMRCC",
+    "currentlyAvailable": false,
+    "secondarySpecializations": ["Urology"],
+    "clinics": [
+      {
+        "name": "Memorial Hospital",
+        "fee": { "inPerson": 215, "online": 222 },
+        "contact": "(703) 714-6985",
+        "address": "118 Enobe Circle",
+        "dayTime": ["Saturday", "Friday"],
+        "whatsApp": "(234) 727-3452",
+        "location": { "lat": 44.6077, "lng": -161.82855 }
+      }
+    ],
+    "experience": 18,
+    "verified": true,
+    "onlineConsult": false,
+    "bookingEnabled": true,
+    "fee": { "inPerson": 427, "online": 332 },
+    "rating": 4.3,
+    "reviews": 701,
+    "nextAvailable": null,
+    "lastUpdated": 1757682580836,
+    "status": "unknown",
+    "avgConsultTime": 46,
+    "queuedPatients": 10
+  }
+]

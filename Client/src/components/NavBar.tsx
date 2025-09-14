@@ -1,0 +1,55 @@
+import { useEffect, useRef, useState } from "react";
+import NavLinks from "./NavLinks.js";
+import { HiMenuAlt2 } from "react-icons/hi";
+import AuthActions from "./AuthActions.js";
+
+const Logo = ({ toggleFn }: { toggleFn: () => void }) => {
+  return (
+    <button onClick={toggleFn} className="lg:hidden">
+      <HiMenuAlt2 />
+    </button>
+  );
+};
+
+const NavBar = () => {
+  const [showRoutes, setShowRoutes] = useState(false);
+  const onRouteChange = () => setShowRoutes(false);
+
+  let ref = useRef(null);
+
+  useEffect(() => {
+    const navbar = ref?.current as HTMLElement | null;
+    const handleMouseDown = (e: MouseEvent) => {
+      if (navbar && showRoutes && !navbar.contains(e.target as Node))
+        setShowRoutes(false);
+    };
+
+    if (showRoutes) {
+      document.addEventListener("click", handleMouseDown);
+      return () => document.removeEventListener("click", handleMouseDown);
+    }
+  }, [showRoutes]);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (showRoutes && e.key == "Escape") setShowRoutes(false);
+    };
+
+    if (showRoutes) {
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }
+  }, [showRoutes]);
+
+  return (
+    <header className="app-header">
+      <nav className="navbar lg:flex-nowrap" ref={ref}>
+        <Logo toggleFn={() => setShowRoutes((p) => !p)} />
+        <NavLinks showRoutes={showRoutes} onRouteChange={onRouteChange} />
+        <AuthActions />
+      </nav>
+    </header>
+  );
+};
+
+export default NavBar;

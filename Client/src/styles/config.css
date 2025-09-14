@@ -1,0 +1,115 @@
+@import "tailwindcss";
+@source "src/**/*.{html,ts,tsx,css}";
+
+/* 
+Import using @import directive
+import the tailwindcss dep, includes base, layer, theme etc. by default.
+set the source using @source "{path}" for tailwind to find files for tailwindcss classes:
+relative to the current stylesheet or from the cwd eg Frontend.
+Use the theme directive for add primary styles for your project,
+utility directive for custom utilities
+custom-variant for custom variants,
+and variant for applying variants
+*/
+
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant show (&:where(.show, .show *));
+
+@theme {
+  /* Primary: Black-Gray */
+  --color-primary: #202020;
+  --color-primary-dark: #141414;
+  --color-primary-light: #343434;
+  --color-primary-lightest: #454545;
+
+  /* Secondary - Gray */
+  --color-secondary: var(--color-gray-600);
+  --color-secondary-dark: var(--color-gray-700);
+  --color-secondary-light: var(--color-gray-500);
+  --color-secondary-lightest: var(--color-gray-400);
+
+  /* Accent - amber */
+  --color-accent: var(--color-sky-500);
+  --color-accent-dark: var(--color-sky-600);
+  --color-accent-light: var(--color-sky-400);
+  --color-accent-lightest: var(--color-sky-300);
+
+  /* Alerts */
+  --color-error: var(--color-red-600);
+  --color-error-dark: var(--color-red-700);
+  --color-error-light: var(--color-red-500);
+
+  --color-success: var(--color-green-600);
+  --color-success-dark: var(--color-green-700);
+  --color-success-light: var(--color-green-500);
+
+  --color-warning: var(--color-yellow-600);
+  --color-warning-dark: var(--color-yellow-700);
+  --color-warning-light: var(--color-yellow-500);
+
+  /* Defaults */
+  --default-transition-duration: 240ms;
+
+  /* Font-size */
+  --text-xs: 0.5rem;
+  --text-sm: 0.65rem;
+  --text-base: 0.75rem;
+  --text-lg: 0.9rem;
+  --text-xl: 1.075rem;
+  --text-2xl: 1.2rem;
+  --text-3xl: 1.35rem;
+
+  /* Animations */
+  --animate-spin: spin 1s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+}
+
+/* Default DOM tag styles */
+@layer base {
+  *,
+  *::after,
+  *::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    height: 100vh;
+
+    @variant dark {
+      color: theme(--color-slate-300);
+      background: theme(--color-primary);
+    }
+  }
+
+  body {
+    height: 100%;
+    letter-spacing: 1.2px;
+    font-size: theme(--text-base);
+  }
+
+  #root {
+    all: inherit;
+  }
+
+  main {
+    @apply py-6;
+  }
+
+  main,
+  .navbar {
+    @apply container;
+  }
+
+  button,
+  a {
+    outline: none;
+    cursor: pointer;
+  }
+}

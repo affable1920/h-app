@@ -1,0 +1,45 @@
+@import "./config.css";
+
+@layer components {
+  .navlinks {
+    @apply absolute  top-full py-6 bg-white shadow-md 
+    shadow-slate-200/50 w-full left-0 items-center gap-14 hidden;
+
+    @variant show {
+      @apply flex flex-col;
+    }
+
+    @variant lg {
+      @apply flex flex-row static shadow-none p-0 gap-24;
+    }
+  }
+
+  .navlink {
+    @apply font-bold hover:bg-slate-100 rounded-md hover:shadow-inner hover:shadow-slate-200 
+      p-1 px-4 border-[1px] border-transparent hover:border-slate-200 transition-all duration-200
+       tracking-widest text-[11px];
+
+    &.active {
+      @apply bg-accent-lightest text-white border-transparent shadow-inner shadow-black/25;
+
+      @variant lg {
+        @apply py-1;
+      }
+    }
+  }
+
+  .input {
+    @apply grow border-2 border-slate-300 rounded-md p-2 text-sm tracking-widest font-bold;
+  }
+
+  .card {
+    @apply rounded-md p-4 font-semibold shadow-sm 
+    shadow-slate-200/40 border-2 bg-white border-slate-300/50 h-full min-h-32;
+  }
+}
+
+.dashboard {
+  display: grid;
+  gap: calc(theme(--spacing) * 6);
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+}

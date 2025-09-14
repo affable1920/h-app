@@ -1,0 +1,84 @@
+@import "./config.css";
+
+/* Default app css utilities. */
+
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  max-width: calc(100% - 4rem);
+
+  @variant md {
+    max-width: calc(100% - 8rem);
+  }
+
+  @variant lg {
+    max-width: calc(100% - 12rem);
+  }
+}
+
+@utility app-header {
+  @apply bg-white shadow-md shadow-slate-200/50 relative z-[5];
+}
+
+@utility navbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  height: calc(theme(--spacing) * 14);
+}
+
+@utility label {
+  font-weight: 600;
+  font-style: italic;
+  font-size: theme(--text-sm);
+  color: theme(--color-primary);
+
+  @variant dark {
+    color: inherit;
+  }
+}
+
+@utility input-box {
+  display: flex;
+  gap: 6px;
+  flex-direction: column;
+}
+
+@utility overlay {
+  position: fixed;
+  inset: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+@utility error-text {
+  @apply text-error dark:text-error-dark text-shadow-2xs text-shadow-error-light dark:text-shadow-error
+   text-center tracking-wider italic text-sm;
+}
+
+@utility link {
+  outline: none;
+  font-weight: medium;
+  font-size: theme(--text-xs);
+  font-weight: bold;
+  padding: calc(theme(--spacing) * 1);
+
+  @apply hover:underline;
+}
+
+@utility form-wrapper {
+  @apply flex flex-col gap-8 max-w-sm md:max-w-md mx-auto px-8 py-6
+      rounded-md border-2 border-slate-300 dark:border-primary-lightest;
+}
+
+@utility form-content {
+  @apply flex flex-col gap-4;
+}
+
+@utility card-h2 {
+  @apply font-bold leading-tight;
+}

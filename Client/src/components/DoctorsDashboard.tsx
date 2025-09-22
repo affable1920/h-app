@@ -1,19 +1,20 @@
 import { useEffect, useRef } from "react";
-import { FcNext, FcPrevious } from "react-icons/fc";
 import DoctorCard from "./DoctorCard";
 import useDocStore from "../stores/doctorsStore";
 import { RiAiGenerate } from "react-icons/ri";
 import useModalStore from "../stores/modalStore";
 import useQueryStore from "../stores/queryStore";
-
-import { exponentialBackoff } from "../utilities/utils";
+import { FcNext, FcPrevious } from "react-icons/fc";
+import { debounce, exponentialBackoff } from "../utilities/utils";
 
 const DoctorsDashboard = () => {
-  const get = useDocStore((s) => s.get);
+  const getDoctors = useDocStore((s) => s.getDoctors);
   const doctors = useDocStore((s) => s.doctors);
 
-  const max = useQueryStore((s) => s.max);
+  const limit = useQueryStore((s) => s.limit);
   const currPage = useQueryStore((s) => s.currPage);
+
+  const totalCount = useQueryStore((s) => s.totalCount);
   const searchQuery = useQueryStore((s) => s.searchQuery);
 
   const setCurrPage = useQueryStore((s) => s.setCurrPage);
@@ -22,38 +23,42 @@ const DoctorsDashboard = () => {
   const ref = useRef<HTMLDivElement>(null);
   const openModal = useModalStore((s) => s.openModal);
 
+  const dbSetSearchQuery = debounce(setSearchQuery, 100);
+
   useEffect(() => {
     const fetchDocs = async () => {
       const controller = new AbortController();
 
       try {
-        const query = { max, currPage, searchQuery };
-        await exponentialBackoff(() => get(query, controller.signal));
+        // await get(query, controller.signal);
+        await exponentialBackoff(() =>
+          getDoctors({ limit, currPage, searchQuery }, controller.signal)
+        );
       } catch (ex) {
         console.log(ex);
       }
 
       return () => controller.abort();
     };
-
     fetchDocs();
-  }, [get, max, searchQuery, currPage]);
+  }, [getDoctors, limit, currPage, searchQuery]);
+
+  const isLastPage =
+    doctors.length < limit || currPage === Math.ceil((totalCount || 0) / limit);
+
+  useEffect(() => {
+    // console.log(chat());
+  }, []);
 
   return (
     <section className="flex flex-col gap-4 mx-auto">
       <section className="w-full rounded-md flex items-center justify-between">
-        <div
-          contentEditable
-          onInput={(e) => setSearchQuery(e.currentTarget.textContent)}
+        <input
+          // value={searchQuery}
+          placeholder="Search for a doc ..."
+          onChange={(e) => dbSetSearchQuery(e.target.value)}
           className="input relative outline-none w-full max-w-3/4"
-        >
-          {!searchQuery && (
-            <p className="opacity-60 pointer-events-none absolute">
-              Search for a doc ...
-            </p>
-          )}
-          <div className="h-full outline-none border-none min-h-6" />
-        </div>
+        />
         <RiAiGenerate
           size={24}
           className="cursor-pointer"
@@ -68,12 +73,13 @@ const DoctorsDashboard = () => {
       </div>
 
       <div className="flex items-center self-end">
-        <button
-          onClick={() => setCurrPage(currPage === 1 ? currPage : currPage + 1)}
-        >
+        <button onClick={() => setCurrPage(currPage === 1 ? 1 : currPage - 1)}>
           <FcPrevious />
         </button>
-        <button onClick={() => setCurrPage(currPage + 1)}>
+        <button
+          className={`${isLastPage ? "hidden" : "flex"}`}
+          onClick={() => setCurrPage(currPage + 1)}
+        >
           <FcNext />
         </button>
       </div>

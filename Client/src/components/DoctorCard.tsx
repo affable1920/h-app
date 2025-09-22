@@ -7,6 +7,7 @@ import { useCallback, useState } from "react";
 
 import DrCardEssentials from "./DrCardEssentials";
 import DrCardSecondaryInfo from "./DrCardSecondaryInfo";
+import DrCardBack from "./DrCardBack";
 
 interface DoctorCardProps {
   doctor: Doc;
@@ -46,7 +47,9 @@ const DoctorCard = React.memo(({ doctor }: DoctorCardProps) => {
       </motion.article>
 
       {/* back side */}
-      <motion.article className="backface-hidden absolute inset-0 rotate-y-180 p-4"></motion.article>
+      <motion.article className="backface-hidden absolute inset-0 rotate-y-180 p-4">
+        <DrCardBack {...{ doctor }} />
+      </motion.article>
 
       <motion.button
         onClick={handleFlip}

@@ -1,12 +1,13 @@
 import json
-from fastapi import Depends
 from fastapi.routing import APIRouter
+from fastapi import Depends, HTTPException
+from app.models.responses import DoctorResponse
 from app.models.queryparams import QueryParameters
 
 router = APIRouter(prefix="/doctors", tags=["doctors"])
 
 cache_key = ""
-docs_cache = []
+cache = []
 
 cache_expired = False
 # mutate on any crud op
@@ -18,33 +19,17 @@ with open(docs_file, "r") as f:
     all_docs: list[dict] = json.load(f)
 
 
-class Cache:
-    def __init__(self):
-        self.cache = {}
-        self.is_expired = False
-
-    def set_cache(self, key, val):
-        self.cache[key] = val
-
-    def set_cache_multiple(self, **kwargs):
-        for key, val in kwargs.items():
-            self.set_cache(key, val)
-
-    def check_if_cached(self, **kwargs):
-        return all([self.cache.get(key) == val for key, val in kwargs.items()])
-
-
-@router.get("", response_model=list[dict])
+@router.get("", response_model=DoctorResponse)
 async def get_docs(params: QueryParameters = Depends()):
-    global docs_cache
+    global cache
     global docs_file
     global cache_key
     global all_docs
 
     curr_cache_key = f"{params.page}-{params.max}-{params.search_query}"
-    if cache_key == curr_cache_key and not cache_expired:
+    if curr_cache_key == cache_key:
         print("return cache hit")
-        return docs_cache
+        return cache
 
     cache_key = curr_cache_key
 
@@ -58,9 +43,13 @@ async def get_docs(params: QueryParameters = Depends()):
             ).lower().startswith(params.search_query)]
 
         docs = doctors[start: min(len(doctors), end)]
-        docs_cache = docs
 
-        return docs
+        response = {"doctors": docs, "total_count": len(
+            all_docs), "curr_count": len(docs)}
 
-    except FileNotFoundError:
-        return {"error": "File not found"}
+        cache = response
+        return response
+
+    except (FileNotFoundError, Exception) as e:
+        raise HTTPException(status_code=404, detail={
+                            "msg": "An Unexpected error occurred !", "error": str(e)})

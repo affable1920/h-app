@@ -6,7 +6,9 @@ const Layout = () => {
   return (
     <>
       <Modal />
-      <NavBar />
+      <header className="app-header">
+        <NavBar />
+      </header>
       <main>
         <Outlet />
       </main>

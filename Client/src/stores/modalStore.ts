@@ -1,15 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 
-interface ModalStore {
+type ModalState = {
   currModal: string | null;
-  openModal: (modal: string) => void;
-  closeModal: () => void;
-}
+  modalProps: Record<string, any>;
+};
 
-const useModalStore = create<ModalStore>((set) => ({
+type ModalActions = {
+  closeModal: () => void;
+  openModal: (modal: string, options?: Record<string, any>) => void;
+};
+
+const useModalStore = create<ModalState & ModalActions>((set, get) => ({
   currModal: null,
-  openModal: (modal: string) => set({ currModal: modal }),
+  modalProps: {},
+
+  openModal: (modal: string, options) => {
+    set({ currModal: modal, modalProps: options ?? get().modalProps });
+  },
+
   closeModal: () => set({ currModal: null }),
 }));
+
+export const removeModal = () => useModalStore.setState({ currModal: null });
 
 export default useModalStore;

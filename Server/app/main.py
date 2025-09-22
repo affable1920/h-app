@@ -2,24 +2,23 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.routes import ai
 from app.routes import doctors
+from app.routes import clinics
 
 
 @asynccontextmanager
 async def root(app: FastAPI):
     print("Starting up")
 
-    # cache = doctors.Cache()
-    # cache.set_cache_multiple(a=1, b=2, c=3)
-
-    # print(cache.check_if_cached(a=1, b=2, c=3))
-
     yield
     print("Shutting down")
 
 app = FastAPI(lifespan=root)
 
+app.include_router(ai.router)
 app.include_router(doctors.router)
+app.include_router(clinics.router)
 
 app.add_middleware(
     CORSMiddleware,

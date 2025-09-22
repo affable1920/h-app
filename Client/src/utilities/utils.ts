@@ -1,4 +1,5 @@
-import type { AxiosResponse } from "axios";
+import type { AxiosResponse, AxiosError } from "axios";
+import type { ErrorResponse } from "../types/responses";
 
 export const paginate = <T>(
   items: T[] = [],
@@ -31,8 +32,8 @@ export async function exponentialBackoff(
   maxRetries: number = 3
 ) {
   // config for exp backoff
-  const callId = Math.random().toString(36).substring(2, 8);
-  console.log(`[${callId}] Starting exponential backoff`);
+  // const callId = Math.random().toString(36).substring(2, 8);
+  // console.log(`[${callId}] Starting exponential backoff`);
 
   let attempt = 1;
 
@@ -40,7 +41,10 @@ export async function exponentialBackoff(
     try {
       console.log("Exec attempt", attempt);
       return await func();
-    } catch (ex) {
+    } catch (ex: unknown) {
+      // Return ealry if server unavailable
+      if ((ex as ErrorResponse | AxiosError)?.status === 0) throw ex;
+
       if (attempt === maxRetries) {
         console.log("All attempts failed.");
         throw ex;
@@ -56,4 +60,14 @@ export async function exponentialBackoff(
     }
   }
   console.log("All attempts failed !");
+}
+
+export function debounce(func: (...args: string[]) => void, ms: number) {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  const delay = ms ?? 330;
+
+  return function (...args: string[]) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
 }

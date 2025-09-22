@@ -36,6 +36,10 @@
     @apply rounded-md p-4 font-semibold shadow-sm 
     shadow-slate-200/40 border-2 bg-white border-slate-300/50 h-full min-h-32;
   }
+
+  .modal {
+    @apply bg-white shadow-md shadow-slate-300/40 rounded-md p-4 max-w-fit;
+  }
 }
 
 .dashboard {

@@ -15,7 +15,7 @@ const NavBar = () => {
   const [showRoutes, setShowRoutes] = useState(false);
   const onRouteChange = () => setShowRoutes(false);
 
-  let ref = useRef(null);
+  const ref = useRef(null);
 
   useEffect(() => {
     const navbar = ref?.current as HTMLElement | null;
@@ -24,10 +24,8 @@ const NavBar = () => {
         setShowRoutes(false);
     };
 
-    if (showRoutes) {
-      document.addEventListener("click", handleMouseDown);
-      return () => document.removeEventListener("click", handleMouseDown);
-    }
+    document.addEventListener("click", handleMouseDown);
+    return () => document.removeEventListener("click", handleMouseDown);
   }, [showRoutes]);
 
   useEffect(() => {
@@ -35,20 +33,16 @@ const NavBar = () => {
       if (showRoutes && e.key == "Escape") setShowRoutes(false);
     };
 
-    if (showRoutes) {
-      document.addEventListener("keydown", handleEscape);
-      return () => document.removeEventListener("keydown", handleEscape);
-    }
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [showRoutes]);
 
   return (
-    <header className="app-header">
-      <nav className="navbar lg:flex-nowrap" ref={ref}>
-        <Logo toggleFn={() => setShowRoutes((p) => !p)} />
-        <NavLinks showRoutes={showRoutes} onRouteChange={onRouteChange} />
-        <AuthActions />
-      </nav>
-    </header>
+    <nav className="navbar lg:flex-nowrap" ref={ref}>
+      <Logo toggleFn={() => setShowRoutes((p) => !p)} />
+      <NavLinks showRoutes={showRoutes} onRouteChange={onRouteChange} />
+      <AuthActions />
+    </nav>
   );
 };
 

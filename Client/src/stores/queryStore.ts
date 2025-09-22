@@ -1,21 +1,23 @@
 import { create } from "zustand";
 
 interface QueryStore {
-  max: number;
+  limit: number;
   currPage: number;
-  searchQuery: string;
+  searchQuery?: string;
+  totalCount: number | null;
 
-  setMax: (max: number) => void;
+  setLimit: (max: number) => void;
   setCurrPage: (cp: number) => void;
   setSearchQuery: (sq: string) => void;
 }
 
 const useQueryStore = create<QueryStore>((set) => ({
-  max: 5,
+  limit: 5,
   currPage: 1,
   searchQuery: "",
+  totalCount: null,
 
-  setMax: (max: number) => set((store) => ({ ...store, max })),
+  setLimit: (max: number) => set((store) => ({ ...store, limit: max })),
   setCurrPage: (cp: number) => set((store) => ({ ...store, currPage: cp })),
   setSearchQuery: (sq: string) =>
     set((store) => ({ ...store, currPage: 1, searchQuery: sq })),

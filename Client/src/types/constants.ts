@@ -1,3 +1,20 @@
+import { TbUser } from "react-icons/tb";
+import { IoLocation } from "react-icons/io5";
+import { SlCallOut } from "react-icons/sl";
+import type { IconType } from "react-icons/lib";
+import { BsFillCalendar2Fill } from "react-icons/bs";
+import { MdMore, MdOfflineBolt } from "react-icons/md";
+
+export const iconMap: Record<string, IconType> = {
+  more: MdMore,
+  user: TbUser,
+  call: SlCallOut,
+  location: IoLocation,
+  offline: MdOfflineBolt,
+  calendar: BsFillCalendar2Fill,
+};
+
+// data specific
 export const SPECIALIZATIONS = [
   "Cardiology",
   "Dermatology",

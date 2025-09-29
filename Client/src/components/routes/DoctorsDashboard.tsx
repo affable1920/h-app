@@ -1,11 +1,12 @@
-import { useEffect, useRef } from "react";
-import DoctorCard from "./DoctorCard";
-import useDocStore from "../stores/doctorsStore";
+import React, { useEffect, useRef, useState } from "react";
+import DoctorCard from "../DoctorCard";
+import useDocStore from "../../stores/doctorsStore";
 import { RiAiGenerate } from "react-icons/ri";
-import useModalStore from "../stores/modalStore";
-import useQueryStore from "../stores/queryStore";
+import useModalStore from "../../stores/modalStore";
+import useQueryStore from "../../stores/queryStore";
 import { FcNext, FcPrevious } from "react-icons/fc";
-import { debounce, exponentialBackoff } from "../utilities/utils";
+import { debounce, exponentialBackoff } from "../../utilities/utils";
+import Button from "../Button";
 
 const DoctorsDashboard = () => {
   const getDoctors = useDocStore((s) => s.getDoctors);
@@ -23,9 +24,15 @@ const DoctorsDashboard = () => {
   const ref = useRef<HTMLDivElement>(null);
   const openModal = useModalStore((s) => s.openModal);
 
-  const dbSetSearchQuery = debounce(setSearchQuery, 100);
+  // Debounced version of setSearchQuery to limit API calls
+  // dbSetSearchQuery is a new function on every render
+  // call one - dbSetSearchQuery = fn1 => e.g let fn1 = () => console.log("hello")
+  // call two - dbSetSearchQuery = fn2 => e.g let fn2 = () => console.log("hello")
+  // as fn1 !== fn2, dbSetSearchQuery is a new function every time
+  const dbSetSearchQuery = debounce(setSearchQuery, 180);
 
   useEffect(() => {
+    console.log("dash effect called.");
     const fetchDocs = async () => {
       const controller = new AbortController();
 
@@ -43,24 +50,31 @@ const DoctorsDashboard = () => {
     fetchDocs();
   }, [getDoctors, limit, currPage, searchQuery]);
 
+  const [searchText, setSearchText] = useState("");
+
   const isLastPage =
     doctors.length < limit || currPage === Math.ceil((totalCount || 0) / limit);
 
-  useEffect(() => {
-    // console.log(chat());
-  }, []);
+  function handleSearch({
+    target: { value: input = "" },
+  }: React.ChangeEvent<HTMLInputElement>) {
+    setSearchText(input);
+    dbSetSearchQuery(input);
+  }
 
   return (
     <section className="flex flex-col gap-4 mx-auto">
-      <section className="w-full rounded-md flex items-center justify-between">
-        <input
-          // value={searchQuery}
-          placeholder="Search for a doc ..."
-          onChange={(e) => dbSetSearchQuery(e.target.value)}
-          className="input relative outline-none w-full max-w-3/4"
-        />
+      <section className="w-full rounded-md flex items-center justify-between md:justify-end gap-4">
+        <div className="input w-full max-w-3xs flex items-center relative italic">
+          <input
+            value={searchText}
+            placeholder="Search for a doc ..."
+            onChange={handleSearch}
+            className="placeholder:opacity-60 outline-none w-full"
+          />
+          <Button className="absolute text-xs right-1">Ctrl K</Button>
+        </div>
         <RiAiGenerate
-          size={24}
           className="cursor-pointer"
           onClick={() => openModal("AIGenerateModal")}
         />

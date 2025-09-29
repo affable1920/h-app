@@ -23,7 +23,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 
   // Full width option
-  fullWidth?: boolean;
+  rounded?: boolean;
 }
 
 const Button = memo(
@@ -35,7 +35,7 @@ const Button = memo(
     startIcon,
     endIcon,
     loading = false,
-    fullWidth = false,
+    rounded = false,
     className = "",
     ...rest // Spread operator captures all other props
   }: ButtonProps) => {
@@ -65,7 +65,7 @@ const Button = memo(
       sizeClasses[size],
       variantClasses[variant],
       giveColor && colorClasses[color],
-      fullWidth && "w-full",
+      rounded && "rounded-full",
       loading && "cursor-wait",
       className,
     ]

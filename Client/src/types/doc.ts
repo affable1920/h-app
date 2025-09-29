@@ -2,13 +2,26 @@ type Fee = Record<string, string | number | null>;
 export type Status = "available" | "away" | "busy" | "unknown";
 
 export interface Clinic {
+  id: string;
   name: string;
   fee?: Fee;
   address: string;
   contact: string;
   dayTime: string[];
   whatsApp?: string;
+  facilities?: string[];
+  parkingAvailable?: boolean;
   location?: Record<string, number>;
+  wheelchairAccessible?: boolean;
+  schedule?: Record<string, { start: string; end: string; type?: string }[]>;
+}
+
+export interface DrCTA {
+  icon: string;
+  name?: string;
+  needsDD?: boolean;
+  action: () => void;
+  isPrimary?: boolean;
 }
 
 export interface Doc {

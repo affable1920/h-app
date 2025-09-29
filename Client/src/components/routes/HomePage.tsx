@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MdSend } from "react-icons/md";
-import { generateDoctorData } from "../utilities/doc_list_generator";
+import { generateDoctorData } from "../../utilities/doc_list_generator";
 
 const HomePage = () => {
   const [userQuery, setUserQuery] = useState("");

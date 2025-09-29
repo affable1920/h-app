@@ -1,5 +1,7 @@
-import type { AxiosResponse, AxiosError } from "axios";
+import type { AxiosResponse } from "axios";
+import { MONTHS, type DaysPerMonth } from "../types/constants";
 import type { ErrorResponse } from "../types/responses";
+import { DateTime } from "luxon";
 
 export const paginate = <T>(
   items: T[] = [],
@@ -20,6 +22,7 @@ export const filter = <T extends { name: string }>(
 ): T[] => {
   if (!sq) return items;
   const sqNormalized = sq.toLowerCase().trim();
+
   return items.filter((item) =>
     item.name.toLowerCase().trim().includes(sqNormalized)
   );
@@ -42,8 +45,8 @@ export async function exponentialBackoff(
       console.log("Exec attempt", attempt);
       return await func();
     } catch (ex: unknown) {
-      // Return ealry if server unavailable
-      if ((ex as ErrorResponse | AxiosError)?.status === 0) throw ex;
+      // Return ealry if server unavailable or bad request
+      if ([0, 404].includes((ex as ErrorResponse)?.status)) throw ex;
 
       if (attempt === maxRetries) {
         console.log("All attempts failed.");
@@ -68,6 +71,23 @@ export function debounce(func: (...args: string[]) => void, ms: number) {
 
   return function (...args: string[]) {
     if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func(...args), delay);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
   };
 }
+
+function getDaysPerMonth(monthIndex: number): number {
+  if (monthIndex < 1 || monthIndex > 12) return 0;
+  const days = DateTime.local().set({ month: monthIndex }).daysInMonth;
+
+  return days;
+}
+
+export const daysPerMonth: DaysPerMonth = MONTHS.reduce(
+  (acc, month, i) => ({
+    ...acc,
+    [i + 1]: { name: month, days: getDaysPerMonth(i + 1) },
+  }),
+  {}
+);

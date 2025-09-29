@@ -23,5 +23,4 @@ const useModalStore = create<ModalState & ModalActions>((set, get) => ({
 }));
 
 export const removeModal = () => useModalStore.setState({ currModal: null });
-
 export default useModalStore;

@@ -7,18 +7,13 @@ import React from "react";
 const DrCardEssentials = React.memo(({ doctor }: { doctor: Doc }) => {
   return (
     <section className="flex gap-2">
-      <div className="h-full w-full max-w-20 aspect-square bg-slate-100/30 rounded-md">
-        <img
-          className="h-full hover:scale-95 cursor-pointer w-full object-cover 
-          mix-blend-multiply transition-transform duration-150"
-          src={docImage}
-          alt="doc_img"
-        />
+      <div className="doctor-img-container max-w-20">
+        <img className="doctor-img" src={docImage} alt="doc_img" />
       </div>
       <div className="flex flex-col justify-between max-w-40">
         <div className="flex flex-col gap-0.5">
           <div className="flex gap-1 items-center">
-            <Link to="/">
+            <Link to={`/doctors/${doctor.id}`}>
               <h2 className="card-h2 truncate line-clamp-1 hover:underline hover:text-blue-700">
                 {doctor.name}
               </h2>

@@ -14,6 +14,30 @@ export const iconMap: Record<string, IconType> = {
   calendar: BsFillCalendar2Fill,
 };
 
+export const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
+
+export type MonthData = {
+  name: (typeof MONTHS)[number];
+  days: number;
+};
+
+export type DaysPerMonth = {
+  [key: number]: MonthData;
+};
+
 // data specific
 export const SPECIALIZATIONS = [
   "Cardiology",

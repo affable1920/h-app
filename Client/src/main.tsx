@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 
 // Components
-import router from "./components/router.tsx";
+import router from "./components/routes/router.tsx";
 
 // stylesheets
 import "./styles/config.css";

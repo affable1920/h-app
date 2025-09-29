@@ -35,7 +35,3 @@ class Doctor(BaseModel):
     currently_available: bool
     waiting_time: str | int | None = None
     office: dict[str, str]
-
-    @field_serializer("name")
-    def strip_lower_name(cls, name: str):
-        return name.strip().title()

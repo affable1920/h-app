@@ -14,5 +14,5 @@ class QueryParameters(BaseModel):
 
     @field_validator("search_query")
     @classmethod
-    def strip_lower_sq(cls, sq: str):
-        return sq.strip().lower()
+    def strip_lower_sq(cls, sq: str) -> str | None:
+        return sq.strip().lower() if sq else None

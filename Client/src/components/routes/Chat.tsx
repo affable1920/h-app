@@ -1,5 +1,5 @@
 import { useState } from "react";
-import sendMsg from "../services/aiService";
+import sendMsg from "../../services/aiService";
 
 type AIResponse = {
   id: string;

@@ -5,6 +5,7 @@ import useModalStore from "../stores/modalStore";
 import useInjectModalHandlers from "../hooks/useModalHandlers";
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
+import useDocStore from "../stores/doctorsStore";
 
 const MODALS: Record<string, React.ElementType> = {
   AIGenerateModal: () => {
@@ -38,6 +39,16 @@ const MODALS: Record<string, React.ElementType> = {
       </motion.ul>
     );
   },
+
+  call() {
+    const { currDoctor } = useDocStore.getState();
+
+    return (
+      <article>
+        <h2 className="card-h2">{currDoctor?.name}</h2>
+      </article>
+    );
+  },
 };
 
 const Modal = React.memo(() => {
@@ -47,13 +58,17 @@ const Modal = React.memo(() => {
   // Inject modal handlers for modal closers
 
   const portal = document.getElementById("portal");
-
   const modalProps = useModalStore((s) => s.modalProps);
+
   const { x, y } = modalProps.position || { x: 50, y: 50 };
 
-  if (!portal || !currModal) return null;
-  const ModalElement = MODALS[currModal];
+  const transform = modalProps.viewOverlay
+    ? ""
+    : `translateX(${Math.floor(x)}px) translateY(${Math.floor(y)}px)`;
 
+  if (!portal || !currModal) return null;
+
+  const ModalElement = MODALS[currModal];
   if (!ModalElement) return null;
 
   return createPortal(
@@ -62,9 +77,7 @@ const Modal = React.memo(() => {
       <div
         className={"modal"}
         style={{
-          transform: `translateX(${Math.floor(x)}px) translateY(${Math.floor(
-            y
-          )}px)`,
+          transform,
         }}
       >
         {ModalElement && <ModalElement {...modalProps} />}

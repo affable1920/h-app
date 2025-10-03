@@ -47,6 +47,11 @@
   .doctor-img-container {
     @apply h-full w-full aspect-square bg-slate-100/30 rounded-md;
   }
+
+  .box {
+    @apply bg-white shadow-md shadow-slate-300/60 rounded-lg text-gray-700 flex flex-col
+      border-2 border-slate-300/20 p-6 py-8 gap-8;
+  }
 }
 
 .dashboard {

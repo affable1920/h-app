@@ -49,17 +49,20 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doc }) => {
         </div>
 
         <div className="flex items-center italic gap-1 self-end">
-          {(config || []).map(({ name = "", isPrimary, icon }) => {
+          {(config || []).map((configObject, i) => {
+            const { name, isPrimary, icon, label = "" } = configObject;
             const Icon = iconMap[icon];
             return (
               <Button
-                key={name}
-                onClick={() => service.getDoctorAction()}
+                key={i}
+                onClick={({ currentTarget }) =>
+                  service.getDoctorAction(doctor.id, name, currentTarget)
+                }
                 style={{ order: isPrimary ? 10 : 9 }}
                 color={isPrimary ? "accent" : "primary"}
                 variant={isPrimary ? "contained" : "outlined"}
               >
-                {name[0].toUpperCase() + name.slice(1)} {Icon && <Icon />}
+                {label[0].toUpperCase() + label.slice(1)} {Icon && <Icon />}
               </Button>
             );
           })}

@@ -82,3 +82,23 @@
 @utility card-h2 {
   @apply font-bold leading-tight;
 }
+
+@utility badge {
+  @apply text-center font-bold text-gray-600 p-2 py-1 bg-slate-100 rounded-md;
+}
+
+@utility badge-current {
+  @apply !border-b-2 !border-accent-light font-black shadow-inner shadow-accent-dark/20;
+}
+
+@utility badge-selected {
+  @apply bg-amber-400 shadow-md shadow-slate-200/60 font-black;
+}
+
+@utility badge-disabled {
+  @apply cursor-default opacity-60 pointer-events-none selection:bg-transparent;
+}
+
+@utility badge-choice {
+  @apply opacity-80 pointer-events-auto;
+}

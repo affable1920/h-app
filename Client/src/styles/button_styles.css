@@ -59,3 +59,7 @@
     @apply bg-secondary-light text-white border-secondary-dark;
   }
 }
+
+@utility icon {
+  @apply bg-transparent border-none block p-1;
+}

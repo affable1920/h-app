@@ -9,7 +9,11 @@ const Overlay = memo(
     viewOverlay: boolean;
   }) => {
     return (
-      <div className={`overlay ${!viewOverlay && "bg-transparent"}`}>
+      <div
+        className={`overlay ${
+          viewOverlay ? "flex justify-center items-center" : "bg-transparent"
+        }`}
+      >
         {children}
       </div>
     );

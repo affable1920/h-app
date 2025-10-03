@@ -1,17 +1,20 @@
+import useDocStore from "../stores/doctorsStore";
 import useModalStore from "../stores/modalStore";
-import type { Status, DrCTA } from "../types/doc";
+import type { Status, DrCTA, DoctorActions } from "../types/doc";
 
 const customConfig: Record<Status, DrCTA[]> = {
   available: [
     {
+      name: "call",
       icon: "call",
-      name: "consult now",
+      label: "consult now",
       action: () => {},
       isPrimary: true,
     },
     {
-      icon: "calendar",
       name: "schedule",
+      icon: "calendar",
+      label: "schedule",
       needsDD: true,
       action: () => {},
     },
@@ -19,15 +22,17 @@ const customConfig: Record<Status, DrCTA[]> = {
 
   busy: [
     {
-      action: () => {},
+      label: "schedule",
       icon: "calendar",
       name: "schedule",
+      action: () => {},
       needsDD: true,
       isPrimary: true,
     },
     {
-      icon: "calendar",
-      name: "Schedule",
+      icon: "call",
+      name: "schedule",
+      label: "Book an appointment",
       needsDD: true,
       action: () => {},
     },
@@ -38,12 +43,14 @@ const customConfig: Record<Status, DrCTA[]> = {
       action: () => {},
       isPrimary: true,
       icon: "offline",
-      name: "Leave a message",
+      label: "Leave a message",
+      name: "message",
     },
     {
       icon: "user",
-      name: "View Profile",
+      label: "View Profile",
       action: () => {},
+      name: "profile",
     },
   ],
 
@@ -52,50 +59,85 @@ const customConfig: Record<Status, DrCTA[]> = {
       action: () => {},
       isPrimary: true,
       icon: "offline",
-      name: "Leave a message",
+      label: "Leave a message",
+      name: "message",
     },
     {
+      label: "View Profile",
       icon: "user",
-      name: "View Profile",
+      name: "profile",
       action: () => {},
     },
   ],
 };
 
 class DoctorService {
-  static cache: Record<string, { x: number; y: number }>;
+  public static cache: Record<string, { x: number; y: number }> = {};
+  private _actionMapper: { [key in keyof DoctorActions]: DoctorActions[key] };
 
-  constructor(private _id: string) {}
+  constructor(private _id: string) {
+    this._actionMapper = {
+      call: this.call.bind(this),
+      schedule: this.schedule.bind(this),
+      message: this.message.bind(this),
+      profile: this.profile.bind(this),
+      book: this.book.bind(this),
+    };
+  }
 
-  getPos(ev: React.MouseEvent) {
-    if (ev.currentTarget.textContent.trim().toLowerCase() !== "schedule")
-      return;
+  book() {}
+  message() {}
+  profile() {}
 
-    if (DoctorService.cache[this._id]) {
-      console.log("cache hit");
-      useModalStore.getState().openModal("schedule", {
-        position: DoctorService.cache[this._id],
-        docID: this._id,
-      });
-      return;
-    }
+  getPos(targetElement: EventTarget & Element) {
+    const rect = targetElement.getBoundingClientRect();
 
-    const rect = ev.currentTarget.getBoundingClientRect();
     const position = {
       x: rect.left,
       y: rect.bottom,
     };
 
+    return position;
+  }
+
+  call() {
+    useModalStore.getState().openModal("call", {
+      docID: this._id,
+      viewOverlay: true,
+    });
+  }
+
+  schedule(targetElement: EventTarget & Element) {
+    if (DoctorService.cache[this._id]) {
+      console.log("cache hit");
+
+      useModalStore.getState().openModal("schedule", {
+        position: DoctorService.cache[this._id],
+        docID: this._id,
+      });
+
+      return;
+    }
+
+    const position = this.getPos(targetElement);
     DoctorService.cache[this._id] = position;
+
     useModalStore
       .getState()
       .openModal("schedule", { position, docID: this._id });
   }
 
-  getDoctorAction() {}
+  async getDoctorAction(
+    docID: string,
+    actionName: keyof DoctorActions,
+    targetElement: Element
+  ) {
+    await useDocStore.getState().getDoctorById(docID);
+    if (actionName) this._actionMapper[actionName](targetElement);
+  }
 
   getDoctorInfo(status: Status = "unknown") {
-    if (status) return customConfig[status || "unknown"];
+    if (status) return customConfig[status];
   }
 }
 

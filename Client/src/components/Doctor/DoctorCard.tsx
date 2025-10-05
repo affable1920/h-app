@@ -1,16 +1,16 @@
 import React from "react";
-import { motion } from "motion/react";
-import { MdFlip } from "react-icons/md";
-
-import type { Doc } from "../types/doc";
 import { useCallback, useState } from "react";
 
+import { motion } from "motion/react";
+import { MdFlip } from "react-icons/md";
+import type { Doctor } from "../../types/Doctor";
+
+import DrCardBack from "./DrCardBack";
 import DrCardEssentials from "./DrCardEssentials";
 import DrCardSecondaryInfo from "./DrCardSecondaryInfo";
-import DrCardBack from "./DrCardBack";
 
 interface DoctorCardProps {
-  doctor: Doc;
+  doctor: Doctor;
 }
 
 const DoctorCard = React.memo(({ doctor }: DoctorCardProps) => {
@@ -25,7 +25,7 @@ const DoctorCard = React.memo(({ doctor }: DoctorCardProps) => {
       className="card relative"
       animate={{
         rotateY: isFlipped ? 180 : 0,
-        transition: { duration: 0.29 },
+        transition: { duration: 0.25 },
       }}
       style={{
         transformStyle: "preserve-3d",

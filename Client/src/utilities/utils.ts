@@ -1,6 +1,6 @@
 import type { AxiosResponse } from "axios";
-import { MONTHS, type DaysPerMonth } from "../types/constants";
-import type { ErrorResponse } from "../types/responses";
+import { MONTHS, type DaysPerMonth } from "./constants";
+import type { ErrorResponse } from "../types/ResponseTypes";
 import { DateTime } from "luxon";
 
 export const paginate = <T>(

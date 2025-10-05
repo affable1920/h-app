@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
-import type { Doc } from "../types/doc";
-import docImage from "../assets/doctor.jpg";
-import { MdVerifiedUser, MdStar } from "react-icons/md";
 import React from "react";
+import { Link } from "react-router-dom";
+import type { Doctor } from "../../types/Doctor";
+import docImage from "../../assets/doctor.jpg";
+import { MdVerifiedUser, MdStar } from "react-icons/md";
 
-const DrCardEssentials = React.memo(({ doctor }: { doctor: Doc }) => {
+const DrCardEssentials = React.memo(({ doctor }: { doctor: Doctor }) => {
   return (
     <section className="flex gap-2">
       <div className="doctor-img-container max-w-20">

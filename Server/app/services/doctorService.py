@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from pydoc import doc
 from typing_extensions import Self
 
 
@@ -9,7 +8,7 @@ class DoctorService:
     _doctors: list[dict] = []
     _cache: dict[str, dict] = {}
     _cache_is_valid: bool = True
-    _file_path = Path("data/doctors.json")
+    _file_path = Path("data/Doctors.json")
 
     def __new__(cls) -> Self:
         """

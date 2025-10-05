@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { MdSend } from "react-icons/md";
-import { generateDoctorData } from "../../utilities/doc_list_generator";
+import generateDoctors from "../../scripts/dataGenerator";
 
 const HomePage = () => {
   const [userQuery, setUserQuery] = useState("");
 
-  const blob = new Blob([JSON.stringify(generateDoctorData())], {
+  const blob = new Blob([JSON.stringify(generateDoctors())], {
     type: "application/json",
   });
 

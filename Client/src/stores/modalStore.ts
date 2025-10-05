@@ -8,7 +8,7 @@ type ModalState = {
 
 type ModalActions = {
   closeModal: () => void;
-  openModal: (modal: string, options?: Record<string, any>) => void;
+  openModal: (modal: string, options?: Record<string, unknown>) => void;
 };
 
 const useModalStore = create<ModalState & ModalActions>((set, get) => ({

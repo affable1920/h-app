@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import api from "../services/ApiClient";
-import type { Doc } from "../types/doc";
+import type { Doctor } from "../types/Doctor";
 import useQueryStore from "./queryStore";
 import { persist } from "zustand/middleware";
 
@@ -12,8 +12,8 @@ type QueryParams = {
 };
 
 interface DocStore {
-  doctors: Doc[];
-  currDoctor: Doc | null;
+  doctors: Doctor[];
+  currDoctor: Doctor | null;
 
   setCurrDoc?: (id: string) => void;
 
@@ -22,7 +22,7 @@ interface DocStore {
 }
 
 type DoctorResponse = {
-  doctors: Doc[];
+  doctors: Doctor[];
   curr_count: number;
   total_count: number;
 };
@@ -55,7 +55,7 @@ const useDocStore = create<DocStore>()(
 
       async getDoctorById(id, signal) {
         try {
-          const doctor = await api.get<Doc>(`${endpoint}/${id}`, { signal });
+          const doctor = await api.get<Doctor>(`${endpoint}/${id}`, { signal });
           set(() => ({ ...get(), currDoctor: doctor }));
         } catch (ex) {
           console.log(ex);

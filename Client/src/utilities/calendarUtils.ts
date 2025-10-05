@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { DAYS_OF_WEEK } from "../types/constants";
+import { DAYS_OF_WEEK } from "./constants";
 
 function getPreviousMonthDays(date: DateTime): DateTime[] {
   const countPrevMonth = DateTime.local().set({

@@ -1,23 +1,23 @@
 import React, { useMemo } from "react";
-import Button from "./Button";
-import type { Doc } from "../types/doc";
+import Button from "../Button";
+import type { Doctor } from "../../types/Doctor";
 import { Link } from "react-router-dom";
-import { iconMap } from "../types/constants";
+import { iconMap } from "../../utilities/constants";
 import { BiLocationPlus } from "react-icons/bi";
-import DoctorService from "../services/DoctorService";
+import DoctorService from "../../services/DoctorService";
 
-const statusConfig = {
-  available: { bg: "bg-success", text: "text-success" },
+const statusCssConfig = {
+  available: { bg: "bg-success", text: "text-success text-sky-950" },
   busy: { bg: "bg-warning", text: "text-warning" },
   unknown: { bg: "bg-error", text: "text-error" },
   away: { bg: "bg-secondary-dark", text: "text-secondary-dark opacity-60" },
 };
 
-const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doc }) => {
+const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
   const service = useMemo(() => new DoctorService(doctor.id), [doctor]);
 
   const status = doctor.status ?? "unknown";
-  const config = service.getDoctorInfo(doctor.status);
+  const config = service.getDoctorInfo(status);
 
   return (
     <section className="flex flex-col text-sm capitalize">
@@ -27,20 +27,16 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doc }) => {
             <p className="text-black font-bold">Status -</p>
             <div className={`flex items-center gap-2`}>
               <span
-                className={`inline-flex w-1 h-1 rounded-full ${statusConfig[status].bg}`}
+                className={`inline-flex w-1 h-1 rounded-full ${statusCssConfig[status].bg}`}
               />
-              <h2 className={`card-h2 ${statusConfig[status].text}`}>
+              <h2 className={`card-h2 ${statusCssConfig[status].text}`}>
                 {doctor.status}
               </h2>
             </div>
           </div>
           <Link
-            className={`flex items-center gap-1 font-bold italic justify-end ${
-              status === "available"
-                ? statusConfig[status].text
-                : "text-sky-950"
-            } 
-            hover:underline underline-offset-2`}
+            className={`flex items-center gap-1 italic justify-end text-sky-900
+            hover:underline underline-offset-2 font-black`}
             to="/"
           >
             {doctor.office?.name ?? doctor.clinics[0]?.name}

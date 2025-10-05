@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import DoctorCard from "../DoctorCard";
+import DoctorCard from "./DoctorCard";
 import useDocStore from "../../stores/doctorsStore";
 import { RiAiGenerate } from "react-icons/ri";
 import useModalStore from "../../stores/modalStore";

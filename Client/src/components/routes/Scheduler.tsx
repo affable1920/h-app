@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import docImage from "../../assets/doctor.jpg";
 import useDocStore from "../../stores/doctorsStore";
 import { IoInformationCircle, IoInformationCircleSharp } from "react-icons/io5";
-import Calendar from "../Calendar";
+import Calendar from "../Calendar/Calendar";
 import ClinicsView from "../ClinicsView";
-import { motion } from "motion/react";
+import { motion, type Variant } from "motion/react";
 // import DoctorService from "../../services/DoctorService";
 
 const Scheduler = React.memo(() => {
@@ -13,8 +13,21 @@ const Scheduler = React.memo(() => {
   // const service = doctor?.id ? new DoctorService(doctor.id) : null;
   // const doctorInfo = service?.getDoctorInfo(doctor?.status);
 
+  const [showInfo, setShowInfo] = useState(false);
+
   if (!doctor)
     return <div className="card-h2">Doctor onboarding in process ...</div>;
+
+  const variants: Record<string, Variant> = {
+    hidden: {
+      x: 100,
+      opacity: 0,
+    },
+    visible: {
+      x: 0,
+      opacity: 1,
+    },
+  };
 
   return (
     <article className="font-semibold flex flex-col gap-8">
@@ -45,11 +58,18 @@ const Scheduler = React.memo(() => {
 
       <section className="flex flex-col gap-8 md:flex-row">
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-end italic font-bold text-sm gap-2 text-sky-800 opacity-75">
-            <motion.p initial={{ opacity: 0 }}>
-              Select any day according to your schedule
+          <div className="flex items-center justify-end overflow-hidden italic font-bold text-sm gap-2 text-sky-800 opacity-75">
+            <motion.p
+              variants={variants}
+              transition={{ duration: 0.1 }}
+              animate={showInfo ? "visible" : "hidden"}
+            >
+              Select any day that fits your schedule
             </motion.p>
-            <IoInformationCircleSharp cursor={"pointer"} />
+            <IoInformationCircleSharp
+              className="cursor-pointer z-1"
+              onClick={() => setShowInfo(!showInfo)}
+            />
           </div>
           <Calendar />
         </div>

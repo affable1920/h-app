@@ -1,14 +1,13 @@
-import React from "react";
+import { memo, useState, useCallback } from "react";
 import { DateTime } from "luxon";
-import { useState, useCallback } from "react";
-import CalendarBody from "./Calendar/CalendarBody";
+import CalendarBody from "./CalendarBody";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { AnimatePresence, motion } from "motion/react";
 
 const currDate = DateTime.local();
 type Direction = "left" | "right";
 
-const Calendar = React.memo(() => {
+const Calendar = memo(() => {
   const [dateInView, setDateInView] = useState<DateTime>(DateTime.local());
 
   const handleMonthChange = useCallback(

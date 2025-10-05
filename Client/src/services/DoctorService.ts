@@ -1,6 +1,6 @@
 import useDocStore from "../stores/doctorsStore";
 import useModalStore from "../stores/modalStore";
-import type { Status, DrCTA, DoctorActions } from "../types/doc";
+import type { Status, DrCTA, DoctorActions } from "../types/Doctor";
 
 const customConfig: Record<Status, DrCTA[]> = {
   available: [
@@ -132,7 +132,11 @@ class DoctorService {
     actionName: keyof DoctorActions,
     targetElement: Element
   ) {
-    await useDocStore.getState().getDoctorById(docID);
+    const { currDoctor } = useDocStore.getState();
+
+    if (currDoctor?.id !== docID)
+      await useDocStore.getState().getDoctorById(docID);
+
     if (actionName) this._actionMapper[actionName](targetElement);
   }
 

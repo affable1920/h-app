@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { DateTime } from "luxon";
 
-import { DAYS_OF_WEEK } from "../../types/constants";
+import { DAYS_OF_WEEK } from "../../utilities/constants";
 
 import useDocStore from "../../stores/doctorsStore";
 import useScheduleStore from "../../stores/scheduleStore";
@@ -9,21 +9,7 @@ import useScheduleStore from "../../stores/scheduleStore";
 import { ImCross } from "react-icons/im";
 import { createCalendarData } from "../../utilities/calendarUtils";
 
-import { AnimatePresence, motion, type Variant } from "motion/react";
-const variants: Record<string, Variant> = {
-  initial: {
-    x: 100,
-    opacity: 0,
-  },
-  animate: {
-    x: 0,
-    opacity: 100,
-  },
-  exit: {
-    x: -100,
-    opacity: 0,
-  },
-};
+import { AnimatePresence, motion } from "motion/react";
 
 interface BodyProps {
   dateInView: DateTime;
@@ -36,11 +22,11 @@ const isDateToday = (date: DateTime) => {
   return date.day === today.day && date.month === today.month;
 };
 
-const CalendarBody = React.memo(({ dateInView, direction }: BodyProps) => {
+const CalendarBody = React.memo(({ dateInView }: BodyProps) => {
   const selectedDate = useScheduleStore((s) => s.selectedDate);
   const setSelectedDate = useScheduleStore((s) => s.setSelectedDate);
 
-  const clinics = useDocStore((s) => s.currDoctor?.clinics);
+  const doctor = useDocStore((s) => s.currDoctor);
   const calendar = useMemo(() => createCalendarData(dateInView), [dateInView]);
 
   const getBadgeClass = useCallback(
@@ -64,19 +50,12 @@ const CalendarBody = React.memo(({ dateInView, direction }: BodyProps) => {
   );
 
   const availableDays = useMemo(
-    () =>
-      new Set(
-        clinics
-          ?.map((cl) =>
-            Object.keys?.({ ...cl.schedule }).map((d) => d?.toLowerCase())
-          )
-          .flat()
-      ),
-    [clinics]
+    () => new Set(doctor?.schedule.map((s) => s.weekday)),
+    [doctor]
   );
 
   const isDisabled = useCallback(
-    (weekday: string) => !availableDays.has(weekday),
+    (weekday: (typeof DAYS_OF_WEEK)[number]) => !availableDays.has(weekday),
     [availableDays]
   );
 
@@ -94,17 +73,11 @@ const CalendarBody = React.memo(({ dateInView, direction }: BodyProps) => {
           {day.slice(0, 3)}
         </h2>
       ))}
-      {calendar.map((date, index) => {
-        const wkday = date.weekdayLong?.toLowerCase() as string;
+      {calendar.map((date, i) => {
+        const wkday = date.weekdayLong as (typeof DAYS_OF_WEEK)[number];
         return (
-          <AnimatePresence mode="wait" custom={direction}>
+          <AnimatePresence mode="wait" key={i}>
             <motion.button
-              layout
-              key={index}
-              variants={variants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
               disabled={isDisabled(wkday)}
               onClick={() => setSelectedDate(date)}
               className={getBadgeClass(date) + " relative"}

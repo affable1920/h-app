@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import type { ErrorResponse } from "../types/responses";
+import type { ErrorResponse } from "../types/ResponseTypes";
 
 const url = import.meta.env.VITE_API_URL || "http://localhost:8000";
 

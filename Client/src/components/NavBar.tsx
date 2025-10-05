@@ -15,10 +15,10 @@ const NavBar = () => {
   const [showRoutes, setShowRoutes] = useState(false);
   const onRouteChange = () => setShowRoutes(false);
 
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const navbar = ref?.current as HTMLElement | null;
+    const navbar = ref?.current as HTMLElement;
     const handleMouseDown = (e: MouseEvent) => {
       if (navbar && showRoutes && !navbar.contains(e.target as Node))
         setShowRoutes(false);

@@ -5,9 +5,9 @@ import Chat from "./Chat";
 import Layout from "./Layout";
 import HomePage from "./HomePage";
 import Scheduler from "./Scheduler";
-import DoctorsDashboard from "./DoctorsDashboard";
+import DoctorsDashboard from "../Doctor/DoctorsDashboard";
 import useDocStore from "../../stores/doctorsStore";
-import DoctorProfile from "./DoctorProfile";
+import DoctorProfile from "../Doctor/DoctorProfile";
 import ErrorBoundary from "../ErrorBoundary";
 
 /*
@@ -60,6 +60,6 @@ export default router;
 async function loadCurrDoctor({ params }: { params: { id?: string } }) {
   const { getDoctorById, currDoctor } = useDocStore.getState();
 
-  if (currDoctor && currDoctor.id === params.id) return currDoctor;
+  if (currDoctor?.id === params.id) return currDoctor;
   if (params.id) await getDoctorById(params.id);
 }

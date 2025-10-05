@@ -130,6 +130,11 @@ export const EXPERIENCE_RANGE = {
   MAX_YEARS: 35,
 } as const;
 
+export const CONSULTATION_DURATION_CONFIG = {
+  MIN: 15,
+  MAX: 60,
+} as const;
+
 export const CONSULTATION_DURATION = [
   15, // 15 minutes
   30, // 30 minutes
@@ -181,3 +186,16 @@ export type Hospital = (typeof HOSPITALS)[number];
 export type ConsultationDuration = (typeof CONSULTATION_DURATION)[number];
 export type CREDENTIALS = (typeof CREDENTIALS)[number];
 export type STATUSES = (typeof STATUSES)[number];
+
+export const WEEKDAY_MAP = {
+  SUNDAY: "sunday",
+  MONDAY: "monday",
+  TUESDAY: "tuesday",
+  WEDNESDAY: "wednesday",
+  THURSDAY: "thursday",
+  FRIDAY: "friday",
+  SATURDAY: "saturday",
+} as const;
+
+// Type for lowercase weekdays
+export type WEEKDAY = (typeof WEEKDAY_MAP)[keyof typeof WEEKDAY_MAP];

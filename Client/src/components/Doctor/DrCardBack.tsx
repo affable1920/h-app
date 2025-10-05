@@ -1,9 +1,9 @@
-import type { Doc } from "..//types/doc";
+import type { Doctor } from "../../types/Doctor";
 import { motion } from "motion/react";
 import { IoLocation } from "react-icons/io5";
-import Button from "./Button";
+import Button from "../Button";
 
-const DrCardBack = ({ doctor }: { doctor: Doc }) => {
+const DrCardBack = ({ doctor }: { doctor: Doctor }) => {
   return (
     <div className="flex flex-col h-1/2">
       <h2 className="card-h2 grow">{doctor.name}</h2>

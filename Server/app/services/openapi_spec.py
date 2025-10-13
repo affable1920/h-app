@@ -28,16 +28,14 @@ def generate_openapi_spec(app: FastAPI):
 
     """
     
-    The path would be say /doctors and the path_data (path.values()) would contain details about the
-    fucntion name -> operationId, parameters the route takes, their types, tags, response models ...
+    The path would be say /doctors and the path_data (path.values()) would contain details about the path function.
+    such as operationId aka the function name, parameters the function takes, their types, tags, response models ...
 
-    Tags[0] would be the first tag as given by me inside the route files
+    Tags[0] would be the first tag as inside the route's tags parameter and
     Operation Id would be the func name
 
     Using the rsplit method with the 2nd arg as 1 only splits once from the right
-    thereby creating an array with two items: 1. Tags[0], 2. the http method example -> doctors and get
-
-    The last part added by openapi to each operation id is the http method therefore the rsplit.
+    The last part added by openapi to each operation id is the http method therefore could use the rsplit.
     
     """
 
@@ -53,8 +51,7 @@ def generate_openapi_spec(app: FastAPI):
 
         for path_data in paths.values():
 
-            # operation means a function -> a route function
-            # all route fns per route
+            # operation means a route function
             for operation in path_data.values():
                 if not isinstance(operation, dict):
                     continue

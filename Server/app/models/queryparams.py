@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, field_validator
 class QueryParameters(BaseModel):
     max: int = Field(ge=1, default=5)
     page: Annotated[int, Field(ge=1, default=1, alias="currPage")]
+
     search_query: Annotated[str | None, Field(
         default=None, alias="searchQuery")]
 

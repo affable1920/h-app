@@ -29,15 +29,6 @@ export const MONTHS = [
   "December",
 ] as const;
 
-export type MonthData = {
-  name: (typeof MONTHS)[number];
-  days: number;
-};
-
-export type DaysPerMonth = {
-  [key: number]: MonthData;
-};
-
 // data specific
 export const SPECIALIZATIONS = [
   "Cardiology",
@@ -125,16 +116,6 @@ export const HOSPITALS = [
   "Mercy Hospital",
 ] as const;
 
-export const EXPERIENCE_RANGE = {
-  MIN_YEARS: 2,
-  MAX_YEARS: 35,
-} as const;
-
-export const CONSULTATION_DURATION_CONFIG = {
-  MIN: 15,
-  MAX: 60,
-} as const;
-
 export const CONSULTATION_DURATION = [
   15, // 15 minutes
   30, // 30 minutes
@@ -142,17 +123,12 @@ export const CONSULTATION_DURATION = [
   60, // 1 hour
 ] as const;
 
-export const RATING_RANGE = {
-  MIN: 3.5,
-  MAX: 5.0,
-} as const;
-
 export const CONSULTATION_FEE_RANGE = {
-  MIN: 50,
-  MAX: 500,
+  MIN: 200,
+  MAX: 400,
 } as const;
 
-export const CREDENTIALS = [
+export const Credentials = [
   "MD (Cardiology), DMCC",
   "MD (Family Medicine), DMPH",
   "MD (Internal Medicine), DMPA",
@@ -177,25 +153,15 @@ export const CREDENTIALS = [
 export const STATUSES = ["available", "busy", "away", "unknown"] as const;
 
 // Types for type safety
-export type Specialization = (typeof SPECIALIZATIONS)[number];
-export type DayOfWeek = (typeof DAYS_OF_WEEK)[number];
-export type TimeSlot = (typeof TIME_SLOTS)[number];
-export type Qualification = (typeof QUALIFICATIONS)[number];
+export type Status = (typeof STATUSES)[number];
+export type Slot = (typeof TIME_SLOTS)[number];
 export type Language = (typeof LANGUAGES)[number];
 export type Hospital = (typeof HOSPITALS)[number];
+export type DayOfWeek = (typeof DAYS_OF_WEEK)[number];
+export type Credentials = (typeof Credentials)[number];
+export type Qualification = (typeof QUALIFICATIONS)[number];
+export type Specialization = (typeof SPECIALIZATIONS)[number];
 export type ConsultationDuration = (typeof CONSULTATION_DURATION)[number];
-export type CREDENTIALS = (typeof CREDENTIALS)[number];
-export type STATUSES = (typeof STATUSES)[number];
-
-export const WEEKDAY_MAP = {
-  SUNDAY: "sunday",
-  MONDAY: "monday",
-  TUESDAY: "tuesday",
-  WEDNESDAY: "wednesday",
-  THURSDAY: "thursday",
-  FRIDAY: "friday",
-  SATURDAY: "saturday",
-} as const;
 
 // Type for lowercase weekdays
-export type WEEKDAY = (typeof WEEKDAY_MAP)[keyof typeof WEEKDAY_MAP];
+export type Weekday = (typeof DAYS_OF_WEEK)[number];

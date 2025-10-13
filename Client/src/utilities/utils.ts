@@ -1,6 +1,6 @@
 import type { AxiosResponse } from "axios";
-import { MONTHS, type DaysPerMonth } from "./constants";
-import type { ErrorResponse } from "../types/ResponseTypes";
+import { MONTHS } from "./constants";
+import type { Error } from "../types/ResponseTypes";
 import { DateTime } from "luxon";
 
 export const paginate = <T>(
@@ -46,7 +46,7 @@ export async function exponentialBackoff(
       return await func();
     } catch (ex: unknown) {
       // Return ealry if server unavailable or bad request
-      if ([0, 404].includes((ex as ErrorResponse)?.status)) throw ex;
+      if ([0, 404].includes((ex as Error)?.status)) throw ex;
 
       if (attempt === maxRetries) {
         console.log("All attempts failed.");
@@ -84,10 +84,14 @@ function getDaysPerMonth(monthIndex: number): number {
   return days;
 }
 
-export const daysPerMonth: DaysPerMonth = MONTHS.reduce(
+export const daysPerMonth = MONTHS.reduce(
   (acc, month, i) => ({
     ...acc,
     [i + 1]: { name: month, days: getDaysPerMonth(i + 1) },
   }),
   {}
 );
+
+export function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

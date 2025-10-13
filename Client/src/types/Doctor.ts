@@ -1,5 +1,5 @@
-import type { CONSULTATION_DURATION } from "../utilities/constants";
-import type { Fee, Status, Clinic, Schedule } from "./DoctorInfo";
+import * as constants from "../utilities/constants";
+import type { Fee, Clinic, Schedule } from "./DoctorInfo";
 
 export interface DoctorEssentials {
   id: string;
@@ -11,28 +11,25 @@ export interface DoctorEssentials {
 }
 
 export interface DoctorSecondaryInfo {
-  clinics: Clinic[];
+  fee: Fee;
+  schedules: Schedule[];
   office: Partial<Clinic>;
 
-  fee: Fee;
-  schedule: Schedule;
+  contact?: string;
   consultsOnline: boolean;
   experience?: number | null;
-  contact?: string;
-  status?: Status;
+
   rating?: number;
   reviews?: number;
   verified: boolean;
-  lastUpdated?: number;
+  status?: constants.Status;
+  lastUpdated?: string | null;
   secondarySpecializations?: string[];
 
   baseFee: number;
-  baseConsultTime: (typeof CONSULTATION_DURATION)[number];
-
-  waitingTime?: string;
-  queuedPatients?: number;
   currentlyAvailable?: boolean;
   nextAvailable?: string | null;
+  baseConsultTime: constants.ConsultationDuration;
 }
 
 export interface Doctor extends DoctorEssentials, DoctorSecondaryInfo {}

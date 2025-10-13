@@ -1,3336 +1,968 @@
 [
   {
-    "id": "520d9d32-4a35-4029-97b7-ec220436764b",
-    "name": "Devin Fowler",
-    "email": "onbifa@nak.pg",
-    "credentials": "MD (Neurology), DMCR",
-    "primarySpecialization": "Pediatrics",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Internal Medicine", "Rheumatology"],
-    "clinics": [],
-    "experience": 35,
-    "verified": true,
-    "consultsOnline": true,
-    "fee": { "inPerson": 477, "online": 461 },
-    "rating": 3.7,
-    "reviews": 982,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492178,
-    "status": "busy",
-    "schedule": [
-      {
-        "start": "09:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Wednesday",
-        "clinic": {
-          "id": "9b4735b3-4ad1-47b0-9b73-14e08fb58123",
-          "name": "Memorial Hospital",
-          "address": "1931 Wajkag Mill",
-          "contact": "(417) 448-4931",
-          "whatsApp": "(916) 251-2220",
-          "location": { "lat": -33.18394, "lng": -59.16517 }
-        },
-        "totalHoursAvailable": 3,
-        "slots": [
-          {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "office": {
-      "id": "be691b1e-3f3b-4b14-b78e-6ccaab785239",
-      "name": "University Medical Center",
-      "address": "1366 Zedi View",
-      "contact": "(754) 631-5832",
-      "whatsApp": "(338) 901-2919",
-      "location": { "lat": 48.94437, "lng": 123.76943 }
+    "status": "Away",
+    "fee": {
+      "online": 292,
+      "in_person": 392
     },
-    "queuedPatients": 2,
-    "baseConsultTime": 45,
-    "baseFee": 329
-  },
-  {
-    "id": "a034c876-da9e-4436-844e-07495eb94cc7",
-    "name": "Belle Parsons",
-    "email": "ci@feab.sz",
-    "credentials": "MD (Pediatrics), DMP",
-    "primarySpecialization": "Gastroenterology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Psychiatry"],
-    "clinics": [],
-    "experience": 5,
     "verified": false,
-    "consultsOnline": false,
-    "fee": { "inPerson": 255, "online": 268 },
-    "rating": 4.2,
-    "reviews": 55,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492178,
-    "status": "away",
-    "schedule": [
-      {
-        "start": "11:30 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "7641090d-29b5-4b3e-8b07-8f791e6b2227",
-          "name": "Metropolitan Medical Center",
-          "address": "556 Vazlew Terrace",
-          "contact": "(837) 882-3465",
-          "whatsApp": "(341) 450-6410",
-          "location": { "lat": -8.18683, "lng": -117.95264 }
-        },
-        "totalHoursAvailable": 0,
-        "slots": [
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "11:30 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "7641090d-29b5-4b3e-8b07-8f791e6b2227",
-          "name": "Metropolitan Medical Center",
-          "address": "556 Vazlew Terrace",
-          "contact": "(837) 882-3465",
-          "whatsApp": "(341) 450-6410",
-          "location": { "lat": -8.18683, "lng": -117.95264 }
-        },
-        "totalHoursAvailable": 0,
-        "slots": [
-          {
-            "start": "09:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "queuedPatients": 18,
-    "baseConsultTime": 15,
-    "baseFee": 57
-  },
-  {
-    "id": "d96cc1c3-69e0-4062-9e3d-3b91e395d005",
-    "name": "Estella Sanchez",
-    "email": "ga@votbumcid.hn",
-    "credentials": "MD (Hematology), DMRCC",
-    "primarySpecialization": "Internal Medicine",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Ophthalmology", "Family Medicine"],
-    "clinics": [],
-    "experience": 19,
-    "verified": true,
-    "consultsOnline": true,
-    "fee": { "inPerson": 454, "online": 130 },
-    "rating": 5,
-    "reviews": 302,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492178,
-    "status": "busy",
-    "schedule": [],
-    "queuedPatients": 6,
-    "baseConsultTime": 30,
-    "baseFee": 207
-  },
-  {
-    "id": "cc33a3a2-fa28-4564-9eb6-5d1e8e372c45",
-    "name": "Noah Simon",
-    "email": "nozu@zogidi.it",
-    "credentials": "MD (Surgery), DMS",
-    "primarySpecialization": "Gastroenterology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": [],
-    "clinics": [
-      {
-        "id": "518b5f96-711a-41c2-a17e-0f9bdfaf67ad",
-        "name": "Memorial Hospital",
-        "address": "1038 Dozi Extension",
-        "contact": "(405) 288-6415",
-        "whatsApp": "(376) 695-3834",
-        "location": { "lat": -37.75379, "lng": 28.18969 }
-      }
-    ],
-    "experience": 33,
-    "verified": true,
-    "consultsOnline": true,
-    "fee": { "inPerson": 309, "online": 468 },
-    "rating": 4.3,
-    "reviews": 99,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492178,
-    "status": "available",
-    "schedule": [
-      {
-        "start": "09:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Thursday",
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "04:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "10:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "12:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "09:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "09:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Thursday",
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "09:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Thursday",
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "12:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "office": {
-      "id": "0dcd7591-2ac2-46a3-a925-d2e814c19233",
-      "name": "Community Health Center",
-      "address": "1543 Wamo Boulevard",
-      "contact": "(829) 830-3653",
-      "whatsApp": "(778) 570-9191",
-      "location": { "lat": 4.88487, "lng": -80.98613 }
-    },
-    "queuedPatients": 17,
-    "baseConsultTime": 15,
-    "baseFee": 343
-  },
-  {
-    "id": "0145c13e-9ceb-49a2-831f-b9cd42811e43",
-    "name": "Connor Huff",
-    "email": "gap@pofojha.gw",
-    "credentials": "MD (Ophthalmology), DMO",
-    "primarySpecialization": "Urology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Psychiatry"],
-    "clinics": [
-      {
-        "id": "14d67fa2-37de-4e7c-8e9b-f1ce8191f710",
-        "name": "Mercy Hospital",
-        "address": "1771 Udciz Place",
-        "contact": "(907) 245-5386",
-        "whatsApp": "(253) 928-7138",
-        "location": { "lat": -47.27236, "lng": -172.98895 }
-      }
-    ],
-    "experience": 2,
-    "verified": true,
-    "consultsOnline": true,
-    "fee": { "inPerson": 196, "online": 284 },
-    "rating": 5,
-    "reviews": 34,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "available",
-    "schedule": [
-      {
-        "start": "11:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Friday",
-        "clinic": {
-          "id": "574c227c-5a02-4ae5-9e6b-9f774d771ec4",
-          "name": "Unity Healthcare",
-          "address": "1299 Itoba Park",
-          "contact": "(535) 594-8340",
-          "whatsApp": "(609) 315-9318",
-          "location": { "lat": 42.98398, "lng": -9.73426 }
-        },
-        "totalHoursAvailable": 1,
-        "slots": [
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "11:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Friday",
-        "clinic": {
-          "id": "574c227c-5a02-4ae5-9e6b-9f774d771ec4",
-          "name": "Unity Healthcare",
-          "address": "1299 Itoba Park",
-          "contact": "(535) 594-8340",
-          "whatsApp": "(609) 315-9318",
-          "location": { "lat": 42.98398, "lng": -9.73426 }
-        },
-        "totalHoursAvailable": 1,
-        "slots": []
-      }
-    ],
-    "office": {
-      "id": "9679c3d1-513b-4ddc-abbd-2de0d3fe7596",
-      "name": "Central Hospital",
-      "address": "1188 Java Ridge",
-      "contact": "(613) 300-5797",
-      "whatsApp": "(621) 538-6007",
-      "location": { "lat": -27.25753, "lng": 66.45722 }
-    },
-    "queuedPatients": 15,
-    "baseConsultTime": 15,
-    "baseFee": 89
-  },
-  {
-    "id": "64fc527c-45b6-4b9b-a119-809f28a85cf6",
-    "name": "Hilda Hughes",
-    "email": "pov@pupod.bi",
-    "credentials": "MD (Family Medicine), DMPH",
-    "primarySpecialization": "Family Medicine",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Neurology"],
-    "clinics": [
-      {
-        "id": "d6efd456-e32b-48df-aca2-b1a4e057bb63",
-        "name": "University Medical Center",
-        "address": "1889 Fazu Junction",
-        "contact": "(938) 282-5989",
-        "whatsApp": "(551) 279-8786",
-        "location": { "lat": -46.16746, "lng": 48.24728 }
-      },
-      {
-        "id": "1ae33b8c-0bf9-4711-980d-db4990acad94",
-        "name": "Regional Medical Center",
-        "address": "1198 Jufem Key",
-        "contact": "(476) 608-4921",
-        "whatsApp": "(488) 855-3207",
-        "location": { "lat": 10.79048, "lng": -178.53754 }
-      }
-    ],
-    "experience": 17,
-    "verified": true,
-    "consultsOnline": true,
-    "fee": { "inPerson": 293, "online": 114 },
-    "rating": 4.9,
-    "reviews": 643,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "away",
-    "schedule": [
-      {
-        "start": "09:00 AM",
-        "end": "05:00 PM",
-        "weekday": "Friday",
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:30 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "queuedPatients": 8,
-    "baseConsultTime": 45,
-    "baseFee": 187
-  },
-  {
-    "id": "1a9bf6c8-1b2b-4c81-ab13-c9a586cd01a5",
-    "name": "Bryan Bishop",
-    "email": "onbocmu@raskicu.tw",
-    "credentials": "MD (Hematology), DMRCC",
-    "primarySpecialization": "Obstetrics & Gynecology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Pulmonology"],
-    "clinics": [
-      {
-        "id": "63dc1810-33a1-4f41-9221-7a884fbd249a",
-        "name": "Regional Medical Center",
-        "address": "289 Gifo Highway",
-        "contact": "(718) 396-8075",
-        "whatsApp": "(347) 980-8743",
-        "location": { "lat": 63.30988, "lng": 154.7831 }
-      },
-      {
-        "id": "9cc27ffc-06b9-46f4-8928-067a7f04e2fd",
-        "name": "Mercy Hospital",
-        "address": "199 Redvol Highway",
-        "contact": "(287) 336-9461",
-        "whatsApp": "(777) 807-5234",
-        "location": { "lat": -27.4017, "lng": -122.48443 }
-      }
-    ],
-    "experience": 9,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 283, "online": 356 },
-    "rating": 3.8,
-    "reviews": 928,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "away",
-    "schedule": [
-      {
-        "start": "10:30 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "a4a92a86-fb81-49e8-9142-74b78167d102",
-          "name": "University Medical Center",
-          "address": "296 Pozir Grove",
-          "contact": "(738) 379-4734",
-          "whatsApp": "(936) 632-2254",
-          "location": { "lat": -21.01322, "lng": 52.98044 }
-        },
-        "totalHoursAvailable": 0,
-        "slots": []
-      },
-      {
-        "start": "10:30 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "a4a92a86-fb81-49e8-9142-74b78167d102",
-          "name": "University Medical Center",
-          "address": "296 Pozir Grove",
-          "contact": "(738) 379-4734",
-          "whatsApp": "(936) 632-2254",
-          "location": { "lat": -21.01322, "lng": 52.98044 }
-        },
-        "totalHoursAvailable": 0,
-        "slots": [
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "10:30 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "a4a92a86-fb81-49e8-9142-74b78167d102",
-          "name": "University Medical Center",
-          "address": "296 Pozir Grove",
-          "contact": "(738) 379-4734",
-          "whatsApp": "(936) 632-2254",
-          "location": { "lat": -21.01322, "lng": 52.98044 }
-        },
-        "totalHoursAvailable": 0,
-        "slots": [
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "12:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "office": {
-      "id": "ba4c9c6d-b66e-4af3-8295-05713022d631",
-      "name": "Regional Medical Center",
-      "address": "1651 Ivcud Road",
-      "contact": "(980) 261-3802",
-      "whatsApp": "(658) 311-9985",
-      "location": { "lat": 17.04985, "lng": -124.3304 }
-    },
-    "queuedPatients": 15,
-    "baseConsultTime": 30,
-    "baseFee": 130
-  },
-  {
-    "id": "26d0030b-c339-4b1a-8ba8-1cadf72d8233",
-    "name": "Randy Medina",
-    "email": "adatu@odazippar.lb",
-    "credentials": "MD (Gastroenterology), DMCR",
-    "primarySpecialization": "Internal Medicine",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Obstetrics & Gynecology", "Oncology"],
-    "clinics": [
-      {
-        "id": "0ed4e1e8-12bc-4a2d-9ffa-d52c6466df73",
-        "name": "Mercy Hospital",
-        "address": "144 Miiro Plaza",
-        "contact": "(876) 340-4794",
-        "whatsApp": "(357) 350-7377",
-        "location": { "lat": 74.50321, "lng": -137.64971 }
-      },
-      {
-        "id": "cb74345f-c392-475b-9938-30abec0dd860",
-        "name": "City General Hospital",
-        "address": "755 Idnit Pass",
-        "contact": "(622) 750-5366",
-        "whatsApp": "(618) 344-3869",
-        "location": { "lat": 84.13184, "lng": -54.50541 }
-      }
-    ],
-    "experience": 20,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 470, "online": 382 },
-    "rating": 5,
-    "reviews": 365,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "unknown",
-    "schedule": [],
-    "office": {
-      "id": "39546aaf-bb32-4b37-be1f-18c234cff727",
-      "name": "University Medical Center",
-      "address": "1872 Lirah Key",
-      "contact": "(266) 908-9452",
-      "whatsApp": "(716) 955-4875",
-      "location": { "lat": 51.75406, "lng": -26.69795 }
-    },
-    "queuedPatients": 8,
-    "baseConsultTime": 15,
-    "baseFee": 461
-  },
-  {
-    "id": "73492a40-ab1e-49c2-afe6-6d4d2c478f5b",
-    "name": "Herman Wilkins",
-    "email": "wuuw@mog.ru",
-    "credentials": "MD (Rheumatology), DMRCC",
-    "primarySpecialization": "Oncology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": [
-      "Internal Medicine",
-      "Endocrinology",
-      "Hematology"
-    ],
-    "clinics": [
-      {
-        "id": "cb5c140d-0197-44ac-8d28-ec35ce29bff2",
-        "name": "University Medical Center",
-        "address": "1495 Kolreh Road",
-        "contact": "(711) 238-7467",
-        "whatsApp": "(360) 225-2416",
-        "location": { "lat": 5.46985, "lng": 110.20818 }
-      }
-    ],
-    "experience": 21,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 445, "online": 468 },
-    "rating": 4.2,
-    "reviews": 101,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "unknown",
-    "schedule": [],
-    "queuedPatients": 20,
-    "baseConsultTime": 30,
-    "baseFee": 241
-  },
-  {
-    "id": "bfcb9b86-2455-4c7e-855c-a8a063da4e94",
-    "name": "Augusta Fleming",
-    "email": "mo@vu.tw",
-    "credentials": "MD (Oncology), DMCH",
-    "primarySpecialization": "Rheumatology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Oncology"],
-    "clinics": [
-      {
-        "id": "d271c75d-ea5a-46dc-ace9-25c815079445",
-        "name": "Community Health Center",
-        "address": "334 Vubac Trail",
-        "contact": "(762) 263-2155",
-        "whatsApp": "(335) 732-6656",
-        "location": { "lat": 11.98, "lng": 162.03629 }
-      },
-      {
-        "id": "0c94254f-ff2a-4cc9-b517-12027e6943d7",
-        "name": "Memorial Hospital",
-        "address": "910 Bunwof Lane",
-        "contact": "(473) 819-5427",
-        "whatsApp": "(933) 916-5329",
-        "location": { "lat": -35.72657, "lng": 118.46283 }
-      },
-      {
-        "id": "fe090afe-55ed-4172-9fd1-7afa4684a48f",
-        "name": "Memorial Hospital",
-        "address": "1007 Suro Parkway",
-        "contact": "(485) 792-1260",
-        "whatsApp": "(955) 998-7793",
-        "location": { "lat": 27.69772, "lng": 65.365 }
-      }
-    ],
-    "experience": 27,
-    "verified": true,
-    "consultsOnline": true,
-    "fee": { "inPerson": 345, "online": 448 },
-    "rating": 4.7,
-    "reviews": 299,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "away",
-    "schedule": [
-      {
-        "start": "04:00 PM",
-        "end": "05:00 PM",
-        "weekday": "Thursday",
-        "totalHoursAvailable": 0,
-        "slots": [
-          {
-            "start": "03:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "04:00 PM",
-        "end": "05:00 PM",
-        "weekday": "Thursday",
-        "totalHoursAvailable": 0,
-        "slots": [
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "10:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "office": {
-      "id": "ea24c584-2242-4c21-9fd2-819bcd532361",
-      "name": "Unity Healthcare",
-      "address": "619 Uwje Terrace",
-      "contact": "(741) 726-4072",
-      "whatsApp": "(969) 738-6699",
-      "location": { "lat": 85.85152, "lng": -54.74358 }
-    },
-    "queuedPatients": 12,
-    "baseConsultTime": 15,
-    "baseFee": 41
-  },
-  {
-    "id": "31522b46-0c4f-4384-91a0-366741464c0c",
-    "name": "Francis Porter",
-    "email": "eku@henjoh.gy",
-    "credentials": "MD (Internal Medicine), MRCP",
-    "primarySpecialization": "Gastroenterology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Rheumatology"],
-    "clinics": [
-      {
-        "id": "44c8e1ac-9bfa-4e23-854e-a96262053fdb",
-        "name": "City General Hospital",
-        "address": "1228 Tefav Mill",
-        "contact": "(400) 820-7490",
-        "whatsApp": "(437) 994-1417",
-        "location": { "lat": 14.28497, "lng": -172.57702 }
-      },
-      {
-        "id": "257d3eca-67a6-49e5-a397-8692c658f8d1",
-        "name": "Regional Medical Center",
-        "address": "1527 Pumu Key",
-        "contact": "(246) 924-9468",
-        "whatsApp": "(757) 438-7549",
-        "location": { "lat": 61.30437, "lng": 18.00824 }
-      }
-    ],
-    "experience": 28,
-    "verified": false,
-    "consultsOnline": false,
-    "fee": { "inPerson": 463, "online": 311 },
-    "rating": 4.3,
-    "reviews": 323,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "unknown",
-    "schedule": [
-      {
-        "start": "02:00 PM",
-        "end": "04:30 PM",
-        "weekday": "Sunday",
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "09:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "12:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "02:00 PM",
-        "end": "04:30 PM",
-        "weekday": "Sunday",
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "queuedPatients": 14,
-    "baseConsultTime": 60,
-    "baseFee": 366
-  },
-  {
-    "id": "d2952da4-1446-4379-b57e-13b41090c0a7",
-    "name": "Lura Baker",
-    "email": "vuf@baz.vu",
-    "credentials": "MD (Radiology), DMRD",
-    "primarySpecialization": "Gastroenterology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Rheumatology"],
-    "clinics": [
-      {
-        "id": "f23e2109-3126-4a76-a2bc-6aa9f0309e38",
-        "name": "Mercy Hospital",
-        "address": "690 Cope Heights",
-        "contact": "(345) 944-1073",
-        "whatsApp": "(635) 556-7233",
-        "location": { "lat": -28.31936, "lng": -4.80578 }
-      },
-      {
-        "id": "263fb320-7bad-42b5-802e-c298e15d823e",
-        "name": "Community Health Center",
-        "address": "452 Oseze Street",
-        "contact": "(268) 904-5171",
-        "whatsApp": "(201) 665-5191",
-        "location": { "lat": -1.54153, "lng": 111.3943 }
-      },
-      {
-        "id": "fc41345e-023f-48b2-8b3d-514f8692c91b",
-        "name": "Central Hospital",
-        "address": "1609 Neki Boulevard",
-        "contact": "(418) 432-6391",
-        "whatsApp": "(748) 297-1099",
-        "location": { "lat": -78.15566, "lng": 126.66391 }
-      }
-    ],
+    "reviews": 166,
+    "rating": 4.54,
+    "consults_online": true,
+    "booking_enabled": false,
+    "base_fee": 392,
+    "base_consult_time": 30,
     "experience": 23,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 218, "online": 283 },
-    "rating": 3.9,
-    "reviews": 211,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "busy",
-    "schedule": [
-      {
-        "start": "09:00 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "totalHoursAvailable": 2,
-        "slots": [
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "09:00 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "totalHoursAvailable": 2,
-        "slots": [
-          {
-            "start": "03:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "09:00 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "totalHoursAvailable": 2,
-        "slots": [
-          {
-            "start": "12:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "office": {
-      "id": "924e6525-ba63-45ea-bce1-2ce1cf0d309e",
-      "name": "Memorial Hospital",
-      "address": "1373 Kisvoj Trail",
-      "contact": "(977) 345-2195",
-      "whatsApp": "(868) 937-5278",
-      "location": { "lat": -56.49691, "lng": -138.37296 }
-    },
-    "queuedPatients": 14,
-    "baseConsultTime": 45,
-    "baseFee": 348
-  },
-  {
-    "id": "7ceeaece-8a35-4b23-a36e-4b1862df44ab",
-    "name": "Jeremiah Hammond",
-    "email": "zipkecke@punudafu.ai",
-    "credentials": "MD (Pediatrics), DMP",
-    "primarySpecialization": "Urology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Endocrinology"],
-    "clinics": [
-      {
-        "id": "3288b528-5db6-46e0-a918-9e304c1d6e83",
-        "name": "Unity Healthcare",
-        "address": "373 Apufap Circle",
-        "contact": "(605) 461-4932",
-        "whatsApp": "(358) 335-3030",
-        "location": { "lat": -0.32617, "lng": -153.17714 }
-      },
-      {
-        "id": "25f702ed-79b5-4b2b-a1a6-6669edf722d3",
-        "name": "St. Mary's Hospital",
-        "address": "1906 Usoida Avenue",
-        "contact": "(358) 733-6494",
-        "whatsApp": "(672) 709-4656",
-        "location": { "lat": 51.73208, "lng": -177.28774 }
-      }
-    ],
-    "experience": 33,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 285, "online": 172 },
-    "rating": 4.8,
-    "reviews": 470,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "away",
-    "schedule": [],
-    "queuedPatients": 9,
-    "baseConsultTime": 30,
-    "baseFee": 138
-  },
-  {
-    "id": "41541f39-a593-42d3-9295-3dd071fdd11a",
-    "name": "Mark Garza",
-    "email": "vegoti@seziz.ax",
-    "credentials": "MD (Urology), DMRCC",
-    "primarySpecialization": "Neurology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": [],
-    "clinics": [
-      {
-        "id": "431d7920-02b0-4213-a3a0-90b675cae7cd",
-        "name": "City General Hospital",
-        "address": "1973 Hokges Highway",
-        "contact": "(870) 227-9721",
-        "whatsApp": "(846) 887-5839",
-        "location": { "lat": 23.17101, "lng": -46.08827 }
-      },
-      {
-        "id": "e814dad6-3c9c-44e1-8770-c209fa8c422f",
-        "name": "Metropolitan Medical Center",
-        "address": "1922 Efzur Manor",
-        "contact": "(548) 342-4789",
-        "whatsApp": "(725) 961-7722",
-        "location": { "lat": 11.67843, "lng": 55.38058 }
-      }
-    ],
-    "experience": 10,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 226, "online": 185 },
-    "rating": 4.5,
-    "reviews": 714,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "away",
-    "schedule": [
-      {
-        "start": "11:00 AM",
-        "end": "05:00 PM",
-        "weekday": "Wednesday",
-        "clinic": {
-          "id": "97bf10d6-dde7-4efa-9790-1cc2daa654df",
-          "name": "Unity Healthcare",
-          "address": "246 Liwman Pike",
-          "contact": "(548) 886-6998",
-          "whatsApp": "(965) 749-6556",
-          "location": { "lat": -72.6884, "lng": 160.443 }
-        },
-        "totalHoursAvailable": 0,
-        "slots": [
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "10:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "03:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "12:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "11:00 AM",
-        "end": "05:00 PM",
-        "weekday": "Wednesday",
-        "clinic": {
-          "id": "97bf10d6-dde7-4efa-9790-1cc2daa654df",
-          "name": "Unity Healthcare",
-          "address": "246 Liwman Pike",
-          "contact": "(548) 886-6998",
-          "whatsApp": "(965) 749-6556",
-          "location": { "lat": -72.6884, "lng": 160.443 }
-        },
-        "totalHoursAvailable": 0,
-        "slots": [
-          {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "office": {
-      "id": "bc6cde5a-f0ef-49c6-90f3-645b137dbd02",
-      "name": "St. Mary's Hospital",
-      "address": "749 Ivobu Way",
-      "contact": "(261) 649-1216",
-      "whatsApp": "(870) 748-7152",
-      "location": { "lat": -88.73501, "lng": -38.97897 }
-    },
-    "queuedPatients": 5,
-    "baseConsultTime": 45,
-    "baseFee": 50
-  },
-  {
-    "id": "fe4cb055-3859-403d-abaf-868115a59331",
-    "name": "Claudia Hanson",
-    "email": "onkafni@famdoomo.gu",
-    "credentials": "MD (Psychiatry), DPM",
-    "primarySpecialization": "Ophthalmology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": [
-      "Ophthalmology",
-      "Obstetrics & Gynecology",
-      "Cardiology"
-    ],
-    "clinics": [],
-    "experience": 7,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 154, "online": 412 },
-    "rating": 4.3,
-    "reviews": 522,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "away",
-    "schedule": [
-      {
-        "start": "03:30 PM",
-        "end": "04:30 PM",
-        "weekday": "Tuesday",
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "09:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "queuedPatients": 17,
-    "baseConsultTime": 60,
-    "baseFee": 99
-  },
-  {
-    "id": "a7f663f3-521a-4a97-85d3-ed817abdaef4",
-    "name": "Jon Huff",
-    "email": "di@hapeciur.cn",
-    "credentials": "MD (Gastroenterology), DMCR",
-    "primarySpecialization": "Internal Medicine",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Endocrinology"],
-    "clinics": [
-      {
-        "id": "bafa1748-496c-4ea7-94a7-5cef6f0a0054",
-        "name": "Central Hospital",
-        "address": "42 Colju Grove",
-        "contact": "(253) 638-3623",
-        "whatsApp": "(555) 316-3869",
-        "location": { "lat": 43.65998, "lng": 145.32505 }
-      },
-      {
-        "id": "3250094f-4c36-4252-82fb-94e993426e94",
-        "name": "University Medical Center",
-        "address": "1654 Iziro Boulevard",
-        "contact": "(548) 556-8856",
-        "whatsApp": "(772) 363-5049",
-        "location": { "lat": 11.02664, "lng": 29.63784 }
-      },
-      {
-        "id": "2ac14be7-6122-40e8-b3f3-e826293a5797",
-        "name": "University Medical Center",
-        "address": "1889 Nohres Extension",
-        "contact": "(443) 488-3245",
-        "whatsApp": "(464) 594-4674",
-        "location": { "lat": 33.92954, "lng": -62.46418 }
-      }
-    ],
-    "experience": 18,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 263, "online": 357 },
-    "rating": 4.6,
-    "reviews": 996,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "available",
-    "schedule": [
-      {
-        "start": "10:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Wednesday",
-        "clinic": {
-          "id": "78526faa-9de2-4a8f-865a-c1d055f2f82e",
-          "name": "University Medical Center",
-          "address": "1180 Kibhih Lane",
-          "contact": "(528) 325-2470",
-          "whatsApp": "(913) 466-4061",
-          "location": { "lat": -80.6699, "lng": -125.98286 }
-        },
-        "totalHoursAvailable": 3,
-        "slots": [
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "03:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "09:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "10:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Wednesday",
-        "clinic": {
-          "id": "78526faa-9de2-4a8f-865a-c1d055f2f82e",
-          "name": "University Medical Center",
-          "address": "1180 Kibhih Lane",
-          "contact": "(528) 325-2470",
-          "whatsApp": "(913) 466-4061",
-          "location": { "lat": -80.6699, "lng": -125.98286 }
-        },
-        "totalHoursAvailable": 3,
-        "slots": [
-          {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "10:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Wednesday",
-        "clinic": {
-          "id": "78526faa-9de2-4a8f-865a-c1d055f2f82e",
-          "name": "University Medical Center",
-          "address": "1180 Kibhih Lane",
-          "contact": "(528) 325-2470",
-          "whatsApp": "(913) 466-4061",
-          "location": { "lat": -80.6699, "lng": -125.98286 }
-        },
-        "totalHoursAvailable": 3,
-        "slots": [
-          {
-            "start": "09:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "10:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "queuedPatients": 0,
-    "baseConsultTime": 45,
-    "baseFee": 459
-  },
-  {
-    "id": "116e45f2-5feb-4433-a4be-7330a127b018",
-    "name": "Joel Anderson",
-    "email": "ejji@pad.id",
-    "credentials": "MD (Pediatrics), DMP",
-    "primarySpecialization": "Pediatrics",
-    "currentlyAvailable": false,
-    "secondarySpecializations": [],
-    "clinics": [
-      {
-        "id": "c06aa92e-f7cd-4571-b156-4981fc59a8b8",
-        "name": "St. Mary's Hospital",
-        "address": "1953 Lafuk Path",
-        "contact": "(361) 698-2221",
-        "whatsApp": "(460) 684-2646",
-        "location": { "lat": -14.19694, "lng": 140.12578 }
-      }
-    ],
-    "experience": 13,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 373, "online": 364 },
-    "rating": 4.4,
-    "reviews": 249,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492179,
-    "status": "available",
-    "schedule": [
-      {
-        "start": "11:00 AM",
-        "end": "05:00 PM",
-        "weekday": "Tuesday",
-        "clinic": {
-          "id": "001408ca-dea2-4ffc-9606-02081c7983ca",
-          "name": "City General Hospital",
-          "address": "769 Buep River",
-          "contact": "(308) 259-5502",
-          "whatsApp": "(608) 510-6347",
-          "location": { "lat": -54.0604, "lng": 75.5282 }
-        },
-        "totalHoursAvailable": 3,
-        "slots": [
-          {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "office": {
-      "id": "460f815b-c6a0-4c8a-9958-6f5338a57e2c",
-      "name": "City General Hospital",
-      "address": "320 Ebinol Lane",
-      "contact": "(354) 653-5473",
-      "whatsApp": "(661) 483-5506",
-      "location": { "lat": -33.87305, "lng": 73.47258 }
-    },
-    "queuedPatients": 11,
-    "baseConsultTime": 45,
-    "baseFee": 491
-  },
-  {
-    "id": "419fcd33-2525-4b44-8cf8-a14988aacff3",
-    "name": "Francis Daniel",
-    "email": "ad@muja.mz",
-    "credentials": "MD (Cardiology), DMCC",
-    "primarySpecialization": "Pulmonology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Orthopedics", "Ophthalmology", "Neurology"],
-    "clinics": [
-      {
-        "id": "6fe39511-5a5d-4b21-a5cd-7ddaa910343a",
-        "name": "Central Hospital",
-        "address": "228 Bezek Plaza",
-        "contact": "(504) 713-9630",
-        "whatsApp": "(260) 619-9081",
-        "location": { "lat": -28.99562, "lng": 121.0926 }
-      },
-      {
-        "id": "b77e55b1-5a72-4736-823a-8b155bdfca59",
-        "name": "City General Hospital",
-        "address": "1156 Lumel Avenue",
-        "contact": "(874) 896-9863",
-        "whatsApp": "(982) 512-3080",
-        "location": { "lat": -22.47678, "lng": -49.63188 }
-      }
-    ],
-    "experience": 8,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 304, "online": 109 },
-    "rating": 4.5,
-    "reviews": 753,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "away",
-    "schedule": [
-      {
-        "start": "10:00 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "a58622da-7f75-496c-bd09-7bb52fd2f9ab",
-          "name": "City General Hospital",
-          "address": "629 Rure Pass",
-          "contact": "(630) 921-6847",
-          "whatsApp": "(670) 709-3466",
-          "location": { "lat": -88.34204, "lng": 159.43035 }
-        },
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "03:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "10:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "12:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "10:00 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "a58622da-7f75-496c-bd09-7bb52fd2f9ab",
-          "name": "City General Hospital",
-          "address": "629 Rure Pass",
-          "contact": "(630) 921-6847",
-          "whatsApp": "(670) 709-3466",
-          "location": { "lat": -88.34204, "lng": 159.43035 }
-        },
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "queuedPatients": 6,
-    "baseConsultTime": 45,
-    "baseFee": 176
-  },
-  {
-    "id": "aff79cf6-9eea-4ae3-833f-70307ec5e9de",
-    "name": "Victor Thomas",
-    "email": "tuj@huni.mh",
-    "credentials": "MD (Hematology), DMRCC",
-    "primarySpecialization": "Dermatology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Radiology"],
-    "clinics": [
-      {
-        "id": "17125614-536e-499a-9959-7bc9db88c9f5",
-        "name": "Unity Healthcare",
-        "address": "1636 Tavav Highway",
-        "contact": "(461) 453-3354",
-        "whatsApp": "(766) 846-2422",
-        "location": { "lat": 61.26573, "lng": -39.35416 }
-      },
-      {
-        "id": "ce201553-79d3-4520-bb23-05034323cebe",
-        "name": "University Medical Center",
-        "address": "334 Suma Extension",
-        "contact": "(357) 309-1447",
-        "whatsApp": "(412) 233-1577",
-        "location": { "lat": -53.28894, "lng": 70.4255 }
-      }
-    ],
-    "experience": 13,
-    "verified": false,
-    "consultsOnline": false,
-    "fee": { "inPerson": 242, "online": 191 },
-    "rating": 4.9,
-    "reviews": 625,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "unknown",
-    "schedule": [
-      {
-        "start": "03:30 PM",
-        "end": "04:30 PM",
-        "weekday": "Wednesday",
-        "totalHoursAvailable": 1,
-        "slots": [
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "03:30 PM",
-        "end": "04:30 PM",
-        "weekday": "Wednesday",
-        "totalHoursAvailable": 1,
-        "slots": []
-      },
-      {
-        "start": "03:30 PM",
-        "end": "04:30 PM",
-        "weekday": "Wednesday",
-        "totalHoursAvailable": 1,
-        "slots": [
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "03:30 PM",
-        "end": "04:30 PM",
-        "weekday": "Wednesday",
-        "totalHoursAvailable": 1,
-        "slots": [
-          {
-            "start": "09:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "office": {
-      "id": "7b54bc13-90f4-4804-a8a4-698806c37a05",
-      "name": "Metropolitan Medical Center",
-      "address": "301 Ikena Loop",
-      "contact": "(466) 995-8378",
-      "whatsApp": "(713) 984-5407",
-      "location": { "lat": 49.79989, "lng": 91.14275 }
-    },
-    "queuedPatients": 5,
-    "baseConsultTime": 60,
-    "baseFee": 140
-  },
-  {
-    "id": "68018597-75eb-4fb6-a9e6-845ff8135d27",
-    "name": "Effie Schultz",
-    "email": "uz@opo.bs",
-    "credentials": "MD (Pulmonology), DMRCP",
-    "primarySpecialization": "Rheumatology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Pediatrics", "Pulmonology", "Hematology"],
-    "clinics": [],
-    "experience": 9,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 118, "online": 264 },
-    "rating": 3.7,
-    "reviews": 742,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "available",
-    "schedule": [
-      {
-        "start": "11:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "b66e1f5c-6e80-426d-9644-a39a7e1c3515",
-          "name": "Mercy Hospital",
-          "address": "1872 Erda Mill",
-          "contact": "(526) 912-3857",
-          "whatsApp": "(608) 410-5261",
-          "location": { "lat": -58.30831, "lng": 174.40806 }
-        },
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "11:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "b66e1f5c-6e80-426d-9644-a39a7e1c3515",
-          "name": "Mercy Hospital",
-          "address": "1872 Erda Mill",
-          "contact": "(526) 912-3857",
-          "whatsApp": "(608) 410-5261",
-          "location": { "lat": -58.30831, "lng": 174.40806 }
-        },
-        "totalHoursAvailable": 4,
-        "slots": []
-      }
-    ],
-    "queuedPatients": 0,
-    "baseConsultTime": 60,
-    "baseFee": 212
-  },
-  {
-    "id": "479d384a-d3a3-49f4-932e-cbac4702e224",
-    "name": "Charles Adams",
-    "email": "nawa@dagepmit.ag",
-    "credentials": "MD (Ophthalmology), DMO",
-    "primarySpecialization": "Cardiology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Oncology", "Neurology", "Dermatology"],
-    "clinics": [
-      {
-        "id": "08d229ba-0523-4478-8fb4-51cf979e0cdc",
-        "name": "Regional Medical Center",
-        "address": "1718 Lagaz Road",
-        "contact": "(784) 314-8298",
-        "whatsApp": "(275) 813-1223",
-        "location": { "lat": -50.08758, "lng": -151.80463 }
-      }
-    ],
-    "experience": 26,
-    "verified": true,
-    "consultsOnline": true,
-    "fee": { "inPerson": 488, "online": 65 },
-    "rating": 4.6,
-    "reviews": 483,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "unknown",
-    "schedule": [],
-    "office": {
-      "id": "66c0fbd4-e472-42b4-b1d1-a8929abea58d",
-      "name": "Central Hospital",
-      "address": "327 Nocwi Extension",
-      "contact": "(607) 696-8908",
-      "whatsApp": "(274) 600-8785",
-      "location": { "lat": 60.26912, "lng": -127.41408 }
-    },
-    "queuedPatients": 4,
-    "baseConsultTime": 60,
-    "baseFee": 448
-  },
-  {
-    "id": "d9e049bd-d881-4eaa-93ad-cfbedf8fd903",
-    "name": "Lenora Mullins",
-    "email": "ja@nif.mr",
-    "credentials": "MD (Psychiatry), DPM",
-    "primarySpecialization": "Urology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Orthopedics", "Dermatology", "Rheumatology"],
-    "clinics": [
-      {
-        "id": "10522eb5-8a59-4c7a-81dd-e4541d267140",
-        "name": "Memorial Hospital",
-        "address": "897 Fibpo Pike",
-        "contact": "(520) 559-5611",
-        "whatsApp": "(774) 431-8024",
-        "location": { "lat": -7.54304, "lng": -77.97318 }
-      },
-      {
-        "id": "29163674-5622-418a-9606-cf46c3dac393",
-        "name": "Memorial Hospital",
-        "address": "1256 Hugnoc Center",
-        "contact": "(525) 605-3926",
-        "whatsApp": "(845) 832-5213",
-        "location": { "lat": -14.89862, "lng": 161.19835 }
-      },
-      {
-        "id": "d35ebb71-eddb-4021-bcc6-5da730c89455",
-        "name": "Metropolitan Medical Center",
-        "address": "1307 Azul Court",
-        "contact": "(781) 316-7319",
-        "whatsApp": "(212) 272-3565",
-        "location": { "lat": -53.08993, "lng": 69.07635 }
-      }
-    ],
-    "experience": 31,
-    "verified": true,
-    "consultsOnline": true,
-    "fee": { "inPerson": 253, "online": 378 },
-    "rating": 4.5,
-    "reviews": 785,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "unknown",
-    "schedule": [],
-    "queuedPatients": 15,
-    "baseConsultTime": 30,
-    "baseFee": 236
-  },
-  {
-    "id": "2f1d5466-83f7-4f95-a5af-a71b3a6f0b1e",
-    "name": "Angel Gutierrez",
-    "email": "demrod@gib.nu",
-    "credentials": "MD (Cardiology), DMCC",
-    "primarySpecialization": "Cardiology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": [],
-    "clinics": [
-      {
-        "id": "6147872d-1660-46b3-89a2-d0afa992cdc5",
-        "name": "Unity Healthcare",
-        "address": "1173 Opeise Place",
-        "contact": "(427) 386-3093",
-        "whatsApp": "(821) 219-7149",
-        "location": { "lat": 5.08906, "lng": -173.3049 }
-      }
-    ],
-    "experience": 33,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 328, "online": 478 },
-    "rating": 4.4,
-    "reviews": 2,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "busy",
-    "schedule": [
-      {
-        "start": "04:00 PM",
-        "end": "04:30 PM",
-        "weekday": "Saturday",
-        "clinic": {
-          "id": "c73b48c7-c372-42a9-9ed7-a6f798879b1b",
-          "name": "Community Health Center",
-          "address": "1251 Meak Way",
-          "contact": "(544) 946-2564",
-          "whatsApp": "(849) 622-5673",
-          "location": { "lat": 21.23306, "lng": 19.28843 }
-        },
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "09:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "12:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "04:00 PM",
-        "end": "04:30 PM",
-        "weekday": "Saturday",
-        "clinic": {
-          "id": "c73b48c7-c372-42a9-9ed7-a6f798879b1b",
-          "name": "Community Health Center",
-          "address": "1251 Meak Way",
-          "contact": "(544) 946-2564",
-          "whatsApp": "(849) 622-5673",
-          "location": { "lat": 21.23306, "lng": 19.28843 }
-        },
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "queuedPatients": 2,
-    "baseConsultTime": 15,
-    "baseFee": 211
-  },
-  {
-    "id": "452822d4-7010-4aaa-9d7d-20994d3ef338",
-    "name": "Hester Cummings",
-    "email": "bu@fof.sd",
-    "credentials": "MD (Oncology), DMCH",
-    "primarySpecialization": "Oncology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": [
+    "secondary_specializations": [
       "Pediatrics",
-      "Psychiatry",
-      "Internal Medicine"
+      "General Medicine"
     ],
-    "clinics": [],
-    "experience": 18,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 246, "online": 239 },
-    "rating": 4.9,
-    "reviews": 856,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "busy",
-    "schedule": [
-      {
-        "start": "02:00 PM",
-        "end": "04:30 PM",
-        "weekday": "Saturday",
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "10:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "03:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "02:00 PM",
-        "end": "04:30 PM",
-        "weekday": "Saturday",
-        "totalHoursAvailable": 4,
-        "slots": []
-      }
-    ],
-    "queuedPatients": 19,
-    "baseConsultTime": 15,
-    "baseFee": 274
-  },
-  {
-    "id": "3adf76ad-65d3-41b0-b91f-277af66b987f",
-    "name": "Jane Obrien",
-    "email": "fela@kif.fj",
-    "credentials": "MD (Internal Medicine), MRCP",
-    "primarySpecialization": "Obstetrics & Gynecology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Dermatology", "Urology", "Oncology"],
-    "clinics": [
-      {
-        "id": "fed3e284-34a7-4977-8faf-c66a714ceb0e",
-        "name": "St. Mary's Hospital",
-        "address": "1761 Gemo Key",
-        "contact": "(272) 263-2426",
-        "whatsApp": "(577) 740-3328",
-        "location": { "lat": 86.51959, "lng": -85.12551 }
-      }
-    ],
-    "experience": 35,
-    "verified": false,
-    "consultsOnline": false,
-    "fee": { "inPerson": 459, "online": 88 },
-    "rating": 4.2,
-    "reviews": 902,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "away",
-    "schedule": [],
-    "queuedPatients": 11,
-    "baseConsultTime": 60,
-    "baseFee": 496
-  },
-  {
-    "id": "d5b10031-bd0a-4654-96c5-87558601d8f6",
-    "name": "Mitchell Weber",
-    "email": "wu@tetuim.mh",
-    "credentials": "MD (Obstetrics & Gynecology), DMOH",
-    "primarySpecialization": "Neurology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Pediatrics"],
-    "clinics": [
-      {
-        "id": "f7243ca1-45d8-46bc-bd22-4dfd6681c8cc",
-        "name": "City General Hospital",
-        "address": "884 Mecco Street",
-        "contact": "(652) 281-2366",
-        "whatsApp": "(758) 323-7018",
-        "location": { "lat": -57.8874, "lng": 30.42659 }
-      }
-    ],
-    "experience": 22,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 129, "online": 108 },
-    "rating": 3.6,
-    "reviews": 22,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "busy",
-    "schedule": [
-      {
-        "start": "11:30 AM",
-        "end": "05:00 PM",
-        "weekday": "Sunday",
-        "clinic": {
-          "id": "e3b4c250-c229-474f-af42-af509a2714cb",
-          "name": "Unity Healthcare",
-          "address": "1388 Moguc Center",
-          "contact": "(512) 717-3998",
-          "whatsApp": "(733) 986-7993",
-          "location": { "lat": 88.38094, "lng": -45.76445 }
-        },
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "10:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "09:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      }
-    ],
+    "currently_available": false,
+    "last_updated": "2025-10-12",
+    "next_available": "2025-10-26",
     "office": {
-      "id": "c5fb9c61-3181-4057-8a4d-fa277eb1be51",
-      "name": "Mercy Hospital",
-      "address": "477 Kijnog River",
-      "contact": "(474) 261-9598",
-      "whatsApp": "(274) 937-9685",
-      "location": { "lat": -21.11151, "lng": -35.2726 }
+      "id": "75ef8d75-db67-4349-841c-866bf097cf53",
+      "name": "Sopore sub-district Hospital",
+      "contact": "+1-547-911-4955",
+      "address": "790 Main Street, New York",
+      "facilities": [],
+      "location": {
+        "lat": 89.7781,
+        "lng": -145.9204
+      },
+      "whatsapp": "+1-733-558-2382",
+      "parking_available": false
     },
-    "queuedPatients": 6,
-    "baseConsultTime": 30,
-    "baseFee": 176
-  },
-  {
-    "id": "77747cee-576a-49e2-9c0e-1e10cc14411e",
-    "name": "Effie Singleton",
-    "email": "josrice@owine.eu",
-    "credentials": "MD (Radiology), DMRD",
-    "primarySpecialization": "Hematology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": [],
-    "clinics": [
+    "schedules": [
       {
-        "id": "bccb0f1e-3c4a-4aa5-837b-784b57195d13",
-        "name": "Mercy Hospital",
-        "address": "1207 Taeco Lane",
-        "contact": "(971) 440-3671",
-        "whatsApp": "(535) 920-4638",
-        "location": { "lat": -9.98428, "lng": -148.66882 }
-      },
-      {
-        "id": "d54f3672-2923-4dc0-9b98-1a882c3dfa68",
-        "name": "Metropolitan Medical Center",
-        "address": "1716 Jaopu Grove",
-        "contact": "(382) 495-7351",
-        "whatsApp": "(488) 774-8131",
-        "location": { "lat": -17.07924, "lng": -35.60542 }
-      },
-      {
-        "id": "946bf77f-3348-40ba-81a6-5c31533be5f0",
-        "name": "St. Mary's Hospital",
-        "address": "528 Vuvwok Heights",
-        "contact": "(238) 804-7838",
-        "whatsApp": "(373) 212-9838",
-        "location": { "lat": 60.7373, "lng": -82.41772 }
-      }
-    ],
-    "experience": 5,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 417, "online": 141 },
-    "rating": 3.5,
-    "reviews": 332,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "busy",
-    "schedule": [
-      {
-        "start": "10:00 AM",
-        "end": "05:00 PM",
-        "weekday": "Sunday",
-        "totalHoursAvailable": 1,
-        "slots": [
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "10:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "10:00 AM",
-        "end": "05:00 PM",
-        "weekday": "Sunday",
-        "totalHoursAvailable": 1,
-        "slots": [
-          {
-            "start": "12:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "office": {
-      "id": "f8a5cc7e-7a76-45ec-9766-384a0fa9c300",
-      "name": "Community Health Center",
-      "address": "933 Ajapu Square",
-      "contact": "(649) 279-9712",
-      "whatsApp": "(634) 928-7529",
-      "location": { "lat": 0.45103, "lng": 135.63017 }
-    },
-    "queuedPatients": 12,
-    "baseConsultTime": 30,
-    "baseFee": 278
-  },
-  {
-    "id": "ac396bbe-70d4-43f0-930e-4fa5e21f08cd",
-    "name": "Mario Douglas",
-    "email": "zaelo@al.at",
-    "credentials": "MD (Cardiology), DMCC",
-    "primarySpecialization": "Pediatrics",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Psychiatry", "Urology", "Neurology"],
-    "clinics": [],
-    "experience": 28,
-    "verified": false,
-    "consultsOnline": false,
-    "fee": { "inPerson": 226, "online": 221 },
-    "rating": 4.2,
-    "reviews": 37,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "busy",
-    "schedule": [
-      {
-        "start": "12:00 PM",
-        "end": "04:30 PM",
-        "weekday": "Wednesday",
-        "clinic": {
-          "id": "906d013a-0f26-4ecc-9c3c-ba5a9a26ea5e",
-          "name": "Unity Healthcare",
-          "address": "867 Onfed Square",
-          "contact": "(885) 374-4652",
-          "whatsApp": "(288) 364-3075",
-          "location": { "lat": 45.88616, "lng": -80.14141 }
-        },
-        "totalHoursAvailable": 3,
-        "slots": []
-      }
-    ],
-    "queuedPatients": 2,
-    "baseConsultTime": 45,
-    "baseFee": 33
-  },
-  {
-    "id": "8f337d86-bf5c-44da-8094-d52ce6721319",
-    "name": "Verna Washington",
-    "email": "sud@woprabogo.et",
-    "credentials": "MD (Obstetrics & Gynecology), DMOH",
-    "primarySpecialization": "Pediatrics",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Dermatology", "Hematology"],
-    "clinics": [
-      {
-        "id": "dec33056-f5cf-4785-a328-5cec6a39ad43",
-        "name": "Metropolitan Medical Center",
-        "address": "906 Arij Court",
-        "contact": "(705) 622-7797",
-        "whatsApp": "(479) 458-2893",
-        "location": { "lat": -57.13173, "lng": -95.79546 }
-      }
-    ],
-    "experience": 17,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 64, "online": 315 },
-    "rating": 4.8,
-    "reviews": 378,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "unknown",
-    "schedule": [
-      {
-        "start": "03:00 PM",
-        "end": "04:30 PM",
         "weekday": "Thursday",
-        "totalHoursAvailable": 3,
         "slots": [
           {
-            "start": "09:00 AM",
+            "id": "8ae024dd-d787-400a-a9ae-261b27f20765",
+            "begin": "10:15",
             "duration": 30,
-            "mode": "inPerson",
-            "booked": false
+            "booked": true,
+            "mode": "online"
           },
           {
-            "start": "03:30 PM",
+            "id": "a7a21238-229b-413e-92a6-db188a08fd3d",
+            "begin": "09:00",
             "duration": 30,
-            "mode": "online",
-            "booked": false
+            "booked": true,
+            "mode": "online"
           },
           {
-            "start": "10:00 AM",
+            "id": "92e4278e-3bcf-4584-8eda-762f9ce5f422",
+            "begin": "09:15",
             "duration": 30,
-            "mode": "online",
-            "booked": false
+            "booked": true,
+            "mode": "inPerson"
           },
           {
-            "start": "02:00 PM",
+            "id": "aac5a983-262c-461a-b972-ec90a99b1f58",
+            "begin": "11:00",
             "duration": 30,
-            "mode": "online",
-            "booked": false
+            "booked": false,
+            "mode": "inPerson"
+          },
+          {
+            "id": "fb7885ec-2512-4af0-95d0-118862bbfa07",
+            "begin": "12:30",
+            "duration": 30,
+            "booked": false,
+            "mode": "inPerson"
           }
-        ]
+        ],
+        "clinic": {
+          "id": "d6c098f5-7593-4942-8afc-20a5aa0b7257",
+          "name": "Elite Healthcare Hub",
+          "contact": "+1-238-769-4150",
+          "address": "532 Main Street, Chicago",
+          "facilities": [],
+          "location": {
+            "lat": -35.7611,
+            "lng": -91.1568
+          },
+          "whatsapp": "+1-306-527-7945",
+          "parking_available": false
+        },
+        "end": "13:00",
+        "start": "09:00",
+        "hours_available": 4
       },
       {
-        "start": "03:00 PM",
-        "end": "04:30 PM",
-        "weekday": "Thursday",
-        "totalHoursAvailable": 3,
+        "weekday": "Saturday",
         "slots": [
           {
-            "start": "05:00 PM",
+            "id": "c2bfdb41-c501-4d60-a536-3135726f3e0f",
+            "begin": "17:00",
             "duration": 30,
-            "mode": "inPerson",
-            "booked": false
+            "booked": true,
+            "mode": "online"
           },
           {
-            "start": "10:30 AM",
+            "id": "c6ab8e18-7b58-4a6d-afc6-e6f6ec85726a",
+            "begin": "14:15",
             "duration": 30,
-            "mode": "online",
-            "booked": false
+            "booked": true,
+            "mode": "online"
           },
           {
-            "start": "02:30 PM",
+            "id": "17affdff-3c3b-490c-bfbb-47787732e7b1",
+            "begin": "14:00",
             "duration": 30,
-            "mode": "online",
-            "booked": false
+            "booked": true,
+            "mode": "online"
+          },
+          {
+            "id": "de21708f-79ef-48b7-b556-24b3a0cd5a8e",
+            "begin": "15:15",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "5e4b0451-8f2c-4093-8c61-6c30a4a55107",
+            "begin": "14:30",
+            "duration": 30,
+            "booked": false,
+            "mode": "inPerson"
+          },
+          {
+            "id": "1c2aec05-504a-40d9-8d69-2405c660d93e",
+            "begin": "16:15",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
           }
-        ]
+        ],
+        "clinic": {
+          "id": "81f02743-dc8c-4479-94bf-b92399b61dec",
+          "name": "Sopore sub-district Hospital",
+          "contact": "+1-555-501-6012",
+          "address": "813 Main Street, Houston",
+          "facilities": [],
+          "location": {
+            "lat": -82.7523,
+            "lng": 6.9464
+          },
+          "whatsapp": "+1-552-228-5731",
+          "parking_available": false
+        },
+        "end": "18:00",
+        "start": "14:00",
+        "hours_available": 4
+      },
+      {
+        "weekday": "Saturday",
+        "slots": [
+          {
+            "id": "98d3d5c2-ce4f-4e9b-be9c-ea3647f15621",
+            "begin": "15:15",
+            "duration": 30,
+            "booked": true,
+            "mode": "online"
+          },
+          {
+            "id": "8672dbb4-dd0f-4442-8fa4-f582dcc2fec2",
+            "begin": "14:15",
+            "duration": 30,
+            "booked": true,
+            "mode": "online"
+          },
+          {
+            "id": "dc38a480-d9e0-4646-b9ce-6bc770385402",
+            "begin": "17:30",
+            "duration": 30,
+            "booked": false,
+            "mode": "inPerson"
+          },
+          {
+            "id": "f07a0710-9909-4bb3-aca1-c9163bfaad20",
+            "begin": "16:30",
+            "duration": 30,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "7c374706-d2ca-4a50-bbfd-2955cea39b9b",
+            "begin": "14:45",
+            "duration": 30,
+            "booked": true,
+            "mode": "inPerson"
+          }
+        ],
+        "clinic": {
+          "id": "43314a82-1502-43c2-bee4-5720df8c90ca",
+          "name": "Elite Healthcare Hub",
+          "contact": "+1-323-866-3137",
+          "address": "373 Main Street, Los Angeles",
+          "facilities": [],
+          "location": {
+            "lat": -83.3521,
+            "lng": -166.4109
+          },
+          "whatsapp": "+1-983-684-8518",
+          "parking_available": true
+        },
+        "end": "18:00",
+        "start": "14:00",
+        "hours_available": 4
       }
     ],
-    "office": {
-      "id": "0e1b6414-a7cd-4f3d-92fc-3bd6a923c676",
-      "name": "St. Mary's Hospital",
-      "address": "1297 Kumra Extension",
-      "contact": "(831) 564-6082",
-      "whatsApp": "(752) 482-2817",
-      "location": { "lat": -37.10195, "lng": -170.14375 }
-    },
-    "queuedPatients": 6,
-    "baseConsultTime": 30,
-    "baseFee": 183
+    "id": "6cec924e-ff5f-45b5-afe2-5050aeb40e47",
+    "name": "James",
+    "email": "johnson@medical.com",
+    "credentials": "MBBS",
+    "primary_specialization": "General Medicine"
   },
   {
-    "id": "d1defcbe-1742-4a5c-aefd-74693149d2be",
-    "name": "Cynthia Potter",
-    "email": "libet@fo.co",
-    "credentials": "MD (Endocrinology), DMRCP",
-    "primarySpecialization": "Pediatrics",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Oncology", "Hematology"],
-    "clinics": [
-      {
-        "id": "4a5286f3-f2c1-4792-952f-657c13099cb8",
-        "name": "University Medical Center",
-        "address": "425 Odili Way",
-        "contact": "(821) 575-1983",
-        "whatsApp": "(254) 537-1449",
-        "location": { "lat": -36.81396, "lng": 83.22473 }
-      },
-      {
-        "id": "1dec949f-b018-43f0-801a-0c73ab0abef3",
-        "name": "Memorial Hospital",
-        "address": "1200 Jomla Grove",
-        "contact": "(808) 481-1912",
-        "whatsApp": "(370) 965-1435",
-        "location": { "lat": 47.15849, "lng": 60.43276 }
-      },
-      {
-        "id": "741a4fb4-4628-4768-8d38-273f85108ca0",
-        "name": "Regional Medical Center",
-        "address": "410 Anmi Turnpike",
-        "contact": "(805) 541-3743",
-        "whatsApp": "(286) 967-7487",
-        "location": { "lat": -69.2068, "lng": -131.37397 }
-      }
-    ],
+    "status": "Away",
+    "fee": {
+      "online": 240,
+      "in_person": 340
+    },
+    "verified": false,
+    "reviews": 276,
+    "rating": 3.68,
+    "consults_online": false,
+    "booking_enabled": false,
+    "base_fee": 340,
+    "base_consult_time": 60,
     "experience": 8,
-    "verified": true,
-    "consultsOnline": true,
-    "fee": { "inPerson": 260, "online": 390 },
-    "rating": 4.2,
-    "reviews": 537,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "available",
-    "schedule": [
-      {
-        "start": "11:30 AM",
-        "end": "04:30 PM",
-        "weekday": "Friday",
-        "totalHoursAvailable": 3,
-        "slots": [
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "03:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
+    "secondary_specializations": [
+      "Gastroenterology",
+      "Psychiatry"
     ],
-    "queuedPatients": 9,
-    "baseConsultTime": 60,
-    "baseFee": 151
-  },
-  {
-    "id": "6128d095-6cff-4772-af97-451abe804726",
-    "name": "Phillip Collier",
-    "email": "rijve@benu.si",
-    "credentials": "MD (Dermatology), DDVL",
-    "primarySpecialization": "Radiology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Radiology"],
-    "clinics": [
-      {
-        "id": "595b5caa-130d-437f-afde-fbe7f2793bdc",
-        "name": "Metropolitan Medical Center",
-        "address": "1482 Uwove Heights",
-        "contact": "(904) 880-5917",
-        "whatsApp": "(861) 817-9458",
-        "location": { "lat": -73.31211, "lng": 53.19308 }
-      },
-      {
-        "id": "b94dbbbb-13d4-48ea-a973-7a395dac10f9",
-        "name": "City General Hospital",
-        "address": "1081 Nitgi Glen",
-        "contact": "(384) 922-1280",
-        "whatsApp": "(771) 209-9227",
-        "location": { "lat": 20.65768, "lng": -81.04099 }
-      },
-      {
-        "id": "72d9fd56-1a65-4d55-8a30-7bec93de8214",
-        "name": "Memorial Hospital",
-        "address": "640 Meslo Street",
-        "contact": "(214) 980-1755",
-        "whatsApp": "(326) 595-9570",
-        "location": { "lat": -51.21463, "lng": 89.55247 }
-      }
-    ],
-    "experience": 27,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 169, "online": 466 },
-    "rating": 4.1,
-    "reviews": 716,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "away",
-    "schedule": [
-      {
-        "start": "02:30 PM",
-        "end": "04:30 PM",
-        "weekday": "Saturday",
-        "clinic": {
-          "id": "c118e389-c9a4-4575-a203-6c0db181bb44",
-          "name": "Regional Medical Center",
-          "address": "1017 Wonom Center",
-          "contact": "(571) 382-3769",
-          "whatsApp": "(443) 385-3056",
-          "location": { "lat": 21.83863, "lng": -97.61966 }
-        },
-        "totalHoursAvailable": 1,
-        "slots": []
-      }
-    ],
+    "currently_available": false,
+    "last_updated": "2025-10-12",
+    "next_available": "2025-10-24",
     "office": {
-      "id": "836f3f36-dba7-4af5-90a2-40cd181dc462",
-      "name": "St. Mary's Hospital",
-      "address": "689 Pobjas Road",
-      "contact": "(312) 270-2302",
-      "whatsApp": "(632) 387-9002",
-      "location": { "lat": 30.58645, "lng": 11.7117 }
+      "id": "01cbdd94-3e11-436f-bda8-4a88c68cbfaf",
+      "name": "Elite Healthcare Hub",
+      "contact": "+1-393-267-8803",
+      "address": "619 Main Street, Los Angeles",
+      "facilities": [],
+      "location": {
+        "lat": -67.7966,
+        "lng": 37.0314
+      },
+      "whatsapp": "+1-556-422-4231",
+      "parking_available": true
     },
-    "queuedPatients": 6,
-    "baseConsultTime": 30,
-    "baseFee": 266
+    "schedules": [
+      {
+        "weekday": "Monday",
+        "slots": [
+          {
+            "id": "81fe57d9-c645-4c97-ad3c-0fe609065798",
+            "begin": "14:00",
+            "duration": 60,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "70f97d36-3e5f-497d-8fd1-ecc9bee39896",
+            "begin": "15:30",
+            "duration": 60,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "98b46175-97c3-47db-8c82-3dff5ad65aac",
+            "begin": "16:00",
+            "duration": 60,
+            "booked": false,
+            "mode": "inPerson"
+          },
+          {
+            "id": "69f6a292-6969-4c78-971a-a67686ce2ce2",
+            "begin": "16:15",
+            "duration": 60,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "3ea6fb43-62a7-43e7-b388-28773d6c5a9e",
+            "begin": "15:15",
+            "duration": 60,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "3967b06a-0a22-4f64-8fdb-3d74fef95bf3",
+            "begin": "14:45",
+            "duration": 60,
+            "booked": false,
+            "mode": "online"
+          }
+        ],
+        "clinic": {
+          "id": "e8c66618-c4d5-49ef-b176-1e6ed905f61f",
+          "name": "St. Mary's Healthcare",
+          "contact": "+1-849-638-3737",
+          "address": "865 Elm Street, Phoenix",
+          "facilities": [],
+          "location": {
+            "lat": -71.1967,
+            "lng": -60.8524
+          },
+          "whatsapp": "+1-387-871-5602",
+          "parking_available": false
+        },
+        "end": "18:00",
+        "start": "14:00",
+        "hours_available": 4
+      },
+      {
+        "weekday": "Friday",
+        "slots": [
+          {
+            "id": "8068443e-f97b-4ee5-ac23-1cd4ec28d6d0",
+            "begin": "09:00",
+            "duration": 60,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "0993dcdb-13f5-4098-8836-9335ee8945f4",
+            "begin": "10:00",
+            "duration": 60,
+            "booked": true,
+            "mode": "online"
+          },
+          {
+            "id": "fab39da5-f50e-467c-948d-f4a2c478e0a1",
+            "begin": "11:15",
+            "duration": 60,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "a11f6a4c-a971-4d7d-8ad7-3624fd23d4ec",
+            "begin": "09:15",
+            "duration": 60,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "fbc77050-f49a-45b3-ba04-1f6b6097bd0a",
+            "begin": "10:45",
+            "duration": 60,
+            "booked": true,
+            "mode": "online"
+          }
+        ],
+        "clinic": {
+          "id": "c2c215f9-a637-45dd-9b07-131ed8e0605b",
+          "name": "Sunrise Medical Center",
+          "contact": "+1-650-756-7726",
+          "address": "869 Oak Street, Los Angeles",
+          "facilities": [],
+          "location": {
+            "lat": 33.5146,
+            "lng": -93.0383
+          },
+          "whatsapp": "+1-754-530-6036",
+          "parking_available": true
+        },
+        "end": "13:00",
+        "start": "09:00",
+        "hours_available": 4
+      }
+    ],
+    "id": "141082d6-d0fe-4e10-abf2-01146991b8d4",
+    "name": "Robert",
+    "email": "lisa@medical.com",
+    "credentials": "MD",
+    "primary_specialization": "Neurology"
   },
   {
-    "id": "fa91801a-c620-437b-b418-bddfa2bd5804",
-    "name": "Rose Carlson",
-    "email": "li@bo.eh",
-    "credentials": "MD (Obstetrics & Gynecology), DMOH",
-    "primarySpecialization": "Pediatrics",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Neurology", "Psychiatry", "Pediatrics"],
-    "clinics": [
-      {
-        "id": "192fd11a-ca8c-4515-8b2e-d644e74048ab",
-        "name": "University Medical Center",
-        "address": "1623 Jensi Ridge",
-        "contact": "(822) 487-2658",
-        "whatsApp": "(565) 762-6901",
-        "location": { "lat": 61.43601, "lng": -166.73297 }
-      },
-      {
-        "id": "e814ddcb-e475-408c-9b8a-c111840e8be1",
-        "name": "Metropolitan Medical Center",
-        "address": "669 Retkav Turnpike",
-        "contact": "(514) 323-4554",
-        "whatsApp": "(728) 605-4258",
-        "location": { "lat": 56.49065, "lng": -1.00028 }
-      },
-      {
-        "id": "b8355159-e2cb-4b12-88c9-83018f2715bf",
-        "name": "Regional Medical Center",
-        "address": "1700 Ugbej Circle",
-        "contact": "(845) 238-2803",
-        "whatsApp": "(206) 653-7723",
-        "location": { "lat": -63.31952, "lng": 134.85727 }
-      }
-    ],
-    "experience": 31,
+    "status": "Away",
+    "fee": {
+      "online": 273,
+      "in_person": 373
+    },
     "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 266, "online": 461 },
-    "rating": 5,
-    "reviews": 333,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492180,
-    "status": "unknown",
-    "schedule": [
-      {
-        "start": "11:00 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "76b20d20-5eda-4039-b896-a3d6905ee87a",
-          "name": "University Medical Center",
-          "address": "749 Mabri Mill",
-          "contact": "(409) 245-9963",
-          "whatsApp": "(663) 346-9926",
-          "location": { "lat": 63.30429, "lng": 14.83289 }
-        },
-        "totalHoursAvailable": 3,
-        "slots": [
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "03:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "11:00 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "76b20d20-5eda-4039-b896-a3d6905ee87a",
-          "name": "University Medical Center",
-          "address": "749 Mabri Mill",
-          "contact": "(409) 245-9963",
-          "whatsApp": "(663) 346-9926",
-          "location": { "lat": 63.30429, "lng": 14.83289 }
-        },
-        "totalHoursAvailable": 3,
-        "slots": [
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "10:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "11:00 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "76b20d20-5eda-4039-b896-a3d6905ee87a",
-          "name": "University Medical Center",
-          "address": "749 Mabri Mill",
-          "contact": "(409) 245-9963",
-          "whatsApp": "(663) 346-9926",
-          "location": { "lat": 63.30429, "lng": 14.83289 }
-        },
-        "totalHoursAvailable": 3,
-        "slots": [
-          {
-            "start": "04:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "12:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "11:00 AM",
-        "end": "04:30 PM",
-        "weekday": "Monday",
-        "clinic": {
-          "id": "76b20d20-5eda-4039-b896-a3d6905ee87a",
-          "name": "University Medical Center",
-          "address": "749 Mabri Mill",
-          "contact": "(409) 245-9963",
-          "whatsApp": "(663) 346-9926",
-          "location": { "lat": 63.30429, "lng": 14.83289 }
-        },
-        "totalHoursAvailable": 3,
-        "slots": [
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      }
-    ],
+    "reviews": 418,
+    "rating": 1.92,
+    "consults_online": false,
+    "booking_enabled": false,
+    "base_fee": 373,
+    "base_consult_time": 30,
+    "experience": 29,
+    "secondary_specializations": [],
+    "currently_available": true,
+    "last_updated": "2025-10-12",
+    "next_available": "2025-11-08",
     "office": {
-      "id": "445b71e5-939d-4c08-ae60-7158a79b1311",
-      "name": "Memorial Hospital",
-      "address": "1322 Gisfet Parkway",
-      "contact": "(834) 576-4089",
-      "whatsApp": "(605) 774-6732",
-      "location": { "lat": 19.65583, "lng": -73.15998 }
+      "id": "b3c85fea-2a85-40d3-95d2-1d3469ba1298",
+      "name": "Sopore sub-district Hospital",
+      "contact": "+1-430-275-5592",
+      "address": "141 Main Street, Los Angeles",
+      "facilities": [],
+      "location": {
+        "lat": -13.5499,
+        "lng": 71.6973
+      },
+      "whatsapp": "+1-383-871-1506",
+      "parking_available": false
     },
-    "queuedPatients": 1,
-    "baseConsultTime": 30,
-    "baseFee": 372
-  },
-  {
-    "id": "1f34f31b-905d-41a1-990c-210c372a220d",
-    "name": "Ruth Chavez",
-    "email": "kebcibvup@enazo.bz",
-    "credentials": "MD (Radiology), DMRD",
-    "primarySpecialization": "Orthopedics",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Surgery", "Radiology"],
-    "clinics": [],
-    "experience": 9,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 400, "online": 405 },
-    "rating": 4.5,
-    "reviews": 90,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492181,
-    "status": "available",
-    "schedule": [
+    "schedules": [
       {
-        "start": "10:30 AM",
-        "end": "04:30 PM",
         "weekday": "Saturday",
-        "totalHoursAvailable": 1,
         "slots": [
           {
-            "start": "02:00 PM",
+            "id": "7633aa85-8ebd-4c13-b346-8f37305b77b1",
+            "begin": "10:30",
             "duration": 30,
-            "mode": "inPerson",
-            "booked": false
+            "booked": false,
+            "mode": "inPerson"
+          },
+          {
+            "id": "b56422e6-0bf9-42cc-9c2e-e1987de739a1",
+            "begin": "09:00",
+            "duration": 30,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "60cc523e-fe6b-4489-9b34-c2cae376012e",
+            "begin": "11:30",
+            "duration": 30,
+            "booked": false,
+            "mode": "inPerson"
+          },
+          {
+            "id": "b2bc69d6-e611-465b-aa82-dd940372f75c",
+            "begin": "10:00",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
           }
-        ]
+        ],
+        "clinic": {
+          "id": "64982a05-c4a0-49c3-a635-a679537d4551",
+          "name": "St. Mary's Healthcare",
+          "contact": "+1-845-813-3148",
+          "address": "673 Oak Street, Chicago",
+          "facilities": [],
+          "location": {
+            "lat": 55.8152,
+            "lng": 104.1283
+          },
+          "whatsapp": "+1-567-589-6922",
+          "parking_available": false
+        },
+        "end": "13:00",
+        "start": "09:00",
+        "hours_available": 4
+      },
+      {
+        "weekday": "Saturday",
+        "slots": [
+          {
+            "id": "d01df154-7089-4f91-b4e2-cc6af0d76a6e",
+            "begin": "12:15",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "1aadd85b-6799-4bfd-99eb-c11b7fd81abf",
+            "begin": "09:15",
+            "duration": 30,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "9b1f3d84-cb94-4774-a291-63be840cef12",
+            "begin": "10:00",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "714cfcf0-e3cb-4b81-952a-f3337aca57ce",
+            "begin": "09:30",
+            "duration": 30,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "5205dfd0-30f0-4661-861f-02ee55876fb8",
+            "begin": "11:30",
+            "duration": 30,
+            "booked": true,
+            "mode": "online"
+          },
+          {
+            "id": "a2da7739-f2c7-4552-a447-c36cc2db8842",
+            "begin": "12:30",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
+          }
+        ],
+        "clinic": {
+          "id": "928ce94c-997b-41fe-afae-ed8b588daa37",
+          "name": "Sopore sub-district Hospital",
+          "contact": "+1-494-745-4246",
+          "address": "600 Oak Street, Houston",
+          "facilities": [],
+          "location": {
+            "lat": -8.3426,
+            "lng": -165.4174
+          },
+          "whatsapp": "+1-550-860-2482",
+          "parking_available": true
+        },
+        "end": "13:00",
+        "start": "09:00",
+        "hours_available": 4
       }
     ],
-    "queuedPatients": 13,
-    "baseConsultTime": 60,
-    "baseFee": 197
+    "id": "5c086b90-5a85-4b65-b756-466c45172a5a",
+    "name": "Williams",
+    "email": "robert@medical.com",
+    "credentials": "DPM",
+    "primary_specialization": "ENT"
   },
   {
-    "id": "82f314f4-7669-4681-a465-c5023ada37c4",
-    "name": "Elijah Simpson",
-    "email": "kadogi@jozjapvit.hr",
-    "credentials": "MD (Urology), DMRCC",
-    "primarySpecialization": "Family Medicine",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Rheumatology", "Ophthalmology"],
-    "clinics": [
-      {
-        "id": "a5b55a3f-1ae7-4c24-bad9-e8d4d130c318",
-        "name": "Mercy Hospital",
-        "address": "241 Uluva Heights",
-        "contact": "(985) 259-9709",
-        "whatsApp": "(577) 995-5712",
-        "location": { "lat": 29.95729, "lng": -74.22274 }
-      }
-    ],
-    "experience": 9,
-    "verified": true,
-    "consultsOnline": false,
-    "fee": { "inPerson": 215, "online": 488 },
-    "rating": 3.5,
-    "reviews": 419,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492181,
-    "status": "away",
-    "schedule": [
-      {
-        "start": "02:00 PM",
-        "end": "05:00 PM",
-        "weekday": "Friday",
-        "clinic": {
-          "id": "4fe39e2e-9dea-47dc-ba88-18e7c2abf30d",
-          "name": "Central Hospital",
-          "address": "1051 Biig Pike",
-          "contact": "(988) 265-2464",
-          "whatsApp": "(609) 970-5776",
-          "location": { "lat": -35.57732, "lng": 86.58393 }
-        },
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "03:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "02:00 PM",
-        "end": "05:00 PM",
-        "weekday": "Friday",
-        "clinic": {
-          "id": "4fe39e2e-9dea-47dc-ba88-18e7c2abf30d",
-          "name": "Central Hospital",
-          "address": "1051 Biig Pike",
-          "contact": "(988) 265-2464",
-          "whatsApp": "(609) 970-5776",
-          "location": { "lat": -35.57732, "lng": 86.58393 }
-        },
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "09:00 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "05:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:00 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "03:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "02:00 PM",
-        "end": "05:00 PM",
-        "weekday": "Friday",
-        "clinic": {
-          "id": "4fe39e2e-9dea-47dc-ba88-18e7c2abf30d",
-          "name": "Central Hospital",
-          "address": "1051 Biig Pike",
-          "contact": "(988) 265-2464",
-          "whatsApp": "(609) 970-5776",
-          "location": { "lat": -35.57732, "lng": 86.58393 }
-        },
-        "totalHoursAvailable": 4,
-        "slots": [
-          {
-            "start": "04:30 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "queuedPatients": 16,
-    "baseConsultTime": 15,
-    "baseFee": 469
-  },
-  {
-    "id": "fcfeb736-66db-4c61-92dd-7b8f77afbde2",
-    "name": "Nettie Lucas",
-    "email": "ko@punrar.tl",
-    "credentials": "MD (Hematology), DMRCC",
-    "primarySpecialization": "Endocrinology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Urology"],
-    "clinics": [
-      {
-        "id": "0de77d99-15d9-4d8c-b923-1a45bec3e457",
-        "name": "Community Health Center",
-        "address": "1978 Suni Ridge",
-        "contact": "(450) 862-9604",
-        "whatsApp": "(834) 519-2086",
-        "location": { "lat": -34.95222, "lng": 35.29137 }
-      },
-      {
-        "id": "d6d99ade-040c-48ca-b2a5-edbca158d199",
-        "name": "Metropolitan Medical Center",
-        "address": "1596 Tauve Junction",
-        "contact": "(578) 969-2735",
-        "whatsApp": "(310) 261-4965",
-        "location": { "lat": 40.27273, "lng": -1.9507 }
-      }
-    ],
-    "experience": 21,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 191, "online": 303 },
-    "rating": 3.9,
-    "reviews": 508,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492181,
     "status": "busy",
-    "schedule": [
-      {
-        "start": "02:30 PM",
-        "end": "04:30 PM",
-        "weekday": "Tuesday",
-        "totalHoursAvailable": 4,
-        "slots": []
-      }
-    ],
-    "queuedPatients": 9,
-    "baseConsultTime": 30,
-    "baseFee": 299
-  },
-  {
-    "id": "b4cb4811-4b77-4d5b-87d5-3a1a1642091b",
-    "name": "Donald Patterson",
-    "email": "bumemvoc@apekca.mm",
-    "credentials": "MD (Pediatrics), DMP",
-    "primarySpecialization": "Neurology",
-    "currentlyAvailable": false,
-    "secondarySpecializations": ["Internal Medicine"],
-    "clinics": [
-      {
-        "id": "83ec68ff-dfab-4688-ac43-150b908024dc",
-        "name": "Mercy Hospital",
-        "address": "1117 Vuwsod Square",
-        "contact": "(950) 477-5874",
-        "whatsApp": "(832) 240-8174",
-        "location": { "lat": -26.33387, "lng": -3.93249 }
-      },
-      {
-        "id": "863ddf8f-9a39-4076-b841-bba77ea8b347",
-        "name": "Regional Medical Center",
-        "address": "1094 Sobeb Extension",
-        "contact": "(451) 503-5352",
-        "whatsApp": "(472) 737-2097",
-        "location": { "lat": -43.50927, "lng": 46.18906 }
-      }
-    ],
-    "experience": 4,
+    "fee": {
+      "online": 281,
+      "in_person": 381
+    },
     "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 73, "online": 478 },
-    "rating": 3.8,
-    "reviews": 466,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492181,
-    "status": "available",
-    "schedule": [
-      {
-        "start": "09:00 AM",
-        "end": "05:00 PM",
-        "weekday": "Monday",
-        "totalHoursAvailable": 1,
-        "slots": []
-      },
-      {
-        "start": "09:00 AM",
-        "end": "05:00 PM",
-        "weekday": "Monday",
-        "totalHoursAvailable": 1,
-        "slots": [
-          {
-            "start": "09:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      },
-      {
-        "start": "09:00 AM",
-        "end": "05:00 PM",
-        "weekday": "Monday",
-        "totalHoursAvailable": 1,
-        "slots": [
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          }
-        ]
-      }
-    ],
-    "queuedPatients": 9,
-    "baseConsultTime": 15,
-    "baseFee": 419
-  },
-  {
-    "id": "7e5a0c60-696a-4e5f-86e5-46df830c4edf",
-    "name": "Katherine Sherman",
-    "email": "gel@lazajol.gq",
-    "credentials": "MD (Pediatrics), DMP",
-    "primarySpecialization": "Cardiology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": [],
-    "clinics": [
-      {
-        "id": "96f7c374-d85a-4eef-8518-eeaec34d0254",
-        "name": "Central Hospital",
-        "address": "1918 Zipul Court",
-        "contact": "(836) 982-1465",
-        "whatsApp": "(306) 399-2960",
-        "location": { "lat": -18.36247, "lng": 132.25052 }
-      },
-      {
-        "id": "8a81156c-fffb-4521-a174-c4d5dc2dac71",
-        "name": "Regional Medical Center",
-        "address": "645 Hufteb Circle",
-        "contact": "(970) 535-4361",
-        "whatsApp": "(977) 864-7494",
-        "location": { "lat": 28.8314, "lng": -47.6665 }
-      }
-    ],
-    "experience": 9,
-    "verified": false,
-    "consultsOnline": false,
-    "fee": { "inPerson": 252, "online": 427 },
-    "rating": 4.3,
-    "reviews": 432,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492181,
-    "status": "available",
-    "schedule": [],
-    "queuedPatients": 10,
-    "baseConsultTime": 60,
-    "baseFee": 414
-  },
-  {
-    "id": "c596c75e-5ad4-4b04-ada1-1053dd915271",
-    "name": "Elva Fox",
-    "email": "jelez@nehud.fr",
-    "credentials": "MD (Oncology), DMCH",
-    "primarySpecialization": "Pulmonology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Pulmonology", "Urology"],
-    "clinics": [
-      {
-        "id": "5d716e9d-c0e9-4f90-bac0-ba5f97904340",
-        "name": "Community Health Center",
-        "address": "211 Nubaz Circle",
-        "contact": "(581) 788-3412",
-        "whatsApp": "(975) 554-6994",
-        "location": { "lat": 5.6238, "lng": -47.40545 }
-      }
-    ],
+    "reviews": 304,
+    "rating": 3.12,
+    "consults_online": false,
+    "booking_enabled": false,
+    "base_fee": 381,
+    "base_consult_time": 45,
     "experience": 6,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 297, "online": 463 },
-    "rating": 3.9,
-    "reviews": 552,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492181,
-    "status": "busy",
-    "schedule": [
+    "secondary_specializations": [
+      "Psychiatry"
+    ],
+    "currently_available": false,
+    "last_updated": "2025-10-12",
+    "next_available": "2025-10-14",
+    "office": {
+      "id": "bc254baf-1056-412d-99ab-5fcf259eaf30",
+      "name": "St. Mary's Healthcare",
+      "contact": "+1-912-678-8191",
+      "address": "693 Main Street, Chicago",
+      "facilities": [],
+      "location": {
+        "lat": 45.0779,
+        "lng": 179.1252
+      },
+      "whatsapp": "+1-495-646-6152",
+      "parking_available": true
+    },
+    "schedules": [
       {
-        "start": "12:00 PM",
-        "end": "04:30 PM",
-        "weekday": "Friday",
-        "totalHoursAvailable": 1,
+        "weekday": "Monday",
         "slots": [
           {
-            "start": "04:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
+            "id": "ce101f72-f5b2-4f18-9817-f178543b9bbe",
+            "begin": "10:00",
+            "duration": 45,
+            "booked": true,
+            "mode": "inPerson"
           },
           {
-            "start": "10:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
+            "id": "c9fa43f6-213d-4f54-b416-1e19bd82ef38",
+            "begin": "11:00",
+            "duration": 45,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "1948b339-d80f-49b8-8074-1048f2187a54",
+            "begin": "09:45",
+            "duration": 45,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "3002a875-6f64-4528-8012-91881abf2068",
+            "begin": "11:30",
+            "duration": 45,
+            "booked": false,
+            "mode": "inPerson"
+          },
+          {
+            "id": "764930c6-a3cc-44ce-8351-770d038bc00a",
+            "begin": "10:45",
+            "duration": 45,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "eae1f57f-09e5-4696-86b0-f6e591602fc1",
+            "begin": "11:45",
+            "duration": 45,
+            "booked": false,
+            "mode": "online"
           }
-        ]
+        ],
+        "clinic": {
+          "id": "1019fbf1-987c-4c28-b208-f5eeeb6267f2",
+          "name": "Regional Medical Institute",
+          "contact": "+1-401-264-7697",
+          "address": "520 Oak Street, Phoenix",
+          "facilities": [],
+          "location": {
+            "lat": -59.6641,
+            "lng": 34.4501
+          },
+          "whatsapp": "+1-992-246-2739",
+          "parking_available": true
+        },
+        "end": "13:00",
+        "start": "09:00",
+        "hours_available": 4
+      },
+      {
+        "weekday": "Thursday",
+        "slots": [
+          {
+            "id": "32e5d8f8-5a54-4f59-8339-3f43902129ba",
+            "begin": "14:00",
+            "duration": 45,
+            "booked": false,
+            "mode": "inPerson"
+          },
+          {
+            "id": "e8c8692b-e65c-4923-a662-2ed22622fdc8",
+            "begin": "15:00",
+            "duration": 45,
+            "booked": false,
+            "mode": "inPerson"
+          },
+          {
+            "id": "9c5543b0-1d4d-439a-87d0-79d6c2f5e8a6",
+            "begin": "15:45",
+            "duration": 45,
+            "booked": true,
+            "mode": "inPerson"
+          }
+        ],
+        "clinic": {
+          "id": "21702d48-4049-4e93-aa7a-ec9bb40d8861",
+          "name": "Central Medical Centre",
+          "contact": "+1-592-613-4058",
+          "address": "702 Park Street, New York",
+          "facilities": [],
+          "location": {
+            "lat": -33.9824,
+            "lng": -47.3591
+          },
+          "whatsapp": "+1-313-203-5754",
+          "parking_available": false
+        },
+        "end": "18:00",
+        "start": "14:00",
+        "hours_available": 4
+      },
+      {
+        "weekday": "Tuesday",
+        "slots": [
+          {
+            "id": "999465c6-bb48-44f0-97ab-e995246465ab",
+            "begin": "14:00",
+            "duration": 45,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "add248d3-1b39-494b-8ba5-c3b65de2fa3d",
+            "begin": "15:30",
+            "duration": 45,
+            "booked": true,
+            "mode": "online"
+          },
+          {
+            "id": "cf9cb8de-95da-4491-8e4c-89d345ee0811",
+            "begin": "14:15",
+            "duration": 45,
+            "booked": false,
+            "mode": "online"
+          }
+        ],
+        "clinic": {
+          "id": "ba309450-a70d-4846-a52f-44c722362f0b",
+          "name": "Central Medical Centre",
+          "contact": "+1-445-542-7351",
+          "address": "457 Oak Street, Houston",
+          "facilities": [],
+          "location": {
+            "lat": -38.7379,
+            "lng": 143.7609
+          },
+          "whatsapp": "+1-287-403-9118",
+          "parking_available": false
+        },
+        "end": "18:00",
+        "start": "14:00",
+        "hours_available": 4
+      },
+      {
+        "weekday": "Sunday",
+        "slots": [
+          {
+            "id": "bc9f890f-01e8-4e36-9fad-c34ee5c949d8",
+            "begin": "14:30",
+            "duration": 45,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "5b830009-1433-45a9-8f31-0f4446184760",
+            "begin": "15:15",
+            "duration": 45,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "741e9465-8154-4f6f-b22f-15eef92eaf2d",
+            "begin": "15:45",
+            "duration": 45,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "d16d9fd3-5fbf-43c6-a7b8-a6cdbcebeef8",
+            "begin": "14:00",
+            "duration": 45,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "4f901f7e-93a3-4208-a298-e0efbe053376",
+            "begin": "14:15",
+            "duration": 45,
+            "booked": false,
+            "mode": "inPerson"
+          }
+        ],
+        "clinic": {
+          "id": "c82b32ed-aa83-4c5e-b677-22880b52feca",
+          "name": "Sopore sub-district Hospital",
+          "contact": "+1-503-640-4910",
+          "address": "818 Main Street, Chicago",
+          "facilities": [],
+          "location": {
+            "lat": 56.9488,
+            "lng": -165.5885
+          },
+          "whatsapp": "+1-771-844-8277",
+          "parking_available": false
+        },
+        "end": "18:00",
+        "start": "14:00",
+        "hours_available": 4
       }
     ],
-    "office": {
-      "id": "9bf843ba-ae24-4398-9ae3-529b8d03397a",
-      "name": "Community Health Center",
-      "address": "496 Giuj Heights",
-      "contact": "(268) 271-5875",
-      "whatsApp": "(507) 891-8106",
-      "location": { "lat": -13.86644, "lng": 102.38287 }
-    },
-    "queuedPatients": 9,
-    "baseConsultTime": 30,
-    "baseFee": 247
+    "id": "390e0983-90a5-40c5-abad-9959b5e84274",
+    "name": "Smith",
+    "email": "garcia@medical.com",
+    "credentials": "DO",
+    "primary_specialization": "Cardiology"
   },
   {
-    "id": "4ea11218-3f0b-4b4f-9312-8a5e47014047",
-    "name": "Inez Jacobs",
-    "email": "sifher@og.ru",
-    "credentials": "MD (Cardiology), DMCC",
-    "primarySpecialization": "Ophthalmology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Rheumatology", "Family Medicine"],
-    "clinics": [
+    "status": "unknown",
+    "fee": {
+      "online": 77,
+      "in_person": 177
+    },
+    "verified": true,
+    "reviews": 284,
+    "rating": 2.74,
+    "consults_online": false,
+    "booking_enabled": false,
+    "base_fee": 177,
+    "base_consult_time": 30,
+    "experience": 8,
+    "secondary_specializations": [],
+    "currently_available": true,
+    "last_updated": "2025-10-12",
+    "next_available": "2025-11-02",
+    "office": {
+      "id": "d6bca4c2-199f-44e4-a950-0aa0bc8ba8b4",
+      "name": "Regional Medical Institute",
+      "contact": "+1-262-757-7472",
+      "address": "277 Main Street, Houston",
+      "facilities": [],
+      "location": {
+        "lat": 44.4423,
+        "lng": 56.4828
+      },
+      "whatsapp": "+1-213-266-2711",
+      "parking_available": false
+    },
+    "schedules": [
       {
-        "id": "326f5da2-2acf-485f-907d-cbf65d768c2c",
-        "name": "City General Hospital",
-        "address": "235 Hebwe Turnpike",
-        "contact": "(913) 549-6781",
-        "whatsApp": "(515) 456-5596",
-        "location": { "lat": 83.28006, "lng": 44.82422 }
+        "weekday": "Sunday",
+        "slots": [
+          {
+            "id": "9f3292c2-cbb1-496e-bbc2-2effa56a9eeb",
+            "begin": "11:00",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "388f4e14-7470-4c74-b0b4-e3a17f732821",
+            "begin": "10:30",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "37985a80-6105-4b6f-b8ee-c2fd5e9fedd5",
+            "begin": "12:30",
+            "duration": 30,
+            "booked": true,
+            "mode": "inPerson"
+          },
+          {
+            "id": "dc3639e2-fcbf-43e9-a3f6-e108f9cac8a5",
+            "begin": "09:30",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
+          }
+        ],
+        "clinic": {
+          "id": "27306c37-cb36-42fe-b56a-73e260bf9c89",
+          "name": "St. Mary's Healthcare",
+          "contact": "+1-294-231-2916",
+          "address": "998 Main Street, Chicago",
+          "facilities": [],
+          "location": {
+            "lat": 45.2523,
+            "lng": 45.0934
+          },
+          "whatsapp": "+1-656-224-5130",
+          "parking_available": false
+        },
+        "end": "13:00",
+        "start": "09:00",
+        "hours_available": 4
       },
       {
-        "id": "c8531709-1eb7-463d-9fb1-12653e1f9cd2",
-        "name": "Unity Healthcare",
-        "address": "846 Asote Drive",
-        "contact": "(841) 340-8616",
-        "whatsApp": "(283) 660-9052",
-        "location": { "lat": 79.41857, "lng": 92.77984 }
+        "weekday": "Tuesday",
+        "slots": [
+          {
+            "id": "4518d8d8-4f61-4685-8005-0cdc02c03fe6",
+            "begin": "12:15",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "90421538-a4df-4b4a-9e01-c1e129c5c423",
+            "begin": "12:30",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "3f289ef3-78ae-48c5-abdc-50b0d02a9bd8",
+            "begin": "10:30",
+            "duration": 30,
+            "booked": false,
+            "mode": "online"
+          },
+          {
+            "id": "ac94e9f1-8247-4d25-8702-c7924a142017",
+            "begin": "12:00",
+            "duration": 30,
+            "booked": true,
+            "mode": "online"
+          },
+          {
+            "id": "3f04bdbe-58c0-406e-8a1b-f5c7d67c060f",
+            "begin": "11:15",
+            "duration": 30,
+            "booked": true,
+            "mode": "online"
+          },
+          {
+            "id": "f4ecdb47-5a59-4276-b564-733cefca0129",
+            "begin": "11:30",
+            "duration": 30,
+            "booked": true,
+            "mode": "inPerson"
+          }
+        ],
+        "clinic": {
+          "id": "cda19b1d-1556-428b-86c7-2f1620ef9748",
+          "name": "Central Medical Centre",
+          "contact": "+1-731-269-8969",
+          "address": "409 Oak Street, Houston",
+          "facilities": [],
+          "location": {
+            "lat": 47.9185,
+            "lng": -104.4273
+          },
+          "whatsapp": "+1-771-274-8184",
+          "parking_available": false
+        },
+        "end": "13:00",
+        "start": "09:00",
+        "hours_available": 4
       },
       {
-        "id": "4a8a9679-8314-4a53-95b4-e1b1efc73c56",
-        "name": "City General Hospital",
-        "address": "947 Heplak Extension",
-        "contact": "(539) 860-3296",
-        "whatsApp": "(450) 658-5570",
-        "location": { "lat": 30.53582, "lng": 81.58954 }
-      }
-    ],
-    "experience": 20,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 335, "online": 79 },
-    "rating": 4.8,
-    "reviews": 960,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492181,
-    "status": "busy",
-    "schedule": [
-      {
-        "start": "11:30 AM",
-        "end": "05:00 PM",
         "weekday": "Wednesday",
-        "totalHoursAvailable": 3,
         "slots": [
           {
-            "start": "11:00 AM",
+            "id": "45d90a17-100d-47e9-80c1-e56e8b200d48",
+            "begin": "12:00",
             "duration": 30,
-            "mode": "inPerson",
-            "booked": false
+            "booked": false,
+            "mode": "online"
           },
           {
-            "start": "09:00 AM",
+            "id": "cf10e808-7297-42ea-81b9-4cf254002457",
+            "begin": "11:00",
             "duration": 30,
-            "mode": "inPerson",
-            "booked": false
+            "booked": true,
+            "mode": "inPerson"
           },
           {
-            "start": "05:00 PM",
+            "id": "cb76e696-f431-4f9f-9af8-89f8b1e90b51",
+            "begin": "09:30",
             "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "11:30 AM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
-          },
-          {
-            "start": "02:30 PM",
-            "duration": 30,
-            "mode": "online",
-            "booked": false
-          },
-          {
-            "start": "02:00 PM",
-            "duration": 30,
-            "mode": "inPerson",
-            "booked": false
+            "booked": true,
+            "mode": "inPerson"
           }
-        ]
+        ],
+        "clinic": {
+          "id": "f0f358cd-f058-40a3-9ad1-bd18c66e171e",
+          "name": "Urban Clinic Complex",
+          "contact": "+1-881-384-9164",
+          "address": "212 Park Street, Houston",
+          "facilities": [],
+          "location": {
+            "lat": 78.426,
+            "lng": 33.1448
+          },
+          "whatsapp": "+1-307-540-4789",
+          "parking_available": true
+        },
+        "end": "13:00",
+        "start": "09:00",
+        "hours_available": 4
       }
     ],
-    "office": {
-      "id": "6425ca4f-04d6-4d67-a9e4-1c38ca4c3e1d",
-      "name": "Community Health Center",
-      "address": "1090 Gamro Parkway",
-      "contact": "(571) 480-8120",
-      "whatsApp": "(631) 938-4881",
-      "location": { "lat": -59.85771, "lng": 89.20631 }
-    },
-    "queuedPatients": 13,
-    "baseConsultTime": 60,
-    "baseFee": 216
-  },
-  {
-    "id": "3786be4f-d33b-4dfc-a105-10e6208f3b41",
-    "name": "Winifred Clayton",
-    "email": "arah@ziv.fk",
-    "credentials": "MD (Pulmonology), DMRCP",
-    "primarySpecialization": "Endocrinology",
-    "currentlyAvailable": true,
-    "secondarySpecializations": ["Orthopedics", "Urology"],
-    "clinics": [
-      {
-        "id": "8c57aa04-8b17-4b7b-b057-4974f4210cdf",
-        "name": "Central Hospital",
-        "address": "934 Cekto Heights",
-        "contact": "(974) 503-2445",
-        "whatsApp": "(328) 793-9606",
-        "location": { "lat": -45.06991, "lng": 1.79538 }
-      }
-    ],
-    "experience": 14,
-    "verified": false,
-    "consultsOnline": true,
-    "fee": { "inPerson": 199, "online": 295 },
-    "rating": 4.4,
-    "reviews": 181,
-    "nextAvailable": null,
-    "lastUpdated": 1759652492181,
-    "status": "available",
-    "schedule": [],
-    "queuedPatients": 13,
-    "baseConsultTime": 45,
-    "baseFee": 276
+    "id": "c3298bba-5eba-423b-879d-cd48a90e33de",
+    "name": "Lisa",
+    "email": "smith@medical.com",
+    "credentials": "DC",
+    "primary_specialization": "Dermatology"
   }
 ]

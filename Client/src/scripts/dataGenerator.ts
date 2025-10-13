@@ -6,20 +6,15 @@ import {
   type DoctorSecondaryInfo,
 } from "../types/Doctor.ts";
 import * as constants from "../utilities/constants.ts";
-import type {
-  Clinic,
-  Fee,
-  TimeSlot,
-  Schedule,
-  DayInfo,
-} from "../types/DoctorInfo.ts";
+import type { Clinic, Fee, TimeSlot, Schedule } from "../types/DoctorInfo.ts";
+import { DateTime } from "luxon";
 
 const chance = new Chance();
 
 class DataGenerator {
   private generateClinics(single: boolean = false): Clinic | Clinic[] {
     const clinics = Array.from(
-      { length: chance.natural({ max: single ? 1 : 3 }) },
+      { length: chance.natural({ min: 1, max: single ? 1 : 3 }) },
       () => ({
         id: v4(),
         name: chance.pickone(constants.HOSPITALS),
@@ -30,6 +25,7 @@ class DataGenerator {
           lat: chance.latitude(),
           lng: chance.longitude(),
         },
+        parkingAvailable: chance.bool({ likelihood: 50 }),
       })
     );
 
@@ -38,20 +34,34 @@ class DataGenerator {
   }
 
   private generateFees(): Fee {
+    const min = constants.CONSULTATION_FEE_RANGE.MIN;
+    const max = constants.CONSULTATION_FEE_RANGE.MAX;
+
     return {
-      inPerson: chance.natural({
-        min: constants.CONSULTATION_FEE_RANGE.MIN,
-        max: constants.CONSULTATION_FEE_RANGE.MAX,
-      }),
+      inPerson: chance.natural({ min, max }),
       online: chance.natural({
-        min: constants.CONSULTATION_FEE_RANGE.MIN,
-        max: constants.CONSULTATION_FEE_RANGE.MAX,
+        min: min - 100,
+        max: max - 100,
       }),
     };
   }
 
-  private generateSchedules(): Schedule {
-    const wkday = chance.pickone(constants.DAYS_OF_WEEK);
+  private generateSchedules(
+    baseDuration: constants.ConsultationDuration = 30
+  ): Schedule[] {
+    let weekdayCached: constants.Weekday = "Saturday";
+
+    function generateWeekday(): constants.Weekday {
+      let wkday = chance.pickone(constants.DAYS_OF_WEEK).toLowerCase();
+      if (wkday === weekdayCached)
+        wkday = chance
+          .pickone(constants.DAYS_OF_WEEK.filter((d) => d !== wkday))
+          .toLowerCase();
+
+      weekdayCached = wkday as constants.Weekday;
+      return wkday as constants.Weekday;
+    }
+
     const startSlice = constants.TIME_SLOTS.slice(
       0,
       constants.TIME_SLOTS.length - 2
@@ -60,35 +70,30 @@ class DataGenerator {
     const start = chance.pickone(startSlice);
     const end = chance.pickone(constants.TIME_SLOTS.slice(startSlice.length));
 
-    const dayInfo: DayInfo = {
+    return Array.from({ length: 2 }, () => ({
       start,
       end,
-      weekday: wkday,
+      weekday: generateWeekday(),
+      slots: this.generateTimeSlots(baseDuration),
       clinic: this.generateClinics(true) as Clinic,
-      totalHoursAvailable: chance.natural({ max: 4 }),
-    };
-
-    return Array.from({ length: chance.natural({ max: 4 }) }, () => ({
-      ...dayInfo,
-      slots: this.generateTimeSlots(dayInfo),
+      totalHoursAvailable: chance.natural({ min: 1, max: 4 }),
     }));
   }
 
   private generateTimeSlots(
-    dayInfo: DayInfo,
     baseDuration: constants.ConsultationDuration = 30
   ): TimeSlot[] {
-    const maxSlots = ((dayInfo.totalHoursAvailable || 4) * 60) / baseDuration;
+    const maxSlots = 6;
     const slots = chance.pickset(
       constants.TIME_SLOTS,
       chance.natural({ max: maxSlots })
     );
 
     return slots.map((slotTime) => ({
-      start: slotTime,
+      begin: slotTime,
       duration: baseDuration,
       mode: chance.pickone(["inPerson", "online"]),
-      booked: chance.bool({ likelihood: Math.random() }),
+      booked: chance.bool({ likelihood: Math.ceil(Math.random() * 100) }),
     }));
   }
 
@@ -97,34 +102,45 @@ class DataGenerator {
       id: v4(),
       name: chance.name(),
       email: chance.email(),
-      credentials: chance.pickone(constants.CREDENTIALS),
+      credentials: chance.pickone(constants.Credentials),
       primarySpecialization: chance.pickone(constants.SPECIALIZATIONS),
     };
   }
 
   private generateSecondaries(): DoctorSecondaryInfo {
+    const fee = this.generateFees();
+    const currDate = DateTime.local();
+    const baseConsultTime = chance.pickone(constants.CONSULTATION_DURATION);
+
     return {
+      fee,
       currentlyAvailable: chance.bool(),
       secondarySpecializations: chance.pickset(
         constants.SPECIALIZATIONS,
         chance.natural({ max: 3 })
       ),
-      clinics: this.generateClinics() as Clinic[],
-      experience: chance.natural({ min: 2, max: 35 }),
-      verified: chance.bool(),
       consultsOnline: chance.bool(),
-      fee: this.generateFees(),
-      rating: chance.floating({ min: 3.5, max: 5.0, fixed: 1 }),
-      reviews: chance.natural({ min: 1, max: 1000 }),
-      nextAvailable: null,
-      lastUpdated: Date.now(),
+      reviews: chance.natural({ max: 420 }),
+      verified: chance.bool({ likelihood: 70 }),
+      experience: chance.natural({ min: 1, max: 35 }),
+      rating: chance.floating({ min: 1.5, max: 5.0 }),
+      nextAvailable: chance.pickone([
+        chance.date({
+          string: true,
+          year: 2025,
+          month: chance.pickone([currDate.month, currDate.month + 1]),
+        }),
+        "unknown",
+      ]) as string,
+      lastUpdated: chance.pickone([
+        chance.date({ string: true }) as string,
+        "unknown",
+      ]),
+      baseConsultTime,
+      baseFee: fee.inPerson as number,
       status: chance.pickone(constants.STATUSES),
-      schedule: this.generateSchedules(),
-      waitingTime: undefined,
       office: this.generateClinics(true) as Clinic,
-      queuedPatients: chance.natural({ min: 0, max: 20 }),
-      baseConsultTime: chance.pickone(constants.CONSULTATION_DURATION),
-      baseFee: chance.natural({ max: constants.CONSULTATION_FEE_RANGE.MAX }),
+      schedules: this.generateSchedules(baseConsultTime),
     };
   }
 

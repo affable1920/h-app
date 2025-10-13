@@ -1,15 +1,16 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import Button from "../Button";
 import type { Doctor } from "../../types/Doctor";
 import { Link } from "react-router-dom";
 import { iconMap } from "../../utilities/constants";
 import { BiLocationPlus } from "react-icons/bi";
 import DoctorService from "../../services/DoctorService";
+import { capitalize } from "../../utilities/utils";
 
 const statusCssConfig = {
-  available: { bg: "bg-success", text: "text-success text-sky-950" },
-  busy: { bg: "bg-warning", text: "text-warning" },
   unknown: { bg: "bg-error", text: "text-error" },
+  busy: { bg: "bg-warning", text: "text-warning" },
+  available: { bg: "bg-success", text: "text-success text-sky-950" },
   away: { bg: "bg-secondary-dark", text: "text-secondary-dark opacity-60" },
 };
 
@@ -19,6 +20,18 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
   const status = doctor.status ?? "unknown";
   const config = service.getDoctorInfo(status);
 
+  const handleClick = useCallback(
+    (
+      ev: React.MouseEvent<HTMLButtonElement>,
+      name: string,
+      doctorId: string
+    ) => {
+      const targetBtn = ev.currentTarget.closest("button") as HTMLButtonElement;
+      service.getDoctorAction(doctorId, name, targetBtn);
+    },
+    [service]
+  );
+
   return (
     <section className="flex flex-col text-sm capitalize">
       <section className="flex flex-col mt-auto gap-2 relative">
@@ -27,9 +40,9 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
             <p className="text-black font-bold">Status -</p>
             <div className={`flex items-center gap-2`}>
               <span
-                className={`inline-flex w-1 h-1 rounded-full ${statusCssConfig[status].bg}`}
+                className={`inline-flex w-1 h-1 rounded-full ${statusCssConfig[status]?.bg}`}
               />
-              <h2 className={`card-h2 ${statusCssConfig[status].text}`}>
+              <h2 className={`card-h2 ${statusCssConfig[status]?.text}`}>
                 {doctor.status}
               </h2>
             </div>
@@ -39,7 +52,6 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
             hover:underline underline-offset-2 font-black`}
             to="/"
           >
-            {doctor.office?.name ?? doctor.clinics[0]?.name}
             <BiLocationPlus />
           </Link>
         </div>
@@ -48,17 +60,17 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
           {(config || []).map((configObject, i) => {
             const { name, isPrimary, icon, label = "" } = configObject;
             const Icon = iconMap[icon];
+
             return (
               <Button
                 key={i}
-                onClick={({ currentTarget }) =>
-                  service.getDoctorAction(doctor.id, name, currentTarget)
-                }
+                {...(isPrimary
+                  ? { variant: "contained", color: "accent" }
+                  : { variant: "outlined" })}
                 style={{ order: isPrimary ? 10 : 9 }}
-                color={isPrimary ? "accent" : "primary"}
-                variant={isPrimary ? "contained" : "outlined"}
+                onClick={(ev) => handleClick(ev, name, doctor.id)}
               >
-                {label[0].toUpperCase() + label.slice(1)} {Icon && <Icon />}
+                {capitalize(label)} {Icon && <Icon />}
               </Button>
             );
           })}

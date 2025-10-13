@@ -1,6 +1,10 @@
 import json
+from math import e
 from pathlib import Path
+from fastapi import HTTPException
 from typing_extensions import Self
+
+from app.models.doctorModel.Doctor import Doctor
 
 
 class DoctorService:
@@ -40,6 +44,7 @@ class DoctorService:
 
 #
 
+
     def get_doctors(self, search_query: str, max: int = 5, page: int = 1):
         cache_key = f"{page}-{max}-{search_query}"
         print(cache_key)
@@ -68,8 +73,15 @@ class DoctorService:
 
 #
 
-    def get_doctor_by_id(self, id: str):
-        return next((doc for doc in self._doctors if doc["id"] == id), None)
+    def get_doctor_by_id(self, id: str) -> Doctor:
+        try:
+            curr_doctor = next(
+                (doc for doc in self._doctors if doc["id"] == id))
+            return Doctor(**curr_doctor)
+
+        except Exception as e:
+            print(e)
+            raise HTTPException(404, "Doctor not found")
 
 
 doctor_service = DoctorService()

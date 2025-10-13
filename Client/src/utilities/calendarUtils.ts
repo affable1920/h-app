@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { DAYS_OF_WEEK } from "./constants";
+import { DAYS_OF_WEEK, type Weekday } from "./constants";
 
 function getPreviousMonthDays(date: DateTime): DateTime[] {
   const countPrevMonth = DateTime.local().set({
@@ -62,4 +62,8 @@ export function getWeekData(daysAvailable: string[]) {
     availableDays,
     daysToDisable,
   };
+}
+
+export function getWeekday(index: number): Weekday {
+  return DAYS_OF_WEEK[index];
 }

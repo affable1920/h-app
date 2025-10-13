@@ -2,13 +2,26 @@ import { memo, useState, useCallback } from "react";
 import { DateTime } from "luxon";
 import CalendarBody from "./CalendarBody";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, type Variant } from "motion/react";
+import { IoInformationCircleSharp } from "react-icons/io5";
 
 const currDate = DateTime.local();
 type Direction = "left" | "right";
 
+const variants: Record<string, Variant> = {
+  hidden: {
+    x: 100,
+    opacity: 0,
+  },
+  visible: {
+    x: 0,
+    opacity: 1,
+  },
+};
+
 const Calendar = memo(() => {
   const [dateInView, setDateInView] = useState<DateTime>(DateTime.local());
+  const [showInfo, setShowInfo] = useState(false);
 
   const handleMonthChange = useCallback(
     (dir: Direction) => {
@@ -27,7 +40,22 @@ const Calendar = memo(() => {
   );
 
   return (
-    <section className="box">
+    <section className="box relative">
+      <div className="absolute right-2 top-1 flex items-center justify-end overflow-hidden italic font-bold text-sm gap-2 text-sky-900 opacity-75 selection:bg-transparent">
+        <motion.p
+          initial={false}
+          variants={variants}
+          transition={{ duration: 0.1 }}
+          animate={showInfo ? "visible" : "hidden"}
+        >
+          Select any day that fits your schedule
+        </motion.p>
+        <IoInformationCircleSharp
+          className="cursor-pointer z-1"
+          onClick={() => setShowInfo((prev) => !prev)}
+        />
+      </div>
+
       <header className="flex justify-between overflow-hidden items-center w-full px-1">
         <AnimatePresence mode="wait">
           <motion.h2 className="card-h2 text-lg uppercase font-black">

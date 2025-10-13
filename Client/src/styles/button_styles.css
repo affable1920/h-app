@@ -3,25 +3,30 @@
 /* Base button component */
 @layer components {
   .btn {
-    @apply tracking-widest leading-tight active:scale-95 transition-colors duration-[180] rounded-md flex 
-    items-center gap-1 border-2 font-semibold whitespace-nowrap;
+    @apply tracking-widest leading-tight active:scale-95 transition-colors duration-[180] rounded-lg flex 
+    items-center justify-center gap-1 border-2 font-bold whitespace-nowrap px-4 py-2;
+
+    &:disabled {
+      @apply opacity-80 pointer-events-none;
+    }
   }
 }
 
 /* Size utilities */
 @utility sm {
-  @apply p-1 px-2 text-sm;
+  @apply h-6;
 }
 @utility md {
-  @apply p-1 px-4 text-sm;
+  @apply h-8;
 }
 @utility lg {
-  @apply p-2 px-4 text-base;
+  @apply h-12;
 }
-@utility xl {
-  @apply p-2 px-6 text-base;
+@utility lg {
+  @apply h-14;
 }
 
+/* color utils */
 @utility accent {
   @apply bg-accent border-accent-dark;
 
@@ -36,10 +41,17 @@
 @utility danger {
   @apply bg-error border-error-dark;
 }
+@utility slate {
+  @apply bg-slate-100 border-slate-200/30;
+}
+
+@utility neutral {
+  @apply bg-inherit;
+}
 
 /* Variant utilities */
 @utility contained {
-  @apply bg-secondary-light hover:bg-secondary-lightest text-slate-100;
+  @apply bg-secondary hover:bg-secondary-lightest text-slate-100;
 
   &.primary {
     @apply primary;
@@ -56,10 +68,26 @@
   @apply bg-transparent shadow-none border-secondary;
 
   &:hover {
-    @apply bg-secondary-light text-white border-secondary-dark;
+    @apply bg-secondary text-white border-secondary-dark;
   }
 }
 
 @utility icon {
-  @apply bg-transparent border-none block p-1;
+  @apply bg-transparent border-none block p-0;
+}
+
+@utility badge {
+  @apply text-center font-bold text-gray-600 rounded-md;
+}
+
+@utility badge-disabled {
+  @apply cursor-default opacity-50 pointer-events-none;
+}
+
+@utility badge-current {
+  @apply !border-b-2 !border-b-accent/50 font-black shadow-inner shadow-accent-dark/60;
+}
+
+@utility badge-selected {
+  @apply bg-amber-400 shadow-amber-600/20 font-black shadow-inner;
 }

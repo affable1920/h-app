@@ -1,110 +1,191 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { motion, type Variant } from "motion/react";
-import { BiLocationPlus } from "react-icons/bi";
-import { BsArrowRight } from "react-icons/bs";
-import useDocStore from "../stores/doctorsStore";
-import useScheduleStore from "../stores/scheduleStore";
-import type { WEEKDAY } from "../utilities/constants";
+import { AnimatePresence, motion, type Variant } from "motion/react";
 
-const variants: Record<string, Variant> = {
+import { BsArrowRight } from "react-icons/bs";
+import { BiLocationPlus } from "react-icons/bi";
+import type { Weekday } from "../utilities/constants";
+
+import Button from "./Button";
+import useScheduleStore from "../stores/scheduleStore";
+
+import { FaLink } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import Badge from "./Badge";
+import Spinner from "./Spinner";
+import api from "../services/ApiClient";
+import useDocStore from "../stores/doctorsStore";
+import type { Clinic, Schedule, TimeSlot } from "../types/DoctorInfo";
+
+const scheduleVariants: Record<string, Variant> = {
   initial: {
-    x: 30,
+    scale: 0,
     opacity: 0,
   },
-
   view: {
-    x: 0,
-    opacity: 100,
+    scale: 1,
+    opacity: 1,
   },
 };
 
-const ClinicsView = React.memo(() => {
-  const doctor = useDocStore((s) => s.currDoctor);
-  const selectedDate = useScheduleStore((s) => s.selectedDate);
-  const setSelectedDate = useScheduleStore((s) => s.setSelectedDate);
+const ClinicsView = React.memo(
+  ({ targetSchedules }: { targetSchedules: Schedule[] }) => {
+    const selectedDate = useScheduleStore((s) => s.selectedDate);
+    const selectedSlot = useScheduleStore((s) => s.selectedSlot);
+    const selectedClinic = useScheduleStore((s) => s.selectedClinic);
 
-  const [viewClinics, setViewClinics] = useState(false);
-  const [selectedWeekday, setSelectedWeekday] = useState<WEEKDAY | null>(null);
+    const setSelectedSlot = useScheduleStore((s) => s.setSelectedSlot);
 
-  const availableDays = new Set(
-    (doctor?.schedule.map((s) => s.weekday?.toLowerCase()) || []).flat()
-  ) as Set<WEEKDAY>;
+    const [viewSchedules, setViewSchedules] = useState(false);
+    const [selectedWeekday, setSelectedWeekday] = useState<Weekday | null>(
+      null
+    );
 
-  function toggleClinicsView() {
-    setViewClinics((view) => !view);
-  }
+    const [loading, setloading] = useState(false);
 
-  const handleWkdaySelect = useCallback(
-    (wkday: WEEKDAY) => {
-      if (selectedDate) setSelectedDate(selectedDate);
+    const handleWkdaySelect = useCallback((wkday: Weekday) => {
       setSelectedWeekday((p) => (p === wkday ? null : wkday));
-    },
-    [selectedDate, setSelectedDate]
-  );
+    }, []);
 
-  useEffect(() => {
-    if (selectedDate) setViewClinics(true);
-    setSelectedWeekday(selectedDate?.weekdayLong?.toLowerCase() as WEEKDAY);
-  }, [selectedDate]);
+    useEffect(() => {
+      if (selectedDate) setViewSchedules(true);
+      setSelectedWeekday(selectedDate?.weekdayLong?.toLowerCase() as Weekday);
+    }, [selectedDate]);
 
-  return (
-    <section className="box p-6 py-4">
-      <div className="flex flex-col gap-8 w-full">
-        {doctor?.clinics.map((clinic) => (
-          <article className="flex flex-col gap-4" key={clinic.id}>
-            <header
-              key={clinic.id}
-              className="flex justify-between items-center"
-            >
-              <div className="flex flex-col gap-1">
-                <h2 className="card-h2">{clinic.name}</h2>
-                <p
-                  className={`flex items-center gap-2 text-sm underline underline-offset-2`}
-                >
-                  {clinic.address}
-                  <BiLocationPlus />
-                </p>
-              </div>
-              <motion.button
-                animate={{
-                  rotate: viewClinics ? 90 : 0,
-                  transition: { duration: 0.15 },
-                }}
-              >
-                <BsArrowRight
-                  className="cursor-pointer"
-                  onClick={toggleClinicsView}
-                />
-              </motion.button>
-            </header>
-            <motion.div
-              variants={variants}
-              transition={{
-                duration: 0.15,
-              }}
-              animate={viewClinics ? "view" : "initial"}
-              className="flex flex-wrap items-center text-sm gap-2"
-            >
-              {Array.from(availableDays)?.map((day, i) => {
-                return (
-                  <motion.button
-                    onClick={handleWkdaySelect.bind(null, day)}
-                    className={`badge p-.5 capitalize font-bold
-                          ${selectedWeekday === day && "badge-selected"} 
-                      `}
-                    key={day}
-                    transition={{ delay: i * 0.03 }}
+    if (!targetSchedules || !targetSchedules.length) return;
+
+    function toggleSchedulesView() {
+      setViewSchedules((p) => !p);
+    }
+
+    async function handleSchedule(s: Schedule) {
+      const data = {
+        slot: selectedSlot,
+        date: selectedDate?.toISO(),
+        clinic: selectedClinic ?? s.clinic.id,
+      };
+
+      try {
+        setloading(true);
+        const response = await api.post(
+          `/schedules/${useDocStore.getState().currDoctor?.id}`,
+          data
+        );
+        console.log(response);
+      } catch (ex) {
+        console.log(ex);
+      } finally {
+        setloading(false);
+      }
+    }
+
+    const showBookingInfo = selectedDate && selectedSlot;
+
+    return (
+      <AnimatePresence mode="sync">
+        <motion.section
+          key="schedule"
+          className="box py-4 flex flex-col gap-8 w-full"
+          initial="initial"
+          animate="view"
+          exit="initial"
+          variants={scheduleVariants}
+          transition={{
+            duration: 0.22,
+            ease: "easeOut",
+            when: "beforeChildren",
+          }}
+        >
+          {targetSchedules.map((s) => {
+            const { clinic = {} as Clinic, weekday, slots = [] } = s || {};
+
+            return (
+              <article className="flex flex-col gap-4" key={clinic?.id}>
+                <header className="flex justify-between items-center gap-6">
+                  <div className="flex flex-col gap-0.5">
+                    <Link to="/">
+                      <h2 className="card-h2 flex items-center gap-1">
+                        {clinic?.name}{" "}
+                        <FaLink className="text-xs opacity-60 hover:opacity-100" />
+                      </h2>
+                    </Link>
+
+                    <Link
+                      to="/"
+                      className={`flex items-center gap-2 text-sm underline underline-offset-2`}
+                    >
+                      <p>{clinic?.address} </p>
+                      <BiLocationPlus className="text-xs opacity-80 hover:opacity-100" />
+                    </Link>
+                  </div>
+                  <Button
+                    variant="icon"
+                    initial="false"
+                    needsMotion={true}
+                    animate={{
+                      rotate: viewSchedules ? 90 : 0,
+                    }}
+                    className="cursor-pointer"
+                    onClick={toggleSchedulesView}
                   >
-                    {day.slice(0, 3)}
-                  </motion.button>
-                );
-              })}
-            </motion.div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-});
+                    <BsArrowRight />
+                  </Button>
+                </header>
+
+                <motion.div
+                  initial={false}
+                  animate={{
+                    x: viewSchedules ? 0 : 40,
+                    opacity: viewSchedules ? 1 : 0,
+                    height: viewSchedules ? "auto" : 0,
+                    overflow: viewSchedules ? "visible" : "hidden",
+                  }}
+                  className="flex flex-col text-sm gap-4"
+                >
+                  <Badge
+                    entity={weekday as Weekday}
+                    className="capitalize self-start"
+                    isOn={(wk) => selectedWeekday === wk}
+                    content={(weekday as Weekday).slice(0, 3)}
+                    onClick={() => handleWkdaySelect(weekday as Weekday)}
+                  />
+                  <div className="flex items-center gap-4">
+                    {weekday === selectedWeekday &&
+                      slots?.map((slot) => (
+                        <Badge
+                          key={slot.begin}
+                          content={slot.begin}
+                          className="self-start"
+                          entity={slot as TimeSlot}
+                          isOn={(s) => selectedSlot === s}
+                          onClick={() => setSelectedSlot(slot)}
+                          isDisabled={() => slot.booked as boolean}
+                        />
+                      ))}
+                  </div>
+
+                  {showBookingInfo && (
+                    <Button
+                      size="md"
+                      initial={{ y: 40, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      needsMotion={true}
+                      variant="contained"
+                      color="accent"
+                      disabled={loading}
+                      onClick={() => handleSchedule(s)}
+                      className="self-end flex items-center gap-2"
+                    >
+                      Confirm Slot <Spinner loading={loading} />
+                    </Button>
+                  )}
+                </motion.div>
+              </article>
+            );
+          })}
+        </motion.section>
+      </AnimatePresence>
+    );
+  }
+);
 
 export default ClinicsView;

@@ -1,12 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
+
+import Button from "../Button";
 import DoctorCard from "./DoctorCard";
+
 import useDocStore from "../../stores/doctorsStore";
-import { RiAiGenerate } from "react-icons/ri";
 import useModalStore from "../../stores/modalStore";
 import useQueryStore from "../../stores/queryStore";
-import { FcNext, FcPrevious } from "react-icons/fc";
 import { debounce, exponentialBackoff } from "../../utilities/utils";
-import Button from "../Button";
+
+import { ImCross } from "react-icons/im";
+import { RiAiGenerate } from "react-icons/ri";
+import { FcNext, FcPrevious } from "react-icons/fc";
 
 const DoctorsDashboard = () => {
   const getDoctors = useDocStore((s) => s.getDoctors);
@@ -68,16 +72,24 @@ const DoctorsDashboard = () => {
         <div className="input w-full max-w-3xs flex items-center relative italic">
           <input
             value={searchText}
-            placeholder="Search for a doc ..."
             onChange={handleSearch}
+            placeholder="Search for a doc ..."
             className="placeholder:opacity-60 outline-none w-full"
           />
-          <Button className="absolute text-xs right-1">Ctrl K</Button>
+          <Button
+            variant="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2"
+          >
+            {searchText ? <ImCross /> : "Ctrl K"}
+          </Button>
         </div>
-        <RiAiGenerate
-          className="cursor-pointer"
+        <Button
+          size="xl"
+          variant="icon"
           onClick={() => openModal("AIGenerateModal")}
-        />
+        >
+          <RiAiGenerate />
+        </Button>
       </section>
 
       <div ref={ref} className="dashboard">

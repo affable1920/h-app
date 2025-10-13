@@ -1,10 +1,18 @@
 from fastapi import Depends
 from fastapi.routing import APIRouter
-from app.models.responses import DoctorResponse
-from app.models.queryparams import QueryParameters
+from pydantic import BaseModel
+
+from app.models.doctorModel.Doctor import Doctor
+from app.models.QueryParams import QueryParameters
 from app.services.doctorService import doctor_service
 
 router = APIRouter(prefix="/doctors", tags=["doctors"])
+
+
+class DoctorResponse(BaseModel):
+    doctors: list[dict]
+    curr_count: int
+    total_count: int
 
 
 @router.get("", response_model=DoctorResponse)
@@ -16,13 +24,7 @@ async def get_docs(params: QueryParameters = Depends()):
         print(e)
 
 
-@router.get("/{id}")
+@router.get("/{id}", response_model=Doctor)
 async def get_doctor(id: str):
     return doctor_service.get_doctor_by_id(id)
-
-
-@router.get("/{id}/schedule")
-async def get_doctor_for_schedule(id: str):
-    return f"scheduling request for doctor with id {id} recieved !"
-
 #

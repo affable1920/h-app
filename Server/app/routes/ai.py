@@ -14,7 +14,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from app.models.llm import ChatRequest, ChatResponse
 
 
-router = APIRouter(prefix="/chat", tags=["chat_ai", "llm"])
+router = APIRouter(prefix="/chat", tags=["chatai"])
 
 load_dotenv()
 parser = JsonOutputParser()

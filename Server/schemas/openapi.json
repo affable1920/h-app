@@ -1,0 +1,490 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "FastAPI", "version": "0.1.0" },
+  "paths": {
+    "/chat": {
+      "post": {
+        "tags": ["chatai"],
+        "summary": "Chat",
+        "operationId": "chat_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChatRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChatResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "": ""
+    },
+    "/doctors": {
+      "get": {
+        "tags": ["doctors"],
+        "summary": "Get Doctors",
+        "operationId": "get_doctors_doctors_get",
+        "parameters": [
+          {
+            "name": "max",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 5,
+              "title": "Max"
+            }
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Currpage"
+            }
+          },
+          {
+            "name": "searchQuery",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Searchquery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DoctorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "": ""
+    },
+    "/doctors/{id}": {
+      "get": {
+        "tags": ["doctors"],
+        "summary": "Get Doctor",
+        "operationId": "get_doctor_doctors__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Doctor" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "": ""
+    },
+    "/clinics": {
+      "get": {
+        "tags": ["clinics"],
+        "summary": "Get Clinics",
+        "operationId": "get_clinics_clinics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      },
+      "": ""
+    },
+    "/clinics/{clinic_id}": {
+      "get": {
+        "tags": ["clinics"],
+        "summary": "Get Clinic",
+        "operationId": "get_clinic_clinics__clinic_id__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      },
+      "": ""
+    },
+    "/schedules/{id}": {
+      "post": {
+        "tags": ["schedules"],
+        "summary": "Set Schedule",
+        "operationId": "set_schedule_schedules__id__post",
+        "parameters": [
+          {
+            "name": "clinic_id",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "title": "Clinic Id" }
+          },
+          {
+            "name": "slot_id",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "title": "Slot Id" }
+          },
+          {
+            "name": "wkday",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "title": "Wkday" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "": ""
+    },
+    "/": {
+      "get": {
+        "summary": "Root Path",
+        "operationId": "root_path__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      },
+      "": ""
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChatRequest": {
+        "properties": { "msg": { "type": "string", "title": "Msg" } },
+        "type": "object",
+        "required": ["msg"],
+        "title": "ChatRequest"
+      },
+      "ChatResponse": {
+        "properties": {
+          "id": { "type": "string", "title": "Id" },
+          "msg": {
+            "anyOf": [
+              { "type": "string" },
+              {
+                "items": {
+                  "anyOf": [
+                    { "type": "string" },
+                    { "additionalProperties": true, "type": "object" }
+                  ]
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Msg"
+          },
+          "model_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Model Name"
+          }
+        },
+        "type": "object",
+        "required": ["id", "msg"],
+        "title": "ChatResponse"
+      },
+      "Clinic": {
+        "properties": {
+          "id": { "type": "string", "title": "Id" },
+          "name": { "type": "string", "title": "Name" },
+          "contact": { "type": "string", "title": "Contact" },
+          "address": { "type": "string", "title": "Address" },
+          "facilities": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Facilities",
+            "default": []
+          },
+          "location": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/Location" },
+              { "type": "null" }
+            ]
+          },
+          "whatsapp": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Whatsapp"
+          },
+          "parking_available": {
+            "type": "boolean",
+            "title": "Parking Available",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": ["name", "contact", "address"],
+        "title": "Clinic"
+      },
+      "Doctor": {
+        "properties": {
+          "status": { "type": "string", "title": "Status" },
+          "fee": { "$ref": "#/components/schemas/Fee" },
+          "verified": {
+            "type": "boolean",
+            "title": "Verified",
+            "default": false
+          },
+          "reviews": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Reviews"
+          },
+          "rating": {
+            "anyOf": [
+              { "type": "integer" },
+              { "type": "number" },
+              { "type": "null" }
+            ],
+            "title": "Rating"
+          },
+          "consults_online": {
+            "type": "boolean",
+            "title": "Consults Online",
+            "default": false
+          },
+          "booking_enabled": {
+            "type": "boolean",
+            "title": "Booking Enabled",
+            "default": false
+          },
+          "base_fee": { "type": "integer", "title": "Base Fee" },
+          "base_consult_time": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Base Consult Time"
+          },
+          "experience": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Experience"
+          },
+          "secondary_specializations": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Secondary Specializations",
+            "default": []
+          },
+          "currently_available": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Currently Available"
+          },
+          "last_updated": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Last Updated"
+          },
+          "next_available": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Next Available"
+          },
+          "office": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/Clinic" },
+              { "type": "null" }
+            ]
+          },
+          "schedules": {
+            "items": { "$ref": "#/components/schemas/Schedule" },
+            "type": "array",
+            "title": "Schedules",
+            "default": []
+          },
+          "id": { "type": "string", "title": "Id" },
+          "name": { "type": "string", "title": "Name" },
+          "email": { "type": "string", "format": "email", "title": "Email" },
+          "credentials": { "type": "string", "title": "Credentials" },
+          "primary_specialization": {
+            "type": "string",
+            "title": "Primary Specialization"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "fee",
+          "base_fee",
+          "name",
+          "email",
+          "credentials",
+          "primary_specialization"
+        ],
+        "title": "Doctor"
+      },
+      "DoctorResponse": {
+        "properties": {
+          "doctors": {
+            "items": { "$ref": "#/components/schemas/Doctor" },
+            "type": "array",
+            "title": "Doctors"
+          },
+          "curr_count": { "type": "integer", "title": "Curr Count" },
+          "total_count": { "type": "integer", "title": "Total Count" }
+        },
+        "type": "object",
+        "required": ["doctors", "curr_count", "total_count"],
+        "title": "DoctorResponse"
+      },
+      "Fee": {
+        "properties": {
+          "online": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Online"
+          },
+          "in_person": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "In Person"
+          }
+        },
+        "type": "object",
+        "required": ["online", "in_person"],
+        "title": "Fee"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": { "$ref": "#/components/schemas/ValidationError" },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Location": {
+        "properties": {
+          "lat": { "type": "number", "title": "Lat" },
+          "lng": { "type": "number", "title": "Lng" }
+        },
+        "type": "object",
+        "required": ["lat", "lng"],
+        "title": "Location"
+      },
+      "Schedule": {
+        "properties": {
+          "weekday": { "type": "string", "title": "Weekday" },
+          "slots": {
+            "items": { "$ref": "#/components/schemas/Slot" },
+            "type": "array",
+            "title": "Slots"
+          },
+          "clinic": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/Clinic" },
+              { "type": "null" }
+            ]
+          },
+          "end": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "End"
+          },
+          "start": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Start"
+          },
+          "hours_available": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Hours Available"
+          }
+        },
+        "type": "object",
+        "required": ["weekday", "slots"],
+        "title": "Schedule"
+      },
+      "Slot": {
+        "properties": {
+          "id": { "type": "string", "title": "Id" },
+          "begin": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Begin"
+          },
+          "duration": { "type": "integer", "title": "Duration" },
+          "booked": { "type": "boolean", "title": "Booked", "default": false },
+          "mode": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Mode"
+          }
+        },
+        "type": "object",
+        "required": ["duration"],
+        "title": "Slot"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

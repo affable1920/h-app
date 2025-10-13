@@ -4,10 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-types": "openapi-typescript http://localhost:8000/openapi.json -o ./src/types/api.ts",
+    "dev": "vite",
+    "dev:with-types": "concurrently \"npm run generate-types\" \"npm run dev"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
@@ -40,5 +42,13 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/affable1920/h-app"
+  },
+  "author": {
+    "email": "affableshamik98@gmail.com",
+    "name": "Shamik Zaffar"
   }
 }

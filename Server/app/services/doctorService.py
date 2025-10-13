@@ -48,6 +48,7 @@ class DoctorService:
     def get_doctors(self, search_query: str, max: int = 5, page: int = 1):
         cache_key = f"{page}-{max}-{search_query}"
         print(cache_key)
+
         if cache_key in self._cache and self._cache_is_valid:
             print("Cache hit")
             return self._cache[cache_key]
@@ -63,7 +64,7 @@ class DoctorService:
 
         paginated_doctors = doctors[start: min(end, len(doctors))]
         result = {
-            "doctors": paginated_doctors,
+            "doctors": [Doctor(**doc) for doc in paginated_doctors],
             "total_count": len(self._doctors),
             "curr_count": len(paginated_doctors),
         }

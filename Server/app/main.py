@@ -1,5 +1,5 @@
-from pathlib import Path
 from fastapi import FastAPI
+from fastapi.routing import APIRoute
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -7,28 +7,41 @@ from app.routes import ai
 from app.routes import doctors
 from app.routes import clinics
 from app.routes import schedules
+from app.services.openapi_spec import generate_openapi_spec
+
+
+def generate_uid(route: APIRoute):
+    return str(route.tags[0]) + "-" + route.name
 
 
 @asynccontextmanager
 async def root(app: FastAPI):
     print("Starting up")
 
+    # print(generate_openapi_spec(app))
+
     yield
     print("Shutting down")
 
-app = FastAPI(lifespan=root)
+app = FastAPI(lifespan=root, openapi_url="/openapi.json",
+              docs_url="/docs", redoc_url="/redoc")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_origins=["*"],
+    allow_credentials=True,
+)
+
 
 app.include_router(ai.router)
 app.include_router(doctors.router)
 app.include_router(clinics.router)
 app.include_router(schedules.router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    allow_origins=["*"]
-)
+app.openapi_schema = generate_openapi_spec(app)
 
 
 @app.get("/")

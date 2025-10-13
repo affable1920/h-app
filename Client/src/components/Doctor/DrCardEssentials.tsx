@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import type { Doctor } from "../../types/Doctor";
 import docImage from "../../assets/doctor.jpg";
+import type { Doctor } from "../../types/Doctor";
 import { MdVerifiedUser, MdStar } from "react-icons/md";
 
 const DrCardEssentials = React.memo(({ doctor }: { doctor: Doctor }) => {
@@ -20,8 +20,8 @@ const DrCardEssentials = React.memo(({ doctor }: { doctor: Doctor }) => {
             </Link>
             {<MdVerifiedUser color={doctor.verified ? "green" : "red"} />}
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <h2 className="card-h2 line-clamp-1 text-sm">
+          <div className="flex gap-2 text-sm">
+            <h2 className="card-h2 line-clamp-1">
               {doctor.primarySpecialization}
             </h2>
             <p>({doctor.experience}y)</p>

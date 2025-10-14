@@ -1,3 +1,4 @@
+from enum import Enum
 from uuid import uuid4
 from typing import Annotated
 from pydantic import Field, BaseModel
@@ -5,6 +6,13 @@ from pydantic import Field, BaseModel
 
 def generate_id():
     return str(uuid4())
+
+
+class Status(str, Enum):
+    AWAY = "away"
+    BUSY = "busy"
+    UNKNOWN = "unknown"
+    AVAILABLE = "available"
 
 
 class Fee(BaseModel):
@@ -30,7 +38,8 @@ class Clinic(BaseModel):
 
 class Slot(BaseModel):
     id: str = Field(default_factory=lambda: generate_id())
-    begin: Annotated[str | None, Field(default=None)]
+    begin: Annotated[str | None, Field(
+        default=None, description="The slot start time")]
     duration: int
     booked: bool = False
     mode: str | None = None
@@ -40,7 +49,7 @@ class Schedule(BaseModel):
     weekday: str
     slots: list[Slot]
     clinic: Clinic | None = None
-    # Use time objects for start/end
+    # Use time objects for start/end later
     end: str | None = Field(default=None)
     start: str | None = Field(default=None)
     hours_available: int | None = None

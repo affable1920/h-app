@@ -22,7 +22,7 @@ const DrCardEssentials = React.memo(({ doctor }: { doctor: Doctor }) => {
           </div>
           <div className="flex gap-2 text-sm">
             <h2 className="card-h2 line-clamp-1">
-              {doctor.primarySpecialization}
+              {doctor.primary_specialization}
             </h2>
             <p>({doctor.experience}y)</p>
           </div>

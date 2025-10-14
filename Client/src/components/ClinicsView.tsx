@@ -14,7 +14,7 @@ import Badge from "./Badge";
 import Spinner from "./Spinner";
 import api from "../services/ApiClient";
 import useDocStore from "../stores/doctorsStore";
-import type { Clinic, Schedule, TimeSlot } from "../types/DoctorInfo";
+import type { Clinic, Schedule, Slot } from "../types/Doctor";
 
 const scheduleVariants: Record<string, Variant> = {
   initial: {
@@ -61,7 +61,7 @@ const ClinicsView = React.memo(
       const data = {
         slot: selectedSlot,
         date: selectedDate?.toISO(),
-        clinic: selectedClinic ?? s.clinic.id,
+        clinic: selectedClinic ?? s?.clinic?.id,
       };
 
       try {
@@ -155,7 +155,7 @@ const ClinicsView = React.memo(
                           key={slot.begin}
                           content={slot.begin}
                           className="self-start"
-                          entity={slot as TimeSlot}
+                          entity={slot as Slot}
                           isOn={(s) => selectedSlot === s}
                           onClick={() => setSelectedSlot(slot)}
                           isDisabled={() => slot.booked as boolean}

@@ -1,13 +1,13 @@
-import json
-import random
-from uuid import uuid4
-from datetime import datetime, time, timedelta
-
-from app.constants import index as constants
-from app.models.doctorModel.Doctor import Doctor
-from app.models.doctorModel.DoctorExtraTypes import Clinic, Slot, Schedule, Fee
-
 from app.models.doctorModel.Doctor import DrEssentials, DrSecondaries
+from app.models.doctorModel.DoctorExtraTypes import Clinic, Slot, Schedule, Fee
+from app.models.doctorModel.Doctor import Doctor
+from app.constants import index as constants
+
+from datetime import datetime, time, timedelta
+from uuid import uuid4
+import random
+import json
+from pathlib import Path
 
 
 class DataGenerator:
@@ -182,7 +182,7 @@ def generate_doctors(count: int = 40) -> list[dict]:
 # Example usage
 if __name__ == "__main__":
     try:
-        doctors = generate_doctors(5)
+        doctors = generate_doctors()
 
         with open("data/Doctors.json", "w") as f:
             json.dump(doctors, f, indent=2)

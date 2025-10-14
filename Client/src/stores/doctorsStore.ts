@@ -3,6 +3,7 @@ import api from "../services/ApiClient";
 import type { Doctor } from "../types/Doctor";
 import useQueryStore from "./queryStore";
 import { persist } from "zustand/middleware";
+import { type DoctorResponse } from "../types/Doctor";
 
 type QueryParams = {
   max?: number;
@@ -20,12 +21,6 @@ interface DocStore {
   getDoctorById: (id: string, signal?: AbortSignal) => Promise<void>;
   getDoctors: (query: QueryParams, signal?: AbortSignal) => Promise<void>;
 }
-
-type DoctorResponse = {
-  doctors: Doctor[];
-  curr_count: number;
-  total_count: number;
-};
 
 const endpoint = "/doctors";
 

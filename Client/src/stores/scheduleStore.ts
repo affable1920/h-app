@@ -1,11 +1,10 @@
 import { DateTime } from "luxon";
 import { create } from "zustand";
-import type { TimeSlot } from "../types/DoctorInfo";
-import type { Schedule } from "motion";
+import type { Slot, Schedule } from "../types/Doctor";
 
 interface StoreState {
   selectedDate: DateTime | null;
-  selectedSlot: TimeSlot | null;
+  selectedSlot: Slot | null;
   selectedClinic: string | null;
 
   selectedSchedule?: Schedule | null;
@@ -13,7 +12,7 @@ interface StoreState {
 
 interface Actions {
   setSelectedDate: (date: DateTime) => void;
-  setSelectedSlot: (slot: TimeSlot) => void;
+  setSelectedSlot: (slot: Slot) => void;
   setSelectedClinic: (clinicId: string) => void;
 
   setSelectedSchedule?: (schedule: Schedule) => void;

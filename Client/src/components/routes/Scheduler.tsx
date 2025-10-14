@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from "react";
-import type { Schedule } from "../../types/DoctorInfo";
+import type { Schedule } from "../../types/Doctor";
 
 import ClinicsView from "../ClinicsView";
 import Calendar from "../Calendar/Calendar";
@@ -11,9 +11,7 @@ const Scheduler = memo(() => {
   const selectedDate = useScheduleStore((s) => s.selectedDate);
   const setSelectedClinic = useScheduleStore((s) => s.setSelectedClinic);
 
-  const [targetSchedules, setTargetSchedules] = useState<Schedule[] | null>(
-    null
-  );
+  const [targetSchedules, setTargetSchedules] = useState<Schedule[]>([]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -22,8 +20,9 @@ const Scheduler = memo(() => {
           s.weekday?.toLowerCase() === selectedDate.weekdayLong?.toLowerCase()
       );
 
-      setTargetSchedules(target ?? null);
-      if (target && target.length) setSelectedClinic(target[0]?.clinic?.id);
+      setTargetSchedules(target ?? []);
+      if (target && target[0]?.clinic?.id)
+        setSelectedClinic(target[0].clinic.id);
     }
   }, [doctor, selectedDate, setSelectedClinic]);
 

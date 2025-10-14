@@ -1,4 +1,7 @@
+from typing import Any
 from datetime import time
+
+from app.models.doctorModel.DoctorExtraTypes import Status
 
 # Constants
 HOSPITALS = [
@@ -63,7 +66,8 @@ TIME_SLOTS = [
     time(22, 30),
 ]
 
-STATUSES = ["active", "Away", "busy", "unknown"]
+STATUSES: list[Status] = [Status.AVAILABLE,
+                          Status.AWAY, Status.BUSY, Status.UNKNOWN]
 
 
 NAMES = ["James", "Sarah", "Michael", "Emily", "David", "Jennifer", "Robert", "Lisa",

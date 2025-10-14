@@ -69,10 +69,10 @@ def generate_openapi_spec(app: FastAPI):
                     prefix.lower(), suffix.capitalize()] if x]
                 fn_name = "".join(fn_parts)
 
-                operation["operationId"] = fn_name
+                # operation["operationId"] = fn_name
 
-        app.openapi_schema = spec
-        return app.openapi_schema
+        # app.openapi_schema = spec
+        # return app.openapi_schema
 
     except Exception as e:
         print(e)

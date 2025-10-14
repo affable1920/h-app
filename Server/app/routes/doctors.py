@@ -1,3 +1,4 @@
+from time import time
 from fastapi import Depends
 from pydantic import BaseModel
 from fastapi.routing import APIRouter
@@ -20,10 +21,11 @@ class DoctorResponse(BaseModel):
 @router.get("", response_model=DoctorResponse)
 async def get_doctors(params: QueryParameters = Depends()):
     try:
-        return doctor_service.get_doctors(**params.model_dump())
+        response = doctor_service.get_doctors(params)
+        return response
 
     except Exception as e:
-        print(e)
+        print(f"Exception in doctors route\n{e}")
 
 
 @router.get("/{id}", response_model=Doctor)

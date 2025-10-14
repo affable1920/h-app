@@ -1,6 +1,5 @@
-from datetime import datetime
-from typing import Annotated
 from uuid import uuid4
+from typing import Annotated
 from . import DoctorExtraTypes as DrType
 from pydantic import BaseModel, EmailStr, Field
 
@@ -14,8 +13,8 @@ class DrEssentials(BaseModel):
 
 
 class DrSecondaries(BaseModel):
-    status: str
     fee: DrType.Fee
+    status: DrType.Status = DrType.Status.UNKNOWN
 
     verified: bool = False
     reviews: int | None = None

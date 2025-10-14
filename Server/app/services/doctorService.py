@@ -1,10 +1,10 @@
 import json
-from math import e
 from pathlib import Path
-from fastapi import HTTPException
 from typing_extensions import Self
+from fastapi import Depends, HTTPException
 
 from app.models.doctorModel.Doctor import Doctor
+from app.models.QueryParams import QueryParameters, SortOrder, StatusOrder
 
 
 class DoctorService:
@@ -38,39 +38,71 @@ class DoctorService:
                     self._doctors = json.load(f)
 
             except FileNotFoundError:
-                # create a bg task for auto file creation
+                # create a bg task for auto file creation later
                 print("File not found")
 
 
 #
 
+    def get_doctors(self, kwargs: QueryParameters = Depends()):
+        try:
+            max, page, *rest = kwargs.model_dump(exclude_none=True).values()
 
-    def get_doctors(self, search_query: str, max: int = 5, page: int = 1):
-        cache_key = f"{page}-{max}-{search_query}"
-        print(cache_key)
+            """
 
-        if cache_key in self._cache and self._cache_is_valid:
-            print("Cache hit")
-            return self._cache[cache_key]
+            if any of the params are not provided, then they are set to None
+            and thus are not included in the cache key so that the cache key
+            is not affected by the missing params and the cache key remains the same for the same query
+           
+            
+            *[x for x in rest if x]
+            
+            Moreover, the list comprehension for the rest list will return 
+            nothing if rest would turn out to be empty, or
+            
+            if any item is None, the if x also handles that case, leaving that out 
+            as well.
 
-        doctors = self._doctors
+            All items returned from the outside comprehension would be joined 
+            together after ofcourse converting em to strings sperated by "_"  
+            
+            """
 
-        if search_query:
-            doctors = [
-                doc for doc in doctors if search_query in doc["name"].lower()]
+            cache_key = "_".join(str(x)
+                                 for x in [page, max, *[x for x in rest if x]] if x)
 
-        start = (page - 1) * max
-        end = start + max
+            if cache_key in self._cache and self._cache_is_valid:
+                print("Cache hit under this key: ", cache_key)
+                return self._cache[cache_key]
 
-        paginated_doctors = doctors[start: min(end, len(doctors))]
-        result = {
-            "doctors": [Doctor(**doc) for doc in paginated_doctors],
-            "total_count": len(self._doctors),
-            "curr_count": len(paginated_doctors),
-        }
+            doctors = self._doctors
 
-        self._cache[cache_key] = result
-        return result
+            if kwargs.sort_by:
+                prop, order = kwargs.sort_by
+
+                doctors = sorted(doctors, key=lambda x: x.get(prop, "name"))
+                doctors = doctors if order == SortOrder.ASC else doctors[::-1]
+
+            if kwargs.search_query:
+                doctors = [
+                    doc for doc in doctors if kwargs.search_query in doc["name"].lower()]
+
+            start = (page - 1) * max
+            end = start + max
+
+            paginated_doctors = doctors[start: min(end, len(doctors))]
+
+            result = {
+                "doctors": [Doctor(**doc) for doc in paginated_doctors],
+                "total_count": len(self._doctors or []),
+                "curr_count": len(paginated_doctors or []),
+            }
+
+            self._cache[cache_key] = result
+            return result
+
+        except Exception as e:
+            print(e)
 
 #
 

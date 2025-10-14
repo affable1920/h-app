@@ -1,6 +1,7 @@
+import type { Status } from "../types/Doctor";
 import useDocStore from "../stores/doctorsStore";
 import useModalStore from "../stores/modalStore";
-import type { Status, DrCTA, DoctorActions } from "../types/Doctor";
+import type { DrCTA, DoctorActions } from "../types/DoctorActions";
 
 const customConfig: Record<Status, DrCTA[]> = {
   available: [
@@ -8,7 +9,6 @@ const customConfig: Record<Status, DrCTA[]> = {
       name: "call",
       icon: "call",
       label: "consult now",
-      action: () => {},
       isPrimary: true,
     },
     {
@@ -16,7 +16,6 @@ const customConfig: Record<Status, DrCTA[]> = {
       icon: "calendar",
       label: "schedule",
       needsDD: true,
-      action: () => {},
     },
   ],
 
@@ -25,7 +24,6 @@ const customConfig: Record<Status, DrCTA[]> = {
       label: "schedule",
       icon: "calendar",
       name: "schedule",
-      action: () => {},
       needsDD: true,
       isPrimary: true,
     },
@@ -34,13 +32,11 @@ const customConfig: Record<Status, DrCTA[]> = {
       name: "schedule",
       label: "Book an appointment",
       needsDD: true,
-      action: () => {},
     },
   ],
 
   away: [
     {
-      action: () => {},
       isPrimary: true,
       icon: "offline",
       label: "Leave a message",
@@ -49,14 +45,12 @@ const customConfig: Record<Status, DrCTA[]> = {
     {
       icon: "user",
       label: "View Profile",
-      action: () => {},
       name: "profile",
     },
   ],
 
   unknown: [
     {
-      action: () => {},
       isPrimary: true,
       icon: "offline",
       label: "Leave a message",
@@ -66,7 +60,6 @@ const customConfig: Record<Status, DrCTA[]> = {
       label: "View Profile",
       icon: "user",
       name: "profile",
-      action: () => {},
     },
   ],
 };
@@ -102,7 +95,7 @@ class DoctorService {
 
   call() {
     useModalStore.getState().openModal("call", {
-      docID: this._id,
+      doctorId: this._id,
       viewOverlay: true,
     });
   }
@@ -113,7 +106,7 @@ class DoctorService {
 
       useModalStore.getState().openModal("schedule", {
         position: DoctorService.cache[this._id],
-        docID: this._id,
+        doctorId: this._id,
       });
 
       return;
@@ -124,23 +117,23 @@ class DoctorService {
 
     useModalStore
       .getState()
-      .openModal("schedule", { position, docID: this._id });
+      .openModal("schedule", { position, doctorId: this._id });
   }
 
   async getDoctorAction(
-    docID: string,
-    actionName: keyof DoctorActions,
-    targetElement: Element
+    doctorId: string,
+    targetElement: Element,
+    action: keyof DoctorActions
   ) {
     const { currDoctor } = useDocStore.getState();
 
-    if (currDoctor?.id !== docID)
-      await useDocStore.getState().getDoctorById(docID);
+    if (currDoctor?.id !== doctorId)
+      await useDocStore.getState().getDoctorById(doctorId);
 
-    if (actionName) this._actionMapper[actionName](targetElement);
+    if (action) this._actionMapper[action](targetElement);
   }
 
-  getDoctorInfo(status: Status = "unknown") {
+  getDoctorInfo(status: Status) {
     if (status) return customConfig[status];
   }
 }

@@ -8,9 +8,8 @@ export type DoctorActions = {
 
 export interface DrCTA {
   icon: string;
-  name: keyof DoctorActions;
   label: string;
   needsDD?: boolean;
-  action: () => void;
   isPrimary?: boolean;
+  name: keyof DoctorActions;
 }

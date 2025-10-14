@@ -1,35 +1,16 @@
-import * as constants from "../utilities/constants";
-import type { Fee, Clinic, Schedule } from "./DoctorInfo";
+import type { components } from "./api";
 
-export interface DoctorEssentials {
-  id: string;
-  name: string;
-  email: string;
+export type Doctor = components["schemas"]["Doctor"];
+export type Clinic = components["schemas"]["Clinic"];
 
-  credentials: string;
-  primarySpecialization: string;
-}
+export type Fee = components["schemas"]["Fee"];
+export type Slot = components["schemas"]["Slot"];
+export type Location = components["schemas"]["Location"];
+export type Schedule = components["schemas"]["Schedule"];
 
-export interface DoctorSecondaryInfo {
-  fee: Fee;
-  schedules: Schedule[];
-  office: Partial<Clinic>;
+export type ChatRequest = components["schemas"]["ChatRequest"];
+export type ChatResponse = components["schemas"]["ChatResponse"];
 
-  contact?: string;
-  consultsOnline: boolean;
-  experience?: number | null;
+export type DoctorResponse = components["schemas"]["DoctorResponse"];
 
-  rating?: number;
-  reviews?: number;
-  verified: boolean;
-  status?: constants.Status;
-  lastUpdated?: string | null;
-  secondarySpecializations?: string[];
-
-  baseFee: number;
-  currentlyAvailable?: boolean;
-  nextAvailable?: string | null;
-  baseConsultTime: constants.ConsultationDuration;
-}
-
-export interface Doctor extends DoctorEssentials, DoctorSecondaryInfo {}
+export type Status = Doctor["status"];

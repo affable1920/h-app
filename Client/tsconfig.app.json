@@ -7,6 +7,20 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
+    /* Bundler output management */
+    "baseUrl": "./src",
+    "paths": {
+      // key -> alias, value -> path
+      // all files inside the src directory.
+      "@/*": ["./*"],
+
+      // all files inside the components directory inside src.
+      // think of the asterisk as a placeholder, helps.
+      "@types/*": ["./types/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@components/*": ["./components/*"]
+    },
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

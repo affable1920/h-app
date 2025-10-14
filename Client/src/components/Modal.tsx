@@ -15,7 +15,7 @@ const MODALS: Record<string, React.ElementType> = {
       </div>
     );
   },
-  schedule: ({ docID }: { docID: string }) => {
+  schedule: ({ doctorId }: { doctorId: string }) => {
     return (
       <motion.ul
         layout
@@ -32,7 +32,7 @@ const MODALS: Record<string, React.ElementType> = {
               layoutId={item}
               transition={{ delay: i * 0.1, staggerChildren: 0.1 }}
             >
-              <Link to={`doctors/${docID}/schedule`}>{item}</Link>
+              <Link to={`doctors/${doctorId}/schedule`}>{item}</Link>
             </motion.li>
           )
         )}

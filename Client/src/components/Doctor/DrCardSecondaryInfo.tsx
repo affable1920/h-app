@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import Button from "../Button";
 import type { Doctor } from "../../types/Doctor";
 import { Link } from "react-router-dom";
-import { iconMap } from "../../utilities/constants";
+import { iconMap, type Status } from "../../utilities/constants";
 import { BiLocationPlus } from "react-icons/bi";
 import DoctorService from "../../services/DoctorService";
 import { capitalize } from "../../utilities/utils";
@@ -15,21 +15,20 @@ const statusCssConfig = {
 };
 
 const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
-  const service = useMemo(() => new DoctorService(doctor.id), [doctor]);
+  const service = useMemo(
+    () => new DoctorService(doctor.id as string),
+    [doctor]
+  );
 
-  const status = doctor.status ?? "unknown";
+  const status: Status = (doctor.status as Status) ?? "unknown";
   const config = service.getDoctorInfo(status);
 
   const handleClick = useCallback(
-    (
-      ev: React.MouseEvent<HTMLButtonElement>,
-      name: string,
-      doctorId: string
-    ) => {
+    (ev: React.MouseEvent<HTMLButtonElement>) => {
       const targetBtn = ev.currentTarget.closest("button") as HTMLButtonElement;
-      service.getDoctorAction(doctorId, name, targetBtn);
+      if (doctor.id) service.getDoctorAction(doctor.id, targetBtn, "schedule");
     },
-    [service]
+    [service, doctor]
   );
 
   return (
@@ -58,7 +57,7 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
 
         <div className="flex items-center italic gap-1 self-end">
           {(config || []).map((configObject, i) => {
-            const { name, isPrimary, icon, label = "" } = configObject;
+            const { isPrimary, icon, label = "" } = configObject;
             const Icon = iconMap[icon];
 
             return (
@@ -68,7 +67,7 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
                   ? { variant: "contained", color: "accent" }
                   : { variant: "outlined" })}
                 style={{ order: isPrimary ? 10 : 9 }}
-                onClick={(ev) => handleClick(ev, name, doctor.id)}
+                onClick={handleClick}
               >
                 {capitalize(label)} {Icon && <Icon />}
               </Button>

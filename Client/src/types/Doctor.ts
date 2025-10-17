@@ -11,6 +11,4 @@ export type Schedule = components["schemas"]["Schedule"];
 export type ChatRequest = components["schemas"]["ChatRequest"];
 export type ChatResponse = components["schemas"]["ChatResponse"];
 
-export type DoctorResponse = components["schemas"]["DoctorResponse"];
-
 export type Status = Doctor["status"];

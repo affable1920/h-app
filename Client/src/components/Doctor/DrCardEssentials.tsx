@@ -15,7 +15,7 @@ const DrCardEssentials = React.memo(({ doctor }: { doctor: Doctor }) => {
           <div className="flex gap-1 items-center">
             <Link to={`/doctors/${doctor.id}`}>
               <h2 className="card-h2 truncate line-clamp-1 hover:underline hover:text-blue-700">
-                {doctor.name}
+                Dr. {doctor.name}
               </h2>
             </Link>
             {<MdVerifiedUser color={doctor.verified ? "green" : "red"} />}

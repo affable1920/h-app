@@ -5,7 +5,7 @@ import {
   type DoctorEssentials,
   type DoctorSecondaryInfo,
 } from "../types/Doctor.ts";
-import * as constants from "../utilities/constants.ts";
+import * as constants from "../utils/constants.ts";
 import type { Clinic, Fee, TimeSlot, Schedule } from "../types/DoctorInfo.ts";
 import { DateTime } from "luxon";
 

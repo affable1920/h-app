@@ -1,30 +1,28 @@
 import { create } from "zustand";
 import api from "../services/ApiClient";
-import type { Doctor } from "../types/Doctor";
-import useQueryStore from "./queryStore";
+import useQueryingStore from "./queryStore";
 import { persist } from "zustand/middleware";
-import { type DoctorResponse } from "../types/Doctor";
+import type { operations } from "@/types/api";
+import type { Doctor } from "../types/Doctor";
 
-type QueryParams = {
-  max?: number;
-  limit?: number;
-  currPage?: number;
-  searchQuery?: string;
-};
+type Params = operations["get_doctors"]["parameters"]["query"];
+type DoctorResponse =
+  operations["get_doctors"]["responses"]["200"]["content"]["application/json"];
 
-interface DocStore {
+type StoreState = {
   doctors: Doctor[];
   currDoctor: Doctor | null;
+};
 
+type StoreActions = {
   setCurrDoc?: (id: string) => void;
-
+  getDoctors: (query: Params, signal?: AbortSignal) => Promise<void>;
   getDoctorById: (id: string, signal?: AbortSignal) => Promise<void>;
-  getDoctors: (query: QueryParams, signal?: AbortSignal) => Promise<void>;
-}
+};
 
 const endpoint = "/doctors";
 
-const useDocStore = create<DocStore>()(
+const useDoctorsStore = create<StoreState & StoreActions>()(
   persist(
     (set, get) => ({
       currDoctor: null,
@@ -32,16 +30,14 @@ const useDocStore = create<DocStore>()(
 
       async getDoctors(query, signal) {
         try {
-          const { doctors, total_count } = await api.get<DoctorResponse>(
-            endpoint,
-            {
+          const { data: doctors = [], total_count } =
+            await api.get<DoctorResponse>(endpoint, {
               params: { ...query },
               signal,
-            }
-          );
+            });
 
           set({ doctors });
-          useQueryStore.setState({ totalCount: total_count });
+          useQueryingStore.setState({ totalCount: total_count });
         } catch (ex) {
           console.log(ex);
           throw ex;
@@ -65,4 +61,4 @@ const useDocStore = create<DocStore>()(
   )
 );
 
-export default useDocStore;
+export default useDoctorsStore;

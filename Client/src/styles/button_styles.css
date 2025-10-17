@@ -28,7 +28,7 @@
 
 /* color utils */
 @utility accent {
-  @apply bg-accent border-accent-dark;
+  @apply bg-accent-dark border-accent;
 
   &:hover,
   &:focus {

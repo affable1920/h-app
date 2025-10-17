@@ -1,28 +1,22 @@
 import { useState } from "react";
+import Button from "../Button";
+import { Link } from "react-router-dom";
 import { MdSend } from "react-icons/md";
-import generateDoctors from "../../scripts/dataGenerator";
 
 const HomePage = () => {
   const [userQuery, setUserQuery] = useState("");
 
-  const blob = new Blob([JSON.stringify(generateDoctors())], {
-    type: "application/json",
-  });
-
-  const url = URL.createObjectURL(blob);
-
   return (
-    <section className="flex flex-col h-1/2 max-h-full py-12 pb-2">
-      <div className="grow flex flex-wrap gap-4" />
-
-      <a
-        href={url}
-        download="doctors.json"
-        className="text-center w-full mb-4 bg-slate-100 p-2 
-      rounded-md text-cyan-800"
-      >
-        Download doctors list!
-      </a>
+    <section className="flex flex-col h-1/2 max-h-full py-12 pb-2 gap-4">
+      <ul className="flex items-center gap-4">
+        <li>
+          <Link to="/doctors">
+            <Button size="md" variant="contained" color="primary">
+              See Directories
+            </Button>
+          </Link>
+        </li>
+      </ul>
 
       <section
         className="flex flex-col w-full justify-between max-w-2xl mx-auto gap-4 border-2 border-slate-200 
@@ -31,7 +25,7 @@ const HomePage = () => {
         <div className="relative font-semibold min-h-12">
           {!userQuery && (
             <p className="opacity-50 pointer-events-none absolute">
-              Search by Dr name, condition ...
+              Search for doctors, clinics, conditions ...
             </p>
           )}
 

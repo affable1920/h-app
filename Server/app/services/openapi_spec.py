@@ -32,7 +32,7 @@ def generate_openapi_spec(app: FastAPI):
     such as operationId aka the function name, parameters the function takes, their types, tags, response models ...
 
     Tags[0] would be the first tag as inside the route's tags parameter and
-    Operation Id would be the func name
+    Operation Id would be the actual function name.
 
     Using the rsplit method with the 2nd arg as 1 only splits once from the right
     The last part added by openapi to each operation id is the http method therefore could use the rsplit.
@@ -63,13 +63,13 @@ def generate_openapi_spec(app: FastAPI):
                 suffix = parts[-1] if len(parts) > 1 else ""
 
                 fn_parts = [x for x in [
-                    prefix.lower(), suffix.capitalize()] if x]
-                fn_name = "".join(fn_parts)
+                    prefix.lower(), suffix.lower()] if x]
+                fn_name = "_".join(fn_parts)
 
-                # operation["operationId"] = fn_name
+                operation["operationId"] = fn_name
 
-        # app.openapi_schema = spec
-        # return app.openapi_schema
+        app.openapi_schema = spec
+        return app.openapi_schema
 
     except Exception as e:
         print(e)

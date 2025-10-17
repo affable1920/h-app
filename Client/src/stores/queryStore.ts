@@ -1,26 +1,29 @@
 import { create } from "zustand";
 
-interface QueryStore {
-  limit: number;
+type StoreState = {
+  max: number;
   currPage: number;
-  searchQuery?: string;
   totalCount: number | null;
+  searchQuery: string | null;
+};
 
-  setLimit: (max: number) => void;
+type StoreActions = {
+  setmax: (max: number) => void;
   setCurrPage: (cp: number) => void;
   setSearchQuery: (sq: string) => void;
-}
+};
 
-const useQueryStore = create<QueryStore>((set) => ({
-  limit: 5,
+const useQueryingStore = create<StoreState & StoreActions>((set) => ({
+  max: 8,
   currPage: 1,
-  searchQuery: "",
+  searchQuery: null,
   totalCount: null,
 
-  setLimit: (max: number) => set((store) => ({ ...store, limit: max })),
+  setmax: (max: number) => set((store) => ({ ...store, max: max })),
   setCurrPage: (cp: number) => set((store) => ({ ...store, currPage: cp })),
-  setSearchQuery: (sq: string) =>
-    set((store) => ({ ...store, currPage: 1, searchQuery: sq })),
+  setSearchQuery: (sq: string) => {
+    set((store) => ({ ...store, currPage: 1, searchQuery: sq }));
+  },
 }));
 
-export default useQueryStore;
+export default useQueryingStore;

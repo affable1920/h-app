@@ -3,11 +3,11 @@ import type { Schedule } from "../../types/Doctor";
 
 import ClinicsView from "../ClinicsView";
 import Calendar from "../Calendar/Calendar";
-import useDocStore from "../../stores/doctorsStore";
+import useDoctorsStore from "../../stores/doctorsStore";
 import useScheduleStore from "../../stores/scheduleStore";
 
 const Scheduler = memo(() => {
-  const doctor = useDocStore((s) => s.currDoctor);
+  const doctor = useDoctorsStore((s) => s.currDoctor);
   const selectedDate = useScheduleStore((s) => s.selectedDate);
   const setSelectedClinic = useScheduleStore((s) => s.setSelectedClinic);
 

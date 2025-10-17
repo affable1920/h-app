@@ -74,7 +74,7 @@ const Button = memo((props: ButtonProps) => {
       {...rest} // Spread all other props to the button element
     >
       {startIcon && startIcon}
-      {children}
+      <>{children}</>
       {endIcon && endIcon}
     </ButtonComponent>
   );

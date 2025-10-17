@@ -2,10 +2,10 @@ import React, { useCallback, useMemo } from "react";
 import Button from "../Button";
 import type { Doctor } from "../../types/Doctor";
 import { Link } from "react-router-dom";
-import { iconMap, type Status } from "../../utilities/constants";
+import { iconMap, type Status } from "../../utils/constants";
 import { BiLocationPlus } from "react-icons/bi";
 import DoctorService from "../../services/DoctorService";
-import { capitalize } from "../../utilities/utils";
+import { capitalize } from "../../utils/utils";
 
 const statusCssConfig = {
   unknown: { bg: "bg-error", text: "text-error" },

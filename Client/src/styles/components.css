@@ -54,7 +54,7 @@
   }
 }
 
-.dashboard {
+.directory-layout {
   display: grid;
   gap: calc(theme(--spacing) * 6);
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));

@@ -7,6 +7,8 @@ from app.routes import doctors
 from app.routes import clinics
 from app.routes import schedules
 
+from app.services.openapi_spec import generate_openapi_spec
+
 
 @asynccontextmanager
 async def root(app: FastAPI):
@@ -32,6 +34,9 @@ app.include_router(ai.router)
 app.include_router(doctors.router)
 app.include_router(clinics.router)
 app.include_router(schedules.router)
+
+
+app.openapi_schema = generate_openapi_spec(app)
 
 
 @app.get("/")

@@ -3,7 +3,7 @@ import { AnimatePresence, motion, type Variant } from "motion/react";
 
 import { BsArrowRight } from "react-icons/bs";
 import { BiLocationPlus } from "react-icons/bi";
-import type { Weekday } from "../utilities/constants";
+import type { Weekday } from "../utils/constants";
 
 import Button from "./Button";
 import useScheduleStore from "../stores/scheduleStore";
@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 import Badge from "./Badge";
 import Spinner from "./Spinner";
 import api from "../services/ApiClient";
-import useDocStore from "../stores/doctorsStore";
+import useDoctorsStore from "../stores/doctorsStore";
 import type { Clinic, Schedule, Slot } from "../types/Doctor";
 
 const scheduleVariants: Record<string, Variant> = {
@@ -67,7 +67,7 @@ const ClinicsView = React.memo(
       try {
         setloading(true);
         const response = await api.post(
-          `/schedules/${useDocStore.getState().currDoctor?.id}`,
+          `/schedules/${useDoctorsStore.getState().currDoctor?.id}`,
           data
         );
         console.log(response);

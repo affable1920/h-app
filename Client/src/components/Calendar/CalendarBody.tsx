@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo } from "react";
 import { DateTime } from "luxon";
 import CalendarDay from "./CalendarDay";
-import { DAYS_OF_WEEK, type Weekday } from "../../utilities/constants";
-import { createCalendarData } from "../../utilities/calendarUtils";
-import useDocStore from "../../stores/doctorsStore";
+import { DAYS_OF_WEEK, type Weekday } from "../../utils/constants";
+import { createCalendarData } from "../../utils/calendarUtils";
+import useDoctorsStore from "../../stores/doctorsStore";
 
 interface BodyProps {
   dateInView: DateTime;
@@ -22,7 +22,7 @@ const CalendarBody = React.memo(({ dateInView }: BodyProps) => {
     [dateInView]
   );
 
-  const schedules = useDocStore((s) => s.currDoctor?.schedules);
+  const schedules = useDoctorsStore((s) => s.currDoctor?.schedules);
   const availableDays = useMemo(
     () => schedules?.map((s) => s.weekday) || [],
     [schedules]

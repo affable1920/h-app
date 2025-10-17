@@ -1,5 +1,5 @@
 import type { Status } from "../types/Doctor";
-import useDocStore from "../stores/doctorsStore";
+import useDoctorsStore from "../stores/doctorsStore";
 import useModalStore from "../stores/modalStore";
 import type { DrCTA, DoctorActions } from "../types/DoctorActions";
 
@@ -125,10 +125,10 @@ class DoctorService {
     targetElement: Element,
     action: keyof DoctorActions
   ) {
-    const { currDoctor } = useDocStore.getState();
+    const { currDoctor } = useDoctorsStore.getState();
 
     if (currDoctor?.id !== doctorId)
-      await useDocStore.getState().getDoctorById(doctorId);
+      await useDoctorsStore.getState().getDoctorById(doctorId);
 
     if (action) this._actionMapper[action](targetElement);
   }

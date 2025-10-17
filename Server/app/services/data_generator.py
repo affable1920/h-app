@@ -1,6 +1,6 @@
-from app.models.doctorModel.Doctor import DrEssentials, DrSecondaries
-from app.models.doctorModel.DoctorExtraTypes import Clinic, Slot, Schedule, Fee
-from app.models.doctorModel.Doctor import Doctor
+from app.models.doctor_models.Doctor import DrEssentials, DrSecondaries
+from app.models.doctor_models.DoctorExtraTypes import Clinic, Slot, Schedule, Fee
+from app.models.doctor_models.Doctor import Doctor
 from app.constants import index as constants
 
 from datetime import datetime, time, timedelta

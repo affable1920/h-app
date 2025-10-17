@@ -1,7 +1,7 @@
 from typing import Any
 from datetime import time
 
-from app.models.doctorModel.DoctorExtraTypes import Status
+from app.models.doctor_models.DoctorExtraTypes import Status
 
 # Constants
 HOSPITALS = [

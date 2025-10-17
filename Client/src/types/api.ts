@@ -14,7 +14,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Chat */
-        post: operations["chat_chat_post"];
+        post: operations["chat"];
         delete?: never;
         options?: never;
         head?: never;
@@ -29,7 +29,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get Doctors */
-        get: operations["get_doctors_doctors_get"];
+        get: operations["get_doctors"];
         put?: never;
         post?: never;
         delete?: never;
@@ -46,7 +46,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get Doctor */
-        get: operations["get_doctor_doctors__id__get"];
+        get: operations["get_doctor"];
         put?: never;
         post?: never;
         delete?: never;
@@ -63,7 +63,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get Clinics */
-        get: operations["get_clinics_clinics_get"];
+        get: operations["get_clinics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -80,7 +80,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get Clinic */
-        get: operations["get_clinic_clinics__clinic_id__get"];
+        get: operations["get_clinic"];
         put?: never;
         post?: never;
         delete?: never;
@@ -99,24 +99,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Set Schedule */
-        post: operations["set_schedule_schedules__id__post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Root Path */
-        get: operations["root_path__get"];
-        put?: never;
-        post?: never;
+        post: operations["set_schedule"];
         delete?: never;
         options?: never;
         head?: never;
@@ -228,15 +211,6 @@ export interface components {
             /** Primary Specialization */
             primary_specialization: string;
         };
-        /** DoctorResponse */
-        DoctorResponse: {
-            /** Doctors */
-            doctors: components["schemas"]["Doctor"][];
-            /** Curr Count */
-            curr_count: number;
-            /** Total Count */
-            total_count: number;
-        };
         /** Fee */
         Fee: {
             /** Online */
@@ -256,6 +230,24 @@ export interface components {
             /** Lng */
             lng: number;
         };
+        /** RouteResponse[Clinic] */
+        RouteResponse_Clinic_: {
+            /** Data */
+            data: components["schemas"]["Clinic"][];
+            /** Curr Count */
+            curr_count: number;
+            /** Total Count */
+            total_count: number;
+        };
+        /** RouteResponse[Doctor] */
+        RouteResponse_Doctor_: {
+            /** Data */
+            data: components["schemas"]["Doctor"][];
+            /** Curr Count */
+            curr_count: number;
+            /** Total Count */
+            total_count: number;
+        };
         /** Schedule */
         Schedule: {
             /** Weekday */
@@ -274,7 +266,10 @@ export interface components {
         Slot: {
             /** Id */
             id?: string;
-            /** Begin */
+            /**
+             * Begin
+             * @description The slot start time
+             */
             begin?: string | null;
             /** Duration */
             duration: number;
@@ -314,7 +309,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    chat_chat_post: {
+    chat: {
         parameters: {
             query?: never;
             header?: never;
@@ -347,7 +342,7 @@ export interface operations {
             };
         };
     };
-    get_doctors_doctors_get: {
+    get_doctors: {
         parameters: {
             query?: {
                 max?: number;
@@ -373,7 +368,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DoctorResponse"];
+                    "application/json": components["schemas"]["RouteResponse_Doctor_"];
                 };
             };
             /** @description Validation Error */
@@ -387,7 +382,7 @@ export interface operations {
             };
         };
     };
-    get_doctor_doctors__id__get: {
+    get_doctor: {
         parameters: {
             query?: never;
             header?: never;
@@ -418,9 +413,31 @@ export interface operations {
             };
         };
     };
-    get_clinics_clinics_get: {
+    get_clinics: {
         parameters: {
             query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RouteResponse_Clinic_"];
+                };
+            };
+        };
+    };
+    get_clinic: {
+        parameters: {
+            query: {
+                id: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -436,29 +453,18 @@ export interface operations {
                     "application/json": unknown;
                 };
             };
-        };
-    };
-    get_clinic_clinics__clinic_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
     };
-    set_schedule_schedules__id__post: {
+    set_schedule: {
         parameters: {
             query: {
                 clinic_id: string;
@@ -487,26 +493,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    root_path__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
                 };
             };
         };

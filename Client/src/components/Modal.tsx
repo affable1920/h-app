@@ -5,7 +5,7 @@ import useModalStore from "../stores/modalStore";
 import useInjectModalHandlers from "../hooks/useModalHandlers";
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
-import useDocStore from "../stores/doctorsStore";
+import useDoctorsStore from "../stores/doctorsStore";
 
 const MODALS: Record<string, React.ElementType> = {
   AIGenerateModal: () => {
@@ -41,7 +41,7 @@ const MODALS: Record<string, React.ElementType> = {
   },
 
   call() {
-    const { currDoctor } = useDocStore.getState();
+    const { currDoctor } = useDoctorsStore.getState();
 
     return (
       <article>

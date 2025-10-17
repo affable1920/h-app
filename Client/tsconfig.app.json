@@ -18,6 +18,10 @@
       // think of the asterisk as a placeholder, helps.
       "@types/*": ["./types/*"],
       "@hooks/*": ["./hooks/*"],
+      "@stores/*": ["./stores/*"],
+      "@services/*": ["./services/*"],
+      "@utils/*": ["./utils/*"],
+      "@assets/*": ["./assets/*"],
       "@components/*": ["./components/*"]
     },
 

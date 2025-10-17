@@ -17,8 +17,9 @@ const NavItem = ({ href, label, onRouteClick }: NavItemProps) => {
 
 const navLinks = [
   { label: "Home", route: "/" },
-  { label: "Directory", route: "/doctors", hasChildren: true },
+  { label: "Find", route: "/find" },
   { label: "AI Chat", route: "/chat" },
+  { label: "Directories", route: "/doctors", hasChildren: true },
 ];
 
 interface NavLinksProps {

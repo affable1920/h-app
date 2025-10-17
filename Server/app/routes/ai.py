@@ -11,7 +11,7 @@ from langchain_groq import ChatGroq
 from langchain_core.output_parsers import JsonOutputParser
 
 # custom bulit app deps
-from app.models.llm import ChatRequest, ChatResponse
+from app.models.Llm import ChatRequest, ChatResponse
 
 
 router = APIRouter(prefix="/chat", tags=["chatai"])

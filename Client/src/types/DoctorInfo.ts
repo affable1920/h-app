@@ -1,4 +1,4 @@
-import * as constants from "../utilities/constants";
+import * as constants from "../utils/constants";
 
 export type Consultation = "inPerson" | "online";
 

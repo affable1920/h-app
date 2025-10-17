@@ -21,11 +21,9 @@ class StatusOrder(Enum):
 
 class QueryParameters(BaseModel):
     max: int = Field(ge=1, default=5)
-    page: Annotated[int, Field(ge=1, default=1, alias="currPage")]
+    page: Annotated[int, Field(ge=1, default=1)]
 
-    search_query: Annotated[str | None, Field(
-        default=None, alias="searchQuery")]
-
+    search_query: str | None = Field(default=None, alias="searchQuery")
     sort_by: tuple[str, SortOrder] | None = ("name", SortOrder.ASC)
 
     @field_validator("search_query")

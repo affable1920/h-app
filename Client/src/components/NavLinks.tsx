@@ -4,12 +4,11 @@ import { MdOutlineArrowDropDown } from "react-icons/md";
 interface NavItemProps {
   href: string;
   label: string;
-  onRouteClick?: () => void;
 }
 
-const NavItem = ({ href, label, onRouteClick }: NavItemProps) => {
+const NavItem = ({ href, label }: NavItemProps) => {
   return (
-    <NavLink className="navlink" onClick={onRouteClick} to={href}>
+    <NavLink className="navlink" to={href}>
       {label}
     </NavLink>
   );
@@ -19,21 +18,24 @@ const navLinks = [
   { label: "Home", route: "/" },
   { label: "Find", route: "/find" },
   { label: "AI Chat", route: "/chat" },
-  { label: "Directories", route: "/doctors", hasChildren: true },
+  {
+    label: "Directories",
+    route: "/doctors",
+    hasChildren: true,
+    children: [
+      { label: "Doctors", route: "/doctors" },
+      { label: "Clinics", route: "/clinics" },
+    ],
+  },
 ];
 
-interface NavLinksProps {
-  showRoutes: boolean;
-  onRouteChange: () => void;
-}
-
-const NavLinks = ({ showRoutes, onRouteChange }: NavLinksProps) => {
+const NavLinks = ({ showRoutes }: { showRoutes: boolean }) => {
   return (
     <ul className={`navlinks ${showRoutes && "show"}`}>
-      {navLinks.map(({ label, route, hasChildren }) => (
-        <div className="flex justify-between items-center" key={label}>
-          <NavItem href={route} label={label} onRouteClick={onRouteChange} />
-          {hasChildren && <MdOutlineArrowDropDown />}
+      {navLinks.map((navItem) => (
+        <div className="flex justify-between items-center" key={navItem.label}>
+          <NavItem href={navItem.route} label={navItem.label} />
+          {navItem.hasChildren && <MdOutlineArrowDropDown />}
         </div>
       ))}
     </ul>

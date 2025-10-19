@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import NavLinks from "./NavLinks.js";
 import { HiMenuAlt2 } from "react-icons/hi";
 import AuthActions from "./AuthActions.js";
+import { useLocation } from "react-router-dom";
 
 const Logo = ({ toggleFn }: { toggleFn: () => void }) => {
   return (
@@ -13,7 +14,11 @@ const Logo = ({ toggleFn }: { toggleFn: () => void }) => {
 
 const NavBar = () => {
   const [showRoutes, setShowRoutes] = useState(false);
-  const onRouteChange = () => setShowRoutes(false);
+  const { pathname = "" } = useLocation();
+
+  useEffect(() => {
+    if (showRoutes) setShowRoutes(false);
+  }, [pathname]);
 
   const ref = useRef<HTMLElement>(null);
 
@@ -40,7 +45,7 @@ const NavBar = () => {
   return (
     <nav className="navbar lg:flex-nowrap" ref={ref}>
       <Logo toggleFn={() => setShowRoutes((p) => !p)} />
-      <NavLinks showRoutes={showRoutes} onRouteChange={onRouteChange} />
+      <NavLinks showRoutes={showRoutes} />
       <AuthActions />
     </nav>
   );

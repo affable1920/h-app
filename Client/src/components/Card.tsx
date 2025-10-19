@@ -1,24 +1,17 @@
-import React from "react";
-import { useCallback, useState } from "react";
-
+import { useState, useCallback, type ReactElement } from "react";
 import { motion } from "motion/react";
+import Button from "./Button";
 import { MdFlip } from "react-icons/md";
-import type { Doctor } from "../../types/Doctor";
 
-import DrCardBack from "./DrCardBack";
-import DrCardEssentials from "./DrCardEssentials";
-import DrCardSecondaryInfo from "./DrCardSecondaryInfo";
-
-interface DoctorCardProps {
-  doctor: Doctor;
+interface CardProps<T> {
+  entity: T;
+  CardBack: ReactElement;
+  CardFront: ReactElement;
 }
 
-const DoctorCard = React.memo(({ doctor }: DoctorCardProps) => {
+const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const handleFlip = useCallback(() => setIsFlipped((p) => !p), []);
-
-  if (!doctor)
-    return <h1 className="card-h2">Doctor onboarding in process !</h1>;
 
   return (
     <motion.article
@@ -31,7 +24,8 @@ const DoctorCard = React.memo(({ doctor }: DoctorCardProps) => {
         transformStyle: "preserve-3d",
       }}
     >
-      {/* front side */}
+      {/* Card front */}
+
       <motion.article
         style={{ backfaceVisibility: "hidden" }}
         animate={{
@@ -42,16 +36,18 @@ const DoctorCard = React.memo(({ doctor }: DoctorCardProps) => {
         }}
         transition={{ duration: 0.25 }}
       >
-        <DrCardEssentials doctor={doctor} />
-        <DrCardSecondaryInfo doctor={doctor} />
+        {CardFront}
       </motion.article>
 
-      {/* back side */}
+      {/* Card back */}
+
       <motion.article className="backface-hidden absolute inset-0 rotate-y-180 p-4">
-        <DrCardBack {...{ doctor }} />
+        {CardBack}
       </motion.article>
 
-      <motion.button
+      <Button
+        variant="icon"
+        needsMotion={true}
         onClick={handleFlip}
         whileHover={{ scale: 0.9, opacity: 0.75 }}
         whileInView={{ scale: 0.75, opacity: 0.5 }}
@@ -66,10 +62,10 @@ const DoctorCard = React.memo(({ doctor }: DoctorCardProps) => {
             : "right-full translate-x-1/2"
         } `}
       >
-        <MdFlip size={20} />
-      </motion.button>
+        <MdFlip size={16} />
+      </Button>
     </motion.article>
   );
-});
+};
 
-export default DoctorCard;
+export default Card;

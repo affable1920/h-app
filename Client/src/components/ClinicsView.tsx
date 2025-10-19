@@ -12,8 +12,6 @@ import { FaLink } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import Badge from "./Badge";
 import Spinner from "./Spinner";
-import api from "../services/ApiClient";
-import useDoctorsStore from "../stores/doctorsStore";
 import type { Clinic, Schedule, Slot } from "../types/Doctor";
 
 const scheduleVariants: Record<string, Variant> = {
@@ -58,19 +56,14 @@ const ClinicsView = React.memo(
     }
 
     async function handleSchedule(s: Schedule) {
-      const data = {
-        slot: selectedSlot,
-        date: selectedDate?.toISO(),
-        clinic: selectedClinic ?? s?.clinic?.id,
-      };
+      // const data = {
+      //   slot: selectedSlot,
+      //   date: selectedDate?.toISO(),
+      //   clinic: selectedClinic ?? s?.clinic?.id,
+      // };
 
       try {
         setloading(true);
-        const response = await api.post(
-          `/schedules/${useDoctorsStore.getState().currDoctor?.id}`,
-          data
-        );
-        console.log(response);
       } catch (ex) {
         console.log(ex);
       } finally {

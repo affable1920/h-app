@@ -1,11 +1,9 @@
 import type { AxiosResponse } from "axios";
-import api from "../services/ApiClient";
+import APIClient from "../services/ApiClient";
 
 const endpoint = "/chat";
+const api = new APIClient(endpoint);
 
 export default async function sendMsg(
   msg: string
-): Promise<AxiosResponse["data"]> {
-  const response = await api.post(endpoint, { msg });
-  // return response.data;
-}
+): Promise<AxiosResponse["data"]> {}

@@ -346,7 +346,7 @@ export interface operations {
         parameters: {
             query?: {
                 max?: number;
-                currPage?: number;
+                page?: number;
                 searchQuery?: string | null;
             };
             header?: never;

@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import api from "../services/ApiClient";
+import APIClient from "../services/ApiClient";
 import useQueryingStore from "./queryStore";
 import { persist } from "zustand/middleware";
 import type { operations } from "@/types/api";
-import type { Doctor } from "../types/Doctor";
+import type { Doctor } from "../types/doctorAPI";
 
 type Params = operations["get_doctors"]["parameters"]["query"];
 type DoctorResponse =
@@ -13,6 +13,8 @@ type StoreState = {
   doctors: Doctor[];
   currDoctor: Doctor | null;
 };
+
+const api = new APIClient<DoctorResponse>("/doctors");
 
 type StoreActions = {
   setCurrDoc?: (id: string) => void;
@@ -30,11 +32,10 @@ const useDoctorsStore = create<StoreState & StoreActions>()(
 
       async getDoctors(query, signal) {
         try {
-          const { data: doctors = [], total_count } =
-            await api.get<DoctorResponse>(endpoint, {
-              params: { ...query },
-              signal,
-            });
+          const { data: doctors = [], total_count } = await api.get({
+            params: { ...query },
+            signal,
+          });
 
           set({ doctors });
           useQueryingStore.setState({ totalCount: total_count });
@@ -46,7 +47,7 @@ const useDoctorsStore = create<StoreState & StoreActions>()(
 
       async getDoctorById(id, signal) {
         try {
-          const doctor = await api.get<Doctor>(`${endpoint}/${id}`, { signal });
+          const doctor = await api.get<Doctor>(`${id}`, { signal });
           set(() => ({ ...get(), currDoctor: doctor }));
         } catch (ex) {
           console.log(ex);

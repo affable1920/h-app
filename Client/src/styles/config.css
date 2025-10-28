@@ -76,12 +76,12 @@ and variant for applying variants
   *::before {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
     user-select: none;
+    box-sizing: border-box;
   }
 
   html {
-    height: 100vh;
+    min-height: 100vh;
 
     @variant dark {
       color: theme(--color-slate-300);

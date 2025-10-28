@@ -1,4 +1,4 @@
-import Button from "./Button";
+import Button from "./eventElements/Button";
 import { ArrowBigRightDash, ArrowBigLeftDash } from "lucide-react";
 
 interface PaginationProps {

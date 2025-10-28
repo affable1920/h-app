@@ -1,35 +1,25 @@
-import React, { useCallback, useMemo } from "react";
-import Button from "../Button";
-import type { Doctor } from "../../types/Doctor";
+import React from "react";
+import Button from "../eventElements/Button";
+import type { Doctor } from "../../types/doctorAPI";
 import { Link } from "react-router-dom";
 import { iconMap, type Status } from "../../utils/constants";
 import { BiLocationPlus } from "react-icons/bi";
-import DoctorService from "../../services/DoctorService";
 import { capitalize } from "../../utils/utils";
+import { Doctor as DR } from "@/services/doctorModel";
 
-const statusCssConfig = {
-  unknown: { bg: "bg-error", text: "text-error" },
-  busy: { bg: "bg-warning", text: "text-warning" },
-  available: { bg: "bg-success", text: "text-success text-sky-950" },
-  away: { bg: "bg-secondary-dark", text: "text-secondary-dark opacity-60" },
-};
+function getColorConfig(status: Status) {
+  const statuses: Record<Status, { bg: string; text: string }> = {
+    unknown: { bg: "bg-error", text: "text-error" },
+    busy: { bg: "bg-warning", text: "text-warning" },
+    available: { bg: "bg-success", text: "text-success text-sky-950" },
+    away: { bg: "bg-secondary-dark", text: "text-secondary-dark opacity-60" },
+  };
+
+  return statuses[status];
+}
 
 const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
-  const service = useMemo(
-    () => new DoctorService(doctor.id as string),
-    [doctor]
-  );
-
-  const status: Status = (doctor.status as Status) ?? "unknown";
-  const config = service.getDoctorInfo(status);
-
-  const handleClick = useCallback(
-    (ev: React.MouseEvent<HTMLButtonElement>) => {
-      const targetBtn = ev.currentTarget.closest("button") as HTMLButtonElement;
-      if (doctor.id) service.getDoctorAction(doctor.id, targetBtn, "schedule");
-    },
-    [service, doctor]
-  );
+  const dr = new DR(doctor);
 
   return (
     <section className="flex flex-col text-sm capitalize">
@@ -39,9 +29,11 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
             <p className="text-black font-bold">Status -</p>
             <div className={`flex items-center gap-2`}>
               <span
-                className={`inline-flex w-1 h-1 rounded-full ${statusCssConfig[status]?.bg}`}
+                className={`inline-flex w-1 h-1 rounded-full ${
+                  getColorConfig(doctor.status).bg
+                }`}
               />
-              <h2 className={`card-h2 ${statusCssConfig[status]?.text}`}>
+              <h2 className={`card-h2 ${getColorConfig(doctor.status).text}`}>
                 {doctor.status}
               </h2>
             </div>
@@ -51,23 +43,25 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
             hover:underline underline-offset-2 font-black`}
             to="/"
           >
+            {doctor.office?.name}
             <BiLocationPlus />
           </Link>
         </div>
 
         <div className="flex items-center italic gap-1 self-end">
-          {(config || []).map((configObject, i) => {
-            const { isPrimary, icon, label = "" } = configObject;
+          {(dr.availableActions || []).map((action, i) => {
+            const { isPrimary, icon, label = "", name } = action;
             const Icon = iconMap[icon];
 
             return (
               <Button
-                key={i}
+                name={name}
+                key={`${action.label}-${i}`}
                 {...(isPrimary
                   ? { variant: "contained", color: "accent" }
                   : { variant: "outlined" })}
-                style={{ order: isPrimary ? 10 : 9 }}
-                onClick={handleClick}
+                style={{ order: isPrimary ? 1 : -1 }}
+                onClick={() => dr.executeAction(name)}
               >
                 {capitalize(label)} {Icon && <Icon />}
               </Button>

@@ -1,9 +1,11 @@
 import type { MotionProps } from "motion/react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type Size = "sm" | "md" | "lg" | "xl";
+export type Size = "sm" | "md" | "lg" | "xl";
+
 export type Variant = "contained" | "outlined" | "icon" | "badge";
-type Color =
+
+export type Color =
   | "primary"
   | "accent"
   | "danger"
@@ -14,17 +16,16 @@ type Color =
 
 interface BaseButton extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: Size;
-  rounded?: boolean;
   loading?: boolean;
   children: ReactNode;
   endIcon?: ReactNode;
   startIcon?: ReactNode;
 }
 
-type BaseButtonProps = BaseButton & { needsMotion?: boolean } & MotionProps;
+type MotionButton = BaseButton & { needsMotion?: true } & MotionProps;
 
 export type ButtonProps =
-  | (BaseButtonProps & { variant: "contained"; color: Color })
-  | (BaseButtonProps & { variant: "outlined"; color?: never })
-  | (BaseButtonProps & { variant: "icon"; color?: never })
-  | (BaseButtonProps & { variant: "badge"; color: Color });
+  | (MotionButton & { variant: "contained"; color: Color })
+  | (MotionButton & { variant: "outlined"; color?: never })
+  | (MotionButton & { variant: "icon"; color?: never })
+  | (MotionButton & { variant: "badge"; color: Color });

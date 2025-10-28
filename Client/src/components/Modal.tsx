@@ -3,42 +3,62 @@ import { createPortal } from "react-dom";
 import Overlay from "./Overlay";
 import useModalStore from "../stores/modalStore";
 import useInjectModalHandlers from "../hooks/useModalHandlers";
-import { motion } from "motion/react";
-import { Link } from "react-router-dom";
 import useDoctorsStore from "../stores/doctorsStore";
+import ScheduleModal from "./ScheduleModal";
+import DirectoryFilter from "./DirectoryFilter";
+import { AnimatePresence, motion, type Variant } from "motion/react";
+
+const modalProperties: Record<string, string> = {
+  bottom: "bottom",
+  center: "center",
+};
+
+const bottomModalVariants: Record<string, Variant> = {
+  initial: {
+    y: "100%",
+  },
+  animate: {
+    y: 0,
+    transition: { duration: 0.2, ease: "easeOut" },
+  },
+  exit: {
+    y: "100%",
+    transition: { duration: 0.075, type: "spring" },
+  },
+};
+
+const centerModalVariants: Record<string, Variant> = {
+  initial: {
+    scale: 0,
+    opacity: 0,
+  },
+  animate: {
+    opacity: 1,
+    scale: 1,
+  },
+  exit: {
+    scale: 0,
+    opacity: 0,
+  },
+};
+
+const modalVariants: Record<"center" | "bottom", Record<string, Variant>> = {
+  bottom: bottomModalVariants,
+  center: centerModalVariants,
+};
 
 const MODALS: Record<string, React.ElementType> = {
-  AIGenerateModal: () => {
+  AIGenerateModal() {
     return (
       <div>
         <h2>Hello there !</h2>
       </div>
     );
   },
-  schedule: ({ doctorId }: { doctorId: string }) => {
-    return (
-      <motion.ul
-        layout
-        className="flex flex-col italic font-semibold justify-center"
-        initial={{ y: -10, opacity: 0, fontSize: "var(--text-sm)" }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.29 }}
-      >
-        <h2 className="underline underline-offset-2 mb-1">Schedule on</h2>
-        {["Nearest Date", "Specific date", "Check doctor's schedule"].map(
-          (item, i) => (
-            <motion.li
-              key={item}
-              layoutId={item}
-              transition={{ delay: i * 0.1, staggerChildren: 0.1 }}
-            >
-              <Link to={`doctors/${doctorId}/schedule`}>{item}</Link>
-            </motion.li>
-          )
-        )}
-      </motion.ul>
-    );
-  },
+
+  schedule: ScheduleModal,
+
+  directoryFilter: DirectoryFilter,
 
   call() {
     const { currDoctor } = useDoctorsStore.getState();
@@ -52,37 +72,52 @@ const MODALS: Record<string, React.ElementType> = {
 };
 
 const Modal = React.memo(() => {
+  // Inject modal handlers for modal closers
   useInjectModalHandlers();
 
   const currModal = useModalStore((s) => s.currModal);
-  // Inject modal handlers for modal closers
-
-  const portal = document.getElementById("portal");
   const modalProps = useModalStore((s) => s.modalProps);
 
-  const { x, y } = modalProps.position || { x: 50, y: 50 };
+  function getModalStyleConfig() {
+    let classes: string = "";
+    let variants: Record<string, Variant> = {};
 
-  const transform = modalProps.viewOverlay
-    ? ""
-    : `translateX(${Math.floor(x)}px) translateY(${Math.floor(y)}px)`;
+    if (typeof modalProps?.position === "string") {
+      classes = ["modal", modalProperties[modalProps.position ?? "center"]]
+        .filter(Boolean)
+        .join(" ");
+      variants = modalVariants[modalProps.position ?? "center"];
+    }
 
-  if (!portal || !currModal) return null;
+    return { classes, variants };
+  }
 
-  const ModalElement = MODALS[currModal];
-  if (!ModalElement) return null;
+  const portal = document.getElementById("portal");
+  if (!portal) return null;
+
+  const ModalElement = currModal ? MODALS[currModal] : null;
+  const { classes, variants } = getModalStyleConfig();
 
   return createPortal(
-    <Overlay viewOverlay={modalProps.viewOverlay ?? false}>
-      {/* Actual modal */}
-      <div
-        className={"modal"}
-        style={{
-          transform,
-        }}
-      >
-        {ModalElement && <ModalElement {...modalProps} />}
-      </div>
-    </Overlay>,
+    <AnimatePresence mode="wait">
+      {currModal && ModalElement && (
+        <Overlay
+          key="modalOverlay"
+          viewOverlay={modalProps.viewOverlay ?? false}
+        >
+          <motion.div
+            key={currModal}
+            className={classes}
+            variants={variants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            <ModalElement {...modalProps} />
+          </motion.div>
+        </Overlay>
+      )}
+    </AnimatePresence>,
     portal
   );
 });

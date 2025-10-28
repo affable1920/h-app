@@ -1,8 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import docImage from "../../assets/doctor.jpg";
-import type { Doctor } from "../../types/Doctor";
+import type { Doctor } from "../../types/doctorAPI";
 import { MdVerifiedUser, MdStar } from "react-icons/md";
+import Ratings from "../Ratings";
 
 const DrCardEssentials = React.memo(({ doctor }: { doctor: Doctor }) => {
   return (
@@ -28,16 +29,7 @@ const DrCardEssentials = React.memo(({ doctor }: { doctor: Doctor }) => {
           </div>
         </div>
         <div className="flex gap-2 items-center font-semibold text-sm">
-          <div className="flex">
-            {Array.from({ length: 5 }, (_, i) => (
-              <MdStar
-                key={i + 1}
-                className={`${
-                  (doctor.rating || 0) >= i + 1 ? "text-orange-500" : ""
-                }`}
-              />
-            ))}
-          </div>
+          <Ratings rating={doctor?.rating || 0} />
           <h3 className="underline">({doctor.reviews})</h3>
         </div>
       </div>

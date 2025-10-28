@@ -27,7 +27,11 @@
   }
 
   .input {
-    @apply grow border-2 border-slate-300 rounded-md p-2 text-sm tracking-widest font-bold;
+    @apply w-full border-[1px] border-slate-300 rounded-md p-2 px-4;
+
+    &:focus {
+      @apply shadow-2xl;
+    }
   }
 
   .card {
@@ -36,7 +40,15 @@
   }
 
   .modal {
-    @apply bg-white shadow-md shadow-slate-300/40 rounded-md p-4 max-w-fit;
+    @apply bg-white shadow-md shadow-slate-300/40 rounded-md p-4;
+
+    &.bottom {
+      @apply fixed bottom-0 left-0 w-full min-h-52 rounded-t-md  border-t-slate-300 ring-4 ring-blue-400/25;
+    }
+
+    &.center {
+      @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+    }
   }
 
   .doctor-img {

@@ -6,7 +6,7 @@ interface BadgeProps<T> {
   content: ReactNode;
   className?: string;
   onClick?: () => void;
-  isOn: (entity: T) => boolean;
+  isOn?: (entity: T) => boolean;
   isDisabled?: (entity: T) => boolean;
 }
 
@@ -17,13 +17,14 @@ const BadgeComponent = <T,>({
   onClick,
   isDisabled,
   className,
+  ...rest
 }: BadgeProps<T>) => {
   const disabled = isDisabled?.(entity);
 
   const classConfig = useMemo(() => {
     return [
       disabled && "badge-disabled",
-      isOn(entity) && "badge-selected",
+      isOn?.(entity) && "badge-selected",
       className,
     ]
       .filter(Boolean)
@@ -38,6 +39,7 @@ const BadgeComponent = <T,>({
       onClick={onClick}
       disabled={disabled}
       className={classConfig}
+      {...rest}
     >
       {content}
     </Button>

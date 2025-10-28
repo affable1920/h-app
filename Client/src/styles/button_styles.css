@@ -2,9 +2,11 @@
 
 /* Base button component */
 @layer components {
+  /* Must be on every button */
   .btn {
-    @apply tracking-widest leading-tight active:scale-95 transition-colors duration-[180] rounded-lg flex 
-    items-center justify-center gap-1 border-2 font-bold whitespace-nowrap px-4 py-2;
+    @apply tracking-widest leading-tight active:scale-95  
+    rounded-lg flex items-center justify-center gap-2 border-2 font-bold whitespace-nowrap px-4 py-2
+    select-none cursor-pointer;
 
     &:disabled {
       @apply opacity-80 pointer-events-none;
@@ -17,32 +19,47 @@
   @apply h-6;
 }
 @utility md {
-  @apply h-8;
+  @apply h-8 px-6;
 }
 @utility lg {
-  @apply h-12;
+  @apply h-12 px-8;
 }
-@utility lg {
-  @apply h-14;
+@utility xl {
+  @apply h-14 px-12;
 }
 
 /* color utils */
 @utility accent {
-  @apply bg-accent-dark border-accent;
+  @apply bg-accent-light border-accent text-white;
 
   &:hover,
   &:focus {
-    @apply bg-accent-light text-white;
+    @apply bg-accent border-accent-dark;
   }
 }
 @utility primary {
-  @apply bg-secondary border-secondary-dark;
+  @apply bg-secondary border-secondary-dark text-white;
+
+  &:hover,
+  &:focus {
+    @apply bg-secondary-dark border-secondary;
+  }
 }
 @utility danger {
-  @apply bg-error border-error-dark;
+  @apply bg-error border-error-dark text-white;
+
+  &:hover,
+  &:focus {
+    @apply bg-error-dark border-red-800;
+  }
 }
 @utility slate {
-  @apply bg-slate-100 border-slate-200/30;
+  @apply bg-slate-100 border-slate-300;
+
+  &:hover,
+  &:focus {
+    @apply bg-slate-200 border-slate-400;
+  }
 }
 
 @utility neutral {
@@ -51,7 +68,7 @@
 
 /* Variant utilities */
 @utility contained {
-  @apply bg-secondary hover:bg-secondary-lightest text-slate-100;
+  @apply primary;
 
   &.primary {
     @apply primary;
@@ -62,13 +79,16 @@
   &.danger {
     @apply danger;
   }
+  &.slate {
+    @apply slate;
+  }
 }
 
 @utility outlined {
   @apply bg-transparent shadow-none border-secondary;
 
   &:hover {
-    @apply bg-secondary text-white border-secondary-dark;
+    @apply primary;
   }
 }
 
@@ -89,5 +109,5 @@
 }
 
 @utility badge-selected {
-  @apply bg-amber-400 shadow-amber-600/20 font-black shadow-inner;
+  @apply bg-amber-400 shadow-amber-600/40 !border-amber-700 font-black shadow-inner;
 }

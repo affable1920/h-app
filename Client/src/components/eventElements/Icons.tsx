@@ -1,4 +1,4 @@
-import { Button } from "./ui/button";
+import Button from "./eventElements/Button";
 import { TbUser } from "react-icons/tb";
 import { SlCallOut } from "react-icons/sl";
 import { BiMessage } from "react-icons/bi";

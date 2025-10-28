@@ -1,8 +1,8 @@
 import { memo, useEffect, useState } from "react";
-import type { Schedule } from "../../types/Doctor";
+import type { Schedule } from "@/types/doctorAPI";
 
 import ClinicsView from "../ClinicsView";
-import Calendar from "../Calendar/Calendar";
+import Calendar from "../calendar/Calendar";
 import useDoctorsStore from "../../stores/doctorsStore";
 import useScheduleStore from "../../stores/scheduleStore";
 

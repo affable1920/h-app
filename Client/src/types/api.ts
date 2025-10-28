@@ -213,10 +213,10 @@ export interface components {
         };
         /** Fee */
         Fee: {
-            /** Online */
-            online: number;
             /** In Person */
             in_person: number;
+            /** Online */
+            online?: number | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -248,12 +248,18 @@ export interface components {
             /** Total Count */
             total_count: number;
         };
-        /** Schedule */
+        /**
+         * Schedule
+         * @description use datetime as main schedule date getter if doctors
+         *     don't seem to have a fixed schedule, else better off with weekdays
+         */
         Schedule: {
             /** Weekday */
-            weekday: string;
+            weekday: number;
             /** Slots */
             slots: components["schemas"]["Slot"][];
+            /** Date */
+            date?: string | null;
             clinic?: components["schemas"]["Clinic"] | null;
             /** End */
             end?: string | null;

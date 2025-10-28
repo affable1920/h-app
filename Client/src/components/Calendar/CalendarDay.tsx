@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from "react";
-import Button from "../Button";
+import Button from "../eventElements/Button";
 import { DateTime } from "luxon";
 import useScheduleStore from "../../stores/scheduleStore";
 

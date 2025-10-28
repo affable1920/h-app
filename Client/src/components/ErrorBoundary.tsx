@@ -1,4 +1,4 @@
-import Button from "./Button";
+import Button from "./eventElements/Button";
 import { isRouteErrorResponse, Link, useRouteError } from "react-router-dom";
 
 const ErrorBoundary = () => {

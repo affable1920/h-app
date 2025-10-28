@@ -1,5 +1,5 @@
 import React from "react";
-import type { Doctor } from "../../types/Doctor";
+import type { Doctor } from "../../types/doctorAPI";
 
 const DrCardBack = React.memo(
   ({ doctor }: { doctor: Doctor }) => {

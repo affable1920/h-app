@@ -1,14 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Position } from "@/types/ui";
 import { create } from "zustand";
+
+interface BaseModalProps {
+  [key: string]: unknown;
+}
+
+type ModalProps = BaseModalProps extends { viewOverlay?: true }
+  ? BaseModalProps & { position?: "center" | "bottom" }
+  : BaseModalProps & { position?: Position };
 
 type ModalState = {
   currModal: string | null;
-  modalProps: Record<string, any>;
+  modalProps: ModalProps;
 };
 
 type ModalActions = {
   closeModal: () => void;
-  openModal: (modal: string, options?: Record<string, unknown>) => void;
+  openModal: (modal: string, options?: ModalProps) => void;
 };
 
 const useModalStore = create<ModalState & ModalActions>((set, get) => ({

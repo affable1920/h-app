@@ -4,9 +4,9 @@ import {
   type Doctor,
   type DoctorEssentials,
   type DoctorSecondaryInfo,
-} from "../types/Doctor.ts";
+} from "../types/doctorAPI.ts";
 import * as constants from "../utils/constants.ts";
-import type { Clinic, Fee, TimeSlot, Schedule } from "../types/DoctorInfo.ts";
+import type { Clinic, Fee, TimeSlot, Schedule } from "../types/doctorInfo.ts";
 import { DateTime } from "luxon";
 
 const chance = new Chance();

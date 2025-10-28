@@ -5,14 +5,14 @@ import { BsArrowRight } from "react-icons/bs";
 import { BiLocationPlus } from "react-icons/bi";
 import type { Weekday } from "../utils/constants";
 
-import Button from "./Button";
+import Button from "./eventElements/Button";
 import useScheduleStore from "../stores/scheduleStore";
 
 import { FaLink } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import Badge from "./Badge";
+import Badge from "./eventElements/Badge";
 import Spinner from "./Spinner";
-import type { Clinic, Schedule, Slot } from "../types/Doctor";
+import type { Clinic, Schedule, Slot } from "../types/doctorAPI";
 
 const scheduleVariants: Record<string, Variant> = {
   initial: {

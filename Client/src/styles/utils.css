@@ -48,9 +48,6 @@
 @utility overlay {
   position: fixed;
   inset: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
   z-index: 999;
   background: rgba(0, 0, 0, 0.25);
 }
@@ -82,3 +79,32 @@
 @utility card-h2 {
   @apply font-bold leading-tight;
 }
+
+/* styling inputs */
+/* type=range */
+/* input[type="range"] {
+  width: 100%;
+  height: 4px;
+  outline: none;
+  appearance: none;
+} */
+
+/* access the track / line of the input of type range */
+/* input[type="range"]::-webkit-slider-runnable-track {
+  @apply appearance-none border-transparent outline-none;
+} */
+
+/* access the thumb aka the draggable circle */
+
+/* input[type="range"]::-webkit-slider-thumb {
+  @apply appearance-none w-3 h-3 rounded-full cursor-pointer bg-amber-600 border-2 border-amber-700 
+  transition-colors duration-200 ease-in;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  @apply ring-4 ring-amber-400/60;
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+  @apply scale-90;
+} */

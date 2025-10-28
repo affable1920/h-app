@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 
-import Card from "../Card";
+import Card from "@/components/Card";
 import useDoctorsQuery from "../../hooks/useDoctorsQuery";
 
-import type { Doctor } from "@/types/Doctor";
+import type { Doctor } from "@/types/doctorAPI";
 
 import DrCardBack from "./DrCardBack";
 import DrCardEssentials from "./DrCardEssentials";

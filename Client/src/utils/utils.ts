@@ -1,6 +1,5 @@
-import type { AxiosResponse } from "axios";
+import type { AxiosError, AxiosResponse } from "axios";
 import { MONTHS } from "./constants";
-import type { Error } from "../types/ResponseTypes";
 import { DateTime } from "luxon";
 
 export const paginate = <T>(
@@ -46,7 +45,7 @@ export async function exponentialBackoff(
       return await func();
     } catch (ex: unknown) {
       // Return ealry if server unavailable or bad request
-      if ([0, 404].includes((ex as Error)?.status)) throw ex;
+      if ([0, 404].includes((ex as AxiosError)?.status as number)) throw ex;
 
       if (attempt === maxRetries) {
         console.log("All attempts failed.");

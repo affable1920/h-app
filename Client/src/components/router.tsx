@@ -8,9 +8,9 @@ import Scheduler from "./routes/Scheduler";
 import Directory from "./routes/Directory";
 import ErrorBoundary from "./ErrorBoundary";
 import ClinicsDirectory from "./ClinicsDirectory";
-import DoctorProfile from "./Doctor/DoctorProfile";
+import DoctorProfile from "./doctor/DoctorProfile";
 import useDoctorsStore from "../stores/doctorsStore";
-import DoctorsDirectory from "./Doctor/DoctorsDirectory";
+import DoctorsDirectory from "./doctor/DoctorsDirectory";
 
 /*
 API Routes Structure:

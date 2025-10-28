@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { create } from "zustand";
-import type { Slot, Schedule } from "../types/Doctor";
+import type { Slot, Schedule } from "../types/doctorAPI";
 
 interface StoreState {
   selectedDate: DateTime | null;

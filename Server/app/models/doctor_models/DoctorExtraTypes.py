@@ -1,7 +1,10 @@
+from datetime import datetime, time
 from enum import Enum
 from uuid import uuid4
 from typing import Annotated
 from pydantic import Field, BaseModel
+
+from app.models.BaseModel import BaseModelConfig
 
 
 def generate_id():
@@ -16,8 +19,8 @@ class Status(str, Enum):
 
 
 class Fee(BaseModel):
-    online: int = Field(gt=0)
     in_person: int = Field(gt=0)
+    online: int | None = Field(gt=0, default=None)
 
 
 class Location(BaseModel):
@@ -36,20 +39,28 @@ class Clinic(BaseModel):
     parking_available: bool = False
 
 
-class Slot(BaseModel):
+class Slot(BaseModelConfig):
     id: str = Field(default_factory=lambda: generate_id())
-    begin: Annotated[str | None, Field(
+    begin: Annotated[time | None, Field(
         default=None, description="The slot start time")]
     duration: int
     booked: bool = False
     mode: str | None = None
 
 
-class Schedule(BaseModel):
-    weekday: str
+class Schedule(BaseModelConfig):
+    """
+
+    use datetime as main schedule date getter if doctors 
+    don't seem to have a fixed schedule, else better off with weekdays
+
+    """
+    weekday: int
     slots: list[Slot]
+    date: datetime | None = None
     clinic: Clinic | None = None
+
     # Use time objects for start/end later
-    end: str | None = Field(default=None)
-    start: str | None = Field(default=None)
+    end: time | None = Field(default=None)
+    start: time | None = Field(default=None)
     hours_available: int | None = None

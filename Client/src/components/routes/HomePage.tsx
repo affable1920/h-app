@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Button from "../eventElements/Button";
+import ButtonElement from "../eventElements/Button";
 import { Link } from "react-router-dom";
 import { MdSend } from "react-icons/md";
 
@@ -11,9 +11,9 @@ const HomePage = () => {
       <ul className="flex items-center gap-4">
         <li>
           <Link to="/doctors">
-            <Button size="md" variant="contained" color="primary">
+            <ButtonElement size="md" variant="contained" color="primary">
               See Directories
-            </Button>
+            </ButtonElement>
           </Link>
         </li>
       </ul>

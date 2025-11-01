@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from "react";
-import Button from "../eventElements/Button";
+import ButtonElement from "../eventElements/Button";
 import { DateTime } from "luxon";
 import useScheduleStore from "../../stores/scheduleStore";
 
@@ -35,7 +35,7 @@ const CalendarDay = memo(
     }, [date, isDisabled, isDateSelected, isUnavailable]);
 
     return (
-      <Button
+      <ButtonElement
         size="md"
         color="slate"
         variant="badge"
@@ -44,7 +44,7 @@ const CalendarDay = memo(
         onClick={() => setSelectedDate(date)}
       >
         {date.day}
-      </Button>
+      </ButtonElement>
     );
   }
 );

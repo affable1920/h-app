@@ -1,38 +1,36 @@
 import { memo, useMemo, type ReactNode } from "react";
-import Button from "./Button";
+import ButtonElement from "./Button";
 
-interface BadgeProps<T> {
-  entity: T;
+interface BadgeProps {
   content: ReactNode;
   className?: string;
-  onClick?: () => void;
-  isOn?: (entity: T) => boolean;
-  isDisabled?: (entity: T) => boolean;
+  onClick?: (entity?: unknown) => void;
+  isOn?: (entity: unknown) => boolean;
+  isDisabled?: (entity: unknown) => boolean;
 }
 
-const BadgeComponent = <T,>({
+const BadgeComponent = ({
   isOn,
-  entity,
   content,
   onClick,
   isDisabled,
   className,
   ...rest
-}: BadgeProps<T>) => {
-  const disabled = isDisabled?.(entity);
+}: BadgeProps) => {
+  const disabled = isDisabled?.(content);
 
   const classConfig = useMemo(() => {
     return [
       disabled && "badge-disabled",
-      isOn?.(entity) && "badge-selected",
+      isOn?.(content) && "badge-selected",
       className,
     ]
       .filter(Boolean)
       .join(" ");
-  }, [entity, disabled, isOn, className]);
+  }, [content, disabled, isOn, className]);
 
   return (
-    <Button
+    <ButtonElement
       size="md"
       color="slate"
       variant="badge"
@@ -42,7 +40,7 @@ const BadgeComponent = <T,>({
       {...rest}
     >
       {content}
-    </Button>
+    </ButtonElement>
   );
 };
 

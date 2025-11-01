@@ -1,52 +1,24 @@
-import React from "react";
-import Button from "./Button";
-import { X } from "lucide-react";
+import { type InputHTMLAttributes } from "react";
 import { capitalize } from "@/utils/utils";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  onReset?: () => void;
-}
-
 const Input = ({
+  name,
   label,
   value,
-  onReset,
-  type = "text",
   className,
+  type = "text",
   ...rest
-}: InputProps) => {
-  const classes = [
-    `outline-none w-full border-2 border-slate-200/40 p-4 py-3 rounded-md 
-    tracking-widest`,
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+}: { label?: string } & InputHTMLAttributes<HTMLInputElement>) => {
+  const classes = ["input", className].filter(Boolean).join(" ");
 
   return (
     <div className="flex flex-col tracking-widest">
-      <label htmlFor={label} className="label text-base">
-        {label && capitalize(label)}
-      </label>
-      <div className="relative">
-        {type === "range" && (
-          <div className="flex justify-between items-center italic font-bold">
-            <span>{rest?.min} km</span>
-            <span>{rest?.max} km</span>
-          </div>
-        )}
-        <input type={type} value={value} {...rest} className={classes} />
-        {type === "text" && value && (
-          <Button
-            variant="icon"
-            onClick={onReset}
-            className="absolute top-1/2 -translate-y-1/2 right-4 cursor-pointer"
-          >
-            <X size={10} />
-          </Button>
-        )}
-      </div>
+      {label && (
+        <label htmlFor={name} className="card-h2 italic">
+          {capitalize(label ?? name)}
+        </label>
+      )}
+      <input type={type} value={value} {...rest} className={classes} />
     </div>
   );
 };

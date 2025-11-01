@@ -116,6 +116,8 @@ export const HOSPITALS = [
   "Mercy Hospital",
 ] as const;
 
+export const CONSULTATION_MODES = ["online", "in_person"] as const;
+
 export const CONSULTATION_DURATION = [
   15, // 15 minutes
   30, // 30 minutes

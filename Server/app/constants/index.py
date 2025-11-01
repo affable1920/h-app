@@ -32,7 +32,7 @@ SPECIALIZATIONS = [
 DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday",
                 "Wednesday", "Thursday", "Friday", "Saturday"]
 
-CONSULTATION_DURATION_OPTIONS = [15, 30, 45, 60]
+CONSULTATION_DURATION_OPTIONS = [15, 20, 30]
 
 CONSULTATION_FEE_RANGE = {"MIN": 100, "MAX": 400}
 

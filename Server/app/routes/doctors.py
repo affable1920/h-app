@@ -24,3 +24,5 @@ async def get_doctors(params: QueryParameters = Depends()):
 async def get_doctor(id: str):
     return doctor_service.get_doctor_by_id(id)
 #
+
+# @router.get("{id}/schedule")

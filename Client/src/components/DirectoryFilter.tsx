@@ -1,34 +1,27 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Input from "./eventElements/Input";
 import * as constants from "../utils/constants";
 import Button from "./eventElements/Button";
-import Dropdown from "./eventElements/Dropdown";
 import useModalStore from "@/stores/modalStore";
 import Badge from "./eventElements/Badge";
-import { ChevronUpIcon } from "lucide-react";
-import Ratings from "./Ratings";
+import CategoryFilter from "./CategoryFilter";
+import SelectFilter from "./filters/SelectFilter";
 
-export interface FilterCategory {
-  label: string;
-  type: "text" | "range" | "checkbox";
-}
+type FilterCategories = "specialization" | "distance" | "rating" | "mode";
 
-const filterCategories: FilterCategory[] = [
-  { label: "distance", type: "range" },
+type Filters = {
+  [K in FilterCategories]?: string | number | null;
+};
+
+const categoryFilters: {
+  label: "rating" | "mode";
+  options: readonly string[] | number[];
+}[] = [
+  { label: "mode", options: constants.CONSULTATION_MODES },
+  { label: "rating", options: [1, 2, 3, 4] as const },
 ];
 
-const allSpecs: readonly string[] = constants.SPECIALIZATIONS.map((s) =>
-  s.toLowerCase()
-);
-
-interface Filters {
-  specialization?: string | null;
-  distance?: number | null;
-  rating?: number | null;
-}
-
 const DirectoryFilter = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>({});
 
   function handleFilterUpdate<T extends keyof Filters>(
@@ -38,98 +31,71 @@ const DirectoryFilter = () => {
     setFilters((p) => ({ ...p, [key]: value }));
   }
 
-  const selectedSpec = filters?.["specialization"];
+  const selectedSpecialization = filters?.["specialization"];
+
+  const handleSpecUpdate = useCallback(function (spec: string | null) {
+    handleFilterUpdate("specialization", spec);
+  }, []);
 
   return (
     <section className="flex flex-col items-end h-full gap-8 p-2">
-      <section className="flex flex-col gap-8 w-full justify-between grow">
-        {/*  */}
-        {/* spec filter */}
-
+      <section className="flex flex-col gap-8 w-full grow">
         <div className="flex flex-col gap-4">
-          {selectedSpec && (
+          {selectedSpecialization && (
             <Badge
-              entity={selectedSpec}
-              content={selectedSpec}
-              isOn={() => !!selectedSpec}
               className="w-fit capitalize"
-              onClick={() => handleFilterUpdate("specialization", null)}
+              content={selectedSpecialization}
+              isOn={() => !!selectedSpecialization}
+              onClick={() => handleSpecUpdate(null)}
             />
           )}
-          <Dropdown
-            show={isOpen}
-            options={allSpecs}
-            onOptionSelect={(selectedOption) =>
-              handleFilterUpdate("specialization", selectedOption)
-            }
+          <SelectFilter
+            label="specialization"
+            options={constants.SPECIALIZATIONS}
+            /*
+            How bind in js works: (finally understood)
+            bind creates a new fn below and attaches "specialization" as the key to it, now it's fixed
+
+            and down inside function where it is passed as a prop, we only require one more arg: [the key].
+            */
+            onOptionSelect={handleSpecUpdate}
           />
-          <Button
-            size="md"
-            variant="outlined"
-            onClick={() => setIsOpen((p) => !p)}
-            className="font-semibold gap-2 active:scale-100"
-          >
-            {"Select Specialization"}
-            <ChevronUpIcon
-              size={13}
-              className={`transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              } `}
-            />
-          </Button>
         </div>
 
-        {/* distance filter */}
-        {filterCategories.map((category) => (
+        <div>
           <Input
-            min={1}
-            max={40}
-            step={2.2}
-            key={category.label}
-            type={category.type}
-            label={category.label}
+            type="range"
+            name="distance"
+            label="Filter by distance"
             onChange={(ev) =>
-              handleFilterUpdate(
-                category.label as keyof Filters,
-                parseInt(ev.target.value)
-              )
+              handleFilterUpdate("distance", parseInt(ev.target.value))
             }
+          />
+          <div className="flex justify-between items-center italic font-bold">
+            <span>1 km</span>
+            <span>40 km</span>
+          </div>
+        </div>
+
+        {categoryFilters.map((category) => (
+          <CategoryFilter
+            key={category.label}
+            label={category.label}
+            options={category.options}
+            onOptionSelect={handleFilterUpdate.bind(null, category.label)}
           />
         ))}
-
-        {/* rating filter */}
-        <div>
-          <label htmlFor="ratings" className="label text-base">
-            Filter by rating
-          </label>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {[1, 2, 3, 4].map((rating) => (
-              <Button
-                key={rating}
-                size="md"
-                variant="outlined"
-                onClick={() => handleFilterUpdate("rating", rating)}
-                className="hover:ring-2 active:ring-secondary-dark grow"
-              >
-                <Ratings rating={rating} />
-              </Button>
-            ))}
-          </div>
-
-          {/*  */}
-        </div>
       </section>
 
       <div className="flex items-center gap-4">
         <Button
           size="md"
-          color="primary"
-          variant="contained"
-          onClick={() => useModalStore.getState().closeModal()}
+          variant="outlined"
+          onClick={useModalStore.getState().closeModal}
         >
           Cancel
         </Button>
-        <Button size="md" variant="contained" color="primary">
+        <Button size="md" variant="outlined">
           Apply
         </Button>
       </div>

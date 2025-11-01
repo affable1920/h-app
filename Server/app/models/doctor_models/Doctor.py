@@ -1,7 +1,11 @@
 from uuid import uuid4
 from typing import Annotated
+from datetime import datetime
+
 from . import DoctorExtraTypes as DrType
 from pydantic import BaseModel, EmailStr, Field
+
+from app.models.BaseModel import BaseModelConfig
 
 
 class DrEssentials(BaseModel):
@@ -12,7 +16,7 @@ class DrEssentials(BaseModel):
     primary_specialization: str
 
 
-class DrSecondaries(BaseModel):
+class DrSecondaries(BaseModelConfig):
     fee: DrType.Fee
     status: DrType.Status = DrType.Status.UNKNOWN
 
@@ -30,8 +34,8 @@ class DrSecondaries(BaseModel):
     secondary_specializations: list[str] = []
 
     currently_available: bool | None = None
-    last_updated: Annotated[str | None, Field(default=None)]
-    next_available: Annotated[str | None, Field(default=None)]
+    last_updated: Annotated[datetime | None, Field(default=None)]
+    next_available: Annotated[datetime | None, Field(default=None)]
 
     office: DrType.Clinic | None = None
     schedules: list[DrType.Schedule] = []

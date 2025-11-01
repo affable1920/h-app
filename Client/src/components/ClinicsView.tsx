@@ -5,7 +5,7 @@ import { BsArrowRight } from "react-icons/bs";
 import { BiLocationPlus } from "react-icons/bi";
 import type { Weekday } from "../utils/constants";
 
-import Button from "./eventElements/Button";
+import ButtonElement from "./eventElements/Button";
 import useScheduleStore from "../stores/scheduleStore";
 
 import { FaLink } from "react-icons/fa";
@@ -110,7 +110,7 @@ const ClinicsView = React.memo(
                       <BiLocationPlus className="text-xs opacity-80 hover:opacity-100" />
                     </Link>
                   </div>
-                  <Button
+                  <ButtonElement
                     variant="icon"
                     initial="false"
                     needsMotion={true}
@@ -121,7 +121,7 @@ const ClinicsView = React.memo(
                     onClick={toggleSchedulesView}
                   >
                     <BsArrowRight />
-                  </Button>
+                  </ButtonElement>
                 </header>
 
                 <motion.div
@@ -157,7 +157,7 @@ const ClinicsView = React.memo(
                   </div>
 
                   {showBookingInfo && (
-                    <Button
+                    <ButtonElement
                       size="md"
                       initial={{ y: 40, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
@@ -169,7 +169,7 @@ const ClinicsView = React.memo(
                       className="self-end flex items-center gap-2"
                     >
                       Confirm Slot <Spinner loading={loading} />
-                    </Button>
+                    </ButtonElement>
                   )}
                 </motion.div>
               </article>

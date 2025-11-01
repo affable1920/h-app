@@ -1,6 +1,6 @@
 import { useState, useCallback, type ReactElement } from "react";
 import { motion } from "motion/react";
-import Button from "./eventElements/Button";
+import ButtonElement from "./eventElements/Button";
 import { MdFlip } from "react-icons/md";
 
 interface CardProps<T> {
@@ -45,7 +45,7 @@ const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
         {CardBack}
       </motion.article>
 
-      <Button
+      <ButtonElement
         variant="icon"
         needsMotion={true}
         onClick={handleFlip}
@@ -63,7 +63,7 @@ const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
         } `}
       >
         <MdFlip size={16} />
-      </Button>
+      </ButtonElement>
     </motion.article>
   );
 };

@@ -1,32 +1,35 @@
 import { memo } from "react";
 import { motion } from "motion/react";
-import {
-  VARIANTS,
-  COLORS,
-  SIZES,
-  type ButtonProps,
+import { VARIANTS, COLORS, SIZES } from "@/types/appButtonTypes";
+
+import type {
+  ButtonProps,
+  Color,
+  Variant,
+  Size,
+  MotionButtonProps,
 } from "@/types/appButtonTypes";
 
 const Button = memo(
-  ({
+  <NeedsMotion extends boolean = false>({
     children,
-    color,
-    size = "sm",
     startIcon,
     endIcon,
-    variant,
-    loading = false,
+    size = "sm",
     className = "",
-    needsMotion,
+    loading = false,
+    color = "primary",
+    needsMotion = false,
+    variant = "contained",
     ...rest
-  }: ButtonProps) => {
+  }: ButtonProps<NeedsMotion>) => {
     const hasColor = variant === "contained" || variant === "badge";
 
     const classConfig = [
       "btn",
-      SIZES[size],
-      VARIANTS[variant],
-      hasColor && (COLORS[color] ?? "primary"),
+      SIZES[size as Size],
+      VARIANTS[variant as Variant],
+      hasColor && COLORS[color as Color],
       loading && "cursor-wait",
       className,
     ]
@@ -34,18 +37,25 @@ const Button = memo(
       .join(" ")
       .trim();
 
-    const ButtonComponent = needsMotion ? motion.button : "button";
+    if (needsMotion) {
+      return (
+        <motion.button className={classConfig} {...(rest as MotionButtonProps)}>
+          {startIcon && startIcon}
+          {children}
+          {endIcon && endIcon}
+        </motion.button>
+      );
+    }
 
     return (
-      <ButtonComponent className={classConfig} {...rest}>
+      <button className={classConfig} {...rest}>
         {startIcon && startIcon}
         {children}
         {endIcon && endIcon}
-      </ButtonComponent>
+      </button>
     );
   }
 );
 
-// Display name for debugging - helpful in React DevTools
-Button.displayName = "Button";
 export default Button;
+Button.displayName = "Button";

@@ -6,10 +6,11 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
-import Button from "../eventElements/Button";
+import ButtonElement from "../eventElements/Button";
 import Pagination from "../Pagination";
 import { ArrowLeftRight, X, Funnel } from "lucide-react";
 import useModalStore from "@/stores/modalStore";
+import Input from "../eventElements/Input";
 
 const Directory = () => {
   const location = useLocation().pathname?.split("/").at(1) ?? "doctors";
@@ -61,32 +62,32 @@ const Directory = () => {
         {/* search bar */}
 
         <div className="flex items-center gap-4 order-1">
-          <div className="input w-full max-w-3xs flex items-center relative italic">
-            <input
+          <div className="flex items-center relative">
+            <Input
               value={searchQuery}
               placeholder="Search"
               onChange={handleSearch}
-              className="placeholder:opacity-60 outline-none w-full"
+              className="italic placeholder:text-sm"
             />
-            <Button
+            <ButtonElement
               variant="icon"
               className="absolute right-2 top-1/2 -translate-y-1/2"
               onClick={() => setParams((p) => ({ ...p, searchQuery: "" }))}
             >
               {params.get("searchQuery") ? <X /> : "Ctrl K"}
-            </Button>
+            </ButtonElement>
           </div>
 
-          <Button variant="icon" onClick={handleDirectorySwitch}>
+          <ButtonElement variant="icon" onClick={handleDirectorySwitch}>
             <ArrowLeftRight />
-          </Button>
+          </ButtonElement>
         </div>
 
         {/* rest of the filters  */}
         <div className="flex items-center gap-4">
-          <Button variant="icon" onClick={handleFilter}>
+          <ButtonElement variant="icon" onClick={handleFilter}>
             <Funnel />
-          </Button>
+          </ButtonElement>
         </div>
       </section>
 

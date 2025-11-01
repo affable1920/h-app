@@ -23,7 +23,7 @@ const bottomModalVariants: Record<string, Variant> = {
   },
   exit: {
     y: "100%",
-    transition: { duration: 0.075, type: "spring" },
+    transition: { duration: 0.05, ease: "linear" },
   },
 };
 

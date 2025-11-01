@@ -1,4 +1,4 @@
-import Button from "./eventElements/Button";
+import ButtonElement from "./eventElements/Button";
 import { ArrowBigRightDash, ArrowBigLeftDash } from "lucide-react";
 
 interface PaginationProps {
@@ -17,15 +17,15 @@ const Pagination = ({
   return (
     <article className="flex self-end items-center gap-4">
       {!isFirstPage && (
-        <Button variant="icon" onClick={onPageChange.bind(null, "prev")}>
+        <ButtonElement variant="icon" onClick={onPageChange.bind(null, "prev")}>
           <ArrowBigLeftDash />
-        </Button>
+        </ButtonElement>
       )}
 
       {!isLastPage && (
-        <Button variant="icon" onClick={onPageChange.bind(null, "next")}>
+        <ButtonElement variant="icon" onClick={onPageChange.bind(null, "next")}>
           <ArrowBigRightDash />
-        </Button>
+        </ButtonElement>
       )}
     </article>
   );

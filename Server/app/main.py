@@ -25,7 +25,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",  # Local dev
+        "https://h-app-omega.vercel.app"  # Production
+    ],
     allow_credentials=True,
 )
 

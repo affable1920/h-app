@@ -2,7 +2,8 @@ import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 class APIClient {
-  private _baseUrl: string = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  private _baseUrl: string =
+    import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   protected _api: AxiosInstance;
   protected _endpoint: string;

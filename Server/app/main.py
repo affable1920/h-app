@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import ai
 from app.routes import doctors
 from app.routes import clinics
 from app.routes import schedules
@@ -27,13 +26,14 @@ app.add_middleware(
     allow_headers=["*"],
     allow_origins=[
         "http://localhost:5173",  # Local dev
-        "https://h-app-omega.vercel.app"  # Production
+        "https://h-app-omega.vercel.app",  # Production
+        "https://h-gjrj7czxb-shamik1920.vercel.app",  # Preview
+        "https://vercel.com/shamik1920/h-app/4x5rweUd9TAxsAfHdg1WtZhT7HFb"  # Inspect
     ],
     allow_credentials=True,
 )
 
 
-app.include_router(ai.router)
 app.include_router(doctors.router)
 app.include_router(clinics.router)
 app.include_router(schedules.router)

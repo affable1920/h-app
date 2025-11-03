@@ -8,7 +8,6 @@ import Scheduler from "@routes/Scheduler";
 import Directory from "@routes/Directory";
 
 import drService from "@services/DoctorService";
-import DoctorProfile from "@components/doctor/DoctorProfile";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import ClinicsDirectory from "@components/ClinicsDirectory";
@@ -49,7 +48,7 @@ const router = createBrowserRouter([
 
               {
                 path: ":id",
-                Component: DoctorProfile,
+                Component: () => <div>Doctor's Profile</div>,
                 loader: getDr,
               },
 

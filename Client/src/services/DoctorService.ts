@@ -1,5 +1,5 @@
 import APIClient from "./ApiClient";
-import type { operations } from "@/types/api";
+import { type operations } from "@/types/api";
 
 type SingleDoctorParams = operations["get_doctor"]["parameters"]["path"];
 

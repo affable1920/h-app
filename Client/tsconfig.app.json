@@ -8,6 +8,18 @@
     "skipLibCheck": true,
 
     "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"],
+      /*
+      must be explicit for the types alias to work
+      @types/* means something particular in react and node so the val is here must be explicit
+      or use @/types/* instead of @types/* or maybe something like ~types/*
+      */
+      "@stores/*": ["./stores/*"],
+      "@services/*": ["./services/*"],
+      "@components/*": ["./components/*"],
+      "@routes/*": ["./components/routes/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

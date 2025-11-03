@@ -1,16 +1,18 @@
 import { createBrowserRouter } from "react-router-dom";
 
 //
-import Chat from "./routes/Chat";
-import Layout from "./routes/Layout";
-import HomePage from "./routes/HomePage";
-import Scheduler from "./routes/Scheduler";
-import Directory from "./routes/Directory";
-import ErrorBoundary from "./ErrorBoundary";
-import ClinicsDirectory from "./ClinicsDirectory";
-import DoctorProfile from "./doctor/DoctorProfile";
-import DoctorsDirectory from "./doctor/DoctorsDirectory";
-import drService from "@/services/DoctorService";
+import Chat from "@routes/Chat";
+import Layout from "@routes/Layout";
+import HomePage from "@routes/HomePage";
+import Scheduler from "@routes/Scheduler";
+import Directory from "@routes/Directory";
+
+import drService from "@services/DoctorService";
+
+import ErrorBoundary from "@components/ErrorBoundary";
+import ClinicsDirectory from "@components/ClinicsDirectory";
+import DoctorProfile from "@components/doctor/DoctorProfile";
+import DoctorsDirectory from "@components/doctor/DoctorsDirectory";
 
 /*
 API Routes Structure:

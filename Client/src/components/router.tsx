@@ -8,10 +8,10 @@ import Scheduler from "@routes/Scheduler";
 import Directory from "@routes/Directory";
 
 import drService from "@services/DoctorService";
+import DoctorProfile from "@components/doctor/DoctorProfile";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import ClinicsDirectory from "@components/ClinicsDirectory";
-import DoctorProfile from "@components/doctor/DoctorProfile";
 import DoctorsDirectory from "@components/doctor/DoctorsDirectory";
 
 /*

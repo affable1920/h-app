@@ -6,7 +6,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
-import ButtonElement from "../eventElements/Button";
+import Button from "../eventElements/Button";
 import Pagination from "../Pagination";
 import { ArrowLeftRight, X, Funnel } from "lucide-react";
 import useModalStore from "@/stores/modalStore";
@@ -22,9 +22,10 @@ const Directory = () => {
   const page = parseInt(params.get("page") ?? "1");
   const searchQuery = params.get("searchQuery") ?? "";
 
-  const [entityCount, setEntityCount] = useState<number>(0);
+  const [entityCount, setEntityCount] = useState(0);
   const isLastPage = entityCount < max || page === Math.ceil(entityCount / max);
 
+  // passed to the rendered directory component to immediately update the entity count state var
   function setTotalCount(count: number) {
     setEntityCount(count);
   }
@@ -69,29 +70,30 @@ const Directory = () => {
               onChange={handleSearch}
               className="italic placeholder:text-sm"
             />
-            <ButtonElement
+            <Button
               variant="icon"
               className="absolute right-2 top-1/2 -translate-y-1/2"
               onClick={() => setParams((p) => ({ ...p, searchQuery: "" }))}
             >
               {params.get("searchQuery") ? <X /> : "Ctrl K"}
-            </ButtonElement>
+            </Button>
           </div>
 
-          <ButtonElement variant="icon" onClick={handleDirectorySwitch}>
+          <Button variant="icon" onClick={handleDirectorySwitch}>
             <ArrowLeftRight />
-          </ButtonElement>
+          </Button>
         </div>
 
         {/* rest of the filters  */}
         <div className="flex items-center gap-4">
-          <ButtonElement variant="icon" onClick={handleFilter}>
+          <Button variant="icon" onClick={handleFilter}>
             <Funnel />
-          </ButtonElement>
+          </Button>
         </div>
       </section>
 
       <section className="directory-layout">
+        {/* outlet renders either the Doctor or clinic directory passing them the query params */}
         <Outlet context={{ max, page, searchQuery, setTotalCount }} />
       </section>
 

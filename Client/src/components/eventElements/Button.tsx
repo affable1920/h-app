@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { motion } from "motion/react";
 import { VARIANTS, COLORS, SIZES } from "@/types/appButtonTypes";
 
@@ -23,19 +23,23 @@ const Button = memo(
     variant = "contained",
     ...rest
   }: ButtonProps<NeedsMotion>) => {
-    const hasColor = variant === "contained" || variant === "badge";
-
-    const classConfig = [
-      "btn",
-      SIZES[size as Size],
-      VARIANTS[variant as Variant],
-      hasColor && COLORS[color as Color],
-      loading && "cursor-wait",
-      className,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim();
+    const classConfig = useMemo(
+      function () {
+        const hasColor = variant === "contained" || variant === "badge";
+        return [
+          "btn",
+          SIZES[size as Size],
+          VARIANTS[variant as Variant],
+          hasColor && COLORS[color as Color],
+          loading && "cursor-wait",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .trim();
+      },
+      [size, variant, color, loading, className]
+    );
 
     if (needsMotion) {
       return (

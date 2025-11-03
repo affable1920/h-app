@@ -1,14 +1,15 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
+import axios from "axios";
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
-class APIClient<T> {
-  private _baseUrl: string = import.meta.env.VITE_API_URL || "localhost:8000";
+class APIClient {
+  private _baseUrl: string = import.meta.env.VITE_API_URL;
 
-  protected api: AxiosInstance;
+  protected _api: AxiosInstance;
   protected _endpoint: string;
 
   constructor(endpointPath: string) {
     this._endpoint = endpointPath;
-    this.api = axios.create({
+    this._api = axios.create({
       baseURL: this._baseUrl,
       headers: {
         "Content-Type": "application/json",
@@ -16,12 +17,15 @@ class APIClient<T> {
     });
   }
 
-  async get(config?: AxiosRequestConfig): Promise<T> {
-    return (await this.api.get<T>(this._endpoint, config)).data;
+  async get<T>(config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    return await this._api.get<T>(this._endpoint, config);
   }
 
-  async post(postData: T, config?: AxiosRequestConfig): Promise<T> {
-    return (await this.api.post<T>(this._endpoint, postData, config)).data;
+  async post<T>(
+    postData: T,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> {
+    return await this._api.post<T>(this._endpoint, postData, config);
   }
 }
 

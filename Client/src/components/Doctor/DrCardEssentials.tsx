@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import docImage from "../../assets/doctor.jpg";
 import type { Doctor } from "../../types/doctorAPI";
-import { MdVerifiedUser, MdStar } from "react-icons/md";
+import { MdVerifiedUser } from "react-icons/md";
 import Ratings from "../Ratings";
 
 const DrCardEssentials = React.memo(({ doctor }: { doctor: Doctor }) => {

@@ -1,30 +1,17 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import APIClient from "@/services/ApiClient";
+import drService from "@/services/DoctorService";
 import type { operations } from "@/types/api";
 
-type GetDoctorParams = operations["get_doctor"]["parameters"]["path"];
-type GetDoctorsParams = operations["get_doctors"]["parameters"]["query"];
+type Params = operations["get_doctors"]["parameters"]["query"];
 
-type Params = GetDoctorParams | (GetDoctorsParams & { id?: never });
-
-type DoctorResponse =
-  operations["get_doctors"]["responses"]["200"]["content"]["application/json"];
-
-const endpoint = "/doctors";
-const api = new APIClient<DoctorResponse>(endpoint);
-
-function useDoctorsQuery(params: Params) {
-  const queryKey = params?.id
-    ? ["doctors", "doctor", params.id]
-    : ["doctors", { ...params }];
+export function useAllDoctors(params: Params) {
+  const queryKey = ["doctors", { ...params }];
 
   return useQuery({
     queryKey,
     queryFn: async () => {
       try {
-        const response = await api.get({
-          params: { ...params },
-        });
+        const response = await drService.getAll(params);
 
         return response;
       } catch (ex) {
@@ -35,4 +22,15 @@ function useDoctorsQuery(params: Params) {
   });
 }
 
-export default useDoctorsQuery;
+export function useSingleDoctor(id: string) {
+  return useQuery({
+    queryKey: ["doctors", id],
+    async queryFn() {
+      try {
+        return await drService.getById(id);
+      } catch (ex) {
+        console.log(ex);
+      }
+    },
+  });
+}

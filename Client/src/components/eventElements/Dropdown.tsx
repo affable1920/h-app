@@ -8,11 +8,11 @@ type DropdownProps = {
   onOptionSelect?: (option: string) => void;
 };
 
-const optionListClasses = `flex flex-col font-semibold text-secondary-dark bg-white 
-rounded-md border-2 border-slate-200/40 max-h-48 overflow-y-scroll`;
+const optionListClasses = `flex flex-col font-bold text-secondary-dark bg-transparent 
+rounded-md border-2 max-h-48 overflow-y-scroll border-secondary-lightest/50`;
 
 const optionClasses = `hover:bg-slate-50 cursor-pointer capitalize border-[1px] 
-border-slate-300/50 transition-colors p-2 py-3`;
+transition-colors p-2 py-3 border-inherit`;
 
 const Dropdown = ({ show = false, options, onOptionSelect }: DropdownProps) => {
   return (
@@ -33,13 +33,14 @@ const Dropdown = ({ show = false, options, onOptionSelect }: DropdownProps) => {
           className={optionListClasses}
         >
           {options.map((option) => (
-            <li
+            <motion.li
               key={option}
+              layoutId={option}
               className={optionClasses}
               onClick={() => onOptionSelect?.(option)}
             >
               {option}
-            </li>
+            </motion.li>
           ))}
         </motion.ul>
       )}

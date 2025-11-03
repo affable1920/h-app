@@ -1,5 +1,5 @@
 import { type InputHTMLAttributes } from "react";
-import { capitalize } from "@/utils/utils";
+import { capitalize } from "@/utils/appUtils";
 
 const Input = ({
   name,
@@ -8,7 +8,9 @@ const Input = ({
   className,
   type = "text",
   ...rest
-}: { label?: string } & InputHTMLAttributes<HTMLInputElement>) => {
+}: {
+  label?: string;
+} & InputHTMLAttributes<HTMLInputElement>) => {
   const classes = ["input", className].filter(Boolean).join(" ");
 
   return (

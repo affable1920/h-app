@@ -4,110 +4,130 @@
 @layer components {
   /* Must be on every button */
   .btn {
-    @apply tracking-widest leading-tight active:scale-95  
-    rounded-lg flex items-center justify-center gap-2 border-2 font-bold whitespace-nowrap px-4 py-2
-    select-none cursor-pointer;
+    @apply tracking-widest leading-tight active:scale-95 select-none cursor-pointer [&:disabled]:opacity-80 
+    [&:disabled]:pointer-events-none rounded-lg flex items-center justify-center gap-2 border-2
+    font-bold whitespace-nowrap transition-colors duration-[150ms] ease-in text-center;
 
-    &:disabled {
-      @apply opacity-80 pointer-events-none;
+    /* 
+    size variants
+    
+    and if a btn is a particular size variant i.e has any size class like .sm, 
+    using is just for clarity
+    */
+
+    &:is(.sm) {
+      @apply h-6 px-4 py-2;
+    }
+    &:is(.md) {
+      @apply h-8 px-8;
+    }
+    &:is(.lg) {
+      @apply h-12 px-10 py-4;
+    }
+    &:is(.xl) {
+      @apply h-14 px-12 py-4;
+    }
+
+    /* Variant utilities */
+    /* with color utils nested inside for full control */
+    &:is(.contained) {
+      &:hover,
+      &:focus {
+        @apply ring-2;
+      }
+
+      &.primary {
+        @apply bg-secondary border-secondary-dark text-white;
+
+        &:hover,
+        &:focus {
+          @apply bg-secondary-dark border-black ring-black/10;
+        }
+      }
+      &.accent {
+        @apply bg-accent-light border-accent text-white;
+
+        &:hover,
+        &:focus {
+          @apply bg-accent border-accent-dark ring-accent-dark/10;
+        }
+      }
+      &.danger {
+        @apply bg-error border-error-dark text-white;
+
+        &:hover,
+        &:focus {
+          @apply bg-error-dark border-red-800 ring-red-800/10;
+        }
+      }
+      &.slate {
+        @apply bg-slate-100 border-slate-300;
+
+        &:hover,
+        &:focus {
+          @apply bg-slate-200 border-slate-400 ring-slate-800/10;
+        }
+      }
+      &.neutral {
+        @apply bg-inherit;
+      }
+    }
+
+    &:is(.outlined) {
+      @apply bg-transparent shadow-none border-secondary;
+      &:hover,
+      &:focus {
+        @apply bg-secondary border-secondary-dark text-white;
+      }
+    }
+
+    &:is(.icon) {
+      @apply bg-transparent border-none block p-0 [&>svg]:text-secondary-dark;
+      &:hover,
+      &:focus {
+        @apply [&>svg]:text-black;
+      }
+
+      /* an icon has different size utiltities */
+      &.sm > svg {
+        @apply size-4;
+      }
+      &.md > svg {
+        @apply size-6;
+      }
+      &.lg > svg {
+        @apply size-8;
+      }
+      &.xl > svg {
+        @apply size-10;
+      }
+    }
+
+    &:is(.badge) {
+      @apply rounded-md bg-transparent border-2 border-slate-300/60 text-secondary-dark 
+      capitalize shadow-2xs shadow-slate-200 transition-shadow duration-150 ease-in;
+
+      &:not(:disabled):hover,
+      &:not(:disabled):focus {
+        @apply border-slate-300/40 bg-slate-50 shadow-none;
+      }
+
+      &:disabled {
+        @apply cursor-default opacity-50 pointer-events-none;
+      }
+
+      &.selected {
+        @apply bg-amber-400 border-amber-600 font-black shadow-none;
+
+        &:hover,
+        &:focus {
+          @apply bg-amber-400 border-amber-700 shadow-none ring-2 ring-amber-800/10;
+        }
+      }
+
+      &.current {
+        @apply border-b-2 border-b-accent/50 font-black shadow-inner shadow-accent-dark/60;
+      }
     }
   }
-}
-
-/* Size utilities */
-@utility sm {
-  @apply h-6;
-}
-@utility md {
-  @apply h-8 px-6;
-}
-@utility lg {
-  @apply h-12 px-8;
-}
-@utility xl {
-  @apply h-14 px-12;
-}
-
-/* color utils */
-@utility accent {
-  @apply bg-accent-light border-accent text-white;
-
-  &:hover,
-  &:focus {
-    @apply bg-accent border-accent-dark;
-  }
-}
-@utility primary {
-  @apply bg-secondary border-secondary-dark text-white;
-
-  &:hover,
-  &:focus {
-    @apply bg-secondary-dark border-secondary;
-  }
-}
-@utility danger {
-  @apply bg-error border-error-dark text-white;
-
-  &:hover,
-  &:focus {
-    @apply bg-error-dark border-red-800;
-  }
-}
-@utility slate {
-  @apply bg-slate-100 border-slate-300;
-
-  &:hover,
-  &:focus {
-    @apply bg-slate-200 border-slate-400;
-  }
-}
-
-@utility neutral {
-  @apply bg-inherit;
-}
-
-/* Variant utilities */
-@utility contained {
-  @apply primary;
-
-  &.primary {
-    @apply primary;
-  }
-  &.accent {
-    @apply accent;
-  }
-  &.danger {
-    @apply danger;
-  }
-  &.slate {
-    @apply slate;
-  }
-}
-
-@utility outlined {
-  @apply bg-transparent shadow-none border-secondary;
-
-  &:hover {
-    @apply primary;
-  }
-}
-
-@utility icon {
-  @apply bg-transparent border-none block p-0;
-}
-
-@utility badge {
-  @apply text-center font-bold text-gray-600 rounded-md;
-}
-
-@utility badge-disabled {
-  @apply cursor-default opacity-50 pointer-events-none;
-}
-
-@utility badge-current {
-  @apply !border-b-2 !border-b-accent/50 font-black shadow-inner shadow-accent-dark/60;
-}
-
-@utility badge-selected {
-  @apply bg-amber-400 shadow-amber-600/40 !border-amber-700 font-black shadow-inner;
 }

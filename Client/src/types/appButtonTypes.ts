@@ -29,15 +29,13 @@ export const SIZES = {
 
 export type Size = keyof typeof SIZES;
 
-export type IconSize = {
-  [K in keyof typeof SIZES]: `text-${(typeof SIZES)[K]}`;
-};
-
 export type Color = keyof typeof COLORS;
 export type Variant = keyof typeof VARIANTS;
 
 interface BaseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  size?: Size;
   color?: Color;
+  variant?: Variant;
   loading?: boolean;
   children: ReactNode;
   endIcon?: ReactNode;
@@ -45,15 +43,7 @@ interface BaseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   needsMotion?: boolean;
 }
 
-type IconButtonProps = { variant?: "icon"; size: IconSize };
-
-type RegularButtonprops = {
-  variant?: "contained" | "outlined" | "badge";
-  size?: Size;
-};
-
 export type MotionButtonProps = React.ComponentProps<typeof motion.button>;
 
 export type ButtonProps<NeedsMotion extends boolean = false> = BaseButtonProps &
-  (IconButtonProps | RegularButtonprops) &
   (NeedsMotion extends true ? MotionButtonProps : {});

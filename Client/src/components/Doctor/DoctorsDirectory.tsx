@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 
 import Card from "@/components/Card";
-import useDoctorsQuery from "../../hooks/useDoctorsQuery";
+import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 
 import type { Doctor } from "@/types/doctorAPI";
 
@@ -31,7 +31,7 @@ const DoctorsDirectory = () => {
   const { setTotalCount, ...params } = useOutletContext<ParentContext>();
 
   const { data: { data: doctors = [], total_count } = {}, isError } =
-    useDoctorsQuery(params || {});
+    useAllDoctors(params || {});
 
   useEffect(() => {
     if (total_count) setTotalCount(total_count);

@@ -1,11 +1,18 @@
 import React from "react";
+import { type IconType } from "react-icons/lib";
 import Button from "../eventElements/Button";
-import type { Doctor } from "../../types/doctorAPI";
+import type { Doctor, Status } from "../../types/doctorAPI";
 import { Link } from "react-router-dom";
-import { iconMap, type Status } from "../../utils/constants";
-import { BiLocationPlus } from "react-icons/bi";
-import { capitalize } from "../../utils/utils";
-import { Doctor as DR } from "@/services/doctorModel";
+import { capitalize } from "../../utils/appUtils";
+import { Doctor as DR } from "@/utils/doctorModel";
+import { CalendarFold, MapPin, PhoneOutgoing, User } from "lucide-react";
+
+const iconMap: Record<string, IconType> = {
+  user: User,
+  call: PhoneOutgoing,
+  location: MapPin,
+  calendar: CalendarFold,
+};
 
 function getColorConfig(status: Status) {
   const statuses: Record<Status, { bg: string; text: string }> = {
@@ -44,7 +51,7 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
             to="/"
           >
             {doctor.office?.name}
-            <BiLocationPlus />
+            <MapPin size={10} />
           </Link>
         </div>
 
@@ -58,12 +65,12 @@ const DrCardSecondaryInfo = React.memo(({ doctor }: { doctor: Doctor }) => {
                 name={name}
                 key={`${action.label}-${i}`}
                 {...(isPrimary
-                  ? { variant: "contained", color: "accent" }
+                  ? { variant: "contained", color: "primary" }
                   : { variant: "outlined" })}
                 style={{ order: isPrimary ? 1 : -1 }}
                 onClick={() => dr.executeAction(name)}
               >
-                {capitalize(label)} {Icon && <Icon />}
+                {capitalize(label)} {Icon && <Icon size={12} />}
               </Button>
             );
           })}

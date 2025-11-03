@@ -1,50 +1,31 @@
-import { memo, useMemo, type ReactNode } from "react";
-import ButtonElement from "./Button";
+import type { ButtonProps } from "@/types/appButtonTypes";
+import Button from "./Button";
+import { memo, useMemo } from "react";
 
-interface BadgeProps {
-  content: ReactNode;
-  className?: string;
-  onClick?: (entity?: unknown) => void;
+interface BadgeProps extends ButtonProps {
   isOn?: (entity: unknown) => boolean;
-  isDisabled?: (entity: unknown) => boolean;
+  isCurrent?: (entity: unknown) => boolean;
 }
 
-const BadgeComponent = ({
-  isOn,
-  content,
-  onClick,
-  isDisabled,
-  className,
-  ...rest
-}: BadgeProps) => {
-  const disabled = isDisabled?.(content);
+const Badge = memo(
+  ({ children, isOn, isCurrent, className, ...rest }: BadgeProps) => {
+    const classConfig = useMemo(() => {
+      return [
+        isCurrent?.(children) && "current",
+        isOn?.(children) && "selected",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ");
+    }, [children, isOn, isCurrent, className]);
 
-  const classConfig = useMemo(() => {
-    return [
-      disabled && "badge-disabled",
-      isOn?.(content) && "badge-selected",
-      className,
-    ]
-      .filter(Boolean)
-      .join(" ");
-  }, [content, disabled, isOn, className]);
-
-  return (
-    <ButtonElement
-      size="md"
-      color="slate"
-      variant="badge"
-      onClick={onClick}
-      disabled={disabled}
-      className={classConfig}
-      {...rest}
-    >
-      {content}
-    </ButtonElement>
-  );
-};
-
-const Badge = memo(BadgeComponent);
+    return (
+      <Button variant="badge" className={classConfig} {...rest}>
+        {children}
+      </Button>
+    );
+  }
+);
 
 export default Badge;
 Badge.displayName = "Badge";

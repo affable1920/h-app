@@ -1,12 +1,14 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import Overlay from "./Overlay";
+import { AnimatePresence, motion, type Variant } from "motion/react";
+
+import type { Doctor } from "@/types/doctorAPI";
 import useModalStore from "../stores/modalStore";
 import useInjectModalHandlers from "../hooks/useModalHandlers";
-import useDoctorsStore from "../stores/doctorsStore";
+
+import Overlay from "./Overlay";
 import ScheduleModal from "./ScheduleModal";
-import DirectoryFilter from "./DirectoryFilter";
-import { AnimatePresence, motion, type Variant } from "motion/react";
+import DirectoryFilter from "./filters/DirectoryFilter";
 
 const modalProperties: Record<string, string> = {
   bottom: "bottom",
@@ -60,12 +62,10 @@ const MODALS: Record<string, React.ElementType> = {
 
   directoryFilter: DirectoryFilter,
 
-  call() {
-    const { currDoctor } = useDoctorsStore.getState();
-
+  call: function Call(dr: Doctor) {
     return (
       <article>
-        <h2 className="card-h2">{currDoctor?.name}</h2>
+        <h2 className="card-h2">{dr?.name}</h2>
       </article>
     );
   },

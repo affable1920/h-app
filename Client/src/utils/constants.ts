@@ -1,19 +1,3 @@
-import { TbUser } from "react-icons/tb";
-import { IoLocation } from "react-icons/io5";
-import { SlCallOut } from "react-icons/sl";
-import type { IconType } from "react-icons/lib";
-import { BsFillCalendar2Fill } from "react-icons/bs";
-import { MdMore, MdOfflineBolt } from "react-icons/md";
-
-export const iconMap: Record<string, IconType> = {
-  more: MdMore,
-  user: TbUser,
-  call: SlCallOut,
-  location: IoLocation,
-  offline: MdOfflineBolt,
-  calendar: BsFillCalendar2Fill,
-};
-
 export const MONTHS = [
   "January",
   "February",
@@ -50,16 +34,6 @@ export const SPECIALIZATIONS = [
   "Rheumatology",
   "Surgery",
   "Urology",
-] as const;
-
-export const DAYS_OF_WEEK = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
 ] as const;
 
 export const TIME_SLOTS = [
@@ -152,18 +126,6 @@ export const Credentials = [
   "MD (Internal Medicine), MRCP",
 ] as const;
 
-export const STATUSES = ["available", "busy", "away", "unknown"] as const;
+export const DAYS_OF_WEEK = [...Array.from({ length: 7 })] as const;
 
 // Types for type safety
-export type Status = (typeof STATUSES)[number];
-export type Slot = (typeof TIME_SLOTS)[number];
-export type Language = (typeof LANGUAGES)[number];
-export type Hospital = (typeof HOSPITALS)[number];
-export type DayOfWeek = (typeof DAYS_OF_WEEK)[number];
-export type Credentials = (typeof Credentials)[number];
-export type Qualification = (typeof QUALIFICATIONS)[number];
-export type Specialization = (typeof SPECIALIZATIONS)[number];
-export type ConsultationDuration = (typeof CONSULTATION_DURATION)[number];
-
-// Type for lowercase weekdays
-export type Weekday = (typeof DAYS_OF_WEEK)[number];

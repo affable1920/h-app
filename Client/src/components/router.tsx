@@ -9,8 +9,8 @@ import Directory from "./routes/Directory";
 import ErrorBoundary from "./ErrorBoundary";
 import ClinicsDirectory from "./ClinicsDirectory";
 import DoctorProfile from "./doctor/DoctorProfile";
-import useDoctorsStore from "../stores/doctorsStore";
 import DoctorsDirectory from "./doctor/DoctorsDirectory";
+import drService from "@/services/DoctorService";
 
 /*
 API Routes Structure:
@@ -48,13 +48,13 @@ const router = createBrowserRouter([
               {
                 path: ":id",
                 Component: DoctorProfile,
-                loader: loadCurrDoctor,
+                loader: getDr,
               },
 
               {
                 path: ":id/schedule",
                 Component: Scheduler,
-                loader: loadCurrDoctor,
+                loader: getDr,
               },
             ],
           },
@@ -73,9 +73,6 @@ const router = createBrowserRouter([
 
 export default router;
 
-async function loadCurrDoctor({ params }: { params: { id?: string } }) {
-  const { getDoctorById, currDoctor } = useDoctorsStore.getState();
-
-  if (currDoctor?.id === params.id) return currDoctor;
-  if (params.id) await getDoctorById(params.id);
+async function getDr({ params }: { params: { id?: string } }) {
+  return drService.getById(params.id!);
 }

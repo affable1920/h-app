@@ -1,18 +1,23 @@
-import Chance from "chance";
 import { v4 } from "uuid";
-import {
-  type Doctor,
-  type DoctorEssentials,
-  type DoctorSecondaryInfo,
+import Chance from "chance";
+import { DateTime } from "luxon";
+
+import type {
+  Doctor,
+  Clinic,
+  Fee,
+  Slot as TimeSlot,
+  Schedule,
 } from "../types/doctorAPI.ts";
 import * as constants from "../utils/constants.ts";
-import type { Clinic, Fee, TimeSlot, Schedule } from "../types/doctorInfo.ts";
-import { DateTime } from "luxon";
 
 const chance = new Chance();
 
 class DataGenerator {
-  private generateClinics(single: boolean = false): Clinic | Clinic[] {
+  private generateClinics(single: true): Clinic;
+  private generateClinics(single: false): Clinic[];
+
+  private generateClinics(single: boolean): Clinic | Clinic[] {
     const clinics = Array.from(
       { length: chance.natural({ min: 1, max: single ? 1 : 3 }) },
       () => ({
@@ -20,17 +25,17 @@ class DataGenerator {
         name: chance.pickone(constants.HOSPITALS),
         address: chance.address(),
         contact: chance.phone(),
-        whatsApp: chance.phone(),
+        whatsapp: chance.phone(),
+        facilities: [],
         location: {
           lat: chance.latitude(),
           lng: chance.longitude(),
         },
-        parkingAvailable: chance.bool({ likelihood: 50 }),
+        parking_available: chance.bool({ likelihood: 50 }),
       })
     );
 
-    if (single) return clinics[0];
-    return clinics;
+    return single ? clinics[0] : clinics;
   }
 
   private generateFees(): Fee {
@@ -38,7 +43,7 @@ class DataGenerator {
     const max = constants.CONSULTATION_FEE_RANGE.MAX;
 
     return {
-      inPerson: chance.natural({ min, max }),
+      in_person: chance.natural({ min, max }),
       online: chance.natural({
         min: min - 100,
         max: max - 100,
@@ -49,17 +54,17 @@ class DataGenerator {
   private generateSchedules(
     baseDuration: constants.ConsultationDuration = 30
   ): Schedule[] {
-    let weekdayCached: constants.Weekday = "Saturday";
+    let weekdayCached: number;
 
-    function generateWeekday(): constants.Weekday {
-      let wkday = chance.pickone(constants.DAYS_OF_WEEK).toLowerCase();
+    function generateWeekday(): number {
+      const wkdays: number[] = Array.from({ length: 7 });
+      let wkday = chance.pickone(wkdays);
+
       if (wkday === weekdayCached)
-        wkday = chance
-          .pickone(constants.DAYS_OF_WEEK.filter((d) => d !== wkday))
-          .toLowerCase();
+        wkday = chance.pickone(wkdays.filter((d) => d !== wkday));
 
-      weekdayCached = wkday as constants.Weekday;
-      return wkday as constants.Weekday;
+      weekdayCached = wkday;
+      return wkday;
     }
 
     const startSlice = constants.TIME_SLOTS.slice(
@@ -97,34 +102,34 @@ class DataGenerator {
     }));
   }
 
-  private generateEssentials(): DoctorEssentials {
+  private generateEssentials(): Partial<Doctor> {
     return {
       id: v4(),
       name: chance.name(),
       email: chance.email(),
       credentials: chance.pickone(constants.Credentials),
-      primarySpecialization: chance.pickone(constants.SPECIALIZATIONS),
+      primary_specialization: chance.pickone(constants.SPECIALIZATIONS),
     };
   }
 
-  private generateSecondaries(): DoctorSecondaryInfo {
+  private generateSecondaries(): Partial<Doctor> {
     const fee = this.generateFees();
     const currDate = DateTime.local();
     const baseConsultTime = chance.pickone(constants.CONSULTATION_DURATION);
 
     return {
       fee,
-      currentlyAvailable: chance.bool(),
-      secondarySpecializations: chance.pickset(
+      currently_available: chance.bool(),
+      secondary_specializations: chance.pickset(
         constants.SPECIALIZATIONS,
         chance.natural({ max: 3 })
       ),
-      consultsOnline: chance.bool(),
+      consults_online: chance.bool(),
       reviews: chance.natural({ max: 420 }),
       verified: chance.bool({ likelihood: 70 }),
       experience: chance.natural({ min: 1, max: 35 }),
       rating: chance.floating({ min: 1.5, max: 5.0 }),
-      nextAvailable: chance.pickone([
+      next_available: chance.pickone([
         chance.date({
           string: true,
           year: 2025,
@@ -132,12 +137,12 @@ class DataGenerator {
         }),
         "unknown",
       ]) as string,
-      lastUpdated: chance.pickone([
+      last_updated: chance.pickone([
         chance.date({ string: true }) as string,
         "unknown",
       ]),
-      baseConsultTime,
-      baseFee: fee.inPerson as number,
+      base_consult_time: baseConsultTime,
+      base_fee: fee.in_person as number,
       status: chance.pickone(constants.STATUSES),
       office: this.generateClinics(true) as Clinic,
       schedules: this.generateSchedules(baseConsultTime),
@@ -148,7 +153,7 @@ class DataGenerator {
     return {
       ...this.generateEssentials(),
       ...this.generateSecondaries(),
-    };
+    } as Doctor;
   }
 
   static generateDoctors(count: number = 40) {

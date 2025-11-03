@@ -1,5 +1,5 @@
 import useModalStore from "@/stores/modalStore";
-import actionConfigs from "../services/doctorActionsConfig";
+import actionConfigs from "./doctorActionsConfig";
 import type { Doctor as DoctorType, Slot } from "@/types/doctorAPI";
 import type {
   DrCTA,
@@ -33,21 +33,21 @@ export class Doctor implements DoctorActions {
     }.call(this);
   }
 
-  private getCTAPosition(target: EventTarget & HTMLButtonElement): Position {
-    const cacheKey = `${this._data.id}_${target.name}` as string;
-    if (this.cache[cacheKey]) {
-      return this.cache[cacheKey];
-    }
+  // private getCTAPosition(target: EventTarget & HTMLButtonElement): Position {
+  //   const cacheKey = `${this._data.id}_${target.name}` as string;
+  //   if (this.cache[cacheKey]) {
+  //     return this.cache[cacheKey];
+  //   }
 
-    const rect = target.getBoundingClientRect();
-    const position = {
-      x: rect.left,
-      y: rect.bottom,
-    };
+  //   const rect = target.getBoundingClientRect();
+  //   const position = {
+  //     x: rect.left,
+  //     y: rect.bottom,
+  //   };
 
-    this.cache[cacheKey] = position;
-    return position;
-  }
+  //   this.cache[cacheKey] = position;
+  //   return position;
+  // }
 
   private openActionModal(
     modalName: string,

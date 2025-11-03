@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { DAYS_OF_WEEK, type Weekday } from "./constants";
+import { DAYS_OF_WEEK } from "./constants";
 
 function getPreviousMonthDays(date: DateTime): DateTime[] {
   const countPrevMonth = DateTime.local().set({
@@ -46,16 +46,16 @@ export function createCalendarData(date: DateTime): DateTime[] {
 }
 
 export function getWeekdaysWithIndexes() {
-  return DAYS_OF_WEEK.map((day, index) => ({ index, day: day.toLowerCase() }));
+  return DAYS_OF_WEEK.map((day, index) => ({ index, day: day }));
 }
 
-export function getWeekData(daysAvailable: string[]) {
+export function getWeekData(daysAvailable: number[]) {
   const availableDays = getWeekdaysWithIndexes()
-    .filter(({ day }) => daysAvailable.includes(day))
+    .filter(({ day }) => daysAvailable.includes(day as number))
     .map(({ index }) => index);
 
   const daysToDisable = getWeekdaysWithIndexes()
-    .filter(({ day }) => !daysAvailable.includes(day))
+    .filter(({ day }) => !daysAvailable.includes(day as number))
     .map(({ index }) => index);
 
   return {
@@ -64,6 +64,6 @@ export function getWeekData(daysAvailable: string[]) {
   };
 }
 
-export function getWeekday(index: number): Weekday {
-  return DAYS_OF_WEEK[index];
+export function getWeekday(index: number): number {
+  return DAYS_OF_WEEK[index] as number;
 }

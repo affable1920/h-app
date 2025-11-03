@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
-import Input from "./eventElements/Input";
-import * as constants from "../utils/constants";
-import Button from "./eventElements/Button";
+import Input from "../eventElements/Input";
+import * as constants from "../../utils/constants";
+import Button from "../eventElements/Button";
 import useModalStore from "@/stores/modalStore";
-import Badge from "./eventElements/Badge";
+import Badge from "../eventElements/Badge";
 import CategoryFilter from "./CategoryFilter";
-import SelectFilter from "./filters/SelectFilter";
+import SelectFilter from "./SelectFilter";
 
 type FilterCategories = "specialization" | "distance" | "rating" | "mode";
 
@@ -15,7 +15,7 @@ type Filters = {
 
 const categoryFilters: {
   label: "rating" | "mode";
-  options: readonly string[] | number[];
+  options: readonly (string | number)[];
 }[] = [
   { label: "mode", options: constants.CONSULTATION_MODES },
   { label: "rating", options: [1, 2, 3, 4] as const },
@@ -37,17 +37,27 @@ const DirectoryFilter = () => {
     handleFilterUpdate("specialization", spec);
   }, []);
 
+  const handleCategoryUpdate = useCallback(function (
+    label: "rating" | "mode",
+    option: string | number
+  ) {
+    handleFilterUpdate(label, option);
+  },
+  []);
+
   return (
     <section className="flex flex-col items-end h-full gap-8 p-2">
       <section className="flex flex-col gap-8 w-full grow">
         <div className="flex flex-col gap-4">
           {selectedSpecialization && (
             <Badge
+              size="md"
               className="w-fit capitalize"
-              content={selectedSpecialization}
               isOn={() => !!selectedSpecialization}
               onClick={() => handleSpecUpdate(null)}
-            />
+            >
+              {selectedSpecialization}
+            </Badge>
           )}
           <SelectFilter
             label="specialization"
@@ -79,10 +89,11 @@ const DirectoryFilter = () => {
 
         {categoryFilters.map((category) => (
           <CategoryFilter
+            size="md"
             key={category.label}
             label={category.label}
             options={category.options}
-            onOptionSelect={handleFilterUpdate.bind(null, category.label)}
+            onOptionSelect={handleCategoryUpdate}
           />
         ))}
       </section>

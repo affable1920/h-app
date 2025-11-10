@@ -1,4 +1,6 @@
 import { useCallback, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+
 import Input from "../eventElements/Input";
 import * as constants from "../../utils/constants";
 import Button from "../eventElements/Button";
@@ -6,23 +8,27 @@ import useModalStore from "@/stores/modalStore";
 import Badge from "../eventElements/Badge";
 import CategoryFilter from "./CategoryFilter";
 import SelectFilter from "./SelectFilter";
+import type { CategoryFilters, Filters } from "./types";
 
-type FilterCategories = "specialization" | "distance" | "rating" | "mode";
-
-type Filters = {
-  [K in FilterCategories]?: string | number | null;
-};
+type CategoryFilterKey = keyof CategoryFilters;
 
 const categoryFilters: {
-  label: "rating" | "mode";
-  options: readonly (string | number)[];
+  label: CategoryFilterKey;
+  options: string[] | number[];
 }[] = [
-  { label: "mode", options: constants.CONSULTATION_MODES },
-  { label: "rating", options: [1, 2, 3, 4] as const },
+  {
+    label: "mode",
+    options: ["online", "offline"],
+  },
+  {
+    label: "rating",
+    options: [1, 2, 3, 4],
+  },
 ];
 
 const DirectoryFilter = () => {
-  const [filters, setFilters] = useState<Filters>({});
+  const [filters, setFilters] = useState<Partial<Filters>>({});
+  const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   function handleFilterUpdate<T extends keyof Filters>(
     key: T,
@@ -31,22 +37,67 @@ const DirectoryFilter = () => {
     setFilters((p) => ({ ...p, [key]: value }));
   }
 
-  const selectedSpecialization = filters?.["specialization"];
-
   const handleSpecUpdate = useCallback(function (spec: string | null) {
     handleFilterUpdate("specialization", spec);
   }, []);
 
-  const handleCategoryUpdate = useCallback(function (
-    label: "rating" | "mode",
-    option: string | number
-  ) {
-    handleFilterUpdate(label, option);
-  },
-  []);
+  const handleCategoryUpdate = useCallback(
+    function (
+      label: keyof CategoryFilters,
+      option: Filters[keyof CategoryFilters]
+    ) {
+      if (filters?.[label] === option) {
+        handleFilterUpdate(label, null);
+        return;
+      }
+
+      handleFilterUpdate(label, option);
+    },
+    [filters]
+  );
+
+  const selectedSpecialization = filters?.["specialization"];
+  const [, setSearchParams] = useSearchParams();
+
+  async function applyFiltersHTTP() {
+    // Required before applying filters -
+    // curr directory
+    // filters applied
+    // access to directory hook
+
+    const newParams = new URLSearchParams();
+
+    for (const [key, val] of Object.entries(filters)) {
+      console.info("adding filters: ", key, val);
+      newParams.set(key, String(val));
+    }
+
+    try {
+      setSearchParams(newParams);
+      useModalStore.getState().closeModal();
+    } catch (ex) {
+      console.log(ex);
+    }
+  }
 
   return (
-    <section className="flex flex-col items-end h-full gap-8 p-2">
+    <section className="flex flex-col items-end h-full gap-8 p-2 relative">
+      {activeFilterCount > 0 && (
+        <div className="flex gap-4 items-center">
+          <Button
+            variant="icon"
+            className="underline underline-offset-2 text-blue-700"
+            onClick={() => setFilters({})}
+          >
+            Clear all
+          </Button>
+          <Badge
+            size="sm"
+            className="bg-accent text-white shadow-none border-accent-dark"
+            children={activeFilterCount}
+          />
+        </div>
+      )}
       <section className="flex flex-col gap-8 w-full grow">
         <div className="flex flex-col gap-4">
           {selectedSpecialization && (
@@ -94,19 +145,23 @@ const DirectoryFilter = () => {
             label={category.label}
             options={category.options}
             onOptionSelect={handleCategoryUpdate}
+            selectedOption={filters?.[category.label]}
           />
         ))}
       </section>
 
       <div className="flex items-center gap-4">
         <Button
-          size="md"
-          variant="outlined"
+          variant="contained"
           onClick={useModalStore.getState().closeModal}
         >
           Cancel
         </Button>
-        <Button size="md" variant="outlined">
+        <Button
+          onClick={applyFiltersHTTP}
+          disabled={!activeFilterCount}
+          variant="contained"
+        >
           Apply
         </Button>
       </div>

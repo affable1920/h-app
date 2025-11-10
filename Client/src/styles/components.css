@@ -27,11 +27,29 @@
   }
 
   .input {
-    @apply w-full border-2 border-slate-200 rounded-md p-2 px-4 
-    outline-none;
+    @apply w-full border-2 border-slate-200 rounded-md outline-none;
 
     &:focus {
-      @apply border-blue-500 ring-2 ring-blue-300/50;
+      @apply border-secondary ring-2 ring-secondary-lightest/60;
+    }
+
+    &:is(.sm) {
+      @apply h-8 p-1 px-2;
+    }
+    &:is(.md) {
+      @apply h-10 p-2 px-4;
+    }
+  }
+
+  .input-box {
+    @apply flex flex-col tracking-widest;
+
+    &:has(.badge, .icon) {
+      @apply relative;
+    }
+
+    &:has(.badge, .icon) > button {
+      @apply italic text-sm w-fit absolute top-1/2 right-2 -translate-y-1/2 shadow-none border-none px-1;
     }
   }
 

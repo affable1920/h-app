@@ -1,5 +1,4 @@
 import { useState } from "react";
-import sendMsg from "../../services/aiService";
 
 type AIResponse = {
   id: string;
@@ -16,8 +15,7 @@ const Chat = () => {
     setMsgs((p) => [...p, msg]);
 
     try {
-      const response = await sendMsg(msg);
-      setAiResponses((p) => [...p, response]);
+      console.log("ai service");
     } catch (ex) {
       console.log(ex);
     } finally {

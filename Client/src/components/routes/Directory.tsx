@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Outlet,
   useLocation,
@@ -6,55 +6,48 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
-import Button from "../eventElements/Button";
-import Pagination from "../Pagination";
-import { ArrowLeftRight, X, Funnel } from "lucide-react";
+import Pagination from "@components/Pagination";
+import Input from "@components/eventElements/Input";
+import Button from "@components/eventElements/Button";
+
+import { debounce } from "@/utils/appUtils";
+
 import useModalStore from "@/stores/modalStore";
-import Input from "../eventElements/Input";
+import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
 
 const Directory = () => {
-  const location = useLocation().pathname?.split("/").at(1) ?? "doctors";
-
   const navigate = useNavigate();
-  const [params, setParams] = useSearchParams();
 
-  const max = parseInt(params.get("params") ?? "9");
-  const page = parseInt(params.get("page") ?? "1");
-  const searchQuery = params.get("searchQuery") ?? "";
+  const [localSQ, setLocalSQ] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [entityCount, setEntityCount] = useState(0);
-  const isLastPage = entityCount < max || page === Math.ceil(entityCount / max);
+  const cachedSQSetter = useMemo(
+    function () {
+      return debounce(function (sq: string) {
+        setSearchParams((p) => ({ ...p, searchQuery: sq, page: 1 }));
+      }, 200);
+    },
+    [setSearchParams]
+  );
 
-  // passed to the rendered directory component to immediately update the entity count state var
-  function setTotalCount(count: number) {
-    setEntityCount(count);
-  }
-
-  function handleSearch(ev: React.ChangeEvent<HTMLInputElement>) {
-    setParams((prev) => ({ ...prev, page: 1, searchQuery: ev.target.value }));
-  }
+  const searchQuery = searchParams.get("searchQuery") ?? "";
+  const location = useLocation().pathname.split("/").at(1) ?? "doctors";
 
   function handleDirectorySwitch() {
     const nextDir = location === "doctors" ? "clinics" : "doctors";
     navigate(`/${nextDir}`);
   }
 
-  function handlePageChange(direction: "next" | "prev") {
-    if (
-      (page === 1 && direction === "prev") ||
-      (isLastPage && direction === "next")
-    )
-      return;
-
-    const pageToSet = direction === "next" ? page + 1 : page - 1;
-    setParams((p) => ({ ...p, page: pageToSet }));
-  }
-
-  function handleFilter() {
+  function handleFilterState() {
     useModalStore.getState().openModal("directoryFilter", {
       viewOverlay: true,
       position: "bottom",
     });
+  }
+
+  function handleSearch(sq: string) {
+    setLocalSQ(sq);
+    cachedSQSetter(sq);
   }
 
   return (
@@ -63,21 +56,16 @@ const Directory = () => {
         {/* search bar */}
 
         <div className="flex items-center gap-4 order-1">
-          <div className="flex items-center relative">
-            <Input
-              value={searchQuery}
-              placeholder="Search"
-              onChange={handleSearch}
-              className="italic placeholder:text-sm"
-            />
-            <Button
-              variant="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2"
-              onClick={() => setParams((p) => ({ ...p, searchQuery: "" }))}
-            >
-              {params.get("searchQuery") ? <X /> : "Ctrl K"}
+          <Input
+            value={localSQ}
+            placeholder="Search"
+            className="italic placeholder:text-sm"
+            onChange={(ev) => handleSearch(ev.target.value)}
+          >
+            <Button variant={"icon"}>
+              {searchQuery ? <X onClick={() => handleSearch("")} /> : "Ctrl K"}
             </Button>
-          </div>
+          </Input>
 
           <Button variant="icon" onClick={handleDirectorySwitch}>
             <ArrowLeftRight />
@@ -86,22 +74,18 @@ const Directory = () => {
 
         {/* rest of the filters  */}
         <div className="flex items-center gap-4">
-          <Button variant="icon" onClick={handleFilter}>
-            <Funnel />
+          <Button variant="icon" onClick={handleFilterState}>
+            <SlidersHorizontal />
           </Button>
         </div>
       </section>
 
       <section className="directory-layout">
-        {/* outlet renders either the Doctor or clinic directory passing them the query params */}
-        <Outlet context={{ max, page, searchQuery, setTotalCount }} />
+        {/* outlet renders either the Doctor or clinic directory passing them the setTotalCount func */}
+        <Outlet />
       </section>
 
-      <Pagination
-        isLastPage={isLastPage}
-        isFirstPage={page === 1}
-        onPageChange={handlePageChange}
-      />
+      <Pagination />
     </section>
   );
 };

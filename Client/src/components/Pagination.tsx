@@ -1,29 +1,23 @@
+import { useSearchParams } from "react-router-dom";
+import { useAllDoctors } from "@/hooks/useDoctorsQuery";
+
 import ButtonElement from "./eventElements/Button";
 import { ArrowBigRightDash, ArrowBigLeftDash } from "lucide-react";
 
-interface PaginationProps {
-  max?: number;
-  page?: number;
-  isLastPage: boolean;
-  isFirstPage: boolean;
-  onPageChange: (direction: "next" | "prev") => void;
-}
+const Pagination = () => {
+  const { handlePageChange, data: { has_more = false } = {} } = useAllDoctors();
+  const isFirstPage = parseInt(useSearchParams()?.[0].get("page") ?? "1") === 1;
 
-const Pagination = ({
-  isFirstPage,
-  isLastPage,
-  onPageChange,
-}: PaginationProps) => {
   return (
     <article className="flex self-end items-center gap-4">
       {!isFirstPage && (
-        <ButtonElement variant="icon" onClick={onPageChange.bind(null, "prev")}>
+        <ButtonElement variant="icon" onClick={() => handlePageChange("prev")}>
           <ArrowBigLeftDash />
         </ButtonElement>
       )}
 
-      {!isLastPage && (
-        <ButtonElement variant="icon" onClick={onPageChange.bind(null, "next")}>
+      {has_more && (
+        <ButtonElement variant="icon" onClick={() => handlePageChange("next")}>
           <ArrowBigRightDash />
         </ButtonElement>
       )}

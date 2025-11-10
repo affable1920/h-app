@@ -1,20 +1,24 @@
 import Ratings from "../Ratings";
 import Badge from "../eventElements/Badge";
 import type { ButtonProps } from "@/types/appButtonTypes";
+import { type CategoryFilters } from "./types";
 
-type CategoryFilterType = "rating" | "mode";
+type FilterKey = keyof CategoryFilters;
+type CurrentCategoryType<T extends FilterKey> = CategoryFilters[T];
 
-interface CategoryFilterProps<T extends CategoryFilterType> {
+interface CategoryFilterProps<T extends FilterKey> {
   label: T;
   size?: ButtonProps["size"];
-  options: readonly (string | number)[];
-  onOptionSelect: (label: CategoryFilterType, option: string | number) => void;
+  options: T extends "rating" ? number[] : string[];
+  selectedOption?: CurrentCategoryType<T>;
+  onOptionSelect: (label: T, option: CurrentCategoryType<T>) => void;
 }
 
-const CategoryFilter = <T extends CategoryFilterType>({
+const CategoryFilter = <T extends FilterKey>({
   size = "md",
   label,
   options,
+  selectedOption,
   onOptionSelect,
 }: CategoryFilterProps<T>) => {
   return (
@@ -25,7 +29,10 @@ const CategoryFilter = <T extends CategoryFilterType>({
           <Badge
             key={option}
             size={size}
-            onClick={() => onOptionSelect(label, option)}
+            isOn={() => option === selectedOption}
+            onClick={() =>
+              onOptionSelect(label, option as CurrentCategoryType<T>)
+            }
           >
             {label === "rating" ? (
               <Ratings rating={option as number} />

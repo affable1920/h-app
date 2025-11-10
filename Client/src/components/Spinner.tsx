@@ -1,4 +1,4 @@
-const Spinner = ({ loading }: { loading: boolean }) => {
+const Spinner = ({ loading = true }: { loading?: boolean }) => {
   if (!loading) return null;
 
   const spinnerClasses = [
@@ -6,8 +6,6 @@ const Spinner = ({ loading }: { loading: boolean }) => {
   ]
     .filter(Boolean)
     .join(" ");
-
-  console.log(spinnerClasses);
 
   return <div className={spinnerClasses} />;
 };

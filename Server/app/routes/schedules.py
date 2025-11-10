@@ -1,8 +1,7 @@
-from datetime import datetime
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from app.services.doctorService import doctor_service
+from app.services.dr_service import doctor_service
 
 
 router = APIRouter(prefix="/schedules", tags=["schedules"])

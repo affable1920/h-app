@@ -1,5 +1,5 @@
 import useModalStore from "@/stores/modalStore";
-import actionConfigs from "./doctorActionsConfig";
+import actionConfigs from "../utils/doctorActionsConfig";
 import type { Doctor as DoctorType, Slot } from "@/types/doctorAPI";
 import type {
   DrCTA,

@@ -1,11 +1,12 @@
 import json
 from pathlib import Path
+from typing import Annotated, Literal
 # from typing import Generic, TypeVar
 from typing_extensions import Self
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 
 from app.models.doctor_models.Doctor import Doctor
-from app.models.QueryParams import SortOrder
+from app.models.QueryParams import Sort, SortOrder, RouteFilters
 
 # T = TypeVar("T")
 
@@ -44,13 +45,40 @@ class DoctorService():
                 # create a bg task for auto file creation later
                 print("File not found")
 
+    def filter(self, doctors: list[dict], filters: RouteFilters) -> list[dict]:
+        filtered = doctors[:]
+
+        if filters.specialization:
+            print("Spec recieved to filter for: ",
+                  filters.specialization.lower())
+
+            filtered = [doc for doc in filtered if Doctor(
+                **doc).primary_specialization.lower() == filters.specialization.lower()]
+
+        if filters.rating:
+            print("filtering against doc rating: ", filters.rating)
+            filtered = [doc for doc in filtered if doc.get(
+                "rating", 0) >= filters.rating]
+
+        if filters.mode:
+            print("filtering against the selected consultation mode: ", filters.mode)
+            if filters.mode.lower() == "online":
+                filtered = [doc for doc in filtered if doc.get(
+                    "consults_online", False)]
+
+            else:
+                filtered = [doc for doc in filtered if not doc.get(
+                    "consults_online", False)]
+
+        print("number of docs after applying all filters: ", len(filtered))
+        return filtered
+
 
 #
 
-
-    def get_doctors(self, max: int = 5, page: int = 1, search_query: str | None = None,
-                    sort_by: tuple[str, SortOrder] = ("name", SortOrder.ASC)):
+    def get_doctors(self, sort: Sort, max: int = 5, page: int = 1, search_query: str | None = None, **kwargs):
         """
+
         if any of the params are not provided, then they are set to None
         and thus are not included in the cache key so that the cache key
         is not affected by the missing params and the cache key remains the same for the same query
@@ -65,22 +93,37 @@ class DoctorService():
 
         All items returned from the outside comprehension would be joined
         together after ofcourse converting em to strings sperated by "_"
+
         """
+
+        #
         cache_key = "_".join(str(x)
-                             for x in [page, max, *[x for x in [search_query, sort_by] if x]] if x)
+                             for x in [page, max, *[x for x in [search_query, sort] if x]] if x)
+
+        applied_filters: list[str] = []
+
         try:
 
-            if cache_key in self._cache:
-                print("Cache hit under this key: ", cache_key)
-                return self._cache[cache_key]
+            # if cache_key in self._cache:
+            #     print("Cache hit under this key: ", cache_key)
+            #     return self._cache[cache_key]
 
-            doctors = self._doctors
+            doctors = self._doctors[:]
 
-            if sort_by:
-                prop, order = sort_by
+            if sort:
+                print("sorting the docs list: ", sort)
+                prop, order = sort
 
                 doctors = sorted(doctors, key=lambda x: x.get(prop, "name"))
                 doctors = doctors if order == SortOrder.ASC else doctors[::-1]
+
+            if kwargs:
+                for k, v in kwargs.items():
+                    if v:
+                        applied_filters.append(k)
+
+                print("recieved filters: ", kwargs)
+                doctors = self.filter(doctors, RouteFilters(**kwargs))
 
             if search_query:
                 doctors = [
@@ -90,9 +133,12 @@ class DoctorService():
             end = start + max
 
             paginated_doctors = doctors[start: min(end, len(doctors))]
+            total_count = len(doctors)
 
-            response = {"data": [Doctor(**doc) for doc in paginated_doctors], "total_count": len(
-                self._doctors), "curr_count": len(paginated_doctors)}
+            has_more = end < total_count
+
+            response = {"entities": paginated_doctors, "paginated_count": len(paginated_doctors),
+                        "total_count": total_count, "has_more": has_more, "applied_filters": applied_filters}
 
             self._cache[cache_key] = response
             return response
@@ -104,9 +150,9 @@ class DoctorService():
 
     def get_doctor_by_id(self, id: str) -> Doctor:
         try:
-            curr_doctor = next(
+            rqstd_dr = next(
                 (doc for doc in self._doctors if doc["id"] == id))
-            return Doctor(**curr_doctor)
+            return Doctor(**rqstd_dr)
 
         except Exception as e:
             print(e)

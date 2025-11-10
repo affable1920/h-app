@@ -64,7 +64,7 @@ export async function exponentialBackoff(
   console.log("All attempts failed !");
 }
 
-export function debounce(func: (...args: string[]) => void, ms: number) {
+export function debounce(func: (...args: string[]) => void, ms?: number) {
   let timeoutId: ReturnType<typeof setTimeout>;
   const delay = ms ?? 330;
 

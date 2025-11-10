@@ -4,23 +4,6 @@
  */
 
 export interface paths {
-    "/chat": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Chat */
-        post: operations["chat"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/doctors": {
         parameters: {
             query?: never;
@@ -110,22 +93,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** ChatRequest */
-        ChatRequest: {
-            /** Msg */
-            msg: string;
-        };
-        /** ChatResponse */
-        ChatResponse: {
-            /** Id */
-            id: string;
-            /** Msg */
-            msg: string | (string | {
-                [key: string]: unknown;
-            })[];
-            /** Model Name */
-            model_name?: string | null;
-        };
         /** Clinic */
         Clinic: {
             /** Id */
@@ -232,21 +199,29 @@ export interface components {
         };
         /** RouteResponse[Clinic] */
         RouteResponse_Clinic_: {
-            /** Data */
-            data: components["schemas"]["Clinic"][];
-            /** Curr Count */
-            curr_count: number;
+            /** Entities */
+            entities: components["schemas"]["Clinic"][];
+            /** Has More */
+            has_more: boolean;
             /** Total Count */
             total_count: number;
+            /** Paginated Count */
+            paginated_count: number;
+            /** Applied Filters */
+            applied_filters: string[];
         };
         /** RouteResponse[Doctor] */
         RouteResponse_Doctor_: {
-            /** Data */
-            data: components["schemas"]["Doctor"][];
-            /** Curr Count */
-            curr_count: number;
+            /** Entities */
+            entities: components["schemas"]["Doctor"][];
+            /** Has More */
+            has_more: boolean;
             /** Total Count */
             total_count: number;
+            /** Paginated Count */
+            paginated_count: number;
+            /** Applied Filters */
+            applied_filters: string[];
         };
         /**
          * Schedule
@@ -287,6 +262,16 @@ export interface components {
             /** Mode */
             mode?: string | null;
         };
+        /** Sort */
+        Sort: {
+            /**
+             * By
+             * @default name
+             */
+            by: string | null;
+            /** @default asc */
+            order: components["schemas"]["SortOrder"];
+        };
         /**
          * SortOrder
          * @enum {string}
@@ -306,6 +291,29 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /** RouteFilters */
+        RouteFilters: {
+            /**
+             * Mode
+             * @default null
+             */
+            mode: ("online" | "offline") | null;
+            /**
+             * Specialization
+             * @default null
+             */
+            specialization: string | null;
+            /**
+             * Distance
+             * @default null
+             */
+            distance: number | null;
+            /**
+             * Rating
+             * @default null
+             */
+            rating: number | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -315,42 +323,13 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    chat: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChatRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChatResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     get_doctors: {
         parameters: {
             query?: {
+                mode?: ("online" | "offline") | null;
+                specialization?: string | null;
+                distance?: number | null;
+                rating?: number | null;
                 max?: number;
                 page?: number;
                 searchQuery?: string | null;
@@ -361,10 +340,7 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": [
-                    string,
-                    components["schemas"]["SortOrder"]
-                ] | null;
+                "application/json": components["schemas"]["Sort"] | null;
             };
         };
         responses: {

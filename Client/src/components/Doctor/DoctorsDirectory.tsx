@@ -1,6 +1,3 @@
-import { useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
-
 import Card from "@/components/Card";
 import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 
@@ -9,14 +6,8 @@ import type { Doctor } from "@/types/doctorAPI";
 import DrCardBack from "./DrCardBack";
 import DrCardEssentials from "./DrCardEssentials";
 import DrCardSecondaryInfo from "./DrCardSecondaryInfo";
-
-// recieved from the parent outlet
-type ParentContext = {
-  max: number;
-  page: number;
-  searchQuery: string;
-  setTotalCount: (count: number) => void;
-};
+import Button from "../eventElements/Button";
+import Spinner from "../Spinner";
 
 function DrCardFront({ doctor }: { doctor: Doctor }) {
   return (
@@ -27,19 +18,28 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
   );
 }
 
-const DoctorsDirectory = () => {
-  const { setTotalCount, ...params } = useOutletContext<ParentContext>();
-
-  const { data: { data: doctors = [], total_count } = {}, isError } =
-    useAllDoctors(params || {});
-
-  useEffect(() => {
-    if (total_count) setTotalCount(total_count);
-  }, [total_count, setTotalCount]);
+function DoctorsDirectory() {
+  const {
+    data: { entities = [], applied_filters, total_count } = {},
+    isError,
+    isLoading,
+  } = useAllDoctors();
 
   if (isError) return;
 
-  return (doctors || []).map((doctor) => (
+  if (isLoading) return <Spinner />;
+
+  if (applied_filters && !total_count)
+    return (
+      <div className="flex flex-col justify-center items-center gap-2">
+        <h2 className="text-lg uppercase font-semibold">
+          No matching doctors found!
+        </h2>
+        <Button variant="contained">Refetch</Button>
+      </div>
+    );
+
+  return (entities || []).map((doctor) => (
     <Card
       key={doctor.id}
       entity={doctor}
@@ -47,6 +47,6 @@ const DoctorsDirectory = () => {
       CardBack={<DrCardBack doctor={doctor} />}
     />
   ));
-};
+}
 
 export default DoctorsDirectory;

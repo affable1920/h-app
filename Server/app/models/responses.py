@@ -5,10 +5,13 @@ from typing import Generic, TypeVar
 T = TypeVar("T")
 
 
-""" same GET response for clinics and doctors """
-
-
 class RouteResponse(BaseModel, Generic[T]):
-    data: list[T]
-    curr_count: int
+    """ same GET response for clinics and doctors """
+    entities: list[T]
+
+    # has more boolean val for pagination
+    has_more: bool
+
     total_count: int
+    paginated_count: int
+    applied_filters: list[str]

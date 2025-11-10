@@ -4,7 +4,7 @@ import Button from "../eventElements/Button";
 import type { Doctor, Status } from "../../types/doctorAPI";
 import { Link } from "react-router-dom";
 import { capitalize } from "../../utils/appUtils";
-import { Doctor as DR } from "@/utils/doctorModel";
+import { Doctor as DR } from "@/services/DoctorModel";
 import { CalendarFold, MapPin, PhoneOutgoing, User } from "lucide-react";
 
 const iconMap: Record<string, IconType> = {

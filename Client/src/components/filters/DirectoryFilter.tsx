@@ -1,13 +1,17 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import Input from "../eventElements/Input";
-import * as constants from "../../utils/constants";
-import Button from "../eventElements/Button";
-import useModalStore from "@/stores/modalStore";
-import Badge from "../eventElements/Badge";
-import CategoryFilter from "./CategoryFilter";
 import SelectFilter from "./SelectFilter";
+import Input from "../eventElements/Input";
+
+import Badge from "../eventElements/Badge";
+import Button from "../eventElements/Button";
+import CategoryFilter from "./CategoryFilter";
+
+import { AnimatePresence } from "motion/react";
+import useModalStore from "@/stores/modalStore";
+
+import * as constants from "../../utils/constants";
 import type { CategoryFilters, Filters } from "./types";
 
 type CategoryFilterKey = keyof CategoryFilters;
@@ -22,17 +26,31 @@ const categoryFilters: {
   },
   {
     label: "rating",
-    options: [1, 2, 3, 4],
+    options: [2, 3, 4],
   },
 ];
 
 const DirectoryFilter = () => {
-  const [filters, setFilters] = useState<Partial<Filters>>({});
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // filter state - for updating local state first,
+  // then a single api call on apply click
+  const [filters, setFilters] = useState<Partial<Filters>>(() =>
+    Object.fromEntries(searchParams.entries())
+  );
+
+  useEffect(
+    function () {
+      setFilters(Object.fromEntries(searchParams.entries()));
+    },
+    [searchParams]
+  );
+
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   function handleFilterUpdate<T extends keyof Filters>(
     key: T,
-    value: Filters[T]
+    value: Filters[T] | null
   ): void {
     setFilters((p) => ({ ...p, [key]: value }));
   }
@@ -42,9 +60,9 @@ const DirectoryFilter = () => {
   }, []);
 
   const handleCategoryUpdate = useCallback(
-    function (
-      label: keyof CategoryFilters,
-      option: Filters[keyof CategoryFilters]
+    function <T extends CategoryFilterKey>(
+      label: T,
+      option: CategoryFilters[T]
     ) {
       if (filters?.[label] === option) {
         handleFilterUpdate(label, null);
@@ -57,7 +75,6 @@ const DirectoryFilter = () => {
   );
 
   const selectedSpecialization = filters?.["specialization"];
-  const [, setSearchParams] = useSearchParams();
 
   async function applyFiltersHTTP() {
     // Required before applying filters -
@@ -69,6 +86,7 @@ const DirectoryFilter = () => {
 
     for (const [key, val] of Object.entries(filters)) {
       console.info("adding filters: ", key, val);
+      if (!val) continue;
       newParams.set(key, String(val));
     }
 
@@ -81,35 +99,37 @@ const DirectoryFilter = () => {
   }
 
   return (
-    <section className="flex flex-col items-end h-full gap-8 p-2 relative">
-      {activeFilterCount > 0 && (
-        <div className="flex gap-4 items-center">
-          <Button
-            variant="icon"
-            className="underline underline-offset-2 text-blue-700"
-            onClick={() => setFilters({})}
-          >
-            Clear all
-          </Button>
-          <Badge
-            size="sm"
-            className="bg-accent text-white shadow-none border-accent-dark"
-            children={activeFilterCount}
-          />
-        </div>
-      )}
-      <section className="flex flex-col gap-8 w-full grow">
-        <div className="flex flex-col gap-4">
-          {selectedSpecialization && (
-            <Badge
-              size="md"
-              className="w-fit capitalize"
-              isOn={() => !!selectedSpecialization}
-              onClick={() => handleSpecUpdate(null)}
+    <section className="flex flex-col h-full gap-8 p-4 relative text-sm">
+      <div className="flex items-center justify-between">
+        {activeFilterCount > 0 && (
+          <div className="absolute top-0 right-0">
+            <Button
+              color="accent"
+              variant="contained"
+              onClick={() => setFilters({})}
+              className="hover:underline underline-offset-2"
             >
-              {selectedSpecialization}
-            </Badge>
-          )}
+              Clear all
+            </Button>
+            <Badge>{activeFilterCount}</Badge>
+          </div>
+        )}
+      </div>
+      <section className="flex flex-col gap-8 w-full grow">
+        <div className="filter-div">
+          <AnimatePresence mode="wait">
+            {selectedSpecialization && (
+              <Badge
+                as="button"
+                needsMotion={true}
+                className="w-fit capitalize"
+                on={() => !!selectedSpecialization}
+                onClick={() => handleSpecUpdate(null)}
+              >
+                {selectedSpecialization}
+              </Badge>
+            )}
+          </AnimatePresence>
           <SelectFilter
             label="specialization"
             options={constants.SPECIALIZATIONS}
@@ -123,7 +143,7 @@ const DirectoryFilter = () => {
           />
         </div>
 
-        <div>
+        <div className="filter-div">
           <Input
             type="range"
             name="distance"
@@ -145,23 +165,41 @@ const DirectoryFilter = () => {
             label={category.label}
             options={category.options}
             onOptionSelect={handleCategoryUpdate}
-            selectedOption={filters?.[category.label]}
+            optionIsSelected={filters?.[category.label] ?? undefined}
           />
         ))}
+
+        <Badge
+          onClick={() =>
+            handleFilterUpdate(
+              "currently_available",
+              (function (p) {
+                return !p;
+              })(filters?.currently_available)
+            )
+          }
+          className="max-w-fit italic"
+        >
+          Available right now !
+          <Input
+            readOnly
+            type="checkbox"
+            name="availability"
+            className="cursor-pointer"
+            checked={!!filters?.currently_available}
+          />
+        </Badge>
       </section>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 justify-end">
         <Button
-          variant="contained"
+          size="md"
+          variant="outlined"
           onClick={useModalStore.getState().closeModal}
         >
           Cancel
         </Button>
-        <Button
-          onClick={applyFiltersHTTP}
-          disabled={!activeFilterCount}
-          variant="contained"
-        >
+        <Button size="md" variant="outlined" onClick={applyFiltersHTTP}>
           Apply
         </Button>
       </div>

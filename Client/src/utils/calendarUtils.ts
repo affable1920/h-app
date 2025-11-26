@@ -46,7 +46,7 @@ export function createCalendarData(date: DateTime): DateTime[] {
 }
 
 export function getWeekdaysWithIndexes() {
-  return DAYS_OF_WEEK.map((day, index) => ({ index, day: day }));
+  return DAYS_OF_WEEK.map((day, index) => ({ index, day }));
 }
 
 export function getWeekData(daysAvailable: number[]) {

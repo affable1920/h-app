@@ -126,6 +126,16 @@ export const Credentials = [
   "MD (Internal Medicine), MRCP",
 ] as const;
 
+export const WEEKDAYS = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+] as const;
+
 export const DAYS_OF_WEEK = [...Array.from({ length: 7 })] as const;
 
 // Types for type safety

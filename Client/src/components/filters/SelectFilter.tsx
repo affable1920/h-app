@@ -1,7 +1,7 @@
 import { useState } from "react";
-import ButtonElement from "../eventElements/Button";
+import Button from "../eventElements/Button";
 import Dropdown from "../eventElements/Dropdown";
-import { ChevronUpIcon } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 interface SelectFilterProps {
   label: string;
@@ -23,20 +23,17 @@ const SelectFilter = ({
         options={options}
         onOptionSelect={onOptionSelect}
       />
-      <ButtonElement
+      <Button
         size="lg"
         variant="outlined"
-        className="card-h2 italic"
+        className="italic"
         onClick={() => setIsOpen((p) => !p)}
+        endIcon={
+          <ChevronDown className={`${isOpen && "rotate-180"}`} size={12} />
+        }
       >
         Filter by {label}
-        <ChevronUpIcon
-          size={13}
-          className={`transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          } `}
-        />
-      </ButtonElement>
+      </Button>
     </div>
   );
 };

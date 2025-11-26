@@ -1,20 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import NavLinks from "./NavLinks.js";
-import { HiMenuAlt2 } from "react-icons/hi";
-import AuthActions from "./AuthActions.js";
+import { motion } from "motion/react";
 import { useLocation } from "react-router-dom";
 
-const Logo = ({ toggleFn }: { toggleFn: () => void }) => {
-  return (
-    <button onClick={toggleFn} className="lg:hidden">
-      <HiMenuAlt2 />
-    </button>
-  );
-};
+import NavLinks from "./NavLinks.js";
+import Button from "./eventElements/Button";
+import { Menu, Search } from "lucide-react";
 
 const NavBar = () => {
-  const [showRoutes, setShowRoutes] = useState(false);
   const { pathname = "" } = useLocation();
+  const [showRoutes, setShowRoutes] = useState(false);
 
   useEffect(() => {
     if (showRoutes) setShowRoutes(false);
@@ -43,11 +37,24 @@ const NavBar = () => {
   }, [showRoutes]);
 
   return (
-    <nav className="navbar lg:flex-nowrap" ref={ref}>
-      <Logo toggleFn={() => setShowRoutes((p) => !p)} />
+    <motion.nav ref={ref} className="navbar">
+      <Button
+        variant="icon"
+        className="lg:hidden"
+        onClick={() => setShowRoutes((p) => !p)}
+      >
+        <Menu />
+      </Button>
+
+      <div className="flex items-center gap-2 italic font-bold cursor-pointer lg:order-10">
+        <Button className="flex items-center" variant="icon">
+          Ctrl K
+          <Search />
+        </Button>
+      </div>
+
       <NavLinks showRoutes={showRoutes} />
-      <AuthActions />
-    </nav>
+    </motion.nav>
   );
 };
 

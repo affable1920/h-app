@@ -1,11 +1,18 @@
+from pathlib import Path
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
+
+import os
+
+# Skip if data already exists
+
+from app.routes import auth
 from app.routes import doctors
 from app.routes import clinics
-from app.routes import schedules
-
+from app.routes import schedule
+from app.services.data_generator import main
 from app.services.openapi_spec import generate_openapi_spec
 
 
@@ -13,7 +20,18 @@ from app.services.openapi_spec import generate_openapi_spec
 async def root(app: FastAPI):
     print("Starting up")
 
+    if Path("data/Doctors.json").exists():
+        print("Data already generated !")
+        pass
+
+    else:
+        print("Generating data")
+        main()
+
+    app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
+
     yield
+
     print("Shutting down")
 
 app = FastAPI(lifespan=root, openapi_url="/openapi.json",
@@ -36,15 +54,12 @@ app.add_middleware(
 
 app.include_router(doctors.router)
 app.include_router(clinics.router)
-app.include_router(schedules.router)
-
-
-app.openapi_schema = generate_openapi_spec(app)
+app.include_router(auth.router)
 
 
 @app.get("/")
 async def root_path():
-    return {"message": "Hello World"}
+    return {"message": "Welcome to Sopor-i-fix"}
 
 
 if __name__ == "__main__":

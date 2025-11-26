@@ -5,22 +5,22 @@ function useInjectModalHandlers() {
   const currModal = useModalStore((s) => s.currModal);
 
   useEffect(() => {
-    const handleEscape = (ev: KeyboardEvent) => {
+    function handleEscape(ev: KeyboardEvent) {
       if (currModal && ev.key == "Escape") removeModal();
-    };
+    }
 
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, [currModal]);
 
   useEffect(() => {
-    const handleClick = (ev: MouseEvent) => {
+    function handleClick(ev: MouseEvent) {
       if (
         currModal &&
         !document.querySelector(".modal")?.contains(ev.target as Node)
       )
         removeModal();
-    };
+    }
 
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);

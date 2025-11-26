@@ -1,184 +1,226 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, type Variant } from "motion/react";
 
 import { BsArrowRight } from "react-icons/bs";
-import { BiLocationPlus } from "react-icons/bi";
-import type { Weekday } from "../utils/constants";
+import { BiSolidMapPin } from "react-icons/bi";
 
-import ButtonElement from "./eventElements/Button";
+import Button from "./eventElements/Button";
+
+import { ClockArrowDown } from "lucide-react";
+
+import Badge from "./eventElements/Badge";
+import { Link, useLoaderData } from "react-router-dom";
+
+import { WEEKDAYS } from "@/utils/constants";
 import useScheduleStore from "../stores/scheduleStore";
 
-import { FaLink } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import Badge from "./eventElements/Badge";
-import Spinner from "./Spinner";
-import type { Clinic, Schedule, Slot } from "../types/doctorAPI";
+import useModalStore from "@/stores/modalStore";
+import { set as setSchedule } from "../stores/scheduleStore";
+import type { Doctor, Clinic, Schedule, Slot } from "../types/doctorAPI";
 
-const scheduleVariants: Record<string, Variant> = {
-  initial: {
-    scale: 0,
-    opacity: 0,
-  },
-  view: {
-    scale: 1,
+const containerVariants: Record<string, Variant> = {
+  initial: { opacity: 0, y: -40 },
+  animate: {
     opacity: 1,
+    y: 0,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.25, // Wait for parent to finish (matches parent duration)
+    },
+  },
+  exit: {
+    y: -40,
+    opacity: 0,
   },
 };
 
-const ClinicsView = React.memo(
-  ({ targetSchedules }: { targetSchedules: Schedule[] }) => {
-    const selectedDate = useScheduleStore((s) => s.selectedDate);
-    const selectedSlot = useScheduleStore((s) => s.selectedSlot);
-    const selectedClinic = useScheduleStore((s) => s.selectedClinic);
+const articleVariants: Record<string, Variant> = {
+  initial: { opacity: 0, x: -20 },
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: { delayChildren: 0.2, staggerChildren: 0.1 },
+  },
+  exit: { opacity: 0, x: -20 },
+};
 
-    const setSelectedSlot = useScheduleStore((s) => s.setSelectedSlot);
+const ClinicsView = memo(function ({
+  onShow,
+  schedules,
+  showClinicsView,
+}: {
+  schedules: Schedule[];
+  showClinicsView: boolean;
+  onShow: (show: boolean) => void;
+}) {
+  const dr = useLoaderData<Doctor>();
+  const selectedDate = useScheduleStore((s) => s.selectedDate);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
-    const [viewSchedules, setViewSchedules] = useState(false);
-    const [selectedWeekday, setSelectedWeekday] = useState<Weekday | null>(
-      null
-    );
+  const selectedSlot = useScheduleStore((s) => s.selectedSlot);
+  const setSelectedSlot = useScheduleStore((s) => s.setSelectedSlot);
 
-    const [loading, setloading] = useState(false);
+  const isExpanded = useCallback(
+    (id: string) => expandedIds.has(id),
+    [expandedIds]
+  );
 
-    const handleWkdaySelect = useCallback((wkday: Weekday) => {
-      setSelectedWeekday((p) => (p === wkday ? null : wkday));
-    }, []);
+  // Auto-expand schedules matching selected date
+  useEffect(() => {
+    if (selectedDate) {
+      const matchingIds = schedules
+        .filter((s) => s.weekday === selectedDate.weekday)
+        .map((s) => s.id!);
 
-    useEffect(() => {
-      if (selectedDate) setViewSchedules(true);
-      setSelectedWeekday(selectedDate?.weekdayLong?.toLowerCase() as Weekday);
-    }, [selectedDate]);
-
-    if (!targetSchedules || !targetSchedules.length) return;
-
-    function toggleSchedulesView() {
-      setViewSchedules((p) => !p);
+      setExpandedIds(new Set(matchingIds));
+      onShow(true);
     }
+  }, [selectedDate, schedules, onShow]);
 
-    async function handleSchedule(s: Schedule) {
-      // const data = {
-      //   slot: selectedSlot,
-      //   date: selectedDate?.toISO(),
-      //   clinic: selectedClinic ?? s?.clinic?.id,
-      // };
-
-      try {
-        setloading(true);
-      } catch (ex) {
-        console.log(ex);
-      } finally {
-        setloading(false);
+  const toggleExpansion = useCallback((id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
       }
-    }
+      return next;
+    });
+  }, []);
 
-    const showBookingInfo = selectedDate && selectedSlot;
+  async function handleBook(slot: Slot, clinic: Clinic, schedule: Schedule) {
+    setSchedule({
+      selectedSlot: slot,
+      selectedClinic: clinic,
+      selectedSchedule: schedule,
+    });
 
-    return (
-      <AnimatePresence mode="sync">
+    useModalStore.getState().openModal("schedule", { dr });
+  }
+
+  return (
+    <AnimatePresence>
+      {showClinicsView && (
         <motion.section
-          key="schedule"
-          className="box py-4 flex flex-col gap-8 w-full"
-          initial="initial"
-          animate="view"
-          exit="initial"
-          variants={scheduleVariants}
+          key={`${dr.id}-schedule-view`}
+          variants={containerVariants}
           transition={{
-            duration: 0.22,
+            duration: 0.25,
             ease: "easeOut",
-            when: "beforeChildren",
           }}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="box py-4 flex flex-col w-full gap-12"
         >
-          {targetSchedules.map((s) => {
-            const { clinic = {} as Clinic, weekday, slots = [] } = s || {};
+          {schedules.map((schedule) => {
+            const {
+              id,
+              weekday,
+              slots = [],
+              clinic = {} as Clinic,
+            } = schedule || {};
 
             return (
-              <article className="flex flex-col gap-4" key={clinic?.id}>
-                <header className="flex justify-between items-center gap-6">
+              <motion.article
+                key={id}
+                variants={articleVariants}
+                className="schedule-view-box flex flex-col gap-6 "
+              >
+                <header className="flex justify-between items-center">
                   <div className="flex flex-col gap-0.5">
-                    <Link to="/">
-                      <h2 className="card-h2 flex items-center gap-1">
-                        {clinic?.name}{" "}
-                        <FaLink className="text-xs opacity-60 hover:opacity-100" />
-                      </h2>
+                    <Link className="flex items-center gap-2 card-h2" to="/">
+                      {clinic?.name}
                     </Link>
 
                     <Link
                       to="/"
-                      className={`flex items-center gap-2 text-sm underline underline-offset-2`}
+                      className={`flex items-center gap-1 text-sm underline underline-offset-2`}
                     >
-                      <p>{clinic?.address} </p>
-                      <BiLocationPlus className="text-xs opacity-80 hover:opacity-100" />
+                      {clinic?.address}
+                      <BiSolidMapPin size={8} />
                     </Link>
                   </div>
-                  <ButtonElement
+
+                  <Button
                     variant="icon"
-                    initial="false"
+                    initial={false}
                     needsMotion={true}
+                    onClick={() => toggleExpansion(id!)}
                     animate={{
-                      rotate: viewSchedules ? 90 : 0,
+                      rotate: isExpanded(id!) ? 90 : 0,
                     }}
-                    className="cursor-pointer"
-                    onClick={toggleSchedulesView}
                   >
                     <BsArrowRight />
-                  </ButtonElement>
+                  </Button>
                 </header>
 
-                <motion.div
-                  initial={false}
-                  animate={{
-                    x: viewSchedules ? 0 : 40,
-                    opacity: viewSchedules ? 1 : 0,
-                    height: viewSchedules ? "auto" : 0,
-                    overflow: viewSchedules ? "visible" : "hidden",
-                  }}
-                  className="flex flex-col text-sm gap-4"
-                >
-                  <Badge
-                    entity={weekday as Weekday}
-                    className="capitalize self-start"
-                    isOn={(wk) => selectedWeekday === wk}
-                    content={(weekday as Weekday).slice(0, 3)}
-                    onClick={() => handleWkdaySelect(weekday as Weekday)}
-                  />
-                  <div className="flex items-center gap-4">
-                    {weekday === selectedWeekday &&
-                      slots?.map((slot) => (
-                        <Badge
-                          key={slot.begin}
-                          content={slot.begin}
-                          className="self-start"
-                          entity={slot as Slot}
-                          isOn={(s) => selectedSlot === s}
-                          onClick={() => setSelectedSlot(slot)}
-                          isDisabled={() => slot.booked as boolean}
-                        />
-                      ))}
-                  </div>
-
-                  {showBookingInfo && (
-                    <ButtonElement
-                      size="md"
-                      initial={{ y: 40, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      needsMotion={true}
-                      variant="contained"
-                      color="accent"
-                      disabled={loading}
-                      onClick={() => handleSchedule(s)}
-                      className="self-end flex items-center gap-2"
+                <AnimatePresence>
+                  {isExpanded(schedule.id!) && (
+                    <motion.div
+                      key={id}
+                      variants={articleVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      className="flex flex-col gap-6"
+                      transition={{
+                        duration: 0.2,
+                        ease: "easeOut",
+                        opacity: { duration: 0.1 },
+                      }}
                     >
-                      Confirm Slot <Spinner loading={loading} />
-                    </ButtonElement>
+                      <Badge
+                        as="button"
+                        full={false}
+                        className="self-center"
+                        content={WEEKDAYS[weekday]}
+                        selected={weekday === selectedDate?.weekday}
+                      />
+
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center flex-wrap gap-4">
+                          {slots?.map((slot) => {
+                            return (
+                              <Badge
+                                as="button"
+                                full={false}
+                                key={slot.id}
+                                content={slot.begin}
+                                disabled={slot.booked}
+                                onClick={() => setSelectedSlot(slot)}
+                                selected={slot.id === selectedSlot?.id}
+                              />
+                            );
+                          })}
+                        </div>
+
+                        {selectedDate?.weekday === weekday &&
+                          slots.some(
+                            (slot) => slot.id === selectedSlot?.id
+                          ) && (
+                            <Button
+                              onClick={() =>
+                                handleBook(selectedSlot!, clinic, schedule)
+                              }
+                              className="self-end flex items-center gap-2 text-sm capitalize"
+                            >
+                              book slot
+                              <ClockArrowDown />
+                            </Button>
+                          )}
+                      </div>
+                    </motion.div>
                   )}
-                </motion.div>
-              </article>
+                </AnimatePresence>
+              </motion.article>
             );
           })}
         </motion.section>
-      </AnimatePresence>
-    );
-  }
-);
+      )}
+    </AnimatePresence>
+  );
+});
 
 export default ClinicsView;

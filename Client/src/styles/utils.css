@@ -20,22 +20,23 @@
   @apply bg-white shadow-md shadow-slate-200/50 relative z-[5];
 }
 
-@utility navbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  height: calc(theme(--spacing) * 14);
-}
-
 @utility label {
-  font-weight: 600;
+  font-weight: 700;
   font-style: italic;
-  font-size: theme(--text-sm);
   color: theme(--color-primary);
 
   @variant dark {
     color: inherit;
+  }
+
+  &:is(.xs) {
+    @apply text-xs;
+  }
+  &:is(.sm) {
+    @apply text-sm;
+  }
+  &:is(.lg) {
+    @apply text-lg;
   }
 }
 

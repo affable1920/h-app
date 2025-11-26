@@ -1,18 +1,6 @@
 import { NavLink } from "react-router-dom";
-import { MdOutlineArrowDropDown } from "react-icons/md";
-
-interface NavItemProps {
-  href: string;
-  label: string;
-}
-
-const NavItem = ({ href, label }: NavItemProps) => {
-  return (
-    <NavLink className="navlink" to={href}>
-      {label}
-    </NavLink>
-  );
-};
+import { motion } from "motion/react";
+import { ChevronDown } from "lucide-react";
 
 const navLinks = [
   { label: "Home", route: "/" },
@@ -29,16 +17,44 @@ const navLinks = [
   },
 ];
 
-const NavLinks = ({ showRoutes }: { showRoutes: boolean }) => {
+const NavLinks = ({ showRoutes = false }: { showRoutes: boolean }) => {
   return (
-    <ul className={`navlinks ${showRoutes && "show"}`}>
-      {navLinks.map((navItem) => (
-        <div className="flex justify-between items-center" key={navItem.label}>
-          <NavItem href={navItem.route} label={navItem.label} />
-          {navItem.hasChildren && <MdOutlineArrowDropDown />}
-        </div>
+    <motion.ul
+      initial={false}
+      animate={{
+        opacity: showRoutes ? 1 : 0,
+        y: showRoutes ? 0 : -30,
+        pointerEvents: showRoutes ? "auto" : "none",
+      }}
+      transition={{
+        duration: 0.24,
+        ease: "easeOut",
+        opacity: { duration: 0.15 },
+      }}
+      className="navlinks"
+    >
+      {navLinks.map((navItem, i) => (
+        <motion.li
+          initial={false}
+          key={navItem.label}
+          animate={{
+            opacity: showRoutes ? 1 : 0,
+            y: showRoutes ? 0 : -20,
+          }}
+          transition={{
+            duration: 0.2,
+            ease: "easeOut",
+            delay: showRoutes ? i * 0.08 : 0,
+          }}
+          className="navlink"
+        >
+          <NavLink to={navItem.route}>
+            {navItem.label}
+            {navItem.hasChildren && <ChevronDown />}
+          </NavLink>
+        </motion.li>
       ))}
-    </ul>
+    </motion.ul>
   );
 };
 

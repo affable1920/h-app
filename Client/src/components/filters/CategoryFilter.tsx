@@ -1,38 +1,37 @@
 import Ratings from "../Ratings";
 import Badge from "../eventElements/Badge";
-import type { ButtonProps } from "@/types/appButtonTypes";
+import type { ButtonProps } from "@/types/button";
 import { type CategoryFilters } from "./types";
 
-type FilterKey = keyof CategoryFilters;
-type CurrentCategoryType<T extends FilterKey> = CategoryFilters[T];
+type CategoryFilterKey = keyof CategoryFilters;
 
-interface CategoryFilterProps<T extends FilterKey> {
+interface CategoryFilterProps<T extends CategoryFilterKey> {
   label: T;
   size?: ButtonProps["size"];
   options: T extends "rating" ? number[] : string[];
-  selectedOption?: CurrentCategoryType<T>;
-  onOptionSelect: (label: T, option: CurrentCategoryType<T>) => void;
+  optionIsSelected?: T extends "rating" ? number : string;
+  onOptionSelect: (label: T, option: CategoryFilters[T]) => void;
 }
 
-const CategoryFilter = <T extends FilterKey>({
+const CategoryFilter = <T extends CategoryFilterKey>({
   size = "md",
   label,
   options,
-  selectedOption,
+  optionIsSelected,
   onOptionSelect,
 }: CategoryFilterProps<T>) => {
+  console.log(label);
+
   return (
-    <div>
-      <header className="card-h2 italic">Filter by {label}</header>
-      <div className="flex gap-2 flex-wrap mt-2">
+    <div className="filter-div">
+      <label>Filter by {label}</label>
+      <div className="flex gap-2 flex-wrap">
         {options.map((option) => (
           <Badge
             key={option}
             size={size}
-            isOn={() => option === selectedOption}
-            onClick={() =>
-              onOptionSelect(label, option as CurrentCategoryType<T>)
-            }
+            on={() => option == optionIsSelected}
+            onClick={() => onOptionSelect(label, option as CategoryFilters[T])}
           >
             {label === "rating" ? (
               <Ratings rating={option as number} />

@@ -5,28 +5,39 @@ class APIClient {
   private _baseUrl: string =
     import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  protected _api: AxiosInstance;
-  protected _endpoint: string;
+  protected instance: AxiosInstance;
 
-  constructor(endpointPath: string) {
-    this._endpoint = endpointPath;
-    this._api = axios.create({
+  constructor(public readonly endpoint: string) {
+    this.instance = axios.create({
       baseURL: this._baseUrl,
       headers: {
         "Content-Type": "application/json",
       },
     });
+
+    this.endpoint = endpoint;
   }
 
-  async get<T>(config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
-    return await this._api.get<T>(this._endpoint, config);
-  }
-
-  async post<T>(
-    postData: T,
+  async get<T>(
+    path?: string,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
-    return await this._api.post<T>(this._endpoint, postData, config);
+    const url = this.endpoint + "/" + (path ?? "");
+    return await this.instance.get<T>(url, config);
+  }
+
+  // T as the post request's data and R as the response's type.
+  async post<TResponse, TBody>(
+    path: string,
+    data: TBody,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<TResponse>> {
+    const url = this.endpoint + "/" + (path ?? "");
+    return await this.instance.post<TResponse>(url, data, config);
+  }
+
+  async request(config: AxiosRequestConfig) {
+    return await axios(config);
   }
 }
 

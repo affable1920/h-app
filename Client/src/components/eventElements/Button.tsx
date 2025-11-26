@@ -1,36 +1,34 @@
-import { memo, useMemo } from "react";
-import { motion } from "motion/react";
-import { VARIANTS, COLORS, SIZES } from "@/types/appButtonTypes";
+import { memo, useMemo, type ButtonHTMLAttributes } from "react";
+import { motion, type HTMLMotionProps } from "motion/react";
 
-import type {
-  ButtonProps,
-  Color,
-  Variant,
-  Size,
-  MotionButtonProps,
-} from "@/types/appButtonTypes";
+import Spinner from "../Spinner";
+import type { ButtonProps } from "@/types/button";
 
 const Button = memo(
-  <NeedsMotion extends boolean = false>({
-    children,
-    startIcon,
-    endIcon,
-    size = "sm",
-    className = "",
-    loading = false,
-    color = "primary",
-    needsMotion = false,
-    variant = "contained",
-    ...rest
-  }: ButtonProps<NeedsMotion>) => {
+  <NeedsMotion extends boolean = false>(props: ButtonProps<NeedsMotion>) => {
+    const {
+      children,
+      startIcon,
+      endIcon,
+      size = "sm",
+      className = "",
+      loading = false,
+      disabled = false,
+      color = "primary",
+      needsMotion = false,
+      variant = "contained",
+      ...rest
+    } = props;
+
     const classConfig = useMemo(
       function () {
-        const hasColor = variant === "contained" || variant === "badge";
+        const hasColor = variant === "contained";
+
         return [
           "btn",
-          SIZES[size as Size],
-          VARIANTS[variant as Variant],
-          hasColor && COLORS[color as Color],
+          size,
+          variant,
+          hasColor && color,
           loading && "cursor-wait",
           className,
         ]
@@ -43,19 +41,29 @@ const Button = memo(
 
     if (needsMotion) {
       return (
-        <motion.button className={classConfig} {...(rest as MotionButtonProps)}>
+        <motion.button
+          className={classConfig}
+          disabled={loading || disabled}
+          {...(rest as HTMLMotionProps<"button">)}
+        >
           {startIcon && startIcon}
           {children}
           {endIcon && endIcon}
+          {loading && <Spinner />}
         </motion.button>
       );
     }
 
     return (
-      <button className={classConfig} {...rest}>
+      <button
+        className={classConfig}
+        disabled={loading || disabled}
+        {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}
+      >
         {startIcon && startIcon}
         {children}
         {endIcon && endIcon}
+        {loading && <Spinner />}
       </button>
     );
   }

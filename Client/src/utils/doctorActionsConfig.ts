@@ -3,29 +3,25 @@ import type { DrCTA } from "@/types/doctorActions";
 
 const callAction: DrCTA = {
   name: "call",
-  icon: "call",
   label: "consult now",
 };
 
 const scheduleAction: DrCTA = {
   name: "schedule",
-  icon: "calendar",
   label: "schedule",
 };
 
 const messageAction: DrCTA = {
   name: "message",
-  icon: "offline",
-  label: "Leave a message",
+  label: "Get in touch",
 };
 
 const profileAction: DrCTA = {
   name: "profile",
-  icon: "user",
-  label: "View Profile",
+  label: "View profile",
 };
 
-const actionConfigs: Record<Status, DrCTA[]> = {
+const actionConfigs: Record<Exclude<Status, "unknown">, DrCTA[]> = {
   available: [
     {
       ...callAction,
@@ -33,33 +29,23 @@ const actionConfigs: Record<Status, DrCTA[]> = {
     },
     {
       ...scheduleAction,
-      needsDD: true,
+      showsModal: true,
     },
   ],
 
-  busy: [
+  in_patient: [
     {
       ...scheduleAction,
-      needsDD: true,
+      showsModal: true,
       isPrimary: true,
     },
     {
       ...callAction,
-      needsDD: true,
+      showsModal: true,
     },
   ],
 
   away: [
-    {
-      ...messageAction,
-      isPrimary: true,
-    },
-    {
-      ...profileAction,
-    },
-  ],
-
-  unknown: [
     {
       ...messageAction,
       isPrimary: true,

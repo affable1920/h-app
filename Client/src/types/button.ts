@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import type { motion } from "motion/react";
-import type React from "react";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ReactNode, ButtonHTMLAttributes } from "react";
+import type { HTMLMotionProps } from "motion/react";
 
 export const COLORS = {
   slate: "slate",
@@ -15,7 +14,6 @@ export const COLORS = {
 
 export const VARIANTS = {
   icon: "icon",
-  badge: "badge",
   outlined: "outlined",
   contained: "contained",
 } as const;
@@ -32,7 +30,8 @@ export type Size = keyof typeof SIZES;
 export type Color = keyof typeof COLORS;
 export type Variant = keyof typeof VARIANTS;
 
-interface BaseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+// these are props on all buttons
+type BaseProps = {
   size?: Size;
   color?: Color;
   variant?: Variant;
@@ -40,10 +39,9 @@ interface BaseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   endIcon?: ReactNode;
   startIcon?: ReactNode;
-  needsMotion?: boolean;
-}
-
-export type MotionButtonProps = React.ComponentProps<typeof motion.button>;
-
-export type ButtonProps<NeedsMotion extends boolean = false> = BaseButtonProps &
-  (NeedsMotion extends true ? MotionButtonProps : {});
+};
+// extract props specific to the motion button
+export type ButtonProps<TMotion extends boolean = false> = BaseProps &
+  (TMotion extends true
+    ? HTMLMotionProps<"button"> & { needsMotion?: true }
+    : ButtonHTMLAttributes<HTMLButtonElement> & { needsMotion?: false });

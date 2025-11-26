@@ -1,33 +1,46 @@
 import { type InputHTMLAttributes, type ReactNode } from "react";
 import { capitalize } from "@/utils/appUtils";
 
-interface AppInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+interface Input extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+  size?: Size;
   label?: string;
-  size?: "sm" | "md";
+  full?: boolean;
   children?: ReactNode;
+  labelClasses?: string;
 }
+
+type Size = "xs" | "sm" | "md" | "lg";
 
 const Input = ({
   name,
   label,
   value,
-  size = "sm",
-  className,
   children,
+  className,
+  full = false,
+  size = "sm",
   type = "text",
+  labelClasses = "",
   ...rest
-}: AppInputProps) => {
-  const classes = ["input", size ?? "sm", className].filter(Boolean).join(" ");
+}: Input) => {
+  const classes = ["input", size.toString(), full && "w-full", className]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className="input-box">
       {label && (
-        <label htmlFor={name} className="card-h2 italic">
+        <label htmlFor={name} className={"label " + labelClasses}>
           {capitalize(label ?? name)}
         </label>
       )}
-      <input type={type} value={value} {...rest} className={classes} />
+      <input
+        name={name}
+        type={type}
+        value={value}
+        className={classes}
+        {...rest}
+      />
       {children}
     </div>
   );

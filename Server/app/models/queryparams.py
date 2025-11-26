@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Annotated, Literal
-from pydantic import BaseModel, Field, field_validator
+from fastapi import Query
+from pydantic import BaseModel, Field, field_serializer, model_serializer
 
 
 # providing a default value -> field optional
@@ -15,8 +16,9 @@ FILTERS = Literal["specialization", "mode", "rating", "distance", "location"]
 class RouteFilters(BaseModel):
     mode: MODES | None = None
     specialization: str | None = None
-    distance: int | None = Field(gt=0, default=None)
-    rating: Annotated[int | None, Field(gt=0, lt=5, default=None)]
+    currently_available: bool = False
+    max_distance: int | None = Field(gt=0, default=None)
+    min_rating: Annotated[int | None, Field(gt=0, lt=5, default=None)]
 
 
 class SortOrder(Enum):
@@ -29,14 +31,19 @@ class Sort(BaseModel):
     order: SortOrder = SortOrder.ASC
 
 
-class QueryParameters(RouteFilters, BaseModel):
-    max: int = Field(ge=1, default=5)
-    page: Annotated[int, Field(ge=1, default=1)]
+class BaseRouteParams(BaseModel):
+    sort: Sort = Query(Sort())
+    search_query: str | None = None
 
-    search_query: str | None = Field(default=None, alias="searchQuery")
-    sort: Sort | None = Sort()
+    max: int = Query(10, gt=0, lt=25)
+    page: int = Query(gt=0, default=1)
 
-    @field_validator("search_query")
-    @classmethod
-    def strip_lower_sq(cls, sq: str) -> str | None:
-        return sq.strip().lower() if sq else None
+    @field_serializer("search_query")
+    def strip_lower(self, field: str):
+        return field.strip().lower() if field else None
+
+
+class DrQueryParams(BaseRouteParams):
+    specialization: str | None = None
+    currently_available: bool = False
+    mode: Literal["online", "in_person"] | None = None

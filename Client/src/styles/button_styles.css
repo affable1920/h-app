@@ -1,12 +1,22 @@
 @import "./config.css";
+@import "./utils.css";
 
 /* Base button component */
+
 @layer components {
   /* Must be on every button */
   .btn {
-    @apply tracking-widest leading-tight active:scale-[.99] select-none cursor-pointer [&:disabled]:opacity-80 
+    @apply tracking-widest leading-tight active:scale-[.99] select-none cursor-pointer [&:disabled]:opacity-70 
     [&:disabled]:pointer-events-none rounded-lg flex items-center justify-center gap-2 border-2
     font-bold whitespace-nowrap transition-colors duration-[150ms] ease-in text-center;
+
+    &:is(.contained):has(svg) > svg {
+      @apply size-2.5 text-white;
+    }
+
+    &:is(.outlined):has(svg) > svg {
+      @apply size-2.5 text-black;
+    }
 
     /* 
     size variants
@@ -71,12 +81,22 @@
       &.neutral {
         @apply bg-inherit;
       }
+
+      &.success {
+        @apply bg-success border-success-dark text-white;
+
+        &:hover,
+        &:focus {
+          @apply bg-success-dark border-green-800 ring-green-800/10;
+        }
+      }
     }
 
     &:is(.outlined) {
       @apply bg-transparent shadow-none border-secondary;
+
       &:hover {
-        @apply bg-secondary border-secondary-dark text-white border-4;
+        @apply bg-secondary border-secondary-dark text-white;
       }
     }
 
@@ -88,42 +108,17 @@
       }
 
       /* an icon has different size utiltities */
-      &.sm > svg {
+      &:is(.sm) > svg {
+        @apply size-3;
+      }
+      &:is(.md) > svg {
         @apply size-4;
       }
-      &.md > svg {
+      &:is(.lg) > svg {
+        @apply size-5;
+      }
+      &:is(.xl) > svg {
         @apply size-6;
-      }
-      &.lg > svg {
-        @apply size-8;
-      }
-      &.xl > svg {
-        @apply size-10;
-      }
-    }
-
-    &:is(.badge) {
-      @apply rounded-md bg-transparent border-2 border-slate-300/60 text-secondary-dark 
-      capitalize shadow-2xs shadow-slate-200 transition-shadow duration-150 ease-in;
-
-      &:disabled {
-        @apply cursor-default opacity-50 pointer-events-none;
-      }
-
-      &.selected {
-        @apply bg-amber-400 border-amber-600 font-black shadow-none;
-
-        &:hover {
-          @apply bg-amber-400 border-amber-700 shadow-none ring-2 ring-amber-800/10;
-        }
-      }
-
-      &.current {
-        @apply border-b-2 border-b-accent/50 font-black shadow-inner shadow-accent-dark/60;
-      }
-
-      &:is(.sm) {
-        @apply px-2;
       }
     }
   }

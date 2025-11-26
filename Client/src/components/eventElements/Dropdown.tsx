@@ -21,7 +21,6 @@ const Dropdown = ({ show = false, options, onOptionSelect }: DropdownProps) => {
       {show && (
         <motion.ul
           key="dropdown"
-          layout
           initial={{ opacity: 0, height: 0 }}
           animate={{
             opacity: 1,
@@ -35,7 +34,6 @@ const Dropdown = ({ show = false, options, onOptionSelect }: DropdownProps) => {
           {options.map((option) => (
             <motion.li
               key={option}
-              layoutId={option}
               className={optionClasses}
               onClick={() => onOptionSelect?.(option)}
             >

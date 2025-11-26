@@ -1,14 +1,11 @@
 import json
 from pathlib import Path
-from typing import Annotated, Literal
-# from typing import Generic, TypeVar
+from fastapi import HTTPException
 from typing_extensions import Self
-from fastapi import Depends, HTTPException
 
+from app.models.Responses import SlotRecord
 from app.models.doctor_models.Doctor import Doctor
 from app.models.QueryParams import Sort, SortOrder, RouteFilters
-
-# T = TypeVar("T")
 
 
 class DoctorService():
@@ -31,11 +28,11 @@ class DoctorService():
 
         if not cls._instance:
             cls._instance = super().__new__(cls)
-            cls._instance.load_doctors()
+            cls._instance.load()
 
         return cls._instance
 
-    def load_doctors(self):
+    def load(self):
         if not self._doctors:
             try:
                 with open(self._file_path, "r") as f:
@@ -44,6 +41,8 @@ class DoctorService():
             except FileNotFoundError:
                 # create a bg task for auto file creation later
                 print("File not found")
+
+#
 
     def filter(self, doctors: list[dict], filters: RouteFilters) -> list[dict]:
         filtered = doctors[:]
@@ -55,10 +54,15 @@ class DoctorService():
             filtered = [doc for doc in filtered if Doctor(
                 **doc).primary_specialization.lower() == filters.specialization.lower()]
 
-        if filters.rating:
-            print("filtering against doc rating: ", filters.rating)
+        if filters.min_rating:
+            print("filtering against doc min_rating: ", filters.min_rating)
             filtered = [doc for doc in filtered if doc.get(
-                "rating", 0) >= filters.rating]
+                "rating", 0) >= filters.min_rating]
+
+        if filters.currently_available:
+            print("filtering for currently available doctors: ")
+            filtered = [doc for doc in filtered if Doctor(
+                **doc).currently_available]
 
         if filters.mode:
             print("filtering against the selected consultation mode: ", filters.mode)
@@ -76,7 +80,7 @@ class DoctorService():
 
 #
 
-    def get_doctors(self, sort: Sort, max: int = 5, page: int = 1, search_query: str | None = None, **kwargs):
+    def get(self, sort: Sort, max: int = 5, page: int = 1, search_query: str | None = None, **kwargs):
         """
 
         if any of the params are not provided, then they are set to None
@@ -100,7 +104,7 @@ class DoctorService():
         cache_key = "_".join(str(x)
                              for x in [page, max, *[x for x in [search_query, sort] if x]] if x)
 
-        applied_filters: list[str] = []
+        applied_filters: list[tuple[str, str]] = []
 
         try:
 
@@ -120,7 +124,7 @@ class DoctorService():
             if kwargs:
                 for k, v in kwargs.items():
                     if v:
-                        applied_filters.append(k)
+                        applied_filters.append((k, v))
 
                 print("recieved filters: ", kwargs)
                 doctors = self.filter(doctors, RouteFilters(**kwargs))
@@ -148,7 +152,7 @@ class DoctorService():
 
 #
 
-    def get_doctor_by_id(self, id: str) -> Doctor:
+    def get_by_id(self, id: str) -> Doctor:
         try:
             rqstd_dr = next(
                 (doc for doc in self._doctors if doc["id"] == id))
@@ -160,3 +164,38 @@ class DoctorService():
 
 
 doctor_service = DoctorService()
+
+
+class DoctorHelper():
+    def __init__(self, id: str):
+        self._dr: Doctor = doctor_service.get_by_id(id)
+
+
+#
+
+    def book(self, schedule_id: str, slot_id: str, **kwargs) -> SlotRecord | None:
+        dr = self._dr
+
+        rqstd_schedule = next(
+            s for s in dr.schedules if s.id == schedule_id)
+
+        if not rqstd_schedule:
+            raise HTTPException(404, "Schedule not found !")
+
+        if rqstd_schedule.is_recurring:
+            slots = rqstd_schedule.slots
+            target = next(slot for slot in slots if slot.id == slot_id)
+
+            if not target:
+                raise HTTPException(404, "Slot not found !")
+
+            if target.booked:
+                raise HTTPException(400, "Slot already booked !")
+
+            slot_record: dict = kwargs.copy()
+            slot_record.update(
+                {"day": rqstd_schedule.weekday, "doctor_name": self._dr.name,
+                 "dept": self._dr.primary_specialization, "metadata": {"target_slot": target}})
+
+            target.booked = True
+            return SlotRecord(**slot_record)

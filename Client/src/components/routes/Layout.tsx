@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import NavBar from "../NavBar";
-import Modal from "../Modal";
+import Modal from "../modal/Modal";
 
 const Layout = () => {
   return (

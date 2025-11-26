@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, type LoaderFunctionArgs } from "react-router-dom";
 
 //
 import Chat from "@routes/Chat";
@@ -25,6 +25,11 @@ API Routes Structure:
 /chat 
 */
 
+async function loadDoctor({ params }: LoaderFunctionArgs) {
+  if (!params?.id) return;
+  return await drService.getById(params.id);
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -32,7 +37,6 @@ const router = createBrowserRouter([
     errorElement: <ErrorBoundary />,
 
     children: [
-      // app home page
       { index: true, Component: HomePage },
 
       {
@@ -43,27 +47,29 @@ const router = createBrowserRouter([
             children: [
               {
                 index: true,
+                loader: loadDoctor,
                 Component: DoctorsDirectory,
               },
 
               {
-                path: ":id",
-                Component: () => <div>Doctor's Profile</div>,
-                loader: getDr,
-              },
-
-              {
-                path: ":id/schedule",
-                Component: Scheduler,
-                loader: getDr,
+                path: "clinics",
+                children: [{ index: true, Component: ClinicsDirectory }],
               },
             ],
           },
-          {
-            path: "clinics",
-            children: [{ index: true, Component: ClinicsDirectory }],
-          },
         ],
+      },
+
+      {
+        path: "doctors/:id",
+        loader: loadDoctor,
+        Component: () => <div>Doctor's Profile</div>,
+      },
+
+      {
+        path: "doctors/:id/schedule",
+        loader: loadDoctor,
+        Component: Scheduler,
       },
 
       // ai chat route
@@ -73,7 +79,3 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
-
-async function getDr({ params }: { params: { id?: string } }) {
-  return drService.getById(params.id!);
-}

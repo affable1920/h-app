@@ -1,40 +1,51 @@
 import APIClient from "./ApiClient";
 import { type operations } from "@/types/api";
 
-type SingleDoctorParams = operations["get_doctor"]["parameters"]["path"];
+type GetAllDrParams = operations["get_doctors"]["parameters"]["query"];
 
-type GetAllParams = operations["get_doctors"]["parameters"]["query"];
-
-type GetAllDoctorsResponse =
+type GetAllDrResponse =
   operations["get_doctors"]["responses"]["200"]["content"]["application/json"];
 
-type GetSingleDoctorResponse =
+type GetSingleDrResponse =
   operations["get_doctor"]["responses"]["200"]["content"]["application/json"];
 
-class DoctorService {
-  private _endpoint: string = "/doctors";
-  private _apiClient: APIClient;
+type BookScheduleData =
+  operations["book_schedule"]["requestBody"]["content"]["application/json"];
 
+type BookScheduleResponse =
+  operations["book_schedule"]["responses"]["200"]["content"]["application/json"];
+
+class DoctorService extends APIClient {
   constructor() {
-    this._apiClient = new APIClient(this._endpoint);
+    super("/doctors");
   }
 
-  async getAll(params: GetAllParams): Promise<GetAllDoctorsResponse> {
-    return (
-      await this._apiClient.get<GetAllDoctorsResponse>({
-        params: { ...params },
-      })
-    ).data;
+  // Add error handling
+  async getAll(params: GetAllDrParams): Promise<GetAllDrResponse> {
+    const response = await this.get<GetAllDrResponse>(undefined, {
+      params,
+    });
+
+    return response.data;
   }
 
-  async getById(
-    id: SingleDoctorParams["id"]
-  ): Promise<GetSingleDoctorResponse> {
-    return (
-      await this._apiClient.get<GetSingleDoctorResponse>({ params: { id } })
-    ).data;
+  async getById(id: string): Promise<GetSingleDrResponse> {
+    return (await this.get<GetSingleDrResponse>(id)).data;
+  }
+
+  async schedule(
+    id: string,
+    data: BookScheduleData
+  ): Promise<BookScheduleResponse> {
+    const response = await this.post<BookScheduleResponse, BookScheduleData>(
+      `${id}/book`,
+      data
+    );
+
+    return response.data;
   }
 }
 
+// Use dependency injection pattern
 const drService = new DoctorService();
 export default drService;

@@ -3,7 +3,7 @@ import Chance from "chance";
 import { DateTime } from "luxon";
 
 import type {
-  Doctor,
+  DoctorEssentials,
   Clinic,
   Fee,
   Slot as TimeSlot,
@@ -102,7 +102,7 @@ class DataGenerator {
     }));
   }
 
-  private generateEssentials(): Partial<Doctor> {
+  private generateEssentials(): Partial<DoctorEssentials> {
     return {
       id: v4(),
       name: chance.name(),
@@ -112,7 +112,7 @@ class DataGenerator {
     };
   }
 
-  private generateSecondaries(): Partial<Doctor> {
+  private generateSecondaries(): Partial<DoctorEssentials> {
     const fee = this.generateFees();
     const currDate = DateTime.local();
     const baseConsultTime = chance.pickone(constants.CONSULTATION_DURATION);
@@ -149,11 +149,11 @@ class DataGenerator {
     };
   }
 
-  generateDoctor(): Doctor {
+  generateDoctor(): DoctorEssentials {
     return {
       ...this.generateEssentials(),
       ...this.generateSecondaries(),
-    } as Doctor;
+    } as DoctorEssentials;
   }
 
   static generateDoctors(count: number = 40) {

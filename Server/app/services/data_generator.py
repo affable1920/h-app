@@ -13,7 +13,7 @@ class DataGenerator:
     def __init__(self):
         self.weekday_cache = set()
 
-    def generate_clinic(self) -> Clinic:
+    def create_clinic(self) -> Clinic:
         """Generate a single clinic record."""
         lat = random.uniform(-90, 90)
         lng = random.uniform(-180, 180)
@@ -26,6 +26,9 @@ class DataGenerator:
             "whatsapp": f"+1-{random.randint(200, 999)}-{random.randint(200, 999)}-{random.randint(1000, 9999)}",
             "location": {"lat": round(lat, 4), "lng": round(lng, 4)},
             "parking_available": random.choice([True, False]),
+            "facilities": [],
+            "rating": random.randint(1, 5),
+            "reviews": random.randint(10, 100)
         }
 
         return Clinic(**clinic)
@@ -33,32 +36,40 @@ class DataGenerator:
     def generate_clinics(self, single: bool = False) -> Clinic | list[Clinic]:
         """Generate one or multiple clinic records."""
         if single:
-            return self.generate_clinic()
+            return self.create_clinic()
 
         clinics = []
         for _ in range(2):
-            clinics.append(self.generate_clinic())
+            clinics.append(self.create_clinic())
 
         return clinics
 
-    def generate_fees(self) -> Fee:
+    def generate_fees(self, base_fee: int) -> Fee:
         """Generate consultation fees for in-person and online."""
-        min_fee = constants.CONSULTATION_FEE_RANGE["MIN"]
-        max_fee = constants.CONSULTATION_FEE_RANGE["MAX"]
-
-        in_person_fee = random.randint(min_fee, max_fee)
-
         return Fee(**{
-            "in_person": in_person_fee,
-            "online": in_person_fee - 50,
+            "in_person": base_fee,
+            "online": base_fee - 50,
         })
+
+#
 
     def generate_slots(
         self, start: time, end: time, duration: int = 20, consults_online: bool = False
     ) -> list[Slot]:
-        """
-        Generate time slots that fall within the schedule's start and end times.
-        start - time the doctor starts consultations, end ...
+        """ 
+
+        Generate time slots that fall within a schedule's start and end time.
+
+        Args:
+            start (time): Start time of the schedule.
+            end (time): End time of the schedule.
+            duration (int, optional): Consultation duration in minutes. Defaults to 20.
+            consults_online (bool, optional): Whether consultations are online for the mode attr 
+            Defaults to False.
+
+        Returns:
+            list[Slot]: List of generated slots.
+
         """
 
         slots = []
@@ -68,7 +79,6 @@ class DataGenerator:
         while schedule_start <= schedule_end:
             slot_start = schedule_start
             slot_end = slot_start + timedelta(minutes=duration)
-            # datetime.combine(schedule_start, slot_start) + timedelta(minutes=duration)
 
             # Check if the entire consultation fits within the available window
             if slot_end.time() <= end:
@@ -94,32 +104,35 @@ class DataGenerator:
         # Generate 2-4 schedule entries (allowing same weekday with different clinics)
         num_schedules = random.randint(2, 6)
 
-        # cache: weekday: { count, is_morning }
+        # cache: items with key = weekday, and val -> { count, is_morning }
         # max entries per weekday currently set to 2, morning and evening
-        schedule_cache = {
-            "wkday": {
-                "count": 0,
-                "is_morning": False
-            }
-        }
+
+        schedule_cache: dict[int, dict] = {}
 
         for _ in range(num_schedules):
             wkday = random.randint(0, 6)
+
+            # one schedule -> one clinic,
+            # possibe a dr has two schedules on a single day
+
             clinic = self.generate_clinics(single=True)
 
             # Randomly decide if this is a morning or afternoon slot
             is_morning = random.choice([True, False])
 
-            if schedule_cache.get("wkday"):
-                cache = schedule_cache["wkday"]
+            if wkday in schedule_cache:
+                cache = schedule_cache[wkday]
 
-                if cache.get("count") == 2:
+                if (cache.get("count") or 0) == 2:
                     num_schedules += 1
+
+                    # continue to next iter if two schedules ve been set for a particular day
                     continue
 
-                is_morning = False if cache["is_morning"] == True else is_morning
+                is_morning = False if cache.get("is_morning") == True else True
+
                 cache["count"] += 1
-                cache["is_morning"] = True
+                cache["is_morning"] = is_morning
 
             if is_morning:
                 start = time(7, 30)
@@ -132,8 +145,9 @@ class DataGenerator:
                 "start": start,
                 "end": end,
                 "weekday": wkday,
-                "slots": self.generate_slots(start, end, base_duration, consutls_online),
+                "dated": None,
                 "clinic": clinic,
+                "slots": self.generate_slots(start, end, base_duration, consutls_online),
                 "hours_available": (
                     (datetime.combine(datetime.today(), end) -
                      datetime.combine(datetime.today(), start)).seconds // 3600
@@ -152,6 +166,7 @@ class DataGenerator:
             "primary_specialization": random.choice(constants.SPECIALIZATIONS),
         }
 
+        # id auto-generated
         return DrEssentials(**essentials).model_dump()
 
     #
@@ -160,8 +175,6 @@ class DataGenerator:
         """
 
         gets the weekday index, 0 - MON, 6 - SUN
-        the wkday refers to the schedule to find the date for
-
         subtracts today's weekday from the recieved weekday
 
         days ahead tells us how far we are from the 
@@ -182,21 +195,24 @@ class DataGenerator:
 
         #
 
-    def get_next_available_schedules(self, schedules: list[Schedule]):
+    def get_next_available_schedule(self, schedules: list[Schedule]):
         """ Gets the next available schedule's date for the current doctor """
 
-        upcoming_dates: list[date] = []
+        upcoming_schedule_dates: list[date] = []
+
         for schedule in schedules:
             wkday = schedule.weekday
-            upcoming_dates.append(self.get_date_from_weekday(wkday))
+            upcoming_schedule_dates.append(self.get_date_from_weekday(wkday))
 
-        return sorted(upcoming_dates)[0]
+        return sorted(upcoming_schedule_dates)[0]
 
     #
 
     def generate_secondaries(self) -> dict:
         """Generate secondary doctor information."""
-        fee = self.generate_fees()
+        base_fee = random.randint(100, 400)
+
+        fee = self.generate_fees(base_fee)
         consults_online = random.choice([True, False])
 
         if not consults_online:
@@ -208,11 +224,13 @@ class DataGenerator:
 
         schedules = self.generate_schedules(
             base_consult_time, consults_online)
-        next_available = self.get_next_available_schedules(schedules)
+        next_available = self.get_next_available_schedule(schedules)
+
+        currently_available = False
 
         return DrSecondaries(**{
             "fee": fee,
-            "currently_available": random.choice([True, False]),
+            "currently_available": currently_available,
             "secondary_specializations": random.sample(
                 constants.SPECIALIZATIONS, k=random.randint(0, 3)
             ),
@@ -225,9 +243,16 @@ class DataGenerator:
             "last_updated": datetime.now(),
             "base_consult_time": base_consult_time,
             "base_fee": fee.in_person,
-            "status": random.choice(constants.STATUSES),
-            "office": self.generate_clinics(single=True),
+            "status": "available" if currently_available
+            else random.choice(
+                list(filter(lambda x: x != "available", constants.STATUSES))),
             "schedules": schedules,
+            # "metadata": {
+            #     "in_patient": random.choice([True, False]),
+            #     "emergency_available": random.choice([True, False]),
+            #     "home_visits": random.choice([True, False]),
+            #     "accepts_insurance": random.choice([True, False]),
+            # }
         }).model_dump()
 
     def generate_doctor(self) -> Doctor:
@@ -236,24 +261,26 @@ class DataGenerator:
         return Doctor(**doctor)
 
 
-def generate_doctors(count: int = 40) -> list[dict]:
-    """Generate multiple doctor records."""
-    return [DataGenerator().generate_doctor().model_dump() for _ in range(count)]
-
-
 # Example usage
-if __name__ == "__main__":
+
+def main():
     try:
+        def generate_doctors(count: int = 200) -> list[dict]:
+            """Generate multiple doctor records."""
+            return [DataGenerator().generate_doctor().model_dump() for _ in range(count)]
+
         doctors = generate_doctors()
 
         with open("data/Doctors.json", "w") as f:
             json.dump(doctors, f, indent=2, default=str)
 
         # Print first doctor as JSON for visualization
-
-        print(json.dumps(doctors[0], indent=2, default=str))
         print(f"\n\nGenerated {len(doctors)} doctors successfully!")
 
     except Exception as e:
         print(e)
         print(f"Error generating doctors: {e}")
+
+
+if __name__ == "__main__":
+    main()

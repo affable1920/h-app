@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import useScheduleStore from "./scheduleStore";
 
 type StoreState = {
   max: number;

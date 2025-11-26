@@ -6,13 +6,15 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
+import Badge from "../eventElements/Badge";
 import Pagination from "@components/Pagination";
 import Input from "@components/eventElements/Input";
 import Button from "@components/eventElements/Button";
 
 import { debounce } from "@/utils/appUtils";
-
 import useModalStore from "@/stores/modalStore";
+import { IoRefreshOutline } from "react-icons/io5";
+import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
 
 const Directory = () => {
@@ -20,6 +22,8 @@ const Directory = () => {
 
   const [localSQ, setLocalSQ] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const { data: { applied_filters = [] } = {} } = useAllDoctors();
 
   const cachedSQSetter = useMemo(
     function () {
@@ -67,21 +71,43 @@ const Directory = () => {
             </Button>
           </Input>
 
-          <Button variant="icon" onClick={handleDirectorySwitch}>
+          <Button size="md" variant="icon" onClick={handleDirectorySwitch}>
             <ArrowLeftRight />
           </Button>
         </div>
 
         {/* rest of the filters  */}
-        <div className="flex items-center gap-4">
-          <Button variant="icon" onClick={handleFilterState}>
+        <div className="flex gap-4 items-center">
+          <Button
+            size="md"
+            variant="icon"
+            onClick={handleFilterState}
+            className="[&:has(.info)]:relative max-w-fit flex items-center"
+          >
             <SlidersHorizontal />
+            {!!applied_filters.length && (
+              <Badge content={applied_filters.length.toString()} />
+            )}
           </Button>
+
+          {!!applied_filters.length && (
+            <Button onClick={() => setSearchParams({})} variant="icon">
+              <IoRefreshOutline />
+            </Button>
+          )}
         </div>
       </section>
 
+      {applied_filters && (
+        <section className="flex items-center gap-4 flex-wrap">
+          {applied_filters.map(([, appliedFilterVal]) => (
+            <Badge content={appliedFilterVal} />
+          ))}
+        </section>
+      )}
+
       <section className="directory-layout">
-        {/* outlet renders either the Doctor or clinic directory passing them the setTotalCount func */}
+        {/* outlet renders either the Doctor or clinic directory */}
         <Outlet />
       </section>
 

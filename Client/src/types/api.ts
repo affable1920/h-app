@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/doctors/{id}/book": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Book Schedule */
+        post: operations["book_schedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/clinics": {
         parameters: {
             query?: never;
@@ -72,7 +89,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/schedules/{id}": {
+    "/auth/register": {
         parameters: {
             query?: never;
             header?: never;
@@ -81,8 +98,42 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Set Schedule */
-        post: operations["set_schedule"];
+        /** Register */
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login */
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Root Path */
+        get: operations["root_path"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -111,26 +162,50 @@ export interface components {
             location?: components["schemas"]["Location"] | null;
             /** Whatsapp */
             whatsapp?: string | null;
+            /** Reviews */
+            reviews?: number | null;
+            /**
+             * Rating
+             * @default 0
+             */
+            rating: number;
             /**
              * Parking Available
              * @default false
              */
             parking_available: boolean;
         };
+        /** CreateUser */
+        CreateUser: {
+            /** Username */
+            username: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Pwd */
+            pwd: string;
+        };
         /** Doctor */
         Doctor: {
             fee: components["schemas"]["Fee"];
-            /** @default unknown */
             status: components["schemas"]["Status"];
             /**
              * Verified
              * @default false
              */
             verified: boolean;
-            /** Reviews */
-            reviews?: number | null;
-            /** Rating */
-            rating?: number | null;
+            /**
+             * Reviews
+             * @default 0
+             */
+            reviews: number;
+            /**
+             * Rating
+             * @default 0
+             */
+            rating: number;
             /**
              * Consults Online
              * @default false
@@ -152,8 +227,11 @@ export interface components {
              * @default []
              */
             secondary_specializations: string[];
-            /** Currently Available */
-            currently_available?: boolean | null;
+            /**
+             * Currently Available
+             * @default false
+             */
+            currently_available: boolean;
             /** Last Updated */
             last_updated?: string | null;
             /** Next Available */
@@ -164,6 +242,13 @@ export interface components {
              * @default []
              */
             schedules: components["schemas"]["Schedule"][];
+            /**
+             * Metadata
+             * @description Extensible metadata for future flags and settings
+             */
+            metadata?: {
+                [key: string]: unknown;
+            };
             /** Id */
             id?: string;
             /** Name */
@@ -177,6 +262,69 @@ export interface components {
             credentials: string;
             /** Primary Specialization */
             primary_specialization: string;
+        };
+        /**
+         * DoctorSummary
+         * @description Lightweight doctor model for list views - excludes schedules/slots
+         */
+        DoctorSummary: {
+            /** Id */
+            id?: string;
+            /** Name */
+            name: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Credentials */
+            credentials: string;
+            /** Primary Specialization */
+            primary_specialization: string;
+            fee: components["schemas"]["Fee"];
+            status: components["schemas"]["Status"];
+            /**
+             * Verified
+             * @default false
+             */
+            verified: boolean;
+            /**
+             * Reviews
+             * @default 0
+             */
+            reviews: number;
+            /**
+             * Rating
+             * @default 0
+             */
+            rating: number;
+            /**
+             * Consults Online
+             * @default false
+             */
+            consults_online: boolean;
+            /** Experience */
+            experience?: number | null;
+            /**
+             * Currently Available
+             * @default false
+             */
+            currently_available: boolean;
+            /** Next Available */
+            next_available?: string | null;
+        };
+        /** DrScheduleData */
+        DrScheduleData: {
+            /** Slotid */
+            slotId: string;
+            /** Clinicid */
+            clinicId: string;
+            /** Scheduleid */
+            scheduleId: string;
+            /** Patientname */
+            patientName: string;
+            /** Patientcontact */
+            patientContact: string;
         };
         /** Fee */
         Fee: {
@@ -197,6 +345,13 @@ export interface components {
             /** Lng */
             lng: number;
         };
+        /** LoginUser */
+        LoginUser: {
+            /** Username */
+            username: string;
+            /** Pwd */
+            pwd: string;
+        };
         /** RouteResponse[Clinic] */
         RouteResponse_Clinic_: {
             /** Entities */
@@ -208,12 +363,15 @@ export interface components {
             /** Paginated Count */
             paginated_count: number;
             /** Applied Filters */
-            applied_filters: string[];
+            applied_filters: [
+                string,
+                string
+            ][];
         };
-        /** RouteResponse[Doctor] */
-        RouteResponse_Doctor_: {
+        /** RouteResponse[DoctorSummary] */
+        RouteResponse_DoctorSummary_: {
             /** Entities */
-            entities: components["schemas"]["Doctor"][];
+            entities: components["schemas"]["DoctorSummary"][];
             /** Has More */
             has_more: boolean;
             /** Total Count */
@@ -221,7 +379,10 @@ export interface components {
             /** Paginated Count */
             paginated_count: number;
             /** Applied Filters */
-            applied_filters: string[];
+            applied_filters: [
+                string,
+                string
+            ][];
         };
         /**
          * Schedule
@@ -229,29 +390,39 @@ export interface components {
          *     don't seem to have a fixed schedule, else better off with weekdays
          */
         Schedule: {
+            /** Id */
+            id?: string;
+            /** Dated */
+            dated?: string | null;
             /** Weekday */
             weekday: number;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /**
+             * Is Recurring
+             * @default true
+             */
+            is_recurring: boolean;
+            clinic: components["schemas"]["Clinic"];
             /** Slots */
             slots: components["schemas"]["Slot"][];
-            /** Date */
-            date?: string | null;
-            clinic?: components["schemas"]["Clinic"] | null;
-            /** End */
-            end?: string | null;
-            /** Start */
-            start?: string | null;
+            /**
+             * Start
+             * Format: time
+             */
+            start: string;
             /** Hours Available */
             hours_available?: number | null;
+            /** End */
+            end?: string | null;
         };
         /** Slot */
         Slot: {
             /** Id */
             id?: string;
-            /**
-             * Begin
-             * @description The slot start time
-             */
-            begin?: string | null;
             /** Duration */
             duration: number;
             /**
@@ -261,6 +432,29 @@ export interface components {
             booked: boolean;
             /** Mode */
             mode?: string | null;
+            /**
+             * Begin
+             * Format: time
+             * @description The slot start time
+             */
+            begin: string;
+        };
+        /** SlotRecord */
+        SlotRecord: {
+            /** Patient Name */
+            patient_name: string;
+            /** Patient Contact */
+            patient_contact: string;
+            /** Day */
+            day: number;
+            /** Dept */
+            dept: string;
+            /** Doctor Name */
+            doctor_name: string;
+            /** Metadata */
+            metadata: {
+                [key: string]: components["schemas"]["Slot"];
+            };
         };
         /** Sort */
         Sort: {
@@ -281,7 +475,7 @@ export interface components {
          * Status
          * @enum {string}
          */
-        Status: "away" | "busy" | "unknown" | "available";
+        Status: "away" | "available" | "in_patient";
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -304,15 +498,20 @@ export interface components {
              */
             specialization: string | null;
             /**
-             * Distance
-             * @default null
+             * Currently Available
+             * @default false
              */
-            distance: number | null;
+            currently_available: boolean;
             /**
-             * Rating
+             * Max Distance
              * @default null
              */
-            rating: number | null;
+            max_distance: number | null;
+            /**
+             * Min Rating
+             * @default null
+             */
+            min_rating: number | null;
         };
     };
     responses: never;
@@ -326,13 +525,12 @@ export interface operations {
     get_doctors: {
         parameters: {
             query?: {
-                mode?: ("online" | "offline") | null;
-                specialization?: string | null;
-                distance?: number | null;
-                rating?: number | null;
+                search_query?: string | null;
                 max?: number;
                 page?: number;
-                searchQuery?: string | null;
+                specialization?: string | null;
+                currently_available?: boolean;
+                mode?: ("online" | "in_person") | null;
             };
             header?: never;
             path?: never;
@@ -340,7 +538,7 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": components["schemas"]["Sort"] | null;
+                "application/json": components["schemas"]["Sort"];
             };
         };
         responses: {
@@ -350,7 +548,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RouteResponse_Doctor_"];
+                    "application/json": components["schemas"]["RouteResponse_DoctorSummary_"];
                 };
             };
             /** @description Validation Error */
@@ -382,6 +580,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Doctor"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    book_schedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DrScheduleData"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlotRecord"];
                 };
             };
             /** @description Validation Error */
@@ -446,18 +679,18 @@ export interface operations {
             };
         };
     };
-    set_schedule: {
+    register: {
         parameters: {
-            query: {
-                clinic_id: string;
-                slot_id: string;
-                wkday: string;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUser"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -475,6 +708,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginUser"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    root_path: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
         };

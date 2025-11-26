@@ -1,6 +1,6 @@
 import { useState, useCallback, type ReactElement } from "react";
 import { motion } from "motion/react";
-import ButtonElement from "./eventElements/Button";
+import Button from "./eventElements/Button";
 import { MdFlip } from "react-icons/md";
 
 interface CardProps<T> {
@@ -25,9 +25,8 @@ const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
       }}
     >
       {/* Card front */}
-
       <motion.article
-        style={{ backfaceVisibility: "hidden" }}
+        style={{ backfaceVisibility: "hidden", willChange: "contents" }}
         animate={{
           scale: isFlipped ? 0 : 1,
           x: isFlipped ? "1000px" : 0,
@@ -40,30 +39,26 @@ const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
       </motion.article>
 
       {/* Card back */}
-
       <motion.article className="backface-hidden absolute inset-0 rotate-y-180 p-4">
         {CardBack}
       </motion.article>
 
-      <ButtonElement
+      <Button
         variant="icon"
         needsMotion={true}
         onClick={handleFlip}
-        whileHover={{ scale: 0.9, opacity: 0.75 }}
-        whileInView={{ scale: 0.75, opacity: 0.5 }}
         whileTap={{
-          opacity: 1,
           scale: [null, 0.5, 1],
           transition: { duration: 0.25 },
         }}
-        className={`fixed top-3/5 ${
+        className={`absolute top-3/5 ${
           isFlipped
             ? "left-full -translate-x-1/2"
             : "right-full translate-x-1/2"
         } `}
       >
         <MdFlip size={16} />
-      </ButtonElement>
+      </Button>
     </motion.article>
   );
 };

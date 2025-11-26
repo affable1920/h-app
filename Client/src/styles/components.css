@@ -1,43 +1,66 @@
 @import "./config.css";
+@import "./utils.css";
 
+/* layer components 1 */
 @layer components {
-  .navlinks {
-    @apply absolute top-full py-4 pb-8 bg-white shadow-md 
-    shadow-slate-200/50 w-full left-0 gap-18 hidden;
+  .navbar {
+    @apply container flex min-h-14 justify-between items-center;
+  }
 
-    @variant show {
-      @apply flex flex-col px-8;
-    }
+  .navlinks {
+    @apply absolute flex flex-col bg-white shadow-md w-full gap-16 top-full left-0 p-8 pt-4;
 
     @variant lg {
-      @apply flex flex-row items-center static shadow-none p-0 gap-32;
+      @apply w-auto static flex-row bg-transparent p-0 shadow-none;
     }
   }
 
   .navlink {
-    @apply font-bold rounded-md tracking-widest text-gray-800 underline-offset-2;
+    @apply font-bold text-secondary-dark cursor-pointer relative p-2 px-4 rounded-sm;
 
-    &.active {
-      @apply bg-transparent font-black underline;
+    &::before {
+      content: "|";
+      @apply absolute left-0;
+    }
 
-      @variant lg {
-        @apply py-1;
+    &:has(a > svg) a {
+      @apply flex items-center justify-between gap-4;
+
+      & > svg {
+        @apply size-4;
       }
     }
-  }
 
-  .input {
-    @apply w-full border-2 border-slate-200 rounded-md outline-none;
-
-    &:focus {
-      @apply border-secondary ring-2 ring-secondary-lightest/60;
+    &:hover {
+      @apply bg-gray-200/80 transition-all duration-180 ease-in shadow-sm shadow-gray-300/50;
     }
 
+    @variant lg {
+      @apply px-2;
+    }
+  }
+}
+
+/* 2 */
+@layer components {
+  .input {
+    @apply border-2 border-slate-200 rounded-md outline-none;
+
+    &:focus {
+      @apply border-secondary/40 ring-2 ring-blue-600/20;
+    }
+
+    &:is(.xs) {
+      @apply h-6 p-0.5 px-1;
+    }
     &:is(.sm) {
       @apply h-8 p-1 px-2;
     }
     &:is(.md) {
       @apply h-10 p-2 px-4;
+    }
+    &:is(.lg) {
+      @apply h-12 p-3 px-6;
     }
   }
 
@@ -51,22 +74,46 @@
     &:has(.badge, .icon) > button {
       @apply italic text-sm w-fit absolute top-1/2 right-2 -translate-y-1/2 shadow-none border-none px-1;
     }
+
+    &:has(label) {
+      @apply gap-1.5;
+    }
+  }
+
+  div:is(.filter-div) {
+    @apply flex flex-col gap-4 italic;
+
+    & label {
+      @apply text-sm text-shadow-xs italic font-bold bg-secondary/80 p-2 py-1 
+      text-white;
+    }
+
+    &:has(.input-box) .input-box {
+      @apply gap-2;
+    }
   }
 
   .card {
-    @apply rounded-md p-4 font-semibold shadow-sm 
+    @apply rounded-md p-4 pb-3 font-semibold shadow-sm 
     shadow-slate-200/40 border-2 bg-white border-slate-300/50 h-full min-h-32;
   }
 
   .modal {
-    @apply bg-white shadow-md shadow-slate-300/40 rounded-md p-4;
+    @apply bg-white shadow-md shadow-slate-300/40 rounded-md p-2;
 
-    &.bottom {
-      @apply fixed bottom-0 left-0 w-full min-h-52 rounded-t-md  border-t-slate-300 ring-4 ring-blue-400/25;
+    &:is(.bottom) {
+      @apply fixed bottom-0 left-0 w-full rounded-t-md border-t-slate-300 ring-4 ring-blue-400/40
+      max-h-[628px] overflow-y-scroll;
+
+      scrollbar-width: none;
     }
 
-    &.center {
-      @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+    &:is(.top) {
+      @apply fixed top-0 left-0 w-full min-h-52 rounded-b-md  border-b-slate-300 ring-4 ring-blue-400/25;
+    }
+
+    &:is(.center) {
+      @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-primary/10;
     }
   }
 
@@ -81,7 +128,52 @@
 
   .box {
     @apply bg-white shadow-md shadow-slate-300/60 rounded-lg text-gray-700 flex flex-col
-      border-2 border-slate-300/20 p-6 py-8 gap-8;
+      border-2 border-slate-300/20 p-6 py-8 gap-4;
+  }
+
+  .badge {
+    @apply rounded-md border-2 border-slate-200 text-secondary-dark font-bold transition-all
+      capitalize shadow-xs shadow-slate-300/60 flex items-center justify-center cursor-pointer 
+      self-start justify-self-start;
+
+    &:is(.xs) {
+      @apply p-0.5 text-sm;
+    }
+    &:is(.sm) {
+      @apply p-1;
+    }
+    &:is(.md) {
+      @apply p-2;
+    }
+    &:is(.lg) {
+      @apply p-3;
+    }
+
+    &:hover&:not(.current) {
+      @apply ring-1 ring-accent/20 rotate-[7.5deg];
+    }
+
+    &:disabled,
+    &.disabled {
+      @apply cursor-default opacity-40 pointer-events-none shadow-none font-semibold;
+    }
+
+    &.current {
+      @apply border-b-2 border-b-accent/50 font-black shadow-inner shadow-accent-dark/60;
+    }
+
+    &.selected {
+      @apply bg-amber-400 border-amber-600 font-black shadow-none;
+
+      &:hover {
+        @apply bg-amber-400 border-amber-700 shadow-none ring-2 ring-amber-800/10;
+      }
+    }
+
+    &.dot {
+      @apply z-2 text-white bg-primary rounded-full text-xs font-bold shadow-none 
+        border-none absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 pointer-events-none;
+    }
   }
 }
 
@@ -89,4 +181,27 @@
   display: grid;
   gap: calc(theme(--spacing) * 6);
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+}
+
+[data-tooltip] {
+  cursor: pointer;
+  position: relative;
+}
+
+[data-tooltip]::after {
+  @apply bg-gray-800 text-white text-xs rounded-md px-2 py-1;
+  position: absolute;
+  bottom: 100%; /* Position above the element */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+}
+
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip); /* Accesses the attribute's value */
+  /* Add styling for the tooltip box (position, background, etc.) */
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }

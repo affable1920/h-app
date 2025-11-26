@@ -1,53 +1,41 @@
-import { memo, useCallback, useMemo } from "react";
-import ButtonElement from "../eventElements/Button";
+import { memo } from "react";
 import { DateTime } from "luxon";
+
+import Badge from "../eventElements/Badge";
 import useScheduleStore from "../../stores/scheduleStore";
 
 function isDateToday(date: DateTime) {
-  const today = DateTime.local().startOf("day");
-  return date.startOf("day").equals(today);
+  return date.startOf("day").equals(DateTime.now().startOf("day"));
 }
 
 interface CalendarDayProps {
   date: DateTime;
-  isDisabled: (date: DateTime) => boolean;
-  isUnavailable: (date: DateTime) => boolean;
+  disabled?: boolean;
 }
 
-const CalendarDay = memo(
-  ({ date, isDisabled, isUnavailable }: CalendarDayProps) => {
-    const selectedDate = useScheduleStore((s) => s.selectedDate);
-    const setSelectedDate = useScheduleStore(
-      useCallback((s) => s.setSelectedDate, [])
-    );
+const CalendarDay = memo(({ ...props }: CalendarDayProps) => {
+  const { date, disabled = false } = props;
 
-    const isDateSelected = selectedDate && date.equals(selectedDate);
+  const selectedDate = useScheduleStore((s) => s.selectedDate);
+  const setSelectedDate = useScheduleStore((s) => s.setSelectedDate);
 
-    const getBadgeClasses = useMemo(() => {
-      return [
-        "w-full",
-        (isDisabled(date) || isUnavailable(date)) && "badge-disabled",
-        isDateToday(date) && "badge-current opacity-80",
-        isDateSelected && "badge-selected",
-      ]
-        .filter(Boolean)
-        .join(" ");
-    }, [date, isDisabled, isDateSelected, isUnavailable]);
-
-    return (
-      <ButtonElement
-        size="md"
-        color="slate"
-        variant="badge"
-        disabled={isDisabled(date)}
-        className={getBadgeClasses}
-        onClick={() => setSelectedDate(date)}
-      >
-        {date.day}
-      </ButtonElement>
-    );
+  function getTooltipText() {
+    return !disabled ? "Available" : "No schedules available on this date";
   }
-);
+
+  return (
+    <Badge
+      as="button"
+      color="slate"
+      disabled={disabled}
+      current={isDateToday(date)}
+      content={date.day.toString()}
+      data-tooltip={getTooltipText()}
+      onClick={() => setSelectedDate(date)}
+      selected={selectedDate?.startOf("day")?.equals(date.startOf("day"))}
+    />
+  );
+});
 
 export default CalendarDay;
 CalendarDay.displayName = "CalendarDay";

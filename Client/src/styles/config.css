@@ -100,12 +100,7 @@ and variant for applying variants
   }
 
   main {
-    @apply py-6;
-  }
-
-  main,
-  .navbar {
-    @apply container;
+    @apply container py-6;
   }
 
   button,

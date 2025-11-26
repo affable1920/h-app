@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ButtonElement from "../eventElements/Button";
+import ButtonElement from "../common/Button";
 import { Link } from "react-router-dom";
 import { MdSend } from "react-icons/md";
 

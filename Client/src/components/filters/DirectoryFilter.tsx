@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import SelectFilter from "./SelectFilter";
-import Input from "../eventElements/Input";
+import Input from "../common/Input";
 
-import Badge from "../eventElements/Badge";
-import Button from "../eventElements/Button";
+import Badge from "../common/Badge";
+import Button from "../common/Button";
 import CategoryFilter from "./CategoryFilter";
 
 import { AnimatePresence } from "motion/react";

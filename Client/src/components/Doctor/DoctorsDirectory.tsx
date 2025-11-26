@@ -8,7 +8,7 @@ import DrCardBack from "./DrCardBack";
 import DrCardEssentials from "./DrCardEssentials";
 import DrCardSecondaryInfo from "./DrCardSecondaryInfo";
 
-import Button from "../eventElements/Button";
+import Button from "../common/Button";
 import { useSearchParams } from "react-router-dom";
 
 function DrCardFront({ drEssentials }: { drEssentials: DoctorEssentials }) {
@@ -32,7 +32,7 @@ function DoctorsDirectory() {
   if (isError) return;
   if (isLoading) return <Spinner />;
 
-  if (applied_filters && !total_count)
+  if (applied_filters && !total_count) {
     return (
       <div className="flex flex-col justify-center items-center gap-2 mt-4">
         <h2 className="text-lg uppercase font-bold font-mono">
@@ -45,17 +45,16 @@ function DoctorsDirectory() {
         </div>
       </div>
     );
+  }
 
-  return (entities || []).map((doctor) => {
-    return (
-      <Card
-        key={doctor.id}
-        entity={doctor}
-        CardFront={<DrCardFront drEssentials={doctor} />}
-        CardBack={<DrCardBack doctor={doctor} />}
-      />
-    );
-  });
+  return (entities || []).map((doctor) => (
+    <Card
+      key={doctor.id}
+      entity={doctor}
+      CardFront={<DrCardFront drEssentials={doctor} />}
+      CardBack={<DrCardBack doctor={doctor} />}
+    />
+  ));
 }
 
 export default DoctorsDirectory;

@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { DateTime } from "luxon";
 
-import Badge from "../eventElements/Badge";
+import Badge from "../common/Badge";
 import useScheduleStore from "../../stores/scheduleStore";
 
 function isDateToday(date: DateTime) {

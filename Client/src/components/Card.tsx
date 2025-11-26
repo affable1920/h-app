@@ -1,6 +1,6 @@
 import { useState, useCallback, type ReactElement } from "react";
 import { motion } from "motion/react";
-import Button from "./eventElements/Button";
+import Button from "./common/Button";
 import { MdFlip } from "react-icons/md";
 
 interface CardProps<T> {

@@ -4,7 +4,7 @@ import CalendarBody from "./CalendarBody";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { motion, type Variant } from "motion/react";
 import { IoInformationCircleSharp } from "react-icons/io5";
-import Button from "../eventElements/Button";
+import Button from "../common/Button";
 import type { Schedule } from "@/types/doctorAPI";
 
 const currDate = DateTime.local();

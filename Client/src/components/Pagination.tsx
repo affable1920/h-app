@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 
-import ButtonElement from "./eventElements/Button";
+import ButtonElement from "./common/Button";
 import { ArrowBigRightDash, ArrowBigLeftDash } from "lucide-react";
 import { useCallback } from "react";
 

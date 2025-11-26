@@ -1,5 +1,5 @@
 import Ratings from "../Ratings";
-import Badge from "../eventElements/Badge";
+import Badge from "../common/Badge";
 import type { ButtonProps } from "@/types/button";
 import { type CategoryFilters } from "./types";
 

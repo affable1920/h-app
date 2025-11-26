@@ -4,11 +4,11 @@ import { AnimatePresence, motion, type Variant } from "motion/react";
 import { BsArrowRight } from "react-icons/bs";
 import { BiSolidMapPin } from "react-icons/bi";
 
-import Button from "./eventElements/Button";
+import Button from "./common/Button";
 
 import { ClockArrowDown } from "lucide-react";
 
-import Badge from "./eventElements/Badge";
+import Badge from "./common/Badge";
 import { Link, useLoaderData } from "react-router-dom";
 
 import { WEEKDAYS } from "@/utils/constants";

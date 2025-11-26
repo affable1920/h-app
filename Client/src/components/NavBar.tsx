@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { useLocation } from "react-router-dom";
 
 import NavLinks from "./NavLinks.js";
-import Button from "./eventElements/Button";
+import Button from "./common/Button.js";
 import { Menu, Search } from "lucide-react";
 
 const NavBar = () => {

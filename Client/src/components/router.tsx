@@ -1,17 +1,14 @@
-import { createBrowserRouter, type LoaderFunctionArgs } from "react-router-dom";
+import { lazy } from "react";
+import { createBrowserRouter } from "react-router-dom";
+import { type LoaderFunctionArgs } from "react-router-dom";
 
 //
-import Chat from "@routes/Chat";
 import Layout from "@routes/Layout";
 import HomePage from "@routes/HomePage";
-import Scheduler from "@routes/Scheduler";
 import Directory from "@routes/Directory";
 
 import drService from "@services/DoctorService";
-
 import ErrorBoundary from "@components/ErrorBoundary";
-import ClinicsDirectory from "@components/ClinicsDirectory";
-import DoctorsDirectory from "@components/doctor/DoctorsDirectory";
 
 /*
 API Routes Structure:
@@ -24,6 +21,14 @@ API Routes Structure:
 /appointments/:id          # Specific appointment
 /chat 
 */
+
+const Chat = lazy(() => import("@routes/Chat"));
+const Scheduler = lazy(() => import("@routes/Scheduler"));
+
+const ClinicsDirectory = lazy(() => import("@components/ClinicsDirectory"));
+const DoctorsDirectory = lazy(
+  () => import("@components/doctor/DoctorsDirectory")
+);
 
 async function loadDoctor({ params }: LoaderFunctionArgs) {
   if (!params?.id) return;

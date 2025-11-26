@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import {
   Outlet,
   useLocation,
@@ -6,16 +6,17 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
-import Badge from "../eventElements/Badge";
+import Badge from "../common/Badge";
 import Pagination from "@components/Pagination";
-import Input from "@components/eventElements/Input";
-import Button from "@components/eventElements/Button";
+import Input from "@/components/common/Input";
+import Button from "@/components/common/Button";
 
 import { debounce } from "@/utils/appUtils";
 import useModalStore from "@/stores/modalStore";
 import { IoRefreshOutline } from "react-icons/io5";
 import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
+import Spinner from "../Spinner";
 
 const Directory = () => {
   const navigate = useNavigate();
@@ -108,7 +109,9 @@ const Directory = () => {
 
       <section className="directory-layout">
         {/* outlet renders either the Doctor or clinic directory */}
-        <Outlet />
+        <Suspense fallback={<Spinner />}>
+          <Outlet />
+        </Suspense>
       </section>
 
       <Pagination />

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Button from "../eventElements/Button";
-import Dropdown from "../eventElements/Dropdown";
+import Button from "../common/Button";
+import Dropdown from "../common/Dropdown";
 import { ChevronDown } from "lucide-react";
 
 interface SelectFilterProps {

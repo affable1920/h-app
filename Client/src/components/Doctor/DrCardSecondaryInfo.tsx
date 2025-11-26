@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { type IconType } from "react-icons/lib";
 import { DrActionService } from "@/services/DrActionService";
 
-import Button from "../eventElements/Button";
+import Button from "../common/Button";
 import { capitalize } from "../../utils/appUtils";
 
 import type { DrActionName } from "@/types/doctorActions";

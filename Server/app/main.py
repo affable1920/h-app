@@ -4,14 +4,11 @@ from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
 
-import os
-
 # Skip if data already exists
 
 from app.routes import auth
 from app.routes import doctors
 from app.routes import clinics
-from app.routes import schedule
 from app.services.data_generator import main
 from app.services.openapi_spec import generate_openapi_spec
 
@@ -42,19 +39,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_origins=[
-        "http://localhost:5173",  # Local dev
-        "https://h-app-omega.vercel.app",  # Production
-        "https://h-gjrj7czxb-shamik1920.vercel.app",  # Preview
-        "https://vercel.com/shamik1920/h-app/4x5rweUd9TAxsAfHdg1WtZhT7HFb"  # Inspect
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
 )
 
 
+app.include_router(auth.router)
 app.include_router(doctors.router)
 app.include_router(clinics.router)
-app.include_router(auth.router)
 
 
 @app.get("/")

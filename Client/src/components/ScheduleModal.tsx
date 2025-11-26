@@ -1,17 +1,17 @@
-import { toast } from "sonner";
-
-import Text from "./base/Text";
-import Button from "./eventElements/Button";
+import { useState, type ChangeEvent } from "react";
 import type { Doctor } from "@/types/doctorAPI";
 
-import useModalStore from "@/stores/modalStore";
-import useScheduleStore from "@/stores/scheduleStore";
-import useSchedulesMutation from "@/hooks/useSchedulesMutation";
+import Text from "@components/common/Text";
+import Input from "@components/common/Input";
+import Button from "@components/common/Button";
 
+import useModalStore from "@stores/modalStore";
+import useScheduleStore from "@stores/scheduleStore";
+import useSchedulesMutation from "@hooks/useSchedulesMutation";
+
+import { toast } from "sonner";
 import { FaEdit } from "react-icons/fa";
 import { RiMapPin2Fill } from "react-icons/ri";
-import Input from "./eventElements/Input";
-import React, { useState } from "react";
 
 function ScheduleModal() {
   const [patient, setPatient] = useState({
@@ -41,7 +41,7 @@ function ScheduleModal() {
 
   function handleChange({
     target: { name = "", value = "" },
-  }: React.ChangeEvent<HTMLInputElement>) {
+  }: ChangeEvent<HTMLInputElement>) {
     setPatient((p) => ({ ...p, [name]: value }));
   }
 

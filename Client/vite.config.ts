@@ -1,4 +1,3 @@
-import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -34,9 +33,9 @@ export default defineConfig(function () {
               "axios",
               "luxon",
               "sonner",
-              "openapi-typescript",
               "chance",
               "motion",
+              "openapi-typescript",
             ],
           },
         },
@@ -53,12 +52,12 @@ export default defineConfig(function () {
     resolve: {
       alias: {
         // don't use the wildcard char for vite aliases. vite auto. resolves em'
-        "@": path.resolve(__dirname, "./src"),
-        "@hooks": path.resolve(__dirname, "./src/hooks"),
-        "@stores": path.resolve(__dirname, "./src/stores"),
-        "@services": path.resolve(__dirname, "./src/services"),
-        "@components": path.resolve(__dirname, "./src/components"),
-        "@routes": path.resolve(__dirname, "./src/components/routes"),
+        "@": "./src",
+        "@hooks": "./src/hooks",
+        "@stores": "./src/stores",
+        "@services": "./src/services",
+        "@components": "./src/components",
+        "@routes": "./src/components/routes",
       },
     },
   };

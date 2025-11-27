@@ -1,8 +1,8 @@
 import { memo } from "react";
 import { DateTime } from "luxon";
 
-import Badge from "../common/Badge";
-import useScheduleStore from "../../stores/scheduleStore";
+import Badge from "@components/common/Badge";
+import useScheduleStore from "@stores/scheduleStore";
 
 function isDateToday(date: DateTime) {
   return date.startOf("day").equals(DateTime.now().startOf("day"));

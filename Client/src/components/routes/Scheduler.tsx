@@ -2,12 +2,12 @@
 import { memo, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 
-import ClinicsView from "../ClinicsView";
-import Calendar from "../calendar/Calendar";
-import type { Doctor } from "@/types/doctorAPI";
-import Badge from "../common/Badge";
 import { DateTime } from "luxon";
-import Button from "../common/Button";
+import Calendar from "@components/Calendar";
+import type { Doctor } from "@/types/doctorAPI";
+import ClinicsView from "@components/ClinicsView";
+import Badge from "@components/common/Badge";
+import Button from "@components/common/Button";
 import { ArrowRight } from "lucide-react";
 
 const Scheduler = memo(() => {

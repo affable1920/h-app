@@ -37,7 +37,7 @@ app = FastAPI(lifespan=root, openapi_url="/openapi.json",
 
 origins = [
     "http://localhost:5173",
-    "https://h-app-omega.vercel.app",
+    "https://h-app-omega.vercel.app/"
 ]
 
 
@@ -47,7 +47,7 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
     allow_origins=origins,
-    allow_origin_regex=r"https://[\w-]+\.vercel\.app$")
+)
 
 
 app.include_router(auth.router)

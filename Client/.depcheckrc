@@ -1,0 +1,9 @@
+{
+  "ignores": [
+    "@components/*",
+    "@services/*",
+    "@routes/*",
+    "@hooks/*",
+    "@stores/*"
+  ]
+}

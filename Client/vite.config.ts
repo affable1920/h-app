@@ -1,8 +1,7 @@
-import { defineConfig } from "vite";
 import path from "path";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { visualizer } from "rollup-plugin-visualizer";
 
 /*
 - Vite config doc
@@ -14,46 +13,34 @@ ll be resolved and available on the env object
 
 // https://vite.dev/config/
 export default defineConfig(function ({ mode }) {
-  console.log(mode);
-
   return {
-    /* configure what happends during build time 
-    - npm run build
-    */
-    build: {
-      rollupOptions:
-        mode === "production"
-          ? {
-              // Instructions for rollup aka the bundler Vite uses under the hood
-              output: {
-                // How to output the built files
-                manualChunks: {
-                  // code splitting: Manually define which modules/files go together
-                  "react-vendor": ["react", "react-dom", "react-router-dom"],
+    /* configure what happens during build time 
+    - npm run build */
+    // build: {
+    //   rollupOptions: {
+    //     // Instructions for rollup aka the bundler Vite uses under the hood
+    //     output: {
+    //       // How to output the built files
+    //       // use names for packages as in package.json
+    //       // code splitting: Manually define which modules/files go together
+    //       manualChunks(id) {
+    //         if (id.includes("node_modules")) {
+    //           if (
+    //             id.includes("react") ||
+    //             id.includes("react-dom") ||
+    //             id.includes("react-router-dom")
+    //           ) {
+    //             return "react-vendor";
+    //           }
+    //         }
 
-                  // use names for packages as in package.json
-                  "state-management": ["@tanstack/react-query", "zustand"],
-                  "ui-libs": ["react-icons", "lucide-react"],
-                  "utils-libs": [
-                    "axios",
-                    "luxon",
-                    "sonner",
-                    "chance",
-                    "motion",
-                    "openapi-typescript",
-                  ],
-                },
-              },
-            }
-          : undefined,
-    },
+    //         return "react-vendor";
+    //       },
+    //     },
+    //   },
+    // },
 
-    plugins: [
-      react(),
-      tailwindcss(),
-      // the rollup visualizer below shows us a visual breakdown of our bundle
-      visualizer({ open: true, gzipSize: true, brotliSize: true }),
-    ],
+    plugins: [react(), tailwindcss()],
 
     resolve: {
       alias: {

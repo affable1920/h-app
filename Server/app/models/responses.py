@@ -20,12 +20,13 @@ class RouteResponse(BaseModel, Generic[T]):
 
 
 class DrScheduleData(BaseModel):
-    slot_id: str = Field(..., alias="slotId")
-    clinic_id: str = Field(..., alias="clinicId")
-    schedule_id: str = Field(..., alias="scheduleId")
+    slot_id: str = Field(alias="slotId")
+    clinic_id: str = Field(alias="clinicId")
+    schedule_id: str = Field(alias="scheduleId")
 
-    patient_name: str = Field(..., alias="patientName")
-    patient_contact: str = Field(..., alias="patientContact")
+    patient_name: str = Field(min_length=3, alias="patientName")
+    patient_contact: str = Field(
+        min_length=10, max_length=10, alias="patientContact")
 
 
 class SlotRecord(BaseModel):

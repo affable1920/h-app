@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Annotated, Literal
 from fastapi import Query
-from pydantic import BaseModel, Field, field_serializer, model_serializer
+from typing import Annotated, Literal
+from pydantic import BaseModel, Field, field_serializer
 
 
 # providing a default value -> field optional

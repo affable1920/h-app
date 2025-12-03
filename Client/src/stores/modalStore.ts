@@ -21,16 +21,26 @@ const useModalStore = create<ModalState & ModalActions>((set, get) => ({
   currModal: null,
   modalProps: {},
 
-  openModal: (modal: string, options) => {
-    set({ currModal: modal, modalProps: options ?? get().modalProps });
+  openModal(modal: string, options) {
+    set({
+      currModal: modal,
+      modalProps: options ?? {},
+    });
   },
 
-  closeModal: () => set({ currModal: null }),
+  closeModal() {
+    set({ currModal: null });
+  },
 
-  reset: () => {
+  reset() {
     set({ currModal: null, modalProps: {} });
   },
 }));
 
 export const removeModal = () => useModalStore.setState({ currModal: null });
+
+export const remove1 = useModalStore.getState().closeModal;
+export const remove2 = () => useModalStore.getState().closeModal();
+console.log(remove1 === remove2);
+
 export default useModalStore;

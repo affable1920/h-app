@@ -5,7 +5,7 @@ from fastapi.routing import APIRouter
 
 
 from app.models.QueryParams import DrQueryParams
-from app.services.dr_service import DoctorHelper, doctor_service
+from app.services.dr_service import DoctorHelper, DoctorService
 from app.models.doctor_models.Doctor import Doctor, DoctorSummary
 from app.models.Responses import DrScheduleData, RouteResponse, SlotRecord
 
@@ -15,21 +15,25 @@ tags: list[str | Enum] = ['doctors']
 
 router = APIRouter(prefix=base_route, tags=tags)
 
+dr_service = DoctorService()
+
 
 @router.get("", tags=tags, response_model=RouteResponse[DoctorSummary])
 async def get_doctors(params: DrQueryParams = Depends()):
-    return doctor_service.get(**params.model_dump(exclude_none=True, exclude_unset=True))
+    return dr_service.get(**params.model_dump(exclude_none=True, exclude_unset=True))
 
 
 @router.get("/{id}", response_model=Doctor)
 async def get_doctor(id: str):
-    return doctor_service.get_by_id(id)
+    return dr_service.get_by_id(id)
 
 
 @router.post("/{id}/book", response_model=SlotRecord)
 async def book_schedule(data: DrScheduleData, helper: DoctorHelper = Depends()):
-    return helper.book(data.schedule_id, data.slot_id,
-                       patient_contact=data.patient_contact, patient_name=data.patient_name)
+    items = data.model_dump(exclude={"clinic_id"})
+
+    record = await helper.book(**items)
+    return record
 
 
 day_map = {

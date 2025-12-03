@@ -37,12 +37,12 @@ class DoctorService extends APIClient {
     id: string,
     data: BookScheduleData
   ): Promise<BookScheduleResponse> {
-    const response = await this.post<BookScheduleResponse, BookScheduleData>(
-      `${id}/book`,
-      data
-    );
-
-    return response.data;
+    return (
+      await this.post<BookScheduleResponse, BookScheduleData>(
+        `${id}/book`,
+        data
+      )
+    ).data;
   }
 }
 

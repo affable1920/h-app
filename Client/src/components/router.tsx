@@ -10,6 +10,10 @@ import Directory from "@routes/Directory";
 import drService from "@services/DoctorService";
 import ErrorBoundary from "@components/ErrorBoundary";
 
+import Auth from "@routes/Auth";
+import Login from "@components/auth/Login";
+import Register from "@components/auth/Register";
+
 /*
 API Routes Structure:
 /                          # Home
@@ -73,12 +77,25 @@ const router = createBrowserRouter([
 
       {
         path: "doctors/:id/schedule",
-        loader: loadDoctor,
         Component: Scheduler,
       },
 
       // ai chat route
       { path: "chat", Component: Chat },
+      {
+        path: "/auth",
+        Component: Auth,
+        // children: [
+        //   {
+        //     index: true,
+        //     Component: Login,
+        //   },
+        //   {
+        //     path: "register",
+        //     Component: Register,
+        //   },
+        // ],
+      },
     ],
   },
 ]);

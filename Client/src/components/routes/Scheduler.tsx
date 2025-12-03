@@ -1,18 +1,30 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { memo, useState } from "react";
-import { useLoaderData } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { DateTime } from "luxon";
 import Calendar from "@components/Calendar";
-import type { Doctor } from "@/types/doctorAPI";
 import ClinicsView from "@components/ClinicsView";
 import Badge from "@components/common/Badge";
 import Button from "@components/common/Button";
 import { ArrowRight } from "lucide-react";
+import { useDoctor } from "@/hooks/useDoctorsQuery";
+import Spinner from "../Spinner";
 
 const Scheduler = memo(() => {
-  const dr = useLoaderData<Doctor>();
+  const id = useLocation().pathname.split("/").at(2);
+  const { data: dr, isPending, isError } = useDoctor(id as string);
+
   const [showClinicsView, setShowClinicsView] = useState(false);
+
+  if (isPending) return <Spinner />;
+
+  if (isError)
+    return (
+      <div className="card-h2">
+        Hold your breathe. Doctor onboarding in process ...
+      </div>
+    );
 
   const {
     name,
@@ -26,14 +38,6 @@ const Scheduler = memo(() => {
   const info = currently_available
     ? "Available right now !"
     : `${nxtAvailable.toFormat("dd LLL yyyy")}`;
-
-  if (!dr)
-    return (
-      <div className="card-h2">
-        Hold your breathe. Doctor onboarding in process ...
-        <Badge as="link" content="View similar doctors !" />
-      </div>
-    );
 
   function toggleView() {
     setShowClinicsView((p) => !p);
@@ -56,6 +60,7 @@ const Scheduler = memo(() => {
       <section className="flex flex-col gap-2">
         <Badge full={false} content={info} />
         <ClinicsView
+          doctor={dr}
           schedules={schedules}
           onShow={setShowClinicsView}
           showClinicsView={showClinicsView}

@@ -11,7 +11,7 @@ type StoreState = {
 };
 
 interface Actions {
-  setSelectedDate: (date: DateTime) => void;
+  setSelectedDate: (date: DateTime | null) => void;
   setSelectedSlot: (slotId: Slot) => void;
   setSelectedClinic: (clinicId: Clinic) => void;
 
@@ -27,7 +27,8 @@ const useScheduleStore = create<StoreState & Actions>((set, get) => ({
   setSelectedDate(date) {
     set({
       ...get(),
-      selectedDate: get().selectedDate?.equals(date) ? null : date,
+      selectedDate:
+        date === null || get().selectedDate?.equals(date) ? null : date,
     });
   },
 

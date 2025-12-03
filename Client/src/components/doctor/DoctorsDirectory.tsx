@@ -11,6 +11,13 @@ import DrCardSecondaryInfo from "./DrCardSecondaryInfo";
 import Button from "../common/Button";
 import { useSearchParams } from "react-router-dom";
 
+type AppError = {
+  msg: string;
+  status: number;
+  description: string;
+  detaial: Record<string, unknown>;
+};
+
 function DrCardFront({ drEssentials }: { drEssentials: DoctorEssentials }) {
   return (
     <article className="flex flex-col gap-4">
@@ -22,14 +29,14 @@ function DrCardFront({ drEssentials }: { drEssentials: DoctorEssentials }) {
 
 function DoctorsDirectory() {
   const {
-    data: { entities = [], applied_filters, total_count } = {},
-    isError,
     isLoading,
+    isError,
+    error,
+    data: { entities = [], applied_filters, total_count } = {},
   } = useAllDoctors();
 
   const [, setSearchParams] = useSearchParams();
 
-  if (isError) return;
   if (isLoading) return <Spinner />;
 
   if (applied_filters && !total_count) {

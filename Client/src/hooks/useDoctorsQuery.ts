@@ -12,16 +12,22 @@ export function useAllDoctors() {
 
   return useQuery({
     queryKey: ["doctors", { ...params }],
-    queryFn: async () => {
-      try {
-        const response = await drService.getAll(params);
-        console.log("doctors endpoint response: ", response);
-
-        return response;
-      } catch (ex) {
-        console.log(ex);
-      }
+    async queryFn() {
+      return await drService.getAll(params);
     },
+
     placeholderData: keepPreviousData,
+    retry: 1,
+  });
+}
+
+export function useDoctor(id: string) {
+  return useQuery({
+    queryKey: ["doctor", id],
+    async queryFn() {
+      return await drService.getById(id);
+    },
+
+    enabled: !!id,
   });
 }

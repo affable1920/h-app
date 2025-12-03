@@ -1,35 +1,28 @@
 import { useMutation } from "@tanstack/react-query";
 
-import type { operations } from "@/types/api";
-import { getIds } from "@/stores/scheduleStore";
 import drService from "@/services/DoctorService";
+import { getIds } from "@/stores/scheduleStore";
 
-type BookScheduleData =
-  operations["book_schedule"]["requestBody"]["content"]["application/json"];
-
-type SchedulingData = {
-  id: string;
-  patientDetails: { patientName: string; patientContact: string };
+type PatientData = {
+  patientName: string;
+  patientContact: string;
 };
 
 const targets = ["selectedClinic", "selectedSchedule", "selectedSlot"] as const;
 
-export default function useSchedulesMutation() {
+export default function useSchedulesMutation(id: string) {
   const ids = getIds<(typeof targets)[number]>(new Set(targets));
-  const { selectedClinic, selectedSchedule, selectedSlot } = ids;
 
   return useMutation({
-    mutationKey: ["schedules", ...Object.values(ids)],
+    mutationKey: ["doctor", id, "schedules"],
 
-    mutationFn: async ({ id, patientDetails }: SchedulingData) => {
-      const data: BookScheduleData = {
-        ...patientDetails,
-        slotId: selectedSlot,
-        clinicId: selectedClinic,
-        scheduleId: selectedSchedule,
-      };
-
-      await drService.schedule(id, data);
+    async mutationFn({ patientData }: { patientData: PatientData }) {
+      return await drService.schedule(id, {
+        ...patientData,
+        slotId: ids.selectedSlot,
+        clinicId: ids.selectedClinic,
+        scheduleId: ids.selectedSchedule,
+      });
     },
   });
 }

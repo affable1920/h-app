@@ -64,8 +64,8 @@ class DataGenerator:
             start (time): Start time of the schedule.
             end (time): End time of the schedule.
             duration (int, optional): Consultation duration in minutes. Defaults to 20.
-            consults_online (bool, optional): Whether consultations are online for the mode attr 
-            Defaults to False.
+            consults_online (bool, optional): Whether consultations are online for the 
+            mode attr - Defaults to False.
 
         Returns:
             list[Slot]: List of generated slots.
@@ -153,6 +153,7 @@ class DataGenerator:
                      datetime.combine(datetime.today(), start)).seconds // 3600
                 ),
             }
+
             schedules.append(Schedule(**schedule))
 
         return schedules
@@ -160,7 +161,7 @@ class DataGenerator:
     def generate_essentials(self) -> dict:
         """Generate essential doctor information."""
         essentials = {
-            "name": random.choice(constants.NAMES),
+            "name":  random.choice(constants.NAMES),
             "email": f"{random.choice(constants.NAMES).lower()}@medical.com",
             "credentials": random.choice(constants.CREDENTIALS),
             "primary_specialization": random.choice(constants.SPECIALIZATIONS),
@@ -267,7 +268,11 @@ def main():
     try:
         def generate_doctors(count: int = 200) -> list[dict]:
             """Generate multiple doctor records."""
-            return [DataGenerator().generate_doctor().model_dump() for _ in range(count)]
+            doctors = [DataGenerator().generate_doctor().model_dump(
+                mode="json") for _ in range(count)]
+            return doctors
+
+            # return {dr.id: dr.model_dump(mode='json') for dr in doctors}
 
         doctors = generate_doctors()
 

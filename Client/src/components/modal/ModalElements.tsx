@@ -22,6 +22,10 @@ const MODALS: Record<string, React.ElementType> = {
       </article>
     );
   },
+
+  loginModal() {
+    return <div>Login or sign up to continue !</div>;
+  },
 };
 
 export default MODALS;

@@ -30,7 +30,7 @@ const Modal = React.memo(() => {
 
   return createPortal(
     <AnimatePresence mode="wait">
-      {!!(currModal && ModalElement) && (
+      {!!ModalElement && (
         <Overlay viewOverlay={modalProps.viewOverlay ?? false}>
           <motion.div
             key={currModal}

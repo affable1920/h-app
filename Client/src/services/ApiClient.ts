@@ -1,5 +1,17 @@
 import axios from "axios";
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import type {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+} from "axios";
+
+const CONFIG: Record<number, { name: string }> = {
+  400: { name: "Bad Request" },
+  401: { name: "Unauthenticated" },
+  422: { name: "Invalid data" },
+  500: { name: "Server Error" },
+};
 
 class APIClient {
   private _baseUrl: string =
@@ -16,6 +28,51 @@ class APIClient {
     });
 
     this.endpoint = endpoint;
+
+    this.instance.interceptors.request.use(
+      function (config) {
+        return config;
+      },
+      function (e: AxiosError) {
+        console.log(e);
+        return Promise.reject(e);
+      }
+    );
+
+    this.instance.interceptors.response.use(
+      (response) => response,
+      function (e: AxiosError) {
+        if (e.request && !e.response) {
+          return Promise.reject({
+            status: e.status,
+            detail: null,
+            msg: "No response from the server!",
+            description: "The server is likely down!",
+          });
+        }
+
+        const { response, status } = e;
+
+        const expectedError =
+          status && status < 500 && status >= 400 && status != 0;
+
+        if (expectedError) {
+          return Promise.reject({
+            status,
+            msg: "",
+            description: CONFIG[status ?? 500]?.name,
+            detail: (response?.data as any)?.detail,
+          });
+        }
+
+        return Promise.reject({
+          status,
+          msg: "Something went wrong!",
+          detail: (response?.data as any)?.detail,
+          description: "An unexpected error occurred!",
+        });
+      }
+    );
   }
 
   async get<T>(

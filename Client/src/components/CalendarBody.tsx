@@ -30,8 +30,11 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
     [schedules]
   );
 
-  function isDateGone(diffDate: DateTime) {
-    return diffDate.month < monthInView.month || diffDate.day < monthInView.day;
+  function isDateGone(date: DateTime) {
+    return (
+      date.month < monthInView.month ||
+      (date.month === monthInView.month && date.day < monthInView.day)
+    );
   }
 
   const rows = calendar.length < 42 ? 5 : 6;

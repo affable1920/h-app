@@ -1,4 +1,4 @@
-import ButtonElement from "./common/Button";
+import Button from "./common/Button";
 import { isRouteErrorResponse, Link, useRouteError } from "react-router-dom";
 
 const ErrorBoundary = () => {
@@ -13,11 +13,11 @@ const ErrorBoundary = () => {
       className="flex flex-col justify-center gap-4 font-bold text-2xl p-12 px-6 items-center justify-cenetr
     text-center"
     >
-      <h1 className="text-error-dark">{msg}</h1>
+      <h1 className="label text-error-dark">{msg}</h1>
 
-      <ButtonElement className="w-fit">
-        <Link to="/doctors">Go back to dashboard</Link>
-      </ButtonElement>
+      <Button className="w-fit">
+        <Link to="/">Go back to home</Link>
+      </Button>
     </div>
   );
 };

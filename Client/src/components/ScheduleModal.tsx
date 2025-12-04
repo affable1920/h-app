@@ -1,7 +1,6 @@
-import React, { useState, type ReactElement } from "react";
+import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-import Badge from "./common/Badge";
 import Text from "@components/common/Text";
 import Input from "@components/common/Input";
 import Button from "@components/common/Button";
@@ -15,22 +14,37 @@ import useSchedulesMutation from "@hooks/useSchedulesMutation";
 import { toast } from "sonner";
 import { FaEdit } from "react-icons/fa";
 import { RiMapPin2Fill } from "react-icons/ri";
+import { TbAuth2Fa } from "react-icons/tb";
+import { SiAuthentik } from "react-icons/si";
+import { UserPlus } from "lucide-react";
+import Spinner from "./Spinner";
 
 type Mode = {
   label: string;
-  children: ReactElement;
   name: "auth" | "quick";
 };
 
+const modeStyles: React.CSSProperties = {
+  minHeight: "100px",
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  gap: "1.4rem",
+};
+
+const bookingModes: Mode[] = [
+  {
+    name: "quick",
+    label: "quick book",
+  },
+  {
+    name: "auth",
+    label: "login / signup",
+  },
+];
+
 function ScheduleModal() {
   const [selectedMode, setSelectedMode] = useState<Mode>(bookingModes[0]);
-  const [patient, setPatient] = useState({
-    patientName: "",
-    patientContact: "",
-  });
-
-  const closeModal = useModalStore((s) => s.closeModal);
-
   const selectedSlot = useScheduleStore((s) => s.selectedSlot);
   const selectedClinic = useScheduleStore((s) => s.selectedClinic);
 
@@ -41,17 +55,27 @@ function ScheduleModal() {
     dr: Doctor;
   };
 
-  const { mutateAsync } = useSchedulesMutation(dr.id as string);
+  const [patient, setPatient] = useState({
+    patientName: "",
+    patientContact: "",
+  });
+
+  function handleChange({
+    target: { name = "", value = "" },
+  }: React.ChangeEvent<HTMLInputElement>) {
+    setPatient((p) => ({ ...p, [name]: value }));
+  }
+
+  const openModal = useModalStore((s) => s.openModal);
+  const closeModal = useModalStore((s) => s.closeModal);
+  const { mutateAsync, isPending } = useSchedulesMutation(dr.id as string);
 
   async function confirmSlot() {
     await mutateAsync(
       { patientData: patient },
       {
         async onSuccess(_, __, ___, context) {
-          setPatient({
-            patientName: "",
-            patientContact: "",
-          });
+          const knownData = { ...patient };
 
           toast.info("Slot booked successfully !", {
             action: {
@@ -62,8 +86,17 @@ function ScheduleModal() {
             },
           });
 
+          setPatient({
+            patientName: "",
+            patientContact: "",
+          });
+
           context.client.invalidateQueries();
           closeModal();
+
+          openModal("memberModal", {
+            data: knownData,
+          });
         },
 
         async onError(error) {
@@ -76,15 +109,16 @@ function ScheduleModal() {
 
   return (
     <section className="flex flex-col justify-end gap-8 p-4">
-      <div className="flex items-center justify-between">
-        <Text bold content={"Dr. " + dr?.name} />
+      <div className="flex items-center justify-between bg-primary-lightest text-white p-2 rounded-sm">
+        <Text className="self-end" bold content={"Dr. " + dr?.name} />
         <span className="inline-flex flex-col items-end">
-          <Text size="xs" bold content={date as string} />
           <Text
+            bold
             size="sm"
             className="capitalize"
             content={selectedDate?.weekdayShort as string}
           />
+          <Text bold size="xs" content={date as string} />
         </span>
       </div>
 
@@ -104,94 +138,91 @@ function ScheduleModal() {
         </div>
       </div>
 
-      <section className="flex flex-col gap-5">
-        <article className="flex items-center justify-between">
-          {bookingModes.map((mode) => (
-            <Badge
-              size="xs"
-              full={false}
-              key={mode.name}
-              className="px-2"
-              content={mode.label}
-              selected={selectedMode.name === mode.name}
-              onClick={() => setSelectedMode(mode)}
-            />
-          ))}
-        </article>
-
+      <section className="flex flex-col gap-4">
         <AnimatePresence mode="wait">
           <motion.div
+            style={modeStyles}
             key={selectedMode.name}
-            initial={{ x: -10, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
             exit={{ x: 10, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-col gap-3"
+            initial={{ x: -10, opacity: 0 }}
           >
-            {selectedMode.children}
+            <Input
+              label="name"
+              labelClasses="sm"
+              name="patientName"
+              onChange={handleChange}
+              value={patient.patientName}
+              className="italic font-semibold text-sm"
+            />
+            <Input
+              type="number"
+              label="contact"
+              labelClasses="sm"
+              name="patientContact"
+              onChange={handleChange}
+              value={patient.patientContact}
+              className="italic font-semibold text-sm"
+            />
+            <div className="flex items-center justify-between gap-8 text-sm">
+              <Button color="danger" variant="contained" onClick={closeModal}>
+                Cancel
+              </Button>
+
+              <Button
+                color="accent"
+                loading={isPending}
+                variant="contained"
+                onClick={confirmSlot}
+              >
+                Confirm Slot
+              </Button>
+            </div>
           </motion.div>
         </AnimatePresence>
       </section>
-
-      <div className="flex items-center justify-between gap-8 text-sm">
-        <Button color="danger" variant="contained" onClick={closeModal}>
-          Cancel
-        </Button>
-
-        <Button color="accent" variant="contained" onClick={confirmSlot}>
-          Confirm Slot
-        </Button>
-      </div>
     </section>
   );
 }
 
 export default ScheduleModal;
 
-const bookingModes: Mode[] = [
-  {
-    name: "quick",
-    label: "quick book",
-    children: <QuickBookSlot />,
-  },
-  {
-    name: "auth",
-    label: "login / signup",
-    children: <div>Login Signup</div>,
-  },
-];
-
-function QuickBookSlot() {
-  const [patient, setPatient] = useState({
-    patientName: "",
-    patientContact: "",
+function LoginSignup() {
+  const [user, setUser] = useState({
+    email: "",
+    password: "",
   });
 
   function handleChange({
     target: { name = "", value = "" },
   }: React.ChangeEvent<HTMLInputElement>) {
-    setPatient((p) => ({ ...p, [name]: value }));
+    setUser((p) => ({ ...p, [name]: value }));
   }
 
   return (
     <>
       <Input
-        label="name"
+        label="email"
         labelClasses="sm"
-        name="patientName"
+        name="email"
         onChange={handleChange}
-        value={patient.patientName}
+        value={user.email}
         className="italic font-semibold text-sm"
       />
       <Input
-        type="number"
-        label="contact"
+        type="password"
+        label="password"
         labelClasses="sm"
-        name="patientContact"
+        name="password"
         onChange={handleChange}
-        value={patient.patientContact}
+        value={user.password}
         className="italic font-semibold text-sm"
       />
+
+      <div className="flex items-center justify-end text-sm">
+        <Button>Continue to book</Button>
+      </div>
     </>
   );
 }

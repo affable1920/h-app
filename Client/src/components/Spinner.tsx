@@ -1,11 +1,13 @@
-const Spinner = ({ loading = true }: { loading?: boolean }) => {
-  if (!loading) return null;
+type Size = "xs" | "sm" | "md" | "lg";
 
-  const spinnerClasses = [
-    `w-4 h-4 border-4 rounded-full border-black border-b-accent-dark rotate-[360deg] animate-spin duration-[infinity]`,
-  ]
-    .filter(Boolean)
-    .join(" ");
+interface SpinnerProps {
+  size?: Size;
+  loading?: boolean;
+}
+
+const Spinner = ({ loading = true, size = "sm" }: SpinnerProps) => {
+  if (!loading) return null;
+  const spinnerClasses = ["spinner", size].filter(Boolean).join(" ").trim();
 
   return <div className={spinnerClasses} />;
 };

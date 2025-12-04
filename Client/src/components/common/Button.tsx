@@ -29,7 +29,7 @@ const Button = memo(
           size,
           variant,
           hasColor && color,
-          loading && "cursor-wait",
+          loading && "loading",
           className,
         ]
           .filter(Boolean)

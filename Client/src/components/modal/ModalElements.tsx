@@ -23,8 +23,15 @@ const MODALS: Record<string, React.ElementType> = {
     );
   },
 
-  loginModal() {
-    return <div>Login or sign up to continue !</div>;
+  memberModal() {
+    const tagline =
+      "Get onboard account to keep track of all your appointments!";
+
+    return (
+      <div>
+        <h2 className="card-h2">{tagline}</h2>
+      </div>
+    );
   },
 };
 

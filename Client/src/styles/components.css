@@ -175,6 +175,23 @@
         border-none absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 pointer-events-none;
     }
   }
+
+  .spinner {
+    @apply border-4 rounded-full border-black border-b-accent-dark rotate-[360deg] animate-spin 
+    duration-[infinity];
+
+    &:is(.xs) {
+      @apply size-2;
+    }
+
+    &: (.sm) {
+      @apply size-4;
+    }
+
+    &: (.md) {
+      @apply size-6;
+    }
+  }
 }
 
 .directory-layout {

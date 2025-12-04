@@ -8,10 +8,14 @@
   .btn {
     @apply tracking-widest leading-tight active:scale-[.99] select-none cursor-pointer [&:disabled]:opacity-70 
     [&:disabled]:pointer-events-none rounded-lg flex items-center justify-center gap-2 border-2
-    font-bold whitespace-nowrap transition-colors duration-[150ms] ease-in text-center;
+    font-bold whitespace-nowrap transition-colors duration-[150ms] ease-in text-center [&:.loading]:cursor-wait;
 
     &:is(.contained):has(svg) > svg {
       @apply size-2.5 text-white;
+    }
+
+    &:is(.loading) > .spinner {
+      @apply size-3;
     }
 
     &:is(.outlined):has(svg) > svg {

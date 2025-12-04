@@ -150,7 +150,7 @@
                     {
                         "id": "5b3e692d31ba4084902fa3339a4d8930",
                         "duration": 20,
-                        "booked": false,
+                        "booked": true,
                         "mode": "in_person",
                         "begin": "07:50:00"
                     },
@@ -199,7 +199,7 @@
                     {
                         "id": "4a1dd4c4e574459485a6ef84a1f62721",
                         "duration": 20,
-                        "booked": false,
+                        "booked": true,
                         "mode": "in_person",
                         "begin": "10:10:00"
                     },

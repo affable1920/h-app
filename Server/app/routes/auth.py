@@ -1,79 +1,44 @@
-import json
 from enum import Enum
-from pathlib import Path
-from datetime import timedelta
 
-from fastapi import HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from fastapi import APIRouter, HTTPException
+from sqlalchemy.orm import Session
 
-from passlib.context import CryptContext
-from jose import JWTError, jwt, ExpiredSignatureError
-
-from app.services.users_service import users_service
-from app.models.Auth import CreateUser, DBUser, LoginUser
-
+from app.database.entry import get_db
+from app.database.models import User
+from app.helpers.authentication import create_access_token, decode_and_get_current
+from app.schemas.user import CreateUser, DBUser, LoginUser
+from app.services.users_service import UserService
 
 base = "/auth"
 tags: list[str | Enum] = ["auth"]
-
-ALG = "HS256"
-pwd_context = CryptContext(schemes=["bcrypt"])
-
 router = APIRouter(prefix="/auth", tags=tags)
-users_file = Path("data/users.json")
-
-
-def load_users():
-    try:
-        with open(users_file, "r") as f:
-            return json.load(f)
-
-    except FileNotFoundError:
-        with open(users_file, "w") as f:
-            json.dump([], f)
-            return []
-
-
-def create_access_token(data: dict, exp: timedelta | None = timedelta(hours=2)):
-    payload = data.copy()
-    if "pwd" in payload:
-        del payload["pwd"]
-
-    payload.update({"exp": exp})
-    return jwt.encode(payload, key="secret", algorithm=ALG)
-
-
-def decode_access_token(token: str):
-    try:
-        return jwt.decode(token, key="secret", algorithms=[ALG])
-
-    except ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 @router.post("/register")
-async def register(user: CreateUser):
-    users = {}
+async def register(user: CreateUser, db: Session = Depends(get_db), service: UserService = Depends()):
+    if db.query(User).filter(User.email == user.email).first():
+        raise HTTPException(status_code=400, detail="Email already exists!")
 
-    if user.email in users:
-        return HTTPException(status_code=400, detail="Email already exists !")
+    db_user = User(**user.model_dump())
+    db.add(db_user)
+    db.commit()
 
-    try:
-        new_user = DBUser(**user.model_dump())
-        print(new_user)
-        users_service.save(new_user)
+    created_user = service.save(user.model_dump())
+    token = create_access_token(created_user)
 
-    except Exception as e:
-        return HTTPException(status_code=400, detail=str(e))
-
-    token = create_access_token(user.model_dump())
-    return JSONResponse(content=new_user, status_code=201, headers={"x-auth-token": token})
+    return JSONResponse(content=None, status_code=201, headers={"x-auth-token": token})
 
 
-@router.post("/login")
-async def login(user_cred: LoginUser):
-    pass
+@router.post("/login", response_model=DBUser)
+async def login(user_cred: LoginUser, service: UserService = Depends()):
+    db_user = service.verify_user(**user_cred.model_dump())
+
+    token = create_access_token(db_user)
+    return JSONResponse(content=db_user, status_code=200, headers={"x-auth-token": token})
+
+
+@router.get("/me", response_model=DBUser)
+async def profile(user: dict = Depends(decode_and_get_current)):
+    """"""
+    print("profile route handler:",  user)

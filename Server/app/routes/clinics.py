@@ -1,8 +1,8 @@
 from enum import Enum
 from fastapi import APIRouter
-from app.models.Responses import RouteResponse
 
-from app.models.doctor_models.DoctorExtraTypes import Clinic
+from app.schemas.dr_extra import Clinic
+from app.schemas.responses import RouteResponse
 from app.services.clinic_service import service as clinic_service
 
 

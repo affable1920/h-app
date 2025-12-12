@@ -2,16 +2,14 @@ from datetime import datetime
 import json
 from pathlib import Path
 from fastapi import HTTPException
-from orjson import JSONEncodeError
 from typing_extensions import Self
 
-from app.models.Responses import SlotRecord
-from app.models.doctor_models.Doctor import Doctor
-from app.models.doctor_models.DoctorExtraTypes import Schedule
-from app.models.QueryParams import Sort, SortOrder, RouteFilters
+from app.schemas.doctor import Doctor
+from app.schemas.responses import SlotRecord
+from app.schemas.query_params import Sort, SortOrder, RouteFilters
 
 
-class DoctorService():
+class DoctorService:
     _instance = None
     _doctors: list[dict] = []
     _cache: dict[str, dict] = {}
@@ -23,14 +21,14 @@ class DoctorService():
         Singleton pattern -
         a single doctor service class for the whole app.
 
-        helps prevent loading doctor objects from storage every time the class is 
+        helps prevent loading doctor objects from storage every time the class is
         instantiated (as the class could be used in multiple modules accross the app).
 
         The same instance of the class is returned (if present) every time it's called
         On the first call, the doctor's are loaded into memory.
 
-        Using the cache-is-valid flag helps make sure that python loads the data again after 
-        a necessary change and data must be re-loaded. 
+        Using the cache-is-valid flag helps make sure that python loads the data again after
+        a necessary change and data must be re-loaded.
 
         """
 
@@ -40,7 +38,7 @@ class DoctorService():
 
         return cls._instance
 
-#
+    #
 
     def load(self):
         try:
@@ -60,46 +58,56 @@ class DoctorService():
             print(e)
             raise HTTPException(500, "Internal server error")
 
-#
+    #
 
     def filter(self, doctors: list[dict], filters: RouteFilters) -> list[dict]:
         filtered = doctors[:]
 
         if filters.specialization:
-            print("Spec recieved to filter for: ",
-                  filters.specialization.lower())
+            print("Spec recieved to filter for: ", filters.specialization.lower())
 
-            filtered = [doc for doc in filtered if Doctor(
-                **doc).primary_specialization.lower() == filters.specialization.lower()]
+            filtered = [
+                doc
+                for doc in filtered
+                if Doctor(**doc).primary_specialization.lower()
+                == filters.specialization.lower()
+            ]
 
         if filters.min_rating:
             print("filtering against doc min_rating: ", filters.min_rating)
-            filtered = [doc for doc in filtered if doc.get(
-                "rating", 0) >= filters.min_rating]
+            filtered = [
+                doc for doc in filtered if doc.get("rating", 0) >= filters.min_rating
+            ]
 
         if filters.currently_available:
             print("filtering for currently available doctors: ")
-            filtered = [doc for doc in filtered if Doctor(
-                **doc).currently_available]
+            filtered = [doc for doc in filtered if Doctor(**doc).currently_available]
 
         if filters.mode:
             print("filtering against the selected consultation mode: ", filters.mode)
             if filters.mode.lower() == "online":
-                filtered = [doc for doc in filtered if doc.get(
-                    "consults_online", False)]
+                filtered = [
+                    doc for doc in filtered if doc.get("consults_online", False)
+                ]
 
             else:
-                filtered = [doc for doc in filtered if not doc.get(
-                    "consults_online", False)]
+                filtered = [
+                    doc for doc in filtered if not doc.get("consults_online", False)
+                ]
 
         print("number of docs after applying all filters: ", len(filtered))
         return filtered
 
+    #
 
-#
-
-
-    def get(self, sort: Sort, max: int = 5, page: int = 1, search_query: str | None = None, **kwargs):
+    def get(
+        self,
+        sort: Sort,
+        max: int = 5,
+        page: int = 1,
+        search_query: str | None = None,
+        **kwargs,
+    ):
         """
 
         if any of the params are not provided, then they are set to None
@@ -120,13 +128,13 @@ class DoctorService():
         """
 
         #
-        cache_key = "_".join(str(x)
-                             for x in [page, max, *[x for x in [search_query, sort] if x]] if x)
+        cache_key = "_".join(
+            str(x) for x in [page, max, *[x for x in [search_query, sort] if x]] if x
+        )
 
         applied_filters: list[tuple[str, str]] = []
 
         try:
-
             # if cache_key in self._cache:
             #     print("Cache hit under this key: ", cache_key)
             #     return self._cache[cache_key]
@@ -150,18 +158,26 @@ class DoctorService():
 
             if search_query:
                 doctors = [
-                    doc for doc in doctors if search_query in doc["name"].lower()]
+                    doc
+                    for doc in doctors
+                    if search_query.lower() in doc["name"].lower()
+                ]
 
             start = (page - 1) * max
             end = start + max
 
-            paginated_doctors = doctors[start: min(end, len(doctors))]
+            paginated_doctors = doctors[start : min(end, len(doctors))]
             total_count = len(doctors)
 
             has_more = end < total_count
 
-            response = {"entities": paginated_doctors, "paginated_count": len(paginated_doctors),
-                        "total_count": total_count, "has_more": has_more, "applied_filters": applied_filters}
+            response = {
+                "entities": paginated_doctors,
+                "paginated_count": len(paginated_doctors),
+                "total_count": total_count,
+                "has_more": has_more,
+                "applied_filters": applied_filters,
+            }
 
             self._cache[cache_key] = response
             return response
@@ -169,7 +185,7 @@ class DoctorService():
         except Exception as e:
             raise HTTPException(500, f"Something went wrong, {str(e)}")
 
-#
+    #
 
     def get_by_id(self, id: str) -> Doctor:
         dr = next((doc for doc in self._doctors if doc["id"] == id), None)
@@ -184,8 +200,10 @@ class DoctorService():
     def save_dr(self, dr: Doctor):
         try:
             with open(self._file_path, "w") as f:
-                drs = [dr.model_dump(mode="json") if doctor.get(
-                    "id") == dr.id else doctor for doctor in self._doctors]
+                drs = [
+                    dr.model_dump(mode="json") if doctor.get("id") == dr.id else doctor
+                    for doctor in self._doctors
+                ]
 
                 json.dump(drs, f, indent=4)
                 print("Doctor updated successfully!")
@@ -211,54 +229,66 @@ dr_service = DoctorService()
 class DoctorHelper(Doctor):
     def __init__(self, id: str):
         self._dr: Doctor = dr_service.get_by_id(id)
-#
 
-    async def book(self, schedule_id: str, slot_id: str, patient_name: str, patient_contact: str) -> SlotRecord | None:
+    #
+
+    async def book(
+        self, schedule_id: str, slot_id: str, patient_name: str, patient_contact: str
+    ) -> SlotRecord | None:
         if not self._dr:
             raise HTTPException(404, "Doctor not found !")
 
         dr = self._dr.model_copy(deep=True)
 
-        rqstd_schedule = next((
-            s for s in dr.schedules if s.id == schedule_id), None)
+        rqstd_schedule = next((s for s in dr.schedules if s.id == schedule_id), None)
 
         if not rqstd_schedule:
             raise HTTPException(404, "Schedule not found !")
 
         if not rqstd_schedule.is_active:
             raise HTTPException(
-                400, "The doctor has not started in-person consultations yet. Please check back later!")
+                400,
+                "The doctor has not started in-person consultations yet. Please check back later!",
+            )
 
         slots = rqstd_schedule.slots
         rqstd_slot = next((slot for slot in slots if slot.id == slot_id))
 
         if not rqstd_slot:
             raise HTTPException(
-                404, "The requested slot could not found. Please try with another one or check again!")
+                404,
+                "The requested slot could not found. Please try with another one or check again!",
+            )
 
         if rqstd_slot.booked:
             raise HTTPException(400, "The slot has already been booked!")
 
-        updated_slot = rqstd_slot.model_copy(update={'booked': True})
+        updated_slot = rqstd_slot.model_copy(update={"booked": True})
 
-        updated_slots = [updated_slot if slot.id ==
-                         slot_id else slot for slot in slots]
+        updated_slots = [updated_slot if slot.id == slot_id else slot for slot in slots]
 
-        updated_schedule = rqstd_schedule.model_copy(
-            update={
-                "slots": updated_slots
-            })
+        updated_schedule = rqstd_schedule.model_copy(update={"slots": updated_slots})
 
         updated_dr = dr.model_copy(
-            update={"schedules": [
-                schedule if schedule.id != schedule_id else updated_schedule for schedule in dr.schedules]
-            })
+            update={
+                "schedules": [
+                    schedule if schedule.id != schedule_id else updated_schedule
+                    for schedule in dr.schedules
+                ]
+            }
+        )
 
         slot_record: SlotRecord = SlotRecord(
-            **{"patient_name": patient_name, "patient_contact": patient_contact,
-               "dept": self._dr.primary_specialization,
-               "day": rqstd_schedule.weekday, "doctor_name": self._dr.name,
-               "metadata": {"target_slot": updated_slot}, "booked_at": datetime.now().isoformat()})
+            **{
+                "patient_name": patient_name,
+                "patient_contact": patient_contact,
+                "dept": self._dr.primary_specialization,
+                "day": rqstd_schedule.weekday,
+                "doctor_name": self._dr.name,
+                "metadata": {"target_slot": updated_slot},
+                "booked_at": datetime.now().isoformat(),
+            }
+        )
 
         dr_service.save_dr(updated_dr)
 

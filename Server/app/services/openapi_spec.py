@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
-from app.models.QueryParams import RouteFilters
+from app.schemas.query_params import RouteFilters
 
 
 """
@@ -47,14 +47,14 @@ def generate_openapi_spec(app: FastAPI):
         description="Modified OpenAPI spec for the tsc client.",
     )
 
-    spec.setdefault("components", {}).setdefault("schemas", {})[
-        "RouteFilters"] = RouteFilters.model_json_schema()
+    spec.setdefault("components", {}).setdefault("schemas", {})["RouteFilters"] = (
+        RouteFilters.model_json_schema()
+    )
 
     try:
         paths = spec.get("paths", {})
 
         for path_data in paths.values():
-
             # operation means a route function
             for operation in path_data.values():
                 if not isinstance(operation, dict):
@@ -66,8 +66,7 @@ def generate_openapi_spec(app: FastAPI):
                 prefix = parts[0] if parts else ""
                 suffix = parts[-1] if len(parts) > 1 else ""
 
-                fn_parts = [x for x in [
-                    prefix.lower(), suffix.lower()] if x]
+                fn_parts = [x for x in [prefix.lower(), suffix.lower()] if x]
                 fn_name = "_".join(fn_parts)
 
                 operation["operationId"] = fn_name

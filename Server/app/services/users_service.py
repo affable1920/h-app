@@ -1,54 +1,108 @@
 import json
+from typing import Self
 from pathlib import Path
-from typing_extensions import Self
 
-from app.models.Auth import DBUser
+from fastapi import HTTPException
+from threading import Lock
+from passlib.context import CryptContext
+from app.schemas.user import DBUser
 
 
-class UsersService():
-    _instance = None
-    _users: dict[str, dict] = {}
-    _file_path = Path("data/users.json")
+class UserService:
+    instance = None
+    users: dict[str, dict] = {}
+    users_file = Path("data/users.json")
+    lock = Lock()
+    context = CryptContext(schemes=["argon2"], deprecated="auto")
 
     def __new__(cls) -> Self:
-        if not cls._instance:
-            cls.load()
-            cls._instance = super().__new__(cls)
+        if not cls.instance:
+            cls.instance = super().__new__(cls)
+            cls.instance.load()
 
-        return cls._instance
+        return cls.instance
+
+    #
+
+    @classmethod
+    def create_file(cls):
+        with cls.lock:
+            with open(cls.users_file, "w") as f:
+                json.dump({}, f, indent=4)
+
+    #
 
     @classmethod
     def load(cls):
+        if not cls.users_file.exists() or cls.users_file.stat().st_size == 0:
+            UserService.create_file()
+            return {}
+
         try:
-            with open(cls._file_path, "r") as f:
-                cls._users = json.load(f)
+            with open(cls.users_file, "r") as f:
+                cls.users = json.load(f)
 
-        except FileNotFoundError:
-            with open(cls._file_path, "w") as f:
-                json.dump([], f)
-                cls._users = {}
+        except json.JSONDecodeError as e:
+            print(e)
+            raise HTTPException(status_code=500, detail="Error loading users !")
 
-    @classmethod
-    def dump(cls, user: DBUser):
-        upd_users = cls._users.copy()
-        upd_users[user.id] = user.model_dump()
+        except FileNotFoundError as e:
+            print(e)
+            cls.create_file()
+            return {}
 
-        with open(cls._file_path, "w") as f:
-            json.dump(upd_users, f, indent=4)
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=500, detail="Error loading users !")
 
-    def get_by_id(self, id: str) -> dict | None:
-        return self._users.get(id)
+    #
 
-    def get_by_email(self, email: str) -> dict | None:
-        for id, user in self._users.items():
-            if user["email"] == email:
-                return user
+    def get_user(self, email: str) -> DBUser | None:
+        rqstd = self.users.get(email, None)
+        return DBUser(**rqstd) if rqstd else None
 
-    def has(self, id: str) -> bool:
-        return id in self._users
+    #
 
-    def save(self, user: DBUser):
-        self.dump(user)
+    def hash_pwd(self, pwd) -> str:
+        return self.context.hash(pwd)
 
+    #
 
-users_service = UsersService()
+    def verify_pwd(self, pwd, hash) -> bool:
+        return self.context.verify(pwd, hash)
+
+    #
+
+    def save(self, user: dict) -> dict:
+        db_user = DBUser(**user)
+
+        hashed_pwd = self.hash_pwd(db_user.password)
+        db_user.password = hashed_pwd
+
+        updated_users = self.users.copy()
+        updated_users[db_user.email] = db_user.model_dump()
+
+        try:
+            with open(self.users_file, "w") as f:
+                json.dump(updated_users, f, indent=4)
+
+                print("User successfully saved!")
+                return db_user.model_dump(exclude={"password"})
+
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=500, detail="Error saving users !")
+
+    #
+
+    def verify_user(self, email: str, password: str) -> dict:
+        db_user = self.get_user(email)
+        if not db_user:
+            raise HTTPException(status_code=404, detail="Invalid email Id")
+
+        pwd_is_valid = self.verify_pwd(password, db_user.password)
+
+        if not pwd_is_valid:
+            raise HTTPException(status_code=401, detail="Invalid password")
+
+        return db_user.model_dump(exclude={"password"})

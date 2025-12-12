@@ -1,25 +1,24 @@
 from enum import Enum
 from fastapi import Depends
 from fastapi import APIRouter
-from fastapi.routing import APIRouter
 
 
-from app.models.QueryParams import DrQueryParams
+from app.schemas.query_params import DrQueryParams
 from app.services.dr_service import DoctorHelper, DoctorService
-from app.models.doctor_models.Doctor import Doctor, DoctorSummary
-from app.models.Responses import DrScheduleData, RouteResponse, SlotRecord
+from app.schemas.doctor import Doctor, DoctorSummary
+from app.schemas.responses import DrScheduleData, RouteResponse, SlotRecord
 
 
 base_route = "/doctors"
-tags: list[str | Enum] = ['doctors']
-
-router = APIRouter(prefix=base_route, tags=tags)
+tags: list[str | Enum] = ["doctors"]
 
 dr_service = DoctorService()
+router = APIRouter(prefix=base_route, tags=tags)
 
 
 @router.get("", tags=tags, response_model=RouteResponse[DoctorSummary])
 async def get_doctors(params: DrQueryParams = Depends()):
+    print(params)
     return dr_service.get(**params.model_dump(exclude_none=True, exclude_unset=True))
 
 

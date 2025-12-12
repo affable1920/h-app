@@ -3,7 +3,7 @@ from typing import Self
 from pathlib import Path
 
 from fastapi import HTTPException
-from app.models.doctor_models.DoctorExtraTypes import Clinic
+from app.schemas.dr_extra import Clinic
 
 
 class ClinicService:
@@ -40,11 +40,14 @@ class ClinicService:
             print(e)
             return []
 
-#
+    #
     def get_clinics(self):
         try:
-            response = {"data": [Clinic(**clinic) for clinic in self._clinics], "total_count": len(
-                self._clinics), "curr_count": len(self._clinics)}
+            response = {
+                "data": [Clinic(**clinic) for clinic in self._clinics],
+                "total_count": len(self._clinics),
+                "curr_count": len(self._clinics),
+            }
 
             print(response)
             return response
@@ -52,13 +55,13 @@ class ClinicService:
         except Exception as e:
             print(e)
 
-
-#
+    #
 
     def get_clinic_by_id(self, id: str) -> Clinic:
         try:
             curr_clinic = next(
-                (clinic for clinic in self._clinics if clinic["id"] == id))
+                (clinic for clinic in self._clinics if clinic["id"] == id)
+            )
             return Clinic(**curr_clinic)
 
         except Exception as e:

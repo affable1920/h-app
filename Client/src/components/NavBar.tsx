@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import NavLinks from "./NavLinks.js";
 import Button from "./common/Button.js";
 import { Menu, Search } from "lucide-react";
+import useAuth from "@/hooks/useAuth.js";
+import { BiSolidUser } from "react-icons/bi";
+import useModalStore from "@/stores/modalStore.js";
 
 const NavBar = () => {
   const { pathname = "" } = useLocation();
@@ -36,6 +39,15 @@ const NavBar = () => {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [showRoutes]);
 
+  const { user } = useAuth();
+
+  function showAuthOptions() {
+    return useModalStore.getState().openModal.bind(null, "authOptions", {
+      user,
+      position: "top",
+    });
+  }
+
   return (
     <motion.nav ref={ref} className="navbar">
       <Button
@@ -46,11 +58,17 @@ const NavBar = () => {
         <Menu />
       </Button>
 
-      <div className="flex items-center gap-2 italic font-bold cursor-pointer lg:order-10">
+      <div className="flex items-center gap-4 italic font-bold cursor-pointer lg:order-10">
         <Button className="flex items-center" variant="icon">
           Ctrl K
           <Search />
         </Button>
+
+        {user && (
+          <Button onClick={showAuthOptions()} variant="icon">
+            <BiSolidUser />
+          </Button>
+        )}
       </div>
 
       <NavLinks showRoutes={showRoutes} />

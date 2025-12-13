@@ -1,25 +1,27 @@
-import { useSearchParams } from "react-router-dom";
+import { useCallback } from "react";
+
+import useQueryStore from "@/stores/queryStore";
 import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 
 import ButtonElement from "./common/Button";
 import { ArrowBigRightDash, ArrowBigLeftDash } from "lucide-react";
-import { useCallback } from "react";
 
 const Pagination = () => {
+  const { page, setPage } = useQueryStore();
   const { data: { has_more = false } = {} } = useAllDoctors();
-  const [searchParams, setSearchParams] = useSearchParams();
 
-  const isFirstPage = parseInt(useSearchParams()?.[0].get("page") ?? "1") === 1;
+  const isFirstPage = page === 1;
 
-  const handlePageChange = useCallback(
-    function (direction: "next" | "prev") {
-      const page = parseInt(searchParams.get?.("page") ?? "1");
-      const nextPage = direction === "next" ? page + 1 : page - 1;
+  const handlePageChange = useCallback((direction: "next" | "prev") => {
+    if (
+      (isFirstPage && direction === "prev") ||
+      (!has_more && direction === "next")
+    )
+      return;
 
-      setSearchParams((p) => ({ ...p, page: nextPage.toString() }));
-    },
-    [searchParams, setSearchParams]
-  );
+    const nextPage = direction === "next" ? page + 1 : page - 1;
+    setPage(nextPage);
+  }, []);
 
   return (
     <article className="flex self-end items-center gap-4">

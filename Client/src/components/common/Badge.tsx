@@ -10,6 +10,7 @@ interface BaseBadgeProps {
   current?: boolean;
   disabled?: boolean;
   selected?: boolean;
+  rotate?: boolean;
   size?: "xs" | Exclude<Size, "xl">;
 }
 
@@ -33,6 +34,7 @@ const Badge = memo(
     current = false,
     disabled = false,
     selected = false,
+    rotate = false,
     ...rest
   }: BadgeProps<T>) => {
     const Component = as || "button";
@@ -46,11 +48,12 @@ const Badge = memo(
         selected && "selected",
         disabled && "disabled",
         full && "w-full",
+        rotate && "enable-rotate",
         className,
       ]
         .filter(Boolean)
         .join(" ");
-    }, [current, selected, full, className, size, color, disabled]);
+    }, [current, selected, full, rotate, className, size, color, disabled]);
 
     return (
       <Component className={classConfig} {...rest}>

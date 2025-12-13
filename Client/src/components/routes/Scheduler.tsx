@@ -26,18 +26,7 @@ const Scheduler = memo(() => {
       </div>
     );
 
-  const {
-    name,
-    next_available,
-    schedules = [],
-    currently_available = false,
-  } = dr;
-
-  const nxtAvailable = DateTime.fromISO(next_available!);
-
-  const info = currently_available
-    ? "Available right now !"
-    : `${nxtAvailable.toFormat("dd LLL yyyy")}`;
+  const { name, schedules = [] } = dr;
 
   function toggleView() {
     setShowClinicsView((p) => !p);
@@ -58,7 +47,6 @@ const Scheduler = memo(() => {
       </header>
 
       <section className="flex flex-col gap-2">
-        <Badge full={false} content={info} />
         <ClinicsView
           doctor={dr}
           schedules={schedules}

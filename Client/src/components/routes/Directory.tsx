@@ -1,41 +1,32 @@
 import { useState, useMemo, Suspense } from "react";
-import {
-  Outlet,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import Spinner from "../Spinner";
 import Badge from "../common/Badge";
-import Pagination from "@components/Pagination";
 import Input from "@/components/common/Input";
+
+import Pagination from "@components/Pagination";
 import Button from "@/components/common/Button";
 
 import { debounce } from "@/utils/appUtils";
-import useModalStore from "@/stores/modalStore";
 import { IoRefreshOutline } from "react-icons/io5";
-import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
-import Spinner from "../Spinner";
+
+import useQueryStore from "@stores/queryStore";
+import useModalStore from "@/stores/modalStore";
+import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 
 const Directory = () => {
   const navigate = useNavigate();
-
   const [localSQ, setLocalSQ] = useState("");
-  const [searchParams, setSearchParams] = useSearchParams();
 
   const { data: { applied_filters = [] } = {} } = useAllDoctors();
+  const { searchQuery, setSearchQuery, clearSearchQuery } = useQueryStore();
 
-  const cachedSQSetter = useMemo(
-    function () {
-      return debounce(function (sq: string) {
-        setSearchParams((p) => ({ ...p, searchQuery: sq, page: 1 }));
-      }, 200);
-    },
-    [setSearchParams]
-  );
+  const setQueryCached = useMemo(function () {
+    return debounce(setSearchQuery, 200);
+  }, []);
 
-  const searchQuery = searchParams.get("searchQuery") ?? "";
   const location = useLocation().pathname.split("/").at(1) ?? "doctors";
 
   function handleDirectorySwitch() {
@@ -50,9 +41,9 @@ const Directory = () => {
     });
   }
 
-  function handleSearch(sq: string) {
-    setLocalSQ(sq);
-    cachedSQSetter(sq);
+  function handleSearch(query: string) {
+    setLocalSQ(query);
+    setQueryCached(query);
   }
 
   return (
@@ -68,7 +59,7 @@ const Directory = () => {
             onChange={(ev) => handleSearch(ev.target.value)}
           >
             <Button variant={"icon"}>
-              {searchQuery ? <X onClick={() => handleSearch("")} /> : "Ctrl K"}
+              {searchQuery ? <X onClick={clearSearchQuery} /> : "Ctrl K"}
             </Button>
           </Input>
 
@@ -92,7 +83,7 @@ const Directory = () => {
           </Button>
 
           {!!applied_filters.length && (
-            <Button onClick={() => setSearchParams({})} variant="icon">
+            <Button variant="icon">
               <IoRefreshOutline />
             </Button>
           )}

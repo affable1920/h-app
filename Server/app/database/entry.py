@@ -28,8 +28,6 @@ def get_db():
     Session = sessionmaker(autoflush=False, autocommit=False, bind=engine)
     session = Session()
 
-    Base.metadata.create_all(engine)
-
     try:
         yield session
 

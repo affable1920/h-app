@@ -201,8 +201,24 @@ export interface components {
              * Format: email
              */
             email: string;
-            /** Pwd */
-            pwd: string;
+            /** Password */
+            password: string;
+        };
+        /** DBUser */
+        DBUser: {
+            /** Id */
+            id?: string;
+            /** Username */
+            username: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+            /** Created At */
+            created_at?: string;
         };
         /** Doctor */
         Doctor: {
@@ -364,10 +380,13 @@ export interface components {
         };
         /** LoginUser */
         LoginUser: {
-            /** Username */
-            username: string;
-            /** Pwd */
-            pwd: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
         };
         /** RouteResponse[Clinic] */
         RouteResponse_Clinic_: {
@@ -558,7 +577,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["DBUser"];
                 };
             };
             /** @description Validation Error */
@@ -591,7 +610,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["DBUser"];
                 };
             };
             /** @description Validation Error */

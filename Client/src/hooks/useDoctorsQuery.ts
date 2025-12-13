@@ -13,11 +13,12 @@ export function useAllDoctors() {
   return useQuery({
     queryKey: ["doctors", { ...params }],
     async queryFn() {
-      return await drService.getAll(params);
+      const response = await drService.getAll(params);
+      return response;
     },
 
-    placeholderData: keepPreviousData,
     retry: 1,
+    placeholderData: keepPreviousData,
   });
 }
 

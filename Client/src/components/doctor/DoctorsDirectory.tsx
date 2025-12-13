@@ -1,22 +1,15 @@
-import Card from "@/components/Card";
+import Card from "@components/Card";
+import Button from "../common/Button";
+import Spinner from "@components/Spinner";
+
+import useQueryStore from "@/stores/queryStore";
 import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 
+import DrCardBack from "./DrCardBack";
 import type { DoctorEssentials } from "@/types/doctorAPI";
 
-import Spinner from "../Spinner";
-import DrCardBack from "./DrCardBack";
 import DrCardEssentials from "./DrCardEssentials";
 import DrCardSecondaryInfo from "./DrCardSecondaryInfo";
-
-import Button from "../common/Button";
-import { useSearchParams } from "react-router-dom";
-
-type AppError = {
-  msg: string;
-  status: number;
-  description: string;
-  detaial: Record<string, unknown>;
-};
 
 function DrCardFront({ drEssentials }: { drEssentials: DoctorEssentials }) {
   return (
@@ -29,15 +22,13 @@ function DrCardFront({ drEssentials }: { drEssentials: DoctorEssentials }) {
 
 function DoctorsDirectory() {
   const {
-    isLoading,
-    isError,
-    error,
+    isPending,
     data: { entities = [], applied_filters, total_count } = {},
   } = useAllDoctors();
 
-  const [, setSearchParams] = useSearchParams();
+  const { reset } = useQueryStore();
 
-  if (isLoading) return <Spinner />;
+  if (isPending) return <Spinner />;
 
   if (applied_filters && !total_count) {
     return (
@@ -46,7 +37,7 @@ function DoctorsDirectory() {
           No matching doctors found!
         </h2>
         <div className="flex items-center gap-2">
-          <Button onClick={() => setSearchParams({})} size="md">
+          <Button onClick={reset} size="md">
             Reset filters
           </Button>
         </div>
@@ -58,8 +49,8 @@ function DoctorsDirectory() {
     <Card
       key={doctor.id}
       entity={doctor}
-      CardFront={<DrCardFront drEssentials={doctor} />}
       CardBack={<DrCardBack doctor={doctor} />}
+      CardFront={<DrCardFront drEssentials={doctor} />}
     />
   ));
 }

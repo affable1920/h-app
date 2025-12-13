@@ -1,10 +1,11 @@
 import { Outlet } from "react-router-dom";
 import NavBar from "../NavBar";
 import Modal from "../modal/Modal";
+import AuthProvider from "@/stores/AuthProvider";
 
 const Layout = () => {
   return (
-    <>
+    <AuthProvider>
       <Modal />
       <header className="app-header">
         <NavBar />
@@ -12,7 +13,7 @@ const Layout = () => {
       <main>
         <Outlet />
       </main>
-    </>
+    </AuthProvider>
   );
 };
 

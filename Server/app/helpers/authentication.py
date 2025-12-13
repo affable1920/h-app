@@ -20,8 +20,11 @@ the auth header
 """
 
 
-def create_access_token(data: dict, exp_dur: timedelta | None = timedelta(hours=2)) -> str:
+def create_access_token(
+    data: dict, exp_dur: timedelta | None = timedelta(hours=2)
+) -> str:
     payload = data.copy()
+
     if "password" in payload:
         del payload["password"]
 
@@ -35,15 +38,14 @@ def create_access_token(data: dict, exp_dur: timedelta | None = timedelta(hours=
 
     except jwt.PyJWTError as e:
         print(e)
-        raise HTTPException(
-            status_code=500, detail="Error creating access token")
+        raise HTTPException(status_code=500, detail="Error creating access token")
 
 
 def decode_access_token(token: Annotated[str, Depends(auth_scheme)]) -> dict:
     """
     This function uses the auth scheme as a dependency which
     automatically extracts the bearer token
-    and the function itself returns the decoded user to any function that in turn 
+    and the function itself returns the decoded user to any function that in turn
     uses this function as a dependency
     """
 
@@ -52,39 +54,53 @@ def decode_access_token(token: Annotated[str, Depends(auth_scheme)]) -> dict:
 
     except jwt.ExpiredSignatureError as e:
         print("Token expired:", e)
-        raise HTTPException(status_code=401, detail="Token expired ! Please log in again.", headers={
-                            "x-session-expire": "true"})
+        raise HTTPException(
+            status_code=401,
+            detail="Token expired ! Please log in again.",
+            headers={"x-session-expire": "true"},
+        )
 
     except jwt.InvalidTokenError as e:
         print(e)
-        raise HTTPException(status_code=401, detail="Invalid token! Please log back in.", headers={
-                            "x-session-expire": "true"})
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token! Please log back in.",
+            headers={"x-session-expire": "true"},
+        )
 
 
-def decode_and_get_current(token: str = Depends(auth_scheme), service: UserService = Depends()):
+def decode_and_get_current(
+    token: str = Depends(auth_scheme), service: UserService = Depends()
+):
     try:
         payload = jwt.decode(token, key=SECRET, algorithms=[ALG])
         email: str = payload.get("email")
 
         if not email:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            )
 
     except jwt.ExpiredSignatureError as e:
         print("Token expired:", e)
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired ! Please log in again.",
-                            headers={"x-session-expire": "true"})
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired ! Please log in again.",
+            headers={"x-session-expire": "true"},
+        )
 
     except JWTError as e:
         print(e)
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
 
     # later get user from db
     curr_user = service.get_user(email=email)
 
     if not curr_user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
 
     return curr_user

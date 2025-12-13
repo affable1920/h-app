@@ -20,8 +20,6 @@ const CategoryFilter = <T extends CategoryFilterKey>({
   optionIsSelected,
   onOptionSelect,
 }: CategoryFilterProps<T>) => {
-  console.log(label);
-
   return (
     <div className="filter-div">
       <label>Filter by {label}</label>

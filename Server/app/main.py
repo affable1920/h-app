@@ -11,19 +11,22 @@ from app.services.openapi_spec import generate_openapi_spec
 @asynccontextmanager
 async def root(app: FastAPI):
     print("Starting up")
+
+    from app.database.entry import Base, engine
+
+    Base.metadata.create_all(engine)
+
     app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
 
     yield
     print("Shutting down")
 
 
-app = FastAPI(lifespan=root, openapi_url="/openapi.json",
-              docs_url="/docs", redoc_url="/redoc")
+app = FastAPI(
+    lifespan=root, openapi_url="/openapi.json", docs_url="/docs", redoc_url="/redoc"
+)
 
-origins = [
-    "http://localhost:5173",
-    "https://h-app-omega.vercel.app"
-]
+origins = ["http://localhost:5173", "https://h-app-omega.vercel.app"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
     allow_origins=origins,
     allow_credentials=True,
-    expose_headers=["x-auth-token", "x-session-expire"]
+    expose_headers=["x-auth-token", "x-session-expire"],
 )
 
 app.include_router(auth.router)
@@ -55,6 +58,7 @@ async def generate_data():
     main()
     return {"message": "Data generated successfully"}
 
+
 # @app.middleware("http")
 # async def logger(req: Request, call_next):
 #     print(f"Request-Headers: {req.headers}")
@@ -70,5 +74,6 @@ async def generate_data():
 
 if __name__ == "__main__":
     import uvicorn
+
     # update host === localhost to 0.0.0.0 and reload from false to true in prod
     uvicorn.run("app.main:app", host="localhost", port=8000, reload=True)

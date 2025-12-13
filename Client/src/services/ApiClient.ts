@@ -47,21 +47,21 @@ class APIClient {
             status: e.status,
             detail: null,
             msg: "No response from the server!",
-            description: "The server is likely down!",
+            description:
+              "The server is likely down, Please try after sometime.",
           });
         }
 
         const { response, status } = e;
-
-        const expectedError =
-          status && status < 500 && status >= 400 && status != 0;
+        const expectedError = status && status < 500 && status >= 400;
+        console.log(response);
 
         if (expectedError) {
           return Promise.reject({
             status,
-            msg: "",
+            detail: e,
             description: CONFIG[status ?? 500]?.name,
-            detail: (response?.data as any)?.detail,
+            msg: (response?.data as any)?.detail,
           });
         }
 
@@ -79,7 +79,9 @@ class APIClient {
     path?: string,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
-    const url = this.endpoint + "/" + (path ?? "");
+    console.log(this.endpoint);
+
+    const url = this.endpoint + (path ? `/${path}` : "");
     return await this.instance.get<T>(url, config);
   }
 
@@ -90,7 +92,9 @@ class APIClient {
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<TResponse>> {
     const url = this.endpoint + "/" + (path ?? "");
-    return await this.instance.post<TResponse>(url, data, config);
+    return await this.instance.post<TResponse>(url, data, {
+      ...config,
+    });
   }
 
   async request(config: AxiosRequestConfig) {

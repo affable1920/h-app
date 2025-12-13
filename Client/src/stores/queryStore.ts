@@ -1,30 +1,76 @@
-import { create } from "zustand";
-import useScheduleStore from "./scheduleStore";
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 type StoreState = {
   max: number;
-  currPage: number;
-  totalCount: number | null;
+  page: number;
+  currEntityCount: number;
   searchQuery: string | null;
+  sort?: { by: string; order: "asc" | "desc" };
 };
 
 type StoreActions = {
-  setmax: (max: number) => void;
-  setCurrPage: (cp: number) => void;
+  setPage: (cp: number) => void;
+  setEntityCount: (c: number) => void;
   setSearchQuery: (sq: string) => void;
+
+  reset: () => void;
+  clearSearchQuery: () => void;
 };
 
-const useQueryingStore = create<StoreState & StoreActions>((set) => ({
-  max: 8,
-  currPage: 1,
-  searchQuery: null,
-  totalCount: null,
+function useQueryStore(): StoreState & StoreActions {
+  const max = 8;
 
-  setmax: (max: number) => set((store) => ({ ...store, max: max })),
-  setCurrPage: (cp: number) => set((store) => ({ ...store, currPage: cp })),
-  setSearchQuery: (sq: string) => {
-    set((store) => ({ ...store, currPage: 1, searchQuery: sq }));
-  },
-}));
+  const [currEntityCount, setCurrEntityCount] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-export default useQueryingStore;
+  const page = Number(searchParams.get("page") ?? 1);
+  const searchQuery = searchParams.get("searchQuery") ?? null;
+
+  function setSearchQuery(sq: string) {
+    const key = "searchQuery";
+    setSearchParams((p) => {
+      p.set(key, sq);
+      p.set("page", "1");
+
+      return p;
+    });
+  }
+
+  function clearSearchQuery() {
+    setSearchParams((p) => {
+      p.delete("searchQuery");
+      return p;
+    });
+  }
+
+  function setPage(cp: number) {
+    setSearchParams((p) => {
+      p.set("page", cp.toString());
+      return p;
+    });
+  }
+
+  function reset() {
+    setSearchParams({});
+  }
+
+  const store = {
+    max,
+    page,
+    reset,
+    setPage,
+    setEntityCount(count: number) {
+      setCurrEntityCount(count);
+    },
+
+    searchQuery,
+    setSearchQuery,
+    currEntityCount,
+    clearSearchQuery,
+  };
+
+  return store;
+}
+
+export default useQueryStore;

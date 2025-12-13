@@ -25,6 +25,7 @@ const CalendarDay = memo(({ ...props }: CalendarDayProps) => {
 
   return (
     <Badge
+      rotate
       as="button"
       color="slate"
       disabled={disabled}

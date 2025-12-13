@@ -1,4 +1,4 @@
-import { lazy } from "react";
+import { lazy, useEffect } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { type LoaderFunctionArgs } from "react-router-dom";
 
@@ -10,9 +10,10 @@ import Directory from "@routes/Directory";
 import drService from "@services/DoctorService";
 import ErrorBoundary from "@components/ErrorBoundary";
 
-import Auth from "@routes/Auth";
-import Login from "@components/auth/Login";
+import SignIn from "@/components/auth/SignIn";
 import Register from "@components/auth/Register";
+import Auth from "@/services/Auth";
+import authClient from "@/services/Auth";
 
 /*
 API Routes Structure:
@@ -82,19 +83,27 @@ const router = createBrowserRouter([
 
       // ai chat route
       { path: "chat", Component: Chat },
+    ],
+  },
+
+  {
+    path: "auth",
+    children: [
+      { index: true, Component: SignIn },
+      { path: "register", Component: Register },
       {
-        path: "/auth",
-        Component: Auth,
-        // children: [
-        //   {
-        //     index: true,
-        //     Component: Login,
-        //   },
-        //   {
-        //     path: "register",
-        //     Component: Register,
-        //   },
-        // ],
+        path: "me",
+        Component: () => {
+          useEffect(function () {
+            async function fetchProfile() {
+              const response = await authClient.profile();
+            }
+
+            fetchProfile();
+          });
+
+          return <div>Profile component</div>;
+        },
       },
     ],
   },

@@ -1,0 +1,34 @@
+git checkout -- "filename-url"  -> undo unstaged changes
+// i.e undo changes made to a file ... before doing git add on it 
+
+
+
+git reset "filename-url" -> undo staged changes
+i.e undo git add
+
+
+
+// What to commit and not to commit to git (.gitignore)
+
+What TO Commit:
+✅ Source code - .js, .py, .java, .css, etc.
+✅ Configuration templates - .env.example (without real secrets)
+✅ Documentation - README.md, docs/
+✅ Package definitions - package.json, requirements.txt, Cargo.toml
+✅ Tests - test files and test data
+✅ Assets - images, fonts (if not too large)
+
+What NOT TO Commit:
+❌ Dependencies - others can install them via package.json
+❌ Secrets - API keys, passwords, tokens
+❌ Build artifacts - compiled code, minified files
+❌ Large files - videos, large datasets (use Git LFS if needed)
+❌ Local config - database URLs, local paths
+❌ IDE settings - personal editor configurations
+
+
+
+// say a git repo in initialised by you.
+after making the ist commit, if you wanna psuh to remote (github)
+use -> git remote add origin "url" 
+eg git remote add https://github.com/affable1920/{project_name.git}   

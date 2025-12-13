@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+venv/
+env/
+.venv/
+.vercel/
+
+# Environment variables & secrets
+.env
+.env.local
+*.env
+config.local.js
+secrets.yml
+
+# API keys and credentials
+*.pem
+*.key
+credentials.json
+
+# Build outputs
+dist/
+build/
+*.log
+*.min.js
+*.bundle.js
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.cache
+.temp/

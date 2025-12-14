@@ -1,9 +1,10 @@
-from jose import JWTError
 import jwt
+from jose import JWTError
 from typing import Annotated
 from datetime import datetime, timedelta
-from fastapi import HTTPException, Depends, status
+
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import HTTPException, Depends, status
 
 from app.services.users_service import UserService
 
@@ -31,7 +32,9 @@ def create_access_token(
     iat = datetime.now()
     exp = iat + exp_dur if exp_dur else iat + timedelta(hours=2)
 
-    payload.update({"iat": iat.timestamp(), "exp": exp.timestamp()})
+    payload.update(
+        {"sub": payload.get("id"), "iat": iat.timestamp(), "exp": exp.timestamp()}
+    )
 
     try:
         return jwt.encode(payload, key=SECRET, algorithm=ALG)

@@ -3,7 +3,12 @@ from typing import Annotated
 from datetime import datetime
 
 from . import dr_extra as DrType
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    Field,
+    field_serializer,
+)
 
 
 def generate_id():
@@ -16,6 +21,10 @@ class DrEssentials(BaseModel):
     email: EmailStr
     credentials: str
     primary_specialization: str
+
+    @field_serializer("name", "email", "primary_specialization")
+    def serialize(self, field: str | None):
+        return field.strip().lower() if field else None
 
 
 class DrSecondaries(BaseModel):

@@ -7,6 +7,7 @@ type StoreState = {
   currEntityCount: number;
   searchQuery: string | null;
   sort?: { by: string; order: "asc" | "desc" };
+  [k: string]: any;
 };
 
 type StoreActions = {
@@ -16,6 +17,7 @@ type StoreActions = {
 
   reset: () => void;
   clearSearchQuery: () => void;
+  set?: (key: string, val: any) => void;
 };
 
 function useQueryStore(): StoreState & StoreActions {
@@ -55,6 +57,13 @@ function useQueryStore(): StoreState & StoreActions {
     setSearchParams({});
   }
 
+  function set(key: string, val: any) {
+    setSearchParams((p) => {
+      p.set(key, val);
+      return p;
+    });
+  }
+
   const store = {
     max,
     page,
@@ -64,6 +73,7 @@ function useQueryStore(): StoreState & StoreActions {
       setCurrEntityCount(count);
     },
 
+    set,
     searchQuery,
     setSearchQuery,
     currEntityCount,

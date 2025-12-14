@@ -45,6 +45,8 @@ function DoctorsDirectory() {
     );
   }
 
+  console.log(applied_filters);
+
   return (entities || []).map((doctor) => (
     <Card
       key={doctor.id}

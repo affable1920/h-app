@@ -35,6 +35,8 @@ function Register() {
       toast.info("Logged in successfully!", {});
     } catch (ex) {
       toast.error("Login failed!");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -47,12 +49,7 @@ function Register() {
   return (
     <AuthLayout name="Register" submitFn={submit}>
       <article className="flex flex-col gap-8">
-        <Input
-          name="username"
-          type="username"
-          label="username"
-          onChange={handleChange}
-        />
+        <Input name="username" label="username" onChange={handleChange} />
         <Input
           type="email"
           name="email"
@@ -66,6 +63,7 @@ function Register() {
           onChange={handleChange}
         />
       </article>
+
       <Button type="submit" size="md" loading={loading}>
         Register
       </Button>

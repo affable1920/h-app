@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
-from app.schemas.query_params import RouteFilters
+
+from app.schemas.query_params import BaseRouteParams
 
 
 """
@@ -47,8 +48,8 @@ def generate_openapi_spec(app: FastAPI):
         description="Modified OpenAPI spec for the tsc client.",
     )
 
-    spec.setdefault("components", {}).setdefault("schemas", {})["RouteFilters"] = (
-        RouteFilters.model_json_schema()
+    spec.setdefault("components", {}).setdefault("schemas", {})["BaseRouteFilters"] = (
+        BaseRouteParams.model_json_schema()
     )
 
     try:

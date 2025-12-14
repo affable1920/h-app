@@ -1,9 +1,8 @@
 from enum import Enum
 
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import JSONResponse
-from h11 import Response
 from sqlalchemy.orm import Session
+from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.database.entry import get_db
 from app.services.users_service import UserService
@@ -44,12 +43,18 @@ async def login(user_cred: LoginUser, db: Session = Depends(get_db)):
     if not service.verify_pwd(user_cred.password, db_user.password):
         raise HTTPException(status_code=401, detail="Invalid password!")
 
-    token = create_access_token(db_user)
+    token_payload = {
+        "sub": db_user.id,
+        "email": db_user.email,
+        "username": db_user.username,
+        "role": db_user.role,
+    }
 
+    token = create_access_token(token_payload)
     return JSONResponse(
         status_code=200,
-        content=ResponseUser(**db_user.__dict__),
         headers={"x-auth-token": token},
+        content=ResponseUser.model_validate(db_user).model_dump(),
     )
 
 

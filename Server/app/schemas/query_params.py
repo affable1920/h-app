@@ -12,15 +12,6 @@ MODES = Literal["online", "offline"]
 FILTERS = Literal["specialization", "mode", "rating", "distance", "location"]
 
 
-class RouteFilters(BaseModel):
-    mode: MODES | None = None
-    specialization: str | None = None
-    currently_available: bool = Field(False, alias="currentlyAvailable")
-    max_distance: int | None = Field(gt=0, default=None, alias="maxDistance")
-    min_rating: Annotated[int | None, Field(
-        gt=0, le=5, default=None, alias="minRating")]
-
-
 class SortOrder(Enum):
     ASC = "asc"
     DESC = "desc"
@@ -35,8 +26,13 @@ class BaseRouteParams(BaseModel):
     sort: Sort = Field(default=Sort())
     search_query: str | None = Field(default=None, alias="searchQuery")
 
-    page: int = Field(default=1, gt=0, alias="currPage")
     max: int = Field(default=10, gt=0, lt=25)
+    page: int = Field(default=1, gt=0, alias="currPage")
+
+    max_distance: int | None = Field(gt=0, default=None, alias="maxDistance")
+    min_rating: Annotated[
+        int | None, Field(gt=0, le=5, default=None, alias="minRating")
+    ]
 
     @field_serializer("search_query")
     def strip_lower(self, field: str):
@@ -45,6 +41,5 @@ class BaseRouteParams(BaseModel):
 
 class DrQueryParams(BaseRouteParams):
     specialization: str | None = None
-    currently_available: bool = Field(
-        default=False, alias="currentlyAvailable")
-    mode: Literal["online", "in_personx"] | None = None
+    mode: Literal["online", "in_person"] | None = None
+    currently_available: bool = Field(default=False, alias="currentlyAvailable")

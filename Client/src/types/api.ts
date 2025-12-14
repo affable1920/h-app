@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Profile */
+        get: operations["profile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/doctors": {
         parameters: {
             query?: never;
@@ -157,6 +174,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Generate Data */
+        get: operations["generate_data"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -203,22 +237,6 @@ export interface components {
             email: string;
             /** Password */
             password: string;
-        };
-        /** DBUser */
-        DBUser: {
-            /** Id */
-            id?: string;
-            /** Username */
-            username: string;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** Password */
-            password: string;
-            /** Created At */
-            created_at?: string;
         };
         /** Doctor */
         Doctor: {
@@ -388,6 +406,19 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** ResponseUser */
+        ResponseUser: {
+            /** Id */
+            id: string;
+            /** Username */
+            username: string;
+            /**
+             * Role
+             * @default guest
+             * @enum {string}
+             */
+            role: "doctor" | "patient" | "admin" | "clinic" | "guest" | "ADMINISTRATOR" | "user";
+        };
         /** RouteResponse[Clinic] */
         RouteResponse_Clinic_: {
             /** Entities */
@@ -495,12 +526,12 @@ export interface components {
         /** Sort */
         Sort: {
             /**
-             * By
+             * Sortby
              * @default name
              */
-            by: string | null;
+            sortBy: string | null;
             /** @default asc */
-            order: components["schemas"]["SortOrder"];
+            sortOrder: components["schemas"]["SortOrder"];
         };
         /**
          * SortOrder
@@ -534,20 +565,20 @@ export interface components {
              */
             specialization: string | null;
             /**
-             * Currently Available
+             * Currentlyavailable
              * @default false
              */
-            currently_available: boolean;
+            currentlyAvailable: boolean;
             /**
-             * Max Distance
+             * Maxdistance
              * @default null
              */
-            max_distance: number | null;
+            maxDistance: number | null;
             /**
-             * Min Rating
+             * Minrating
              * @default null
              */
-            min_rating: number | null;
+            minRating: number | null;
         };
     };
     responses: never;
@@ -577,7 +608,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DBUser"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -610,7 +641,38 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DBUser"];
+                    "application/json": components["schemas"]["ResponseUser"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    profile: {
+        parameters: {
+            query: {
+                db: unknown;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResponseUser"];
                 };
             };
             /** @description Validation Error */
@@ -627,12 +689,12 @@ export interface operations {
     get_doctors: {
         parameters: {
             query?: {
-                search_query?: string | null;
+                searchQuery?: string | null;
+                currPage?: number;
                 max?: number;
-                page?: number;
                 specialization?: string | null;
-                currently_available?: boolean;
-                mode?: ("online" | "in_person") | null;
+                currentlyAvailable?: boolean;
+                mode?: ("online" | "in_personx") | null;
             };
             header?: never;
             path?: never;
@@ -802,6 +864,26 @@ export interface operations {
         };
     };
     health_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    generate_data: {
         parameters: {
             query?: never;
             header?: never;

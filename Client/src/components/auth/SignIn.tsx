@@ -36,6 +36,8 @@ function SignIn() {
     } catch (ex) {
       console.log(ex);
       toast.error("Login failed!");
+    } finally {
+      setLoading(false);
     }
   }
 

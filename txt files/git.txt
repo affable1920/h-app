@@ -32,3 +32,11 @@ What NOT TO Commit:
 after making the ist commit, if you wanna psuh to remote (github)
 use -> git remote add origin "url" 
 eg git remote add https://github.com/affable1920/{project_name.git}   
+
+
+
+
+git checkout {branch_name} -> moves from current branch to this branch
+
+
+- remember to switch to some branch after creating it

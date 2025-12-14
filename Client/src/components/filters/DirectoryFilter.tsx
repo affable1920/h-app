@@ -13,6 +13,7 @@ import useModalStore from "@/stores/modalStore";
 
 import * as constants from "../../utils/constants";
 import type { CategoryFilters, Filters } from "./types";
+import useQueryStore from "@/stores/queryStore";
 
 type CategoryFilterKey = keyof CategoryFilters;
 
@@ -25,13 +26,15 @@ const categoryFilters: {
     options: ["online", "offline"],
   },
   {
-    label: "rating",
+    label: "minRating",
     options: [2, 3, 4],
   },
 ];
 
 const DirectoryFilter = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const { set } = useQueryStore();
 
   // filter state - for updating local state first,
   // then a single api call on apply click
@@ -86,6 +89,7 @@ const DirectoryFilter = () => {
 
     for (const [key, val] of Object.entries(filters)) {
       console.info("adding filters: ", key, val);
+
       if (!val) continue;
       newParams.set(key, String(val));
     }
@@ -134,7 +138,7 @@ const DirectoryFilter = () => {
             label="specialization"
             options={constants.SPECIALIZATIONS}
             /*
-            How bind in js works: (finally understood)
+            How bind in js works:
             bind creates a new fn below and attaches "specialization" as the key to it, now it's fixed
 
             and down inside function where it is passed as a prop, we only require one more arg: [the key].
@@ -149,7 +153,7 @@ const DirectoryFilter = () => {
             name="distance"
             label="Filter by distance"
             onChange={(ev) =>
-              handleFilterUpdate("distance", parseInt(ev.target.value))
+              handleFilterUpdate("maxDistance", parseInt(ev.target.value))
             }
           />
           <div className="flex justify-between items-center italic font-bold">
@@ -172,10 +176,10 @@ const DirectoryFilter = () => {
         <Badge
           onClick={() =>
             handleFilterUpdate(
-              "currently_available",
+              "currentlyAvailable",
               (function (p) {
                 return !p;
-              })(filters?.currently_available)
+              })(filters?.currentlyAvailable)
             )
           }
           className="max-w-fit italic"
@@ -186,7 +190,7 @@ const DirectoryFilter = () => {
             type="checkbox"
             name="availability"
             className="cursor-pointer"
-            checked={!!filters?.currently_available}
+            checked={!!filters?.currentlyAvailable}
           />
         </Badge>
       </section>

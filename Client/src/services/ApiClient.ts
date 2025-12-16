@@ -29,16 +29,6 @@ class APIClient {
 
     this.endpoint = endpoint;
 
-    this.instance.interceptors.request.use(
-      function (config) {
-        return config;
-      },
-      function (e: AxiosError) {
-        console.log(e);
-        return Promise.reject(e);
-      }
-    );
-
     this.instance.interceptors.response.use(
       (response) => response,
       function (e: AxiosError) {
@@ -48,15 +38,14 @@ class APIClient {
             detail: null,
             msg: "No response from the server!",
             description:
-              "The server is likely down, Please try after sometime.",
+              "The server is likely down, Please try after sometime!",
           });
         }
 
         const { response, status } = e;
-        const expectedError = status && status < 500 && status >= 400;
-        console.log(response);
+        const clientError = status && status < 500 && status >= 400;
 
-        if (expectedError) {
+        if (clientError) {
           return Promise.reject({
             status,
             detail: e,
@@ -67,9 +56,9 @@ class APIClient {
 
         return Promise.reject({
           status,
-          msg: "Something went wrong!",
-          detail: (response?.data as any)?.detail,
-          description: "An unexpected error occurred!",
+          detail: e,
+          msg: (response?.data as any).detail,
+          description: CONFIG[status ?? 500].name,
         });
       }
     );

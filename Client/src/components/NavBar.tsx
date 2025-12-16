@@ -42,7 +42,7 @@ const NavBar = () => {
   const { user } = useAuth();
 
   function showAuthOptions() {
-    return useModalStore.getState().openModal.bind(null, "authOptions", {
+    useModalStore.getState().openModal("authOptions", {
       user,
       position: "top",
     });
@@ -65,7 +65,7 @@ const NavBar = () => {
         </Button>
 
         {user && (
-          <Button onClick={showAuthOptions()} variant="icon">
+          <Button onClick={showAuthOptions} variant="icon">
             <BiSolidUser />
           </Button>
         )}

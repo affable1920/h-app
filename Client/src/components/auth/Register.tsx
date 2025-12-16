@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 import Input from "@components/common/Input";
 import Button from "@components/common/Button";
-import AuthLayout from "@components/auth/AuthLayout";
 
 import { toast } from "sonner";
 import authClient from "@/services/Auth";
@@ -11,9 +10,6 @@ import { type paths } from "@/types/api";
 
 type CreateUser =
   paths["/auth/register"]["post"]["requestBody"]["content"]["application/json"];
-
-type DBUser =
-  paths["/auth/login"]["post"]["responses"]["200"]["content"]["application/json"];
 
 function Register() {
   const [user, setUser] = useState<CreateUser>({
@@ -32,9 +28,9 @@ function Register() {
       await authClient.register(user);
       navigate("/");
 
-      toast.info("Logged in successfully!", {});
+      toast.info("Successfully registered!", {});
     } catch (ex) {
-      toast.error("Login failed!");
+      toast.error("Registration failed!");
     } finally {
       setLoading(false);
     }
@@ -47,12 +43,11 @@ function Register() {
   }
 
   return (
-    <AuthLayout name="Register" submitFn={submit}>
+    <div className="flex flex-col gap-8">
       <article className="flex flex-col gap-8">
-        <Input name="username" label="username" onChange={handleChange} />
         <Input
-          type="email"
           name="email"
+          type="email"
           label="email"
           onChange={handleChange}
         />
@@ -62,12 +57,15 @@ function Register() {
           label="password"
           onChange={handleChange}
         />
+        <Input label="username" name="username" onChange={handleChange} />
       </article>
 
-      <Button type="submit" size="md" loading={loading}>
-        Register
-      </Button>
-    </AuthLayout>
+      <article className="flex flex-col gap-3">
+        <Button type="submit" size="md" onSubmit={submit} loading={loading}>
+          Register
+        </Button>
+      </article>
+    </div>
   );
 }
 

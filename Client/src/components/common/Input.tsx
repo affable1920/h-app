@@ -1,5 +1,4 @@
 import { type InputHTMLAttributes, type ReactNode } from "react";
-import { capitalize } from "@/utils/appUtils";
 
 interface Input extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   size?: Size;
@@ -14,12 +13,10 @@ type Size = "xs" | "sm" | "md" | "lg";
 const Input = ({
   name,
   label,
-  value,
   children,
   className,
   full = false,
   size = "sm",
-  type = "text",
   labelClasses = "",
   ...rest
 }: Input) => {
@@ -31,16 +28,10 @@ const Input = ({
     <div className="input-box">
       {label && (
         <label htmlFor={name} className={"label " + labelClasses}>
-          {capitalize(label ?? name)}
+          {label ?? name}
         </label>
       )}
-      <input
-        name={name}
-        type={type}
-        value={value}
-        className={classes}
-        {...rest}
-      />
+      <input name={name} className={classes} {...rest} />
       {children}
     </div>
   );

@@ -11,9 +11,9 @@ import CategoryFilter from "./CategoryFilter";
 import { AnimatePresence } from "motion/react";
 import useModalStore from "@/stores/modalStore";
 
+import useQueryStore from "@/stores/queryStore";
 import * as constants from "../../utils/constants";
 import type { CategoryFilters, Filters } from "./types";
-import useQueryStore from "@/stores/queryStore";
 
 type CategoryFilterKey = keyof CategoryFilters;
 
@@ -34,7 +34,7 @@ const categoryFilters: {
 const DirectoryFilter = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { set } = useQueryStore();
+  const { setQuery } = useQueryStore();
 
   // filter state - for updating local state first,
   // then a single api call on apply click
@@ -60,6 +60,7 @@ const DirectoryFilter = () => {
 
   const handleSpecUpdate = useCallback(function (spec: string | null) {
     handleFilterUpdate("specialization", spec);
+    // set("specialization", spec);
   }, []);
 
   const handleCategoryUpdate = useCallback(

@@ -1,5 +1,5 @@
 import type { paths } from "@/types/api";
-import type { AxiosResponse } from "axios";
+import type { AxiosError, AxiosResponse } from "axios";
 import APIClient from "@/services/ApiClient";
 
 type LoginUser =
@@ -40,6 +40,7 @@ function SetSessionToken(
   */
 
   const originalMethod = descriptor.value;
+  // descriptor.value -> actual function implementation (declaration | source code)
 
   // Now we modify the actual function to do something more than it already did
   // like set the session token (first, get a ref to the actual function)
@@ -49,6 +50,7 @@ function SetSessionToken(
 
     if (token) {
       localStorage.setItem("token", token);
+      console.log(token);
     }
 
     return response.data;
@@ -75,6 +77,11 @@ class AuthClient extends APIClient {
         return Promise.reject(ex);
       }
     );
+
+    this.instance.interceptors.response.use(
+      (response) => response,
+      function (ex: AxiosError) {}
+    );
   }
 
   @SetSessionToken
@@ -84,7 +91,7 @@ class AuthClient extends APIClient {
 
   @SetSessionToken
   async register(user: CreateUser) {
-    const response = await this.post<DBUser, CreateUser>("register", {
+    await this.post<DBUser, CreateUser>("register", {
       ...user,
     });
   }
@@ -92,6 +99,11 @@ class AuthClient extends APIClient {
   async profile() {
     const response = await this.get("me");
     console.log(response.data);
+  }
+
+  async logout() {
+    localStorage.removeItem("token");
+    window.location.reload();
   }
 }
 

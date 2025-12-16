@@ -99,7 +99,7 @@
   }
 
   .modal {
-    @apply bg-white shadow-md shadow-slate-300/40 rounded-md p-2;
+    @apply bg-white shadow-md shadow-slate-300/40 rounded-md;
 
     &:is(.bottom) {
       @apply fixed bottom-0 left-0 w-full rounded-t-md border-t-slate-300 ring-4 ring-blue-400/40
@@ -109,11 +109,11 @@
     }
 
     &:is(.top) {
-      @apply fixed top-0 left-0 w-full min-h-52 rounded-b-md  border-b-slate-300 ring-4 ring-blue-400/25;
+      @apply fixed top-0 left-0 w-full min-h-52 rounded-b-md border-b-slate-300 ring-4 ring-blue-400/25;
     }
 
     &:is(.center) {
-      @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-primary/10;
+      @apply absolute left-1/2 top-1/2 p-2 -translate-x-1/2 -translate-y-1/2 border-2 border-primary/10;
     }
   }
 

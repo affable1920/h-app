@@ -1,14 +1,8 @@
 import { useState } from "react";
+import type { paths } from "@/types/api";
 import { useSearchParams } from "react-router-dom";
 
-type StoreState = {
-  max: number;
-  page: number;
-  currEntityCount: number;
-  searchQuery: string | null;
-  sort?: { by: string; order: "asc" | "desc" };
-  [k: string]: any;
-};
+type ServerQuery = NonNullable<paths["/doctors"]["get"]["parameters"]["query"]>;
 
 type StoreActions = {
   setPage: (cp: number) => void;
@@ -17,10 +11,10 @@ type StoreActions = {
 
   reset: () => void;
   clearSearchQuery: () => void;
-  set?: (key: string, val: any) => void;
+  setQuery: <T extends keyof ServerQuery>(key: T, val: ServerQuery[T]) => void;
 };
 
-function useQueryStore(): StoreState & StoreActions {
+function useQueryStore(): ServerQuery & StoreActions {
   const max = 8;
 
   const [currEntityCount, setCurrEntityCount] = useState(0);
@@ -57,7 +51,7 @@ function useQueryStore(): StoreState & StoreActions {
     setSearchParams({});
   }
 
-  function set(key: string, val: any) {
+  function setQuery<T extends keyof ServerQuery>(key: T, val: ServerQuery[T]) {
     setSearchParams((p) => {
       p.set(key, val);
       return p;
@@ -73,7 +67,7 @@ function useQueryStore(): StoreState & StoreActions {
       setCurrEntityCount(count);
     },
 
-    set,
+    setQuery,
     searchQuery,
     setSearchQuery,
     currEntityCount,

@@ -529,7 +529,7 @@ export interface components {
              * Sortby
              * @default name
              */
-            sortBy: string | null;
+            sortBy: string;
             /** @default asc */
             sortOrder: components["schemas"]["SortOrder"];
         };
@@ -551,34 +551,6 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
-        };
-        /** RouteFilters */
-        RouteFilters: {
-            /**
-             * Mode
-             * @default null
-             */
-            mode: ("online" | "offline") | null;
-            /**
-             * Specialization
-             * @default null
-             */
-            specialization: string | null;
-            /**
-             * Currentlyavailable
-             * @default false
-             */
-            currentlyAvailable: boolean;
-            /**
-             * Maxdistance
-             * @default null
-             */
-            maxDistance: number | null;
-            /**
-             * Minrating
-             * @default null
-             */
-            minRating: number | null;
         };
     };
     responses: never;
@@ -690,17 +662,19 @@ export interface operations {
         parameters: {
             query?: {
                 searchQuery?: string | null;
-                currPage?: number;
                 max?: number;
+                currPage?: number;
+                maxDistance?: number | null;
+                minRating?: number | null;
                 specialization?: string | null;
+                mode?: ("online" | "in_person") | null;
                 currentlyAvailable?: boolean;
-                mode?: ("online" | "in_personx") | null;
             };
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["Sort"];
             };

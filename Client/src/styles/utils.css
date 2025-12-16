@@ -17,13 +17,15 @@
 }
 
 @utility app-header {
-  @apply bg-white shadow-md shadow-slate-200/50 relative z-[5];
+  @apply bg-white shadow-md shadow-slate-200/50 relative z-5;
 }
 
 @utility label {
   font-weight: 700;
   font-style: italic;
   color: theme(--color-primary);
+
+  @apply capitalize;
 
   @variant dark {
     color: inherit;
@@ -72,7 +74,7 @@
 }
 
 @utility card-h2 {
-  @apply font-bold leading-tight;
+  @apply font-bold leading-tight capitalize line-clamp-1;
 }
 
 /* styling inputs */

@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { BiNotification, BiUser } from "react-icons/bi";
 import { Heart, LogOut } from "lucide-react";
 import Button from "../common/Button";
+import authClient from "@/services/Auth";
 
 const MODALS: Record<string, React.ElementType> = {
   aiGenerateModal: function AIGenerateModal() {
@@ -39,9 +40,15 @@ const MODALS: Record<string, React.ElementType> = {
 
   authOptions({ user }: { user: any }) {
     const options = ["history", "settings", "view booked appointments"];
+    const icons = [
+      { icon: Heart, onClick() {} },
+      { icon: BiNotification, onClick() {} },
+      { icon: LogOut, onClick: authClient.logout, text: "logout" },
+    ];
+
     return (
-      <section className="p-4 flex gap-6 flex-col">
-        <motion.ul className="flex items-center flex-wrap gap-8 gap-y-4">
+      <section className="p-4 flex gap-6 justify-between flex-wrap flex-col">
+        <motion.ul className="flex items-center flex-wrap gap-4">
           {options.map((option) => (
             <motion.li
               className="shadow-sm p-2 border-secondary-lightest/25 border-2 rounded-md 
@@ -52,19 +59,17 @@ const MODALS: Record<string, React.ElementType> = {
             </motion.li>
           ))}
         </motion.ul>
-        <ul className="flex items-center gap-4 justify-end">
-          <Button variant="icon">
-            <Heart />
-          </Button>
-          <Button variant="icon">
-            <BiUser />
-          </Button>
-          <Button variant="icon">
-            <LogOut />
-          </Button>
-          <Button variant="icon">
-            <BiNotification />
-          </Button>
+        <ul className="flex items-center gap-6 justify-end">
+          {icons.map(({ icon: Icon, onClick, text = "" }) => (
+            <Button
+              size="md"
+              variant="icon"
+              onClick={onClick}
+              data-tooltip={text}
+            >
+              <Icon />
+            </Button>
+          ))}
         </ul>
       </section>
     );

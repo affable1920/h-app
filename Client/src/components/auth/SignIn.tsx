@@ -1,45 +1,25 @@
 import { useNavigate } from "react-router-dom";
 import { useState, type ChangeEvent } from "react";
 
-import AuthLayout from "./AuthLayout";
 import Input from "@components/common/Input";
 import Button from "@components/common/Button";
 
+import { toast } from "sonner";
 import { type paths } from "@/types/api";
 
-import { toast } from "sonner";
 import authClient from "@/services/Auth";
 
 type LoginUser =
   paths["/auth/login"]["post"]["requestBody"]["content"]["application/json"];
 
-type DBUser =
-  paths["/auth/login"]["post"]["responses"]["200"]["content"]["application/json"];
-
 function SignIn() {
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
   const [user, setUser] = useState<LoginUser>({
     email: "",
     password: "",
   });
-
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  async function submit() {
-    setLoading(true);
-
-    try {
-      await authClient.login(user);
-
-      navigate("/");
-      toast.info("Logged in successfully!", {});
-    } catch (ex) {
-      console.log(ex);
-      toast.error("Login failed!");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function handleChange({
     target: { name = "", value = "" },
@@ -47,26 +27,48 @@ function SignIn() {
     setUser((p) => ({ ...p, [name]: value }));
   }
 
+  async function submit() {
+    setLoading(true);
+
+    try {
+      await authClient.login(user);
+      navigate("/");
+
+      toast.info("Signed in successfully!", {});
+    } catch (ex) {
+      console.log(ex);
+
+      toast.error("Sign in failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <AuthLayout name="sign in" submitFn={submit}>
+    <div className="flex flex-col gap-8">
       <article className="flex flex-col gap-8">
         <Input
+          autoFocus
           type="email"
           name="email"
           label="email"
+          value={user.email}
           onChange={handleChange}
         />
         <Input
           name="password"
           type="password"
           label="password"
+          value={user.password}
           onChange={handleChange}
         />
       </article>
-      <Button type="submit" size="md" loading={loading}>
-        sign in
-      </Button>
-    </AuthLayout>
+      <article className="flex flex-col gap-3">
+        <Button type="submit" size="md" onClick={submit} loading={loading}>
+          sign in
+        </Button>
+      </article>
+    </div>
   );
 }
 

@@ -1,4 +1,6 @@
-import type { components } from "@/types/api";
+import type { paths } from "@/types/api";
 
-export type Filters = components["schemas"]["RouteFilters"];
+type QueryParams = paths["/doctors"]["get"]["parameters"]["query"];
+
+export type Filters = NonNullable<QueryParams>;
 export type CategoryFilters = Pick<Filters, "minRating" | "mode">;

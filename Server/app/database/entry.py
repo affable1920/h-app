@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 
 """
@@ -18,13 +18,17 @@ or otherwise the url would break
 
 
 DATABASE_URL = "postgresql://postgres:Ss%402332253@localhost:5432/sopore_i_fix"
-Base = declarative_base()
-engine = create_engine(url=DATABASE_URL)
 
-# Dependency to get DB session
+
+class Base(DeclarativeBase):
+    pass
+
+
+engine = create_engine(url=DATABASE_URL, echo=True)
 
 
 def get_db():
+    # Dependency to get DB session
     Session = sessionmaker(autoflush=False, autocommit=False, bind=engine)
     session = Session()
 

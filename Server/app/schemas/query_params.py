@@ -18,7 +18,7 @@ class SortOrder(Enum):
 
 
 class Sort(BaseModel):
-    by: str | None = Field(default="name", alias="sortBy")
+    by: str = Field(default="name", alias="sortBy")
     order: SortOrder = Field(default=SortOrder.ASC, alias="sortOrder")
 
 
@@ -35,7 +35,7 @@ class BaseRouteParams(BaseModel):
     ]
 
     @field_serializer("search_query")
-    def strip_lower(self, field: str):
+    def strip_lower(self, field: str | None):
         return field.strip().lower() if field else None
 
 

@@ -122,7 +122,6 @@ class DoctorService:
         end = start + max
 
         has_more = len(doctors) > end
-
         return paginated[start : min(end, len(doctors))], has_more
 
     #

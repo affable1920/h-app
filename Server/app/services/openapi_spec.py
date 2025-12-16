@@ -48,10 +48,6 @@ def generate_openapi_spec(app: FastAPI):
         description="Modified OpenAPI spec for the tsc client.",
     )
 
-    spec.setdefault("components", {}).setdefault("schemas", {})["BaseRouteFilters"] = (
-        BaseRouteParams.model_json_schema()
-    )
-
     try:
         paths = spec.get("paths", {})
 

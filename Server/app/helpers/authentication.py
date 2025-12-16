@@ -1,11 +1,12 @@
 import jwt
 from jose import JWTError
-from typing import Annotated
 from datetime import datetime, timedelta
 
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException, Depends, status
+from sqlalchemy.orm import Session
 
+from app.database.entry import get_db
 from app.services.users_service import UserService
 
 
@@ -44,7 +45,9 @@ def create_access_token(
         raise HTTPException(status_code=500, detail="Error creating access token")
 
 
-def decode_access_token(token: Annotated[str, Depends(auth_scheme)]) -> dict:
+def decode_and_get_current(
+    token: str = Depends(auth_scheme), db: Session = Depends(get_db)
+):
     """
     This function uses the auth scheme as a dependency which
     automatically extracts the bearer token
@@ -53,36 +56,7 @@ def decode_access_token(token: Annotated[str, Depends(auth_scheme)]) -> dict:
     """
 
     try:
-        return jwt.decode(token, key=SECRET, algorithms=[ALG])
-
-    except jwt.ExpiredSignatureError as e:
-        print("Token expired:", e)
-        raise HTTPException(
-            status_code=401,
-            detail="Token expired ! Please log in again.",
-            headers={"x-session-expire": "true"},
-        )
-
-    except jwt.InvalidTokenError as e:
-        print(e)
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid token! Please log back in.",
-            headers={"x-session-expire": "true"},
-        )
-
-
-def decode_and_get_current(
-    token: str = Depends(auth_scheme), service: UserService = Depends()
-):
-    try:
         payload = jwt.decode(token, key=SECRET, algorithms=[ALG])
-        email: str = payload.get("email")
-
-        if not email:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-            )
 
     except jwt.ExpiredSignatureError as e:
         print("Token expired:", e)
@@ -98,9 +72,13 @@ def decode_and_get_current(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         )
 
-    # later get user from db
-    curr_user = service.get_user(email=email)
+    email: str = payload.get("sub")
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
 
+    curr_user = UserService(db).get_user(email=email)
     if not curr_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"

@@ -19,6 +19,7 @@ async def register(user: CreateUser, db: Session = Depends(get_db)):
     service = UserService(db)
 
     if service.get_user(user.email):
+        print("Email already exists !")
         raise HTTPException(status_code=400, detail="Email already exists!")
 
     try:
@@ -40,14 +41,16 @@ async def login(user_cred: LoginUser, db: Session = Depends(get_db)):
     if not db_user:
         raise HTTPException(status_code=400, detail="Invalid email id!")
 
-    if not service.verify_pwd(user_cred.password, db_user.password):
+    is_authenticated = service.verify_pwd(user_cred.password, db_user.password)
+
+    if not is_authenticated:
         raise HTTPException(status_code=401, detail="Invalid password!")
 
     token_payload = {
+        "type": "access",
         "sub": db_user.id,
         "email": db_user.email,
         "username": db_user.username,
-        "role": db_user.role,
     }
 
     token = create_access_token(token_payload)

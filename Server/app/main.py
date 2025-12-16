@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import auth, clinics, doctors
 from app.services.data_generator import main
+from app.routes import auth, clinics, doctors
 from app.services.openapi_spec import generate_openapi_spec
 
 

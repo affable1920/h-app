@@ -49,7 +49,7 @@ class Slot(BaseModel):
 class Schedule(BaseModel):
     """
 
-    use datetime as main schedule date getter if doctors 
+    use datetime as main schedule date getter if doctors
     don't seem to have a fixed schedule, else better off with weekdays
 
     """

@@ -7,17 +7,17 @@ from app.schemas.dr_extra import Slot
 T = TypeVar("T")
 
 
-class RouteResponse(BaseModel, Generic[T]):
+class PaginatedResponse(BaseModel, Generic[T]):
     """same GET response for clinics and doctors"""
 
     entities: list[T]
 
     # has more boolean val for pagination
-    has_more: bool
+    has_next: bool
+    has_prev: bool = False
 
     total_count: int
     paginated_count: int
-    applied_filters: list[tuple[str, str]]
 
 
 class DrScheduleData(BaseModel):

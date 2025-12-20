@@ -294,3 +294,16 @@ problem example: name: Mapped[str] -> no length limit
 - Primary Keys
 use integers and the auto_increment param set to True for simple cases -> faster indexing as integers takes less space
 uuids for complex cases
+
+
+- - - - - -  - - - - -- - -- - - - - - -- - - - -                   - - -- - 
+The problem i faced while generating fake data for the sqlalchemy database
+
+1. circular dependencies as doctors needed clinics and clinics needed doctors.
+Found that relationships are just for the ORM usage, they're not real columns in our db's tables'
+
+2. Got many errors when trying to create schedules and then assign them to doctors.
+I was trying to create schedules without, initially passing the dr id and the clinic id which were foreign keys of a schedule,
+foreign keys are actual columns in our database so must be passed right at the time of schedule creation.
+
+3. All required, nun-nullable columns, foreign keys, not relationships must be passed right at the time of a model's creation

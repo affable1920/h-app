@@ -1,10 +1,11 @@
-from enum import Enum
+from sqlite3 import Time
 from uuid import UUID, uuid4
 
 from datetime import datetime
-from typing import List
+from typing import Any, List
 
 from app.database.entry import Base
+from app.config import UserRole, Mode, Status
 
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from sqlalchemy import (
@@ -12,6 +13,7 @@ from sqlalchemy import (
     JSON,
     Column,
     DateTime,
+    Time as SQLTime,
     ForeignKey,
     Numeric,
     String,
@@ -22,19 +24,6 @@ from sqlalchemy import (
 
 def gen_id():
     return uuid4()
-
-
-class UserRole(Enum):
-    ADMIN = "admin"
-    DOCTOR = "doctor"
-    PATIENT = "patient"
-    CLINIC = "clinic"
-    GUEST = "guest"
-
-
-class Mode(Enum):
-    ONLINE = "online"
-    IN_PERSON = "in person"
 
 
 class User(Base):
@@ -71,16 +60,16 @@ class User(Base):
 junction = Table(
     "doctor_clinics",
     Base.metadata,
-    Column("doctor_id", String, ForeignKey("doctors.id"), primary_key=True),
-    Column("clinic_id", String, ForeignKey("clinics.id"), primary_key=True),
+    Column("doctor_id", Uuid, ForeignKey("doctors.id"), primary_key=True),
+    Column("clinic_id", Uuid, ForeignKey("clinics.id"), primary_key=True),
 )
 
 
 class Doctor(Base):
     __tablename__ = "doctors"
 
-    id: Mapped[str] = mapped_column(
-        primary_key=True, unique=True, default=gen_id, index=True
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, unique=True, default=gen_id, index=True
     )
 
     password: Mapped[str] = mapped_column(nullable=False)
@@ -102,12 +91,21 @@ class Doctor(Base):
     fullname: Mapped[str]
     credentials: Mapped[str]
 
-    base_fee: Mapped[int]
-    consults_online: Mapped[bool]
+    fee: Mapped[int]
+    consults_online: Mapped[bool] = mapped_column(default=False)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.now
     )
+
+    currently_available: Mapped[bool] = mapped_column(default=True)
+    next_available: Mapped[datetime | None] = mapped_column(default=None)
+
+    last_updated: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.now
+    )
+
+    status: Mapped[Status] = mapped_column(SQLEnum(Status), default=Status.AVAILABLE)
 
     """
     A dr has One to many relationship with schedules
@@ -132,24 +130,34 @@ class Doctor(Base):
         back_populates="doctor", cascade="all, delete-orphan", lazy="joined"
     )
 
+    def __getitem__(self, name: str) -> Any:
+        return self[name] if name else self.username
+
 
 class Schedule(Base):
     __tablename__ = "schedules"
 
-    id: Mapped[str] = mapped_column(primary_key=True, default=gen_id)
-    weekday: Mapped[int]
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=gen_id
+    )
+    weekdays: Mapped[List[int]] = mapped_column(JSON, server_default="[]")
 
-    date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    hours_available = Mapped[int]
+    date: Mapped[datetime | None]
+    hours_available: Mapped[int | None]
 
-    is_active: Mapped[bool]
-    is_recurring: Mapped[bool]
+    is_active: Mapped[bool] = mapped_column(default=True)
+    is_recurring: Mapped[bool] = mapped_column(default=True)
 
-    start: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    end: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    start: Mapped[Time] = mapped_column(SQLTime, nullable=False)
+    end: Mapped[Time] = mapped_column(SQLTime)
 
     clinic_id: Mapped[str] = mapped_column(ForeignKey("clinics.id"), nullable=False)
     doctor_id: Mapped[str] = mapped_column(ForeignKey("doctors.id"), nullable=False)
+
+    base_slot_duration: Mapped[int] = mapped_column(default=20)
+
+    # effective_from: Mapped[datetime] = mapped_column(default=datetime.now)
+    # effective_until: Mapped[datetime] = mapped_column(nullable=True)
 
     """
     The dr id as a foreign key will be a column in this schedules table, where this id will 
@@ -158,7 +166,7 @@ class Schedule(Base):
     But the dr is simply for python -> so we can do schedule.doctor
     
     No reason to add clinic like dr bcz clinic being back populated doesn't make sense as we
-    won't store clinic.schedules - at last intuition - where is the schedule taking place ?
+    won't store clinic.schedules - but at last intuition -> where is the schedule taking place ?
     """
 
     doctor: Mapped["Doctor"] = relationship(back_populates="schedules")
@@ -171,12 +179,14 @@ class Schedule(Base):
 class Slot(Base):
     __tablename__ = "slots"
 
-    id: Mapped[str] = mapped_column(primary_key=True, index=True, default=gen_id)
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, index=True, default=gen_id
+    )
 
     booked: Mapped[bool]
     duration: Mapped[int]
 
-    begin: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    begin: Mapped[Time] = mapped_column(SQLTime, nullable=False)
     mode: Mapped[Mode] = mapped_column(SQLEnum(Mode), default="in person")
 
     schedule_id: Mapped[str] = mapped_column(ForeignKey("schedules.id"))
@@ -186,18 +196,25 @@ class Slot(Base):
 class Clinic(Base):
     __tablename__ = "clinics"
 
-    id: Mapped[str] = mapped_column(primary_key=True, default=gen_id, index=True)
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=gen_id, index=True
+    )
 
-    password: Mapped[str] = mapped_column(nullable=False)
-    username: Mapped[str] = mapped_column(nullable=False)
-
-    name: Mapped[str] = mapped_column(nullable=False, index=True)
+    head: Mapped[str] = mapped_column(nullable=False)
+    owner_name: Mapped[str] = mapped_column(nullable=False, index=True)
     email: Mapped[str] = mapped_column(index=True, nullable=False)
+
+    username: Mapped[str] = mapped_column(nullable=False)
+    password: Mapped[str] = mapped_column(nullable=False)
 
     reviews: Mapped[int] = mapped_column(default=0)
     rating: Mapped[Numeric] = mapped_column(Numeric(2), default=0.0)
 
     address: Mapped[str] = mapped_column(nullable=False)
+    pincode: Mapped[int] = mapped_column(nullable=False)
+
+    mobile: Mapped[str] = mapped_column(String(10))
+    whatsapp: Mapped[str] = mapped_column(String(10))
 
     facilities: Mapped[list[str]] = mapped_column(JSON, server_default="[]")
     specializations: Mapped[list[str]] = mapped_column(JSON, server_default="[]")

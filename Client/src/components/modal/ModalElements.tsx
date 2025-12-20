@@ -1,4 +1,4 @@
-import type { DoctorEssentials } from "@/types/doctorAPI";
+import type { DoctorSummary } from "@/types/doctorAPI";
 import DirectoryFilter from "../filters/DirectoryFilter";
 import ScheduleModal from "../ScheduleModal";
 import { motion } from "motion/react";
@@ -20,7 +20,7 @@ const MODALS: Record<string, React.ElementType> = {
 
   directoryFilter: DirectoryFilter,
 
-  call: function Call(dr: DoctorEssentials) {
+  call: function Call(dr: DoctorSummary) {
     return (
       <article>
         <h2 className="card-h2">{dr?.name}</h2>

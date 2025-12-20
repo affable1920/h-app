@@ -8,7 +8,7 @@ import Button from "../common/Button";
 import { capitalize } from "../../utils/appUtils";
 
 import type { DrActionName } from "@/types/doctorActions";
-import type { DoctorEssentials } from "../../types/doctorAPI";
+import type { DoctorSummary } from "../../types/doctorAPI";
 
 import { PiPlugsConnectedDuotone } from "react-icons/pi";
 import { CalendarFold, PhoneOutgoing, User } from "lucide-react";
@@ -21,7 +21,7 @@ const iconMap: Record<DrActionName, IconType> = {
 };
 
 const DrCardSecondaryInfo = React.memo(
-  ({ doctor }: { doctor: DoctorEssentials }) => {
+  ({ doctor }: { doctor: DoctorSummary }) => {
     const dr = new DrActionService(doctor);
     const navigate = useNavigate();
 

@@ -1,8 +1,8 @@
 import React from "react";
-import type { DoctorEssentials } from "../../types/doctorAPI";
+import type { DoctorSummary } from "../../types/doctorAPI";
 
 const DrCardBack = React.memo(
-  ({ doctor }: { doctor: DoctorEssentials }) => {
+  ({ doctor }: { doctor: DoctorSummary }) => {
     return (
       <div className="flex flex-col h-1/2">
         <h2 className="card-h2 grow">{doctor.name}</h2>

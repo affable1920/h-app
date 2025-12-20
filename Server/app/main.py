@@ -3,9 +3,44 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.services.data_generator import main
+from app.database.models import Doctor
+from app.database.entry import get_db
+from app.services.data_generator import seed_db
 from app.routes import auth, clinics, doctors
 from app.services.openapi_spec import generate_openapi_spec
+from sqlalchemy.orm import Session
+
+
+async def create():
+    db: Session = next(get_db())
+
+    doctor = Doctor(
+        username="Doctor A",
+        password="Ss@2332253",
+        credentials="MMBS - DM | MD",
+        primary_specialization="Pulmonology",
+        secondary_specializations=[],
+        fullname="DOCTORA",
+        experience=10,
+        rating=4.4,
+        reviews=100,
+        clinics=[],
+        schedules=[],
+        email="user@domain.com",
+        verified=True,
+        base_fee=100,
+        consults_online=True,
+    )
+
+    try:
+        db.add(doctor)
+
+        db.commit()
+        db.refresh(doctor)
+
+    except Exception as e:
+        print(e)
+        raise e
 
 
 @asynccontextmanager
@@ -16,6 +51,10 @@ async def root(app: FastAPI):
 
     Base.metadata.create_all(engine)
     app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
+
+    # await main()
+
+    # await create()
 
     yield
     print("Shutting down")
@@ -54,7 +93,7 @@ async def health_check():
 
 @app.get("/generate")
 async def generate_data():
-    main()
+    await seed_db()
     return {"message": "Data generated successfully"}
 
 

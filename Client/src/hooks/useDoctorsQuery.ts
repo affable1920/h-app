@@ -1,19 +1,14 @@
-import type { operations } from "@/types/api";
-import { useSearchParams } from "react-router-dom";
-
+import useQueryStore from "@/stores/queryStore";
 import drService from "@/services/DoctorService";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-type Params = operations["get_doctors"]["parameters"]["query"];
-
 export function useAllDoctors() {
-  const [searchParams] = useSearchParams();
-  const params: Params = Object.fromEntries(searchParams.entries());
+  const { page, searchQuery } = useQueryStore();
 
   return useQuery({
-    queryKey: ["doctors", { ...params }],
+    queryKey: ["doctors", page, searchQuery],
     async queryFn() {
-      const response = await drService.getAll(params);
+      const response = await drService.getAll({ page, searchQuery });
       return response;
     },
 

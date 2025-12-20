@@ -1,10 +1,9 @@
 import { DateTime } from "luxon";
 import useModalStore from "@/stores/modalStore";
-import { getSlotsLeft } from "./DoctorHelperClass";
 import actionConfigs from "../utils/doctorActionsConfig";
 
 import type { Position } from "@/types/utils";
-import type { DoctorEssentials, Slot } from "@/types/doctorAPI";
+import type { DoctorSummary, Slot } from "@/types/doctorAPI";
 import type {
   DrCTA,
   DrActionName,
@@ -18,19 +17,17 @@ type DoctorActions = {
 // implements implies that all function mentioned inside the
 // doctor actions type are implemented on each doctor instance
 export class DrActionService implements DoctorActions {
-  private readonly _dr: DoctorEssentials;
+  private readonly _dr: DoctorSummary;
 
   // availActions will only consist of available actions for a doctor
   // based on his status, and later -> his preferences such as doctor.consultsOnline?
   public readonly availableActions: DrCTA[];
   protected cache: Record<string, Position> = {};
 
-  constructor(dr: DoctorEssentials) {
+  constructor(dr: DoctorSummary) {
     this._dr = dr;
 
-    this.availableActions = (function getAvailableActions(
-      dr: DoctorEssentials
-    ) {
+    this.availableActions = (function getAvailableActions(dr: DoctorSummary) {
       return actionConfigs[dr.status ?? "away"];
     })(this._dr);
   }
@@ -93,7 +90,8 @@ export class DrActionService implements DoctorActions {
 
       const slotsLeft: Slot[] =
         targetSchedule?.slots.reduce<Slot[]>(
-          (acc, currSlot) => (currSlot.booked ? acc : [...acc, currSlot]),
+          (acc: Slot[] = [], currSlot: Slot) =>
+            currSlot.booked ? acc : [...acc, currSlot],
           []
         ) || [];
 

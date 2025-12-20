@@ -1,17 +1,14 @@
 import type { components } from "./api";
 
 // essentials has just the required properties for rendering
-export type DoctorEssentials = components["schemas"]["DoctorSummary"];
-
-// Full dr including schedules, slots etc ...
+export type DoctorSummary = components["schemas"]["DoctorSummary"];
 export type Doctor = components["schemas"]["Doctor"];
 
-export type Status = DoctorEssentials["status"];
+// Full dr including schedules, slots etc ...
+
+export type Status = DoctorSummary["status"];
 
 export type Clinic = components["schemas"]["Clinic"];
 
-export type Fee = components["schemas"]["Fee"];
 export type Slot = components["schemas"]["Slot"];
-
-export type Location = components["schemas"]["Location"];
 export type Schedule = components["schemas"]["Schedule"];

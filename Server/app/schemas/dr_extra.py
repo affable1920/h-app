@@ -1,49 +1,39 @@
-from enum import Enum
-from uuid import uuid4
+from sqlite3 import Time
+from uuid import UUID
 from typing import Annotated
-from datetime import time, date
-from pydantic import Field, BaseModel
+from pydantic import ConfigDict, Field, BaseModel
 
-
-def generate_id():
-    return uuid4().hex
-
-
-class Status(str, Enum):
-    AWAY = "away"
-    AVAILABLE = "available"
-    IN_PATIENT = "in_patient"
-
-
-class Fee(BaseModel):
-    in_person: int = Field(gt=0)
-    online: int | None = Field(gt=0, default=None)
-
-
-class Location(BaseModel):
-    lat: float
-    lng: float
+from app.config import Mode
 
 
 class Clinic(BaseModel):
-    id: str = Field(default_factory=generate_id)
+    id: UUID
+    head: str
     name: str
-    contact: str
+    owner_name: str
+
     address: str
     facilities: list[str] = []
-    location: Location | None = None
+    contact: str = Field(alias="mobile")
+
     whatsapp: str | None = None
     reviews: int | None = None
     rating: int | float = 0.0
+
     parking_available: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Slot(BaseModel):
-    id: str = Field(default_factory=generate_id)
+    id: UUID
     duration: int
+
     booked: bool = False
-    mode: str | None = None
-    begin: Annotated[time, Field(..., description="The slot start time")]
+    mode: Mode | None = None
+
+    begin: Annotated[Time, Field(..., description="The slot start time")]
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Schedule(BaseModel):
@@ -54,18 +44,20 @@ class Schedule(BaseModel):
 
     """
 
-    id: str = Field(default_factory=lambda: generate_id())
+    id: UUID
 
-    dated: date | None = None
-    weekday: int
+    weekdays: list[int]
 
     is_active: bool = True
     is_recurring: bool = True
 
-    clinic: Clinic
+    clinic_id: UUID
+    doctor_id: UUID
+
     slots: list[Slot]
 
-    # Use time objects for start/end later
-    start: time = Field(...)
-    hours_available: int | None = None
-    end: time | None = Field(default=None)
+    start: Time = Field(...)
+    hours_available: int | None = Field(default=None)
+    end: Time | None = Field(default=None)
+
+    model_config = ConfigDict(from_attributes=True)

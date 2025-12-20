@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 
-from app.schemas.query_params import BaseRouteParams
+from app.schemas.query_params import PaginationParams
 
 
 """

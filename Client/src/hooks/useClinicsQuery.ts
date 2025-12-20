@@ -6,7 +6,7 @@ type ClinicsResponse =
   operations["get_clinics"]["responses"]["200"]["content"]["application/json"];
 
 const endpoint = "/clinics";
-const api = new APIClient<ClinicsResponse>(endpoint);
+const api = new APIClient(endpoint);
 
 function useClinicsQuery() {
   return useQuery({

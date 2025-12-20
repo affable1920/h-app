@@ -2,16 +2,15 @@ import Card from "@components/Card";
 import Button from "../common/Button";
 import Spinner from "@components/Spinner";
 
-import useQueryStore from "@/stores/queryStore";
 import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 
 import DrCardBack from "./DrCardBack";
-import type { DoctorEssentials } from "@/types/doctorAPI";
+import type { DoctorSummary } from "@/types/doctorAPI";
 
 import DrCardEssentials from "./DrCardEssentials";
 import DrCardSecondaryInfo from "./DrCardSecondaryInfo";
 
-function DrCardFront({ drEssentials }: { drEssentials: DoctorEssentials }) {
+function DrCardFront({ drEssentials }: { drEssentials: DoctorSummary }) {
   return (
     <article className="flex flex-col gap-4">
       <DrCardEssentials doctor={drEssentials} />
@@ -21,31 +20,27 @@ function DrCardFront({ drEssentials }: { drEssentials: DoctorEssentials }) {
 }
 
 function DoctorsDirectory() {
-  const {
-    isPending,
-    data: { entities = [], applied_filters, total_count } = {},
-  } = useAllDoctors();
-
-  const { reset } = useQueryStore();
+  const { isPending, data: { entities = [], total_count } = {} } =
+    useAllDoctors();
 
   if (isPending) return <Spinner />;
 
-  if (applied_filters && !total_count) {
-    return (
-      <div className="flex flex-col justify-center items-center gap-2 mt-4">
-        <h2 className="text-lg uppercase font-bold font-mono">
-          No matching doctors found!
-        </h2>
-        <div className="flex items-center gap-2">
-          <Button onClick={reset} size="md">
-            Reset filters
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // if (applied_filters && !total_count) {
+  //   return (
+  //     <div className="flex flex-col justify-center items-center gap-2 mt-4">
+  //       <h2 className="text-lg uppercase font-bold font-mono">
+  //         No matching doctors found!
+  //       </h2>
+  //       <div className="flex items-center gap-2">
+  //         <Button onClick={reset} size="md">
+  //           Reset filters
+  //         </Button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
-  console.log(applied_filters);
+  // console.log(applied_filters);
 
   return (entities || []).map((doctor) => (
     <Card

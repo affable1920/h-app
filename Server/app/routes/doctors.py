@@ -1,33 +1,37 @@
 from enum import Enum
-from fastapi import Depends, APIRouter
+from uuid import UUID
+from sqlalchemy.orm import Session
+from fastapi import Depends, APIRouter, Query
 
+from app.database.entry import get_db
+from app.services.dr_service import DoctorService
+from app.schemas.query_params import FilterParams, PaginationParams
 
-from app.schemas.query_params import DrQueryParams
 from app.schemas.doctor import Doctor, DoctorSummary
-from app.services.dr_service import DoctorHelper, DoctorService
-from app.schemas.responses import DrScheduleData, RouteResponse, SlotRecord
+from app.schemas.responses import DrScheduleData, PaginatedResponse
 
 
 base_route = "/doctors"
 tags: list[str | Enum] = ["doctors"]
 
-dr_service = DoctorService()
 router = APIRouter(prefix=base_route, tags=tags)
 
 
-@router.get("", response_model=RouteResponse[DoctorSummary])
-async def get_doctors(params: DrQueryParams = Depends()):
-    return dr_service.get(params)
+@router.get("", response_model=PaginatedResponse[DoctorSummary])
+async def get_doctors(
+    pagination_params: PaginationParams = Depends(),
+    filters: FilterParams = Depends(),
+    db: Session = Depends(get_db),
+):
+    service = DoctorService(db)
+    return service.get(pagination=pagination_params, filters=filters)
 
 
 @router.get("/{id}", response_model=Doctor)
-async def get_doctor(id: str):
-    return dr_service.get_by_id(id)
+async def get_doctor(id: UUID, db: Session = Depends(get_db)):
+    return DoctorService(db).get_by_id(id=id)
 
 
-@router.post("/{id}/book", response_model=SlotRecord)
-async def book_schedule(data: DrScheduleData, helper: DoctorHelper = Depends()):
-    items = data.model_dump(exclude={"clinic_id"})
-
-    record = await helper.book(**items)
-    return record
+@router.post("/{id}/book")
+async def book_schedule(id: str, data: DrScheduleData):
+    pass

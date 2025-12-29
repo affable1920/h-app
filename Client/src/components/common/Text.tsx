@@ -11,20 +11,21 @@ const SIZES = {
 
 type Size = keyof typeof SIZES;
 
-type TextProps<T extends HTMLElementType = "p"> = {
+type TextTypes = Extract<HTMLElementType, "p" | "h1" | "h2" | "h3" | "h4">;
+
+type TextProps<T extends TextTypes = "p"> = {
   as?: T;
   size?: Size;
   bold?: boolean;
   content: string;
 } & Omit<React.ComponentPropsWithoutRef<T>, "as">;
 
-const Text = <T extends HTMLElementType>({
+const Text = <T extends TextTypes = "p">({
   as,
   size = "md",
   content = "",
   bold = false,
   className = "",
-  ...rest
 }: TextProps<T>) => {
   const Element = (as || "p") as HTMLElementType;
 

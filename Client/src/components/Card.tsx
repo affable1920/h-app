@@ -1,6 +1,5 @@
 import { useState, useCallback, type ReactElement } from "react";
 import { motion } from "motion/react";
-import Button from "./common/Button";
 import { MdFlip } from "react-icons/md";
 
 interface CardProps<T> {
@@ -39,17 +38,19 @@ const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
       </motion.article>
 
       {/* Card back */}
-      <motion.article className="backface-hidden absolute inset-0 rotate-y-180 p-4">
+      <motion.article className="rotate-y-180 absolute inset-0 p-4 backface-hidden">
         {CardBack}
       </motion.article>
 
-      <Button
-        variant="icon"
-        needsMotion={true}
+      <motion.button
         onClick={handleFlip}
+        style={{
+          scale: 0.8,
+          opacity: 0.8,
+        }}
+        whileHover={{ scale: 0.9, opacity: 1 }}
         whileTap={{
-          scale: [null, 0.5, 1],
-          transition: { duration: 0.25 },
+          scale: 0.7,
         }}
         className={`absolute top-3/5 ${
           isFlipped
@@ -58,7 +59,7 @@ const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
         } `}
       >
         <MdFlip size={16} />
-      </Button>
+      </motion.button>
     </motion.article>
   );
 };

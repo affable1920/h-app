@@ -41,4 +41,4 @@ class Doctor(DoctorSummary, BaseModel):
 
     # Flexible metadata for future flags without breaking changes
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, extra="allow")

@@ -137,6 +137,11 @@ class Doctor(Base):
 class Schedule(Base):
     __tablename__ = "schedules"
 
+    """
+    A schedule resonates with a particular doctor's schedule 
+    at a particular clinic for any set of given days of a week ( 0 - 6 )
+    """
+
     id: Mapped[UUID] = mapped_column(
         Uuid(as_uuid=True), primary_key=True, default=gen_id
     )
@@ -170,7 +175,7 @@ class Schedule(Base):
     """
 
     doctor: Mapped["Doctor"] = relationship(back_populates="schedules")
-    clinic: Mapped["Clinic"] = relationship()
+    clinic: Mapped["Clinic"] = relationship(lazy="joined")
     slots: Mapped[list["Slot"]] = relationship(
         back_populates="schedule", cascade="all, delete-orphan"
     )

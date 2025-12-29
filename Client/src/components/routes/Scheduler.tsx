@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { memo, useState } from "react";
+import { motion } from "motion/react";
 import { useLocation } from "react-router-dom";
 
-import { DateTime } from "luxon";
 import Calendar from "@components/Calendar";
 import ClinicsView from "@components/ClinicsView";
-import Badge from "@components/common/Badge";
-import Button from "@components/common/Button";
 import { ArrowRight } from "lucide-react";
 import { useDoctor } from "@/hooks/useDoctorsQuery";
 import Spinner from "../Spinner";
@@ -26,7 +23,7 @@ const Scheduler = memo(() => {
       </div>
     );
 
-  const { name, schedules = [] } = dr;
+  const { fullname, schedules = [] } = dr;
 
   function toggleView() {
     setShowClinicsView((p) => !p);
@@ -35,25 +32,21 @@ const Scheduler = memo(() => {
   return (
     <section className="font-semibold flex flex-col pb-12 gap-8 mt-4">
       <header className="flex items-center gap-4">
-        <h2 className="card-h2 text-2xl font-black">Dr. {name} Tanner</h2>
-        <Button
-          variant="icon"
-          needsMotion={true}
+        <h2 className="card-h2 text-2xl font-black">Dr. {fullname} Tanner</h2>
+        <motion.button
           onClick={toggleView}
           animate={{ rotate: showClinicsView ? 90 : 0 }}
         >
-          <ArrowRight />
-        </Button>
+          <ArrowRight size={14} />
+        </motion.button>
       </header>
 
-      <section className="flex flex-col gap-2">
-        <ClinicsView
-          doctor={dr}
-          schedules={schedules}
-          onShow={setShowClinicsView}
-          showClinicsView={showClinicsView}
-        />
-      </section>
+      <ClinicsView
+        doctor={dr}
+        schedules={schedules}
+        onShow={setShowClinicsView}
+        showClinicsView={showClinicsView}
+      />
 
       <section className="flex flex-col gap-8 md:flex-row w-full">
         <Calendar schedules={schedules} />

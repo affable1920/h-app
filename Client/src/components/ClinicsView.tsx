@@ -1,22 +1,21 @@
-import { memo, useCallback, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, type Variant } from "motion/react";
 
 import { BsArrowRight } from "react-icons/bs";
 import { BiSolidMapPin } from "react-icons/bi";
 
 import Button from "./common/Button";
-
 import { ClockArrowDown } from "lucide-react";
 
 import Badge from "./common/Badge";
 import { Link } from "react-router-dom";
 
-import { WEEKDAYS } from "@/utils/constants";
-import useScheduleStore from "../stores/scheduleStore";
+import { getWeekday } from "@/utils/calendarUtils";
+import type { Doctor, Clinic, Schedule } from "../types/doctorAPI";
 
 import useModalStore from "@/stores/modalStore";
-import { set as setSchedule } from "../stores/scheduleStore";
-import type { Doctor, Clinic, Schedule, Slot } from "../types/doctorAPI";
+import { useSchedule } from "./providers/ScheduleProvider";
+import { toast } from "sonner";
 
 const containerVariants: Record<string, Variant> = {
   initial: { opacity: 0, y: -40 },
@@ -43,41 +42,41 @@ const articleVariants: Record<string, Variant> = {
   exit: { opacity: 0 },
 };
 
-const ClinicsView = memo(function ({
-  doctor,
-  onShow,
-  schedules,
-  showClinicsView,
-}: {
+interface ClinicsViewProps {
   doctor: Doctor;
   schedules: Schedule[];
   showClinicsView: boolean;
   onShow: (show: boolean) => void;
-}) {
-  const selectedDate = useScheduleStore((s) => s.selectedDate);
+}
 
-  const setSelectedDate = useScheduleStore((s) => s.setSelectedDate);
+const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
+  const { doctor, onShow, schedules, showClinicsView } = props;
+
+  const {
+    state: scheduleState,
+    actions: { clearField, setSlot, setDay, setClinic },
+  } = useSchedule();
+
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-
-  const selectedSlot = useScheduleStore((s) => s.selectedSlot);
-  const setSelectedSlot = useScheduleStore((s) => s.setSelectedSlot);
 
   const isExpanded = useCallback(
     (id: string) => expandedIds.has(id),
     [expandedIds]
   );
 
-  // Auto-expand schedules matching selected date
   useEffect(() => {
-    if (selectedDate) {
+    // Auto-expand schedules matching selected date
+    if (scheduleState.date) {
+      const wkday = scheduleState.date.weekday;
+
       const matchingIds = schedules
-        .filter((s) => s.weekday === selectedDate.weekday)
+        .filter((s) => s.weekdays.includes(wkday))
         .map((s) => s.id!);
 
       setExpandedIds(new Set(matchingIds));
       onShow(true);
     }
-  }, [selectedDate, schedules, onShow]);
+  }, [schedules, onShow, scheduleState.date]);
 
   const toggleExpansion = useCallback((id: string) => {
     setExpandedIds((prev) => {
@@ -87,19 +86,23 @@ const ClinicsView = memo(function ({
       } else {
         next.add(id);
         if (!expandedIds.has(id)) {
-          setSelectedDate(null);
+          clearField("date");
         }
       }
       return next;
     });
   }, []);
 
-  async function handleBook(slot: Slot, clinic: Clinic, schedule: Schedule) {
-    setSchedule({
-      selectedSlot: slot,
-      selectedClinic: clinic,
-      selectedSchedule: schedule,
-    });
+  async function handleBook() {
+    if (!scheduleState.slot || !(scheduleState.date || scheduleState.day)) {
+      toast.error("Please select all required fields!", {
+        description() {
+          return "slot and a date .";
+        },
+        className: "text-black font-black uppercase",
+      });
+      return;
+    }
 
     useModalStore.getState().openModal("schedule", { dr: doctor });
   }
@@ -117,15 +120,15 @@ const ClinicsView = memo(function ({
           initial="initial"
           animate="animate"
           exit="exit"
-          className="box py-4 flex flex-col w-full gap-12"
+          className="box py-4 flex flex-col w-full gap-14 text-sm"
         >
           {schedules.map((schedule) => {
             const {
               id,
-              weekday,
+              weekdays = [],
               slots = [],
               clinic = {} as Clinic,
-            } = schedule || {};
+            } = (schedule || {}) as Schedule & { clinic?: Clinic };
 
             return (
               <motion.article
@@ -136,7 +139,7 @@ const ClinicsView = memo(function ({
                 <header className="flex justify-between items-center">
                   <div className="flex flex-col gap-0.5">
                     <Link className="flex items-center gap-2 card-h2" to="/">
-                      {clinic?.name}
+                      {clinic?.head}
                     </Link>
 
                     <Link
@@ -148,21 +151,19 @@ const ClinicsView = memo(function ({
                     </Link>
                   </div>
 
-                  <Button
-                    variant="icon"
+                  <motion.button
                     initial={false}
-                    needsMotion={true}
                     onClick={() => toggleExpansion(id!)}
                     animate={{
                       rotate: isExpanded(id!) ? 90 : 0,
                     }}
                   >
-                    <BsArrowRight />
-                  </Button>
+                    <BsArrowRight size={12} />
+                  </motion.button>
                 </header>
 
                 <AnimatePresence>
-                  {isExpanded(schedule.id!) && (
+                  {isExpanded(id!) && (
                     <motion.div
                       key={id}
                       variants={articleVariants}
@@ -176,16 +177,24 @@ const ClinicsView = memo(function ({
                         opacity: { duration: 0.1 },
                       }}
                     >
-                      <Badge
-                        as="button"
-                        full={false}
-                        className="self-center"
-                        content={WEEKDAYS[weekday]}
-                        selected={weekday === selectedDate?.weekday}
-                      />
-
+                      <article className="flex items-center gap-2">
+                        {weekdays.map((wkday) => (
+                          <Badge
+                            full={false}
+                            key={wkday}
+                            className="px-4"
+                            onClick={() => {
+                              setDay(wkday);
+                              clearField("date");
+                            }}
+                            selected={scheduleState.day === wkday}
+                          >
+                            {getWeekday(wkday).slice(0, 3)}
+                          </Badge>
+                        ))}
+                      </article>
                       <div className="flex flex-col gap-4">
-                        <div className="flex items-center justify-center flex-wrap gap-4">
+                        <div className="flex flex-wrap gap-4 justify-center items-center">
                           {slots.every((slot) => slot.booked) ? (
                             <p className="label text-lg text-error-dark">
                               All slots booked !
@@ -197,23 +206,24 @@ const ClinicsView = memo(function ({
                                   as="button"
                                   full={false}
                                   key={slot.id}
+                                  className="grow"
                                   content={slot.begin}
                                   disabled={slot.booked}
-                                  onClick={() => setSelectedSlot(slot)}
-                                  selected={slot.id === selectedSlot?.id}
+                                  onClick={() => {
+                                    setSlot(slot);
+                                    setClinic(clinic);
+                                  }}
+                                  selected={slot.id === scheduleState.slot?.id}
                                 />
                               );
                             })
                           )}
                         </div>
 
-                        {slots.some((slot) => slot.id === selectedSlot?.id) && (
-                          <Button
-                            onClick={() =>
-                              handleBook(selectedSlot!, clinic, schedule)
-                            }
-                            className="self-end flex items-center gap-2 text-sm capitalize"
-                          >
+                        {slots.some(
+                          (slot) => slot.id === scheduleState.slot?.id
+                        ) && (
+                          <Button onClick={handleBook} className="self-end">
                             book slot
                             <ClockArrowDown />
                           </Button>

@@ -1,4 +1,0 @@
-npm cmds -
-
-outdated - shows all outdated pckgs
-dedupe - remove dupes

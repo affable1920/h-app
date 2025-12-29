@@ -1,6 +1,8 @@
 import type { paths } from "@/types/api";
 
-type QueryParams = paths["/doctors"]["get"]["parameters"]["query"];
+export type DrQueryFilters = Omit<
+  NonNullable<paths["/doctors"]["get"]["parameters"]["query"]>,
+  "page" | "max"
+>;
 
-export type Filters = NonNullable<QueryParams>;
-export type CategoryFilters = Pick<Filters, "minRating" | "mode">;
+export type CategoryFilters = Pick<DrQueryFilters, "minRating">;

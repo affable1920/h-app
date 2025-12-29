@@ -1,7 +1,7 @@
 from sqlite3 import Time
 from uuid import UUID
 from typing import Annotated
-from pydantic import ConfigDict, Field, BaseModel
+from pydantic import ConfigDict, EmailStr, Field, BaseModel
 
 from app.config import Mode
 
@@ -9,18 +9,19 @@ from app.config import Mode
 class Clinic(BaseModel):
     id: UUID
     head: str
-    name: str
+
+    email: EmailStr
+    username: str
     owner_name: str
 
     address: str
     facilities: list[str] = []
+    pincode: int
     contact: str = Field(alias="mobile")
 
     whatsapp: str | None = None
     reviews: int | None = None
     rating: int | float = 0.0
-
-    parking_available: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -54,10 +55,12 @@ class Schedule(BaseModel):
     clinic_id: UUID
     doctor_id: UUID
 
+    clinic: Clinic | None = None
+
     slots: list[Slot]
 
     start: Time = Field(...)
     hours_available: int | None = Field(default=None)
     end: Time | None = Field(default=None)
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, extra="allow")

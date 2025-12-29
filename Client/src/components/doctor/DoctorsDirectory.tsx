@@ -1,5 +1,4 @@
 import Card from "@components/Card";
-import Button from "../common/Button";
 import Spinner from "@components/Spinner";
 
 import { useAllDoctors } from "@/hooks/useDoctorsQuery";
@@ -20,8 +19,7 @@ function DrCardFront({ drEssentials }: { drEssentials: DoctorSummary }) {
 }
 
 function DoctorsDirectory() {
-  const { isPending, data: { entities = [], total_count } = {} } =
-    useAllDoctors();
+  const { isPending, data: { entities = [] } = {} } = useAllDoctors();
 
   if (isPending) return <Spinner />;
 

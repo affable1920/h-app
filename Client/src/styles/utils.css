@@ -1,7 +1,3 @@
-@import "./config.css";
-
-/* Default app css utilities. */
-
 @utility container {
   width: 100%;
   margin-inline: auto;
@@ -21,24 +17,30 @@
 }
 
 @utility label {
-  font-weight: 700;
-  font-style: italic;
-  color: theme(--color-primary);
-
-  @apply capitalize;
-
-  @variant dark {
-    color: inherit;
-  }
+  @apply italic font-bold capitalize;
 
   &:is(.xs) {
     @apply text-xs;
   }
+
   &:is(.sm) {
     @apply text-sm;
   }
-  &:is(.lg) {
+
+  &:is(.md) {
     @apply text-lg;
+  }
+
+  &:is(.lg) {
+    @apply text-xl;
+  }
+
+  &.dark {
+    @apply text-primary;
+  }
+
+  &.light {
+    @apply text-white;
   }
 }
 

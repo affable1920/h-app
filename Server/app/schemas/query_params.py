@@ -1,5 +1,4 @@
 from enum import Enum
-from math import ceil
 from typing import Annotated, Literal
 from pydantic import BaseModel, Field, field_serializer
 
@@ -23,8 +22,8 @@ class PaginationParams(BaseModel):
     page: int = Field(default=1, gt=0)
     max: int = Field(default=10, gt=0, lt=25)
 
-    sort_by: str | None = "fullname"
-    sort_order: SortOrder | None = SortOrder.ASC
+    sort_by: str | None = Field(default="fullname", alias="sortBy")
+    sort_order: SortOrder | None = Field(default=SortOrder.ASC, alias="sortOrder")
 
     @property
     def offset(self):

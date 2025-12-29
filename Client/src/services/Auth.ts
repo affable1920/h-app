@@ -46,7 +46,7 @@ function SetSessionToken(
   // like set the session token (first, get a ref to the actual function)
   descriptor.value = async function (this: AuthClient, ...args: any) {
     const response = await originalMethod.apply(this, args);
-    const token = response.headers["x-auth-token"];
+    const token = response.headers?.["x-auth-token"];
 
     if (token) {
       localStorage.setItem("token", token);
@@ -80,7 +80,9 @@ class AuthClient extends APIClient {
 
     this.instance.interceptors.response.use(
       (response) => response,
-      function (ex: AxiosError) {}
+      function (ex: AxiosError) {
+        return ex;
+      }
     );
   }
 

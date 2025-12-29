@@ -39,7 +39,7 @@ async def login(user_cred: LoginUser, db: Session = Depends(get_db)):
     db_user = service.get_user(user_cred.email)
 
     if not db_user:
-        raise HTTPException(status_code=400, detail="Invalid email id!")
+        raise HTTPException(status_code=401, detail="Invalid email id!")
 
     is_authenticated = service.verify_pwd(user_cred.password, db_user.password)
 

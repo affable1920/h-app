@@ -1,7 +1,7 @@
 from enum import Enum
 from uuid import UUID
 from sqlalchemy.orm import Session
-from fastapi import Depends, APIRouter, Query
+from fastapi import Depends, APIRouter
 
 from app.database.entry import get_db
 from app.services.dr_service import DoctorService
@@ -33,5 +33,6 @@ async def get_doctor(id: UUID, db: Session = Depends(get_db)):
 
 
 @router.post("/{id}/book")
-async def book_schedule(id: str, data: DrScheduleData):
-    pass
+async def book_schedule(id: str, data: DrScheduleData, db: Session = Depends(get_db)):
+    print(id)
+    print(data)

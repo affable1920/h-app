@@ -110,7 +110,8 @@ class DataGenerator:
         self, doctor: Doctor, clinic: Clinic, base_duration: int = 20
     ) -> Schedule:
         """Generate realistic schedules with multiple clinics possible on same weekday."""
-        wkdays = random.sample([0, 1, 2, 3, 4, 5, 6], k=random.randint(1, 4))
+        all_days = [0, 1, 2, 3, 4, 5, 6]
+        wkdays = random.sample(all_days, k=random.randint(1, 4))
         is_morning = random.choice([True, False])
 
         if is_morning:
@@ -219,7 +220,9 @@ class DataGenerator:
         return [self.create_clinic() for _ in range(count)]
 
     def generate_schedules(self, doctor: Doctor, count: int = 40):
-        schedules = [self.create_schedule(doctor, clinic) for clinic in doctor.clinics]
+        num_clinics = random.sample(doctor.clinics, min(3, len(doctor.clinics)))
+
+        schedules = [self.create_schedule(doctor, clinic) for clinic in num_clinics]
 
         for schedule in schedules:
             slots = self.create_slots(schedule.start, schedule.end, schedule.id)

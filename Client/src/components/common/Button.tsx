@@ -1,69 +1,32 @@
 import { memo, useMemo, type ButtonHTMLAttributes } from "react";
-import { motion, type HTMLMotionProps } from "motion/react";
 
 import Spinner from "../Spinner";
-import type { ButtonProps } from "@/types/button";
+import { getClassConfig } from "./ButtonStylesConfig";
+import type { ButtonProps, Variant } from "@/types/button";
 
 const Button = memo(
-  <NeedsMotion extends boolean = false>(props: ButtonProps<NeedsMotion>) => {
+  <TVariant extends Variant>(props: ButtonProps<TVariant>) => {
+    const classConfig = useMemo(() => getClassConfig(props), [props]);
     const {
       children,
+      disabled = false,
+      loading = false,
+      className,
       startIcon,
       endIcon,
-      size = "sm",
-      className = "",
-      loading = false,
-      disabled = false,
-      color = "primary",
-      needsMotion = false,
-      variant = "contained",
       ...rest
     } = props;
 
-    const classConfig = useMemo(
-      function () {
-        const hasColor = variant === "contained";
-
-        return [
-          "btn",
-          size,
-          variant,
-          hasColor && color,
-          loading && "loading",
-          className,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .trim();
-      },
-      [size, variant, color, loading, className]
-    );
-
-    if (needsMotion) {
-      return (
-        <motion.button
-          className={classConfig}
-          disabled={loading || disabled}
-          {...(rest as HTMLMotionProps<"button">)}
-        >
-          {startIcon && startIcon}
-          {children}
-          {endIcon && endIcon}
-          {loading && <Spinner />}
-        </motion.button>
-      );
-    }
-
     return (
       <button
-        className={classConfig}
-        disabled={loading || disabled}
+        disabled={disabled || loading}
+        className={`${classConfig} ${className}`}
         {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}
       >
-        {startIcon && startIcon}
+        {startIcon}
         {children}
-        {endIcon && endIcon}
-        {loading && <Spinner />}
+        {loading && <Spinner size="xs" />}
+        {endIcon}
       </button>
     );
   }

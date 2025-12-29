@@ -1,47 +1,48 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import type { ReactNode, ButtonHTMLAttributes } from "react";
-import type { HTMLMotionProps } from "motion/react";
+export const COLORS = [
+  "slate",
+  "accent",
+  "primary",
+  "danger",
+  "warning",
+  "success",
+  "neutral",
+] as const;
 
-export const COLORS = {
-  slate: "slate",
-  accent: "accent",
-  primary: "primary",
-  danger: "danger",
-  warning: "warning",
-  success: "success",
-  neutral: "neutral",
-} as const;
+export const SIZES = ["sm", "md", "lg", "xl"] as const;
 
-export const VARIANTS = {
-  icon: "icon",
-  outlined: "outlined",
-  contained: "contained",
-} as const;
+export const ICONSIZES = ["xs", "sm", "md", "lg"] as const;
+export const VARIANTS = ["icon", "outlined", "contained", "link"] as const;
 
-export const SIZES = {
-  sm: "sm",
-  md: "md",
-  lg: "lg",
-  xl: "xl",
-} as const;
+export type Size = (typeof SIZES)[number];
+export type IconSize = (typeof ICONSIZES)[number];
 
-export type Size = keyof typeof SIZES;
-
-export type Color = keyof typeof COLORS;
-export type Variant = keyof typeof VARIANTS;
+export type Color = (typeof COLORS)[number];
+export type Variant = (typeof VARIANTS)[number];
 
 // these are props on all buttons
-type BaseProps = {
-  size?: Size;
-  color?: Color;
+
+type ColorForVariant<T extends Variant> = T extends "contained"
+  ? { variant?: "contained"; color?: Color }
+  : { variant?: Exclude<Variant, "contained"> };
+
+type SizeForVariant<T extends Variant> = T extends "icon" ? IconSize : Size;
+
+type IconsForVariant<T extends Variant> = T extends "contained" | "outlined"
+  ? {
+      startIcon?: ReactNode;
+      endIcon?: ReactNode;
+    }
+  : {
+      startIcon?: never;
+      endIcon?: never;
+    };
+
+export type ButtonProps<TVariant extends Variant = Variant> = {
+  size?: SizeForVariant<TVariant>;
   variant?: Variant;
   loading?: boolean;
-  children: ReactNode;
-  endIcon?: ReactNode;
-  startIcon?: ReactNode;
-};
-// extract props specific to the motion button
-export type ButtonProps<TMotion extends boolean = false> = BaseProps &
-  (TMotion extends true
-    ? HTMLMotionProps<"button"> & { needsMotion?: true }
-    : ButtonHTMLAttributes<HTMLButtonElement> & { needsMotion?: false });
+} & ColorForVariant<TVariant> &
+  IconsForVariant<TVariant> &
+  ButtonHTMLAttributes<HTMLButtonElement>;

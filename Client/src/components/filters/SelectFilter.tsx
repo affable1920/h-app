@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "motion/react";
 import Button from "../common/Button";
 import Dropdown from "../common/Dropdown";
 import { ChevronDown } from "lucide-react";
@@ -16,6 +17,19 @@ const SelectFilter = ({
 }: SelectFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  function chevron() {
+    return (
+      <motion.svg
+        animate={{
+          rotate: isOpen ? -180 : 0,
+          transition: { duration: 0.15 },
+        }}
+      >
+        <ChevronDown size={12} />
+      </motion.svg>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <Dropdown
@@ -27,10 +41,8 @@ const SelectFilter = ({
         size="lg"
         variant="outlined"
         className="italic"
+        endIcon={chevron()}
         onClick={() => setIsOpen((p) => !p)}
-        endIcon={
-          <ChevronDown className={`${isOpen && "rotate-180"}`} size={12} />
-        }
       >
         Filter by {label}
       </Button>

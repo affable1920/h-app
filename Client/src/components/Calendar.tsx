@@ -27,9 +27,15 @@ const Calendar = memo(({ schedules }: { schedules: Schedule[] }) => {
 
   const handleMonthChange = useCallback(
     (dir: Direction) => {
-      const newMonth =
-        dir === "right" ? monthInView.month + 1 : monthInView.month - 1;
-      if (newMonth < 1 || newMonth > 12) return;
+      const currMonth = monthInView.month;
+
+      const max = 12,
+        min = 1;
+
+      let newMonth = dir === "right" ? currMonth + 1 : currMonth - 1;
+
+      if (newMonth < 1) return;
+      if (newMonth === max) newMonth = min;
 
       setMonthInView((p) => p.set({ month: newMonth }));
     },

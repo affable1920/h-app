@@ -2,28 +2,34 @@ import type { paths } from "@/types/api";
 import { useSearchParams } from "react-router-dom";
 
 type ServerQuery = NonNullable<paths["/doctors"]["get"]["parameters"]["query"]>;
+type StoreState = Pick<
+  ServerQuery,
+  "max" | "page" | "searchQuery" | "sortBy" | "sortOrder"
+>;
+type SortOrder = StoreState["sortOrder"];
 
 type StoreActions = {
   setPage: (cp: number) => void;
   setSearchQuery: (sq: string) => void;
+  setSort: (field: string, order: SortOrder) => void;
 
   reset: () => void;
   clearSearchQuery: () => void;
-  setQuery?: <T extends keyof ServerQuery>(key: T, val: ServerQuery[T]) => void;
 };
 
-function useQueryStore() {
-  const [searchParams, setSearchParams] = useSearchParams();
+function useQueryStore(): StoreState & StoreActions {
+  const max = 8;
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get("page") ?? 1);
   const searchQuery = searchParams.get("searchQuery") ?? null;
 
-  const maxDistance = Number(searchParams.get("maxDistance")) ?? null;
-  const minRating = Number(searchParams.get("minRating") ?? null);
-  const specialization = searchParams.get("specialization") ?? null;
-
-  const currentlyAvailable =
-    Boolean(searchParams.get("currentlyAvailable")) ?? null;
+  const sortBy: StoreState["sortBy"] = searchParams.get("sortBy") ?? "rating";
+  const sortOrderParam = searchParams.get("sortOrder");
+  const sortOrder: SortOrder =
+    sortOrderParam === "asc" || sortOrderParam === "desc"
+      ? sortOrderParam
+      : "desc";
 
   function setSearchQuery(sq: string) {
     const key = "searchQuery";
@@ -53,25 +59,27 @@ function useQueryStore() {
     setSearchParams({});
   }
 
-  // function setQuery<T extends keyof ServerQuery>(key: T, val: ServerQuery[T]) {
-  //   if (val)
-  //     setSearchParams((p) => {
-  //       p.set(key, val.toString());
-  //       return p;
-  //     });
-  // }
+  function setSort(field: string | null, order: SortOrder) {
+    setSearchParams((p) => {
+      if (field) {
+        p.set("sortBy", field);
+      }
 
-  function setSort(property: string, order: "asc" | "desc" = "asc") {
-    searchParams.set("sortBy", property);
-    searchParams.set("sortOrder", order);
+      p.set("sortOrder", String(order));
+      return p;
+    });
   }
 
-  const store: ServerQuery & StoreActions = {
+  const store = {
+    max,
     page,
-    searchQuery,
     reset,
     setPage,
-    // setQuery,
+    sortBy,
+    sortOrder,
+    setSort,
+
+    searchQuery,
     setSearchQuery,
     clearSearchQuery,
   };

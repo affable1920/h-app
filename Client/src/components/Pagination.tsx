@@ -2,14 +2,15 @@ import { useCallback } from "react";
 import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 
 import ButtonElement from "./common/Button";
+import useQueryStore from "@/stores/queryStore";
 import { ArrowBigRightDash, ArrowBigLeftDash } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { MdLockReset } from "react-icons/md";
+import Button from "./common/Button";
 
 const Pagination = () => {
-  const [params, setSearchParams] = useSearchParams();
-  const { data: { has_next = false, has_prev = false } = {} } = useAllDoctors();
-
-  const page = Number(params.get("page")) ?? 1;
+  const { data: { has_next = true, has_prev = false, paginated_count } = {} } =
+    useAllDoctors();
+  const { page = 1, setPage, reset } = useQueryStore();
 
   const handlePageChange = useCallback((direction: "next" | "prev") => {
     if (
@@ -19,22 +20,39 @@ const Pagination = () => {
       return;
 
     const nextPage = direction === "next" ? page + 1 : page - 1;
-    setSearchParams((p) => {
-      p.set("page", nextPage.toString());
-      return p;
-    });
+    setPage(nextPage);
   }, []);
+
+  if (paginated_count === 0)
+    return (
+      <article
+        data-tooltip="Reset all filters !"
+        className="flex justify-center items-center"
+      >
+        <Button onClick={reset} variant="icon" size="md">
+          <MdLockReset />
+        </Button>
+      </article>
+    );
 
   return (
     <article className="flex self-end items-center gap-4">
-      {!has_prev && (
-        <ButtonElement variant="icon" onClick={() => handlePageChange("prev")}>
+      {has_prev && (
+        <ButtonElement
+          size="md"
+          variant="icon"
+          onClick={() => handlePageChange("prev")}
+        >
           <ArrowBigLeftDash />
         </ButtonElement>
       )}
 
       {has_next && (
-        <ButtonElement variant="icon" onClick={() => handlePageChange("next")}>
+        <ButtonElement
+          size="md"
+          variant="icon"
+          onClick={() => handlePageChange("next")}
+        >
           <ArrowBigRightDash />
         </ButtonElement>
       )}

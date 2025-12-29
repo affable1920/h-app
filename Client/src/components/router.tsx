@@ -43,8 +43,8 @@ async function loadDoctor({ params }: LoaderFunctionArgs) {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
-    errorElement: <ErrorBoundary />,
+    Component: Layout,
+    ErrorBoundary: ErrorBoundary,
 
     children: [
       { index: true, Component: HomePage },
@@ -63,7 +63,12 @@ const router = createBrowserRouter([
 
               {
                 path: "clinics",
-                children: [{ index: true, Component: ClinicsDirectory }],
+                children: [
+                  {
+                    index: true,
+                    Component: ClinicsDirectory,
+                  },
+                ],
               },
             ],
           },
@@ -81,7 +86,10 @@ const router = createBrowserRouter([
         Component: Scheduler,
       },
 
-      { path: "chat", Component: Chat },
+      {
+        path: "chat",
+        Component: Chat,
+      },
     ],
   },
 

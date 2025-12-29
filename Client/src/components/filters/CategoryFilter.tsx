@@ -1,40 +1,36 @@
 import Ratings from "../Ratings";
 import Badge from "../common/Badge";
 import type { ButtonProps } from "@/types/button";
-import { type CategoryFilters } from "./types";
 
-type CategoryFilterKey = keyof CategoryFilters;
-
-interface CategoryFilterProps<T extends CategoryFilterKey> {
-  label: T;
+interface CategoryFilterProps {
+  label: string;
   size?: ButtonProps["size"];
   options: number[] | string[];
-  optionIsSelected?: T extends "minRating" ? number : string;
-  onOptionSelect: (label: T, option: CategoryFilters[T]) => void;
+  selectedOption?: number | string;
+  onOptionSelect: (option: number | string) => void;
 }
 
-const CategoryFilter = <T extends CategoryFilterKey>({
-  size = "md",
+const CategoryFilter = ({
   label,
   options,
-  optionIsSelected,
+  selectedOption,
   onOptionSelect,
-}: CategoryFilterProps<T>) => {
+}: CategoryFilterProps) => {
   return (
     <div className="filter-div">
-      <label className="label">Filter by {label}</label>
-      <div className="flex gap-2 flex-wrap">
+      <label>{label}</label>
+      <div className="flex gap-2 items-center ml-auto">
         {options.map((option) => (
           <Badge
+            size="md"
             key={option}
-            size={"sm"}
-            on={() => option == optionIsSelected}
-            onClick={() => onOptionSelect(label, option as CategoryFilters[T])}
+            selected={option == selectedOption}
+            onClick={() => onOptionSelect(option)}
           >
-            {label === "minRating" ? (
+            {label.toLowerCase().includes("rating") ? (
               <Ratings rating={option as number} />
             ) : (
-              (option as string)?.replaceAll("_", " ")
+              option
             )}
           </Badge>
         ))}

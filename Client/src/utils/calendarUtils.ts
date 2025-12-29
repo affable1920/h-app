@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { DAYS_OF_WEEK } from "./constants";
+import { WEEKDAYS } from "./constants";
 
 function getPreviousMonthDays(date: DateTime): DateTime[] {
   const countPrevMonth = DateTime.local().set({
@@ -64,6 +65,10 @@ export function getWeekData(daysAvailable: number[]) {
   };
 }
 
-export function getWeekday(index: number): number {
-  return DAYS_OF_WEEK[index] as number;
+export function getWeekday(index: number): (typeof WEEKDAYS)[number] {
+  if (index < 0 || index >= WEEKDAYS.length) {
+    throw new Error("Invalid weekday index");
+  }
+
+  return WEEKDAYS[index];
 }

@@ -4,6 +4,7 @@ import {
   useMemo,
   type ReactNode,
   useEffect,
+  useContext,
 } from "react";
 import { jwtDecode } from "jwt-decode";
 
@@ -19,7 +20,7 @@ export const AuthContext = createContext<AuthContextType>({
 
 AuthContext.displayName = "AuthContext";
 
-export default function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<{} | null>(null);
   const state = useMemo(() => ({ user, setUser }), [user]);
 
@@ -29,4 +30,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const state = useContext(AuthContext);
+  return state;
 }

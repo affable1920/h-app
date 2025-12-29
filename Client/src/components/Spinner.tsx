@@ -1,15 +1,14 @@
-type Size = "xs" | "sm" | "md" | "lg";
+import type { IconSize } from "@/types/button";
 
-interface SpinnerProps {
-  size?: Size;
+const Spinner = ({
+  loading = true,
+  size = "sm",
+}: {
+  size?: IconSize;
   loading?: boolean;
-}
-
-const Spinner = ({ loading = true, size = "sm" }: SpinnerProps) => {
+}) => {
   if (!loading) return null;
-  const spinnerClasses = ["spinner", size].filter(Boolean).join(" ").trim();
-
-  return <div className={spinnerClasses} />;
+  return <div className={`spinner ${size.toString()}`} />;
 };
 
 export default Spinner;

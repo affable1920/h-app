@@ -2,26 +2,39 @@ import { useState, useMemo, Suspense } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Spinner from "../Spinner";
-import Badge from "../common/Badge";
 import Input from "@/components/common/Input";
 
 import Pagination from "@components/Pagination";
 import Button from "@/components/common/Button";
 
 import { debounce } from "@/utils/appUtils";
-import { IoRefreshOutline } from "react-icons/io5";
 import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
 
-import useQueryStore from "@stores/queryStore";
 import useModalStore from "@/stores/modalStore";
-import { useAllDoctors } from "@/hooks/useDoctorsQuery";
+import useQueryStore from "@/stores/queryStore";
+
+import { AiOutlineSortAscending } from "react-icons/ai";
+import { AiOutlineSortDescending } from "react-icons/ai";
 
 const Directory = () => {
   const navigate = useNavigate();
   const [localSQ, setLocalSQ] = useState("");
 
-  const { data: { applied_filters = [] } = {} } = useAllDoctors();
-  const { searchQuery, setSearchQuery, clearSearchQuery } = useQueryStore();
+  /*
+  Using functions from the filter store anywhere will resolve in an error when not used as instances 
+  of the store object (destructured.) because they lose their "this" binding.
+
+  Use arrow methods inside the class.
+  use as instanc methods on the object itself -> store.functionName
+  */
+  const {
+    searchQuery,
+    setSearchQuery,
+    clearSearchQuery,
+    sortOrder = "desc",
+    sortBy,
+    setSort,
+  } = useQueryStore();
 
   const setQueryCached = useMemo(function () {
     return debounce(setSearchQuery, 200);
@@ -34,7 +47,7 @@ const Directory = () => {
     navigate(`/${nextDir}`);
   }
 
-  function handleFilterState() {
+  function openDirectoryFilter() {
     useModalStore.getState().openModal("directoryFilter", {
       viewOverlay: true,
       position: "bottom",
@@ -46,58 +59,55 @@ const Directory = () => {
     setQueryCached(query);
   }
 
+  function removeSearchQuery() {
+    setLocalSQ("");
+    clearSearchQuery();
+  }
+
   return (
     <section className="flex flex-col gap-4 mx-auto">
       <section className="w-full rounded-md flex items-center justify-between gap-4">
-        {/* search bar */}
+        <div className="flex items-center gap-2">
+          <Button variant="icon" onClick={openDirectoryFilter}>
+            <SlidersHorizontal />
+          </Button>
 
-        <div className="flex items-center gap-4 order-1">
-          <Input
-            value={localSQ}
-            placeholder="Search"
-            className="italic placeholder:text-sm"
-            onChange={(ev) => handleSearch(ev.target.value)}
+          <Button
+            variant="icon"
+            onClick={() =>
+              setSort(sortBy ?? "rating", sortOrder === "asc" ? "desc" : "asc")
+            }
+            data-tooltip={sortOrder}
           >
-            <Button variant={"icon"}>
-              {searchQuery ? <X onClick={clearSearchQuery} /> : "Ctrl K"}
-            </Button>
+            {sortOrder === "asc" ? (
+              <AiOutlineSortAscending />
+            ) : (
+              sortOrder === "desc" && <AiOutlineSortDescending />
+            )}
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* search bar */}
+          <Input>
+            <Input.InputElement
+              value={localSQ}
+              placeholder="Search"
+              className="italic placeholder:text-sm"
+              onChange={(ev) => handleSearch(ev.target.value)}
+            />
+            {searchQuery && (
+              <Button variant="icon" size="xs">
+                <X onClick={removeSearchQuery} />
+              </Button>
+            )}
           </Input>
 
-          <Button size="md" variant="icon" onClick={handleDirectorySwitch}>
+          <Button variant="icon" onClick={handleDirectorySwitch}>
             <ArrowLeftRight />
           </Button>
         </div>
-
-        {/* rest of the filters  */}
-        <div className="flex gap-4 items-center">
-          <Button
-            size="md"
-            variant="icon"
-            onClick={handleFilterState}
-            className="[&:has(.info)]:relative max-w-fit flex items-center"
-          >
-            <SlidersHorizontal />
-            {!!applied_filters.length && (
-              <Badge content={applied_filters.length.toString()} />
-            )}
-          </Button>
-
-          {!!applied_filters.length && (
-            <Button variant="icon">
-              <IoRefreshOutline />
-            </Button>
-          )}
-        </div>
       </section>
-
-      {applied_filters && (
-        <section className="flex items-center gap-4 flex-wrap">
-          {applied_filters.map(([, appliedFilterVal]) => (
-            <Badge content={appliedFilterVal} />
-          ))}
-        </section>
-      )}
-
       <section className="directory-layout">
         {/* outlet renders either the Doctor or clinic directory */}
         <Suspense fallback={<Spinner />}>

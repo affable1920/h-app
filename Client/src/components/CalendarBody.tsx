@@ -23,9 +23,15 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
     [monthInView]
   );
 
-  const availableDays = useMemo(
+  const allScheduleDays = useMemo(
     function () {
-      return schedules?.map((s) => s.weekday) || [];
+      const days = [];
+
+      for (let schedule of schedules) {
+        days.push(schedule.weekdays);
+      }
+
+      return days.flat().sort((a, b) => a - b);
     },
     [schedules]
   );
@@ -34,6 +40,13 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
     return (
       date.month < monthInView.month ||
       (date.month === monthInView.month && date.day < monthInView.day)
+    );
+  }
+
+  function isWkdayToday(day: (typeof WEEKDAYS)[number]) {
+    return (
+      day.toLowerCase() === today.weekdayLong?.toLowerCase() &&
+      monthInView.month === today.month
     );
   }
 
@@ -46,10 +59,7 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
         <h2
           key={i}
           className={`opacity-80 font-black underline-offset-4 capitalize  ${
-            day.toLowerCase() === monthInView.weekdayLong?.toLowerCase() &&
-            monthInView.month === today.month
-              ? "text-accent-dark underline font-black"
-              : ""
+            isWkdayToday(day) ? "text-accent-dark underline font-black" : ""
           }`}
         >
           {day.slice(0, 3)}
@@ -61,7 +71,9 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
           <CalendarDay
             date={date}
             key={`${date.day}-${date.month}-${date.year}`}
-            disabled={isDateGone(date) || !availableDays.includes(date.weekday)}
+            disabled={
+              isDateGone(date) || !allScheduleDays.includes(date.weekday)
+            }
           />
         );
       })}

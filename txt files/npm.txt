@@ -1,0 +1,41 @@
+npm cmds -
+
+outdated - shows all outdated pckgs
+dedupe - remove dupes
+
+
+The Two types of dependencies - 
+1. dependencies - packages our app in production needs to work/run
+
+for example - react, axios, tailwindcss
+These can be found inside package.json under dependencies
+
+
+1. devDependencies
+The deps your app needs to run just in development
+for example - vite, typescript, eslint
+
+Install them using the same npm cmd for Installing packages with a subtle diff -
+npm install <package-name> - install deps
+npm install -D|--save-dev <package-name> - installs dev-deps
+
+
+npm install <package-name>@latest -> installs latest version of a package
+npm update --latest -> updates all packages
+
+
+--- 
+npm list -> list all installed packages - defaults to current project
+npm list -g -> list globally installed ...
+npm view <package-name> -> view a particular package
+npm info <p-name> -> detailed info on the package
+npm docs <p-name> -> docs of a particuar package
+
+npm cache clean -> clear npm cache
+npm cache clean --force -> clear npm cache, forcefully
+
+-f | --force -> Force an operation, may break things
+
+npm audit -> check for vulnerabilities
+npm audit fix -> fix vuls.
+npm audit fix --force -> forcefull fix vulns.

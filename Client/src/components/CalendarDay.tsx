@@ -2,10 +2,14 @@ import { memo } from "react";
 import { DateTime } from "luxon";
 
 import Badge from "@components/common/Badge";
-import useScheduleStore from "@stores/scheduleStore";
+import { useSchedule } from "./providers/ScheduleProvider";
 
 function isDateToday(date: DateTime) {
   return date.startOf("day").equals(DateTime.now().startOf("day"));
+}
+
+function areDatesEqual(dtA: DateTime, dtB: DateTime) {
+  return dtA.startOf("day").equals(dtB.startOf("day"));
 }
 
 interface CalendarDayProps {
@@ -15,9 +19,10 @@ interface CalendarDayProps {
 
 const CalendarDay = memo(({ ...props }: CalendarDayProps) => {
   const { date, disabled = false } = props;
-
-  const selectedDate = useScheduleStore((s) => s.selectedDate);
-  const setSelectedDate = useScheduleStore((s) => s.setSelectedDate);
+  const {
+    state,
+    actions: { setDate },
+  } = useSchedule();
 
   function getTooltipText() {
     return !disabled ? "Available" : "No schedules available on this date";
@@ -32,8 +37,8 @@ const CalendarDay = memo(({ ...props }: CalendarDayProps) => {
       current={isDateToday(date)}
       content={date.day.toString()}
       data-tooltip={getTooltipText()}
-      onClick={() => setSelectedDate(date)}
-      selected={selectedDate?.startOf("day")?.equals(date.startOf("day"))}
+      onClick={() => setDate(date)}
+      selected={state.date ? areDatesEqual(state.date, date) : false}
     />
   );
 });

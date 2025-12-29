@@ -15,7 +15,7 @@ const ErrorBoundary = () => {
     >
       <h1 className="label text-error-dark">{msg}</h1>
 
-      <Button className="w-fit">
+      <Button variant="link">
         <Link to="/">Go back to home</Link>
       </Button>
     </div>

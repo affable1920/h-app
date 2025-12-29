@@ -31,7 +31,7 @@ class DoctorService:
 
     @staticmethod
     def get_full_dr(dr: DBDoctor) -> Doctor:
-        return Doctor.model_validate(dr)
+        return Doctor.model_validate(dr, from_attributes=True)
 
     @staticmethod
     def __filter(
@@ -60,7 +60,7 @@ class DoctorService:
             query = query.filter(DBDoctor.currently_available)
 
         if filters.search_query:
-            query = query.filter(DBDoctor.fullname.ilike(filters.search_query))
+            query = query.filter(DBDoctor.fullname.icontains(filters.search_query))
 
         if filters.mode == Mode.ONLINE:
             query = query.filter(DBDoctor.consults_online)
@@ -111,6 +111,7 @@ class DoctorService:
 
     def get_by_id(self, id: UUID) -> Doctor | None:
         rqstd_doctor = self.db.query(DBDoctor).where(DBDoctor.id == id).first()
+
         if not rqstd_doctor:
             raise HTTPException(
                 404,
@@ -120,6 +121,7 @@ class DoctorService:
                     "desc": "No such doctor exists in our db",
                 },
             )
+
         return self.get_full_dr(rqstd_doctor) if rqstd_doctor else None
 
     def update_doctor(self, id: UUID):
@@ -128,7 +130,7 @@ class DoctorService:
 
 class DoctorHelper:
     def __init__(self, id: str, db: Session):
-        pass
+        self.db = db
 
     async def book(
         self,

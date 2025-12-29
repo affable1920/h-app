@@ -1,6 +1,10 @@
 @import "tailwindcss";
-@source "src/**/*.{html,ts,tsx,css}";
+@source "../../**/*.{js,jsx,ts,tsx,html,css}";
 
+@import "./utils.css";
+@import "./components.css";
+
+/* The import below checks all dirs and sub-dirs for tailwindcss styles */
 /* 
 Import using @import directive
 import the tailwindcss dep, includes base, layer, theme etc. by default.
@@ -11,7 +15,6 @@ utility directive for custom utilities
 custom-variant for custom variants,
 and variant for applying variants
 */
-
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant show (&:where(.show, .show *));
 

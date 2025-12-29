@@ -204,8 +204,13 @@ export interface components {
             id: string;
             /** Head */
             head: string;
-            /** Name */
-            name: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Username */
+            username: string;
             /** Owner Name */
             owner_name: string;
             /** Address */
@@ -215,6 +220,8 @@ export interface components {
              * @default []
              */
             facilities: string[];
+            /** Pincode */
+            pincode: number;
             /** Mobile */
             mobile: string;
             /** Whatsapp */
@@ -226,11 +233,6 @@ export interface components {
              * @default 0
              */
             rating: number;
-            /**
-             * Parking Available
-             * @default false
-             */
-            parking_available: boolean;
         };
         /** CreateUser */
         CreateUser: {
@@ -308,6 +310,8 @@ export interface components {
              * @default []
              */
             schedules: components["schemas"]["Schedule"][];
+        } & {
+            [key: string]: unknown;
         };
         /** DoctorSummary */
         DoctorSummary: {
@@ -447,6 +451,7 @@ export interface components {
              * Format: uuid
              */
             doctor_id: string;
+            clinic?: components["schemas"]["Clinic"] | null;
             /** Slots */
             slots: components["schemas"]["Slot"][];
             /**
@@ -458,6 +463,8 @@ export interface components {
             hours_available?: number | null;
             /** End */
             end?: string | null;
+        } & {
+            [key: string]: unknown;
         };
         /** Slot */
         Slot: {
@@ -600,8 +607,8 @@ export interface operations {
             query?: {
                 page?: number;
                 max?: number;
-                sort_by?: string | null;
-                sort_order?: components["schemas"]["SortOrder"] | null;
+                sortBy?: string | null;
+                sortOrder?: components["schemas"]["SortOrder"] | null;
                 specialization?: string | null;
                 mode?: "online" | null;
                 currentlyAvailable?: boolean;

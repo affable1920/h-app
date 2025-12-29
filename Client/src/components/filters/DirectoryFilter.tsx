@@ -1,84 +1,56 @@
-import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useCallback, useState } from "react";
 
-import SelectFilter from "./SelectFilter";
-import Input from "../common/Input";
-
-import Badge from "../common/Badge";
-import Button from "../common/Button";
-import CategoryFilter from "./CategoryFilter";
-
-import { AnimatePresence } from "motion/react";
 import useModalStore from "@/stores/modalStore";
+import Badge from "@components/common/Badge";
+import { AnimatePresence } from "motion/react";
+import { MdCancel } from "react-icons/md";
+import Button from "../common/Button";
+import Input from "../common/Input";
+import CategoryFilter from "./CategoryFilter";
+import SelectFilter from "./SelectFilter";
 
+import * as constants from "@/utils/constants";
+import { useSearchParams } from "react-router-dom";
+import type { paths } from "@/types/api";
 import useQueryStore from "@/stores/queryStore";
-import * as constants from "../../utils/constants";
-import type { CategoryFilters, Filters } from "./types";
 
-type CategoryFilterKey = keyof CategoryFilters;
+const RATINGFILTER = {
+  label: "rating",
+  options: [2, 3, 4],
+};
 
-const categoryFilters: {
-  label: CategoryFilterKey;
-  options: string[] | number[];
-}[] = [
-  {
-    label: "mode",
-    options: ["online", "offline"],
-  },
-  {
-    label: "minRating",
-    options: [2, 3, 4],
-  },
-];
+type FilterState = Omit<
+  NonNullable<paths["/doctors"]["get"]["parameters"]["query"]>,
+  "max" | "page" | "sortBy" | "sortOrder" | "searchQuery"
+>;
+
+type FilterKey = keyof FilterState;
 
 const DirectoryFilter = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [filters, setFilters] = useState<Partial<FilterState>>({});
+  const { reset } = useQueryStore();
 
-  const { setQuery } = useQueryStore();
+  function handleFilterUpdate<K extends FilterKey>(
+    key: K,
+    val: FilterState[K]
+  ) {
+    if (filters[key] === val) {
+      setFilters((p) => ({ ...p, [key]: undefined }));
+      return;
+    }
 
-  // filter state - for updating local state first,
-  // then a single api call on apply click
-  const [filters, setFilters] = useState<Partial<Filters>>(() =>
-    Object.fromEntries(searchParams.entries())
-  );
-
-  useEffect(
-    function () {
-      setFilters(Object.fromEntries(searchParams.entries()));
-    },
-    [searchParams]
-  );
-
-  const activeFilterCount = Object.values(filters).filter(Boolean).length;
-
-  function handleFilterUpdate<T extends keyof Filters>(
-    key: T,
-    value: Filters[T] | null
-  ): void {
-    setFilters((p) => ({ ...p, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: val }));
   }
+
+  const selectedSpecialization = filters.specialization ?? null;
+  const [, setSearchParams] = useSearchParams();
 
   const handleSpecUpdate = useCallback(function (spec: string | null) {
     handleFilterUpdate("specialization", spec);
-    // set("specialization", spec);
   }, []);
 
-  const handleCategoryUpdate = useCallback(
-    function <T extends CategoryFilterKey>(
-      label: T,
-      option: CategoryFilters[T]
-    ) {
-      if (filters?.[label] === option) {
-        handleFilterUpdate(label, null);
-        return;
-      }
-
-      handleFilterUpdate(label, option);
-    },
-    [filters]
-  );
-
-  const selectedSpecialization = filters?.["specialization"];
+  const activeFilterCount = Object.values(filters).filter(Boolean).length;
+  const closeModal = useModalStore((s) => s.closeModal);
 
   async function applyFiltersHTTP() {
     // Required before applying filters -
@@ -97,26 +69,21 @@ const DirectoryFilter = () => {
 
     try {
       setSearchParams(newParams);
-      useModalStore.getState().closeModal();
+      closeModal();
     } catch (ex) {
       console.log(ex);
     }
   }
 
   return (
-    <section className="flex flex-col h-full gap-8 p-4 relative text-sm">
+    <section className="flex flex-col h-full gap-8 p-4 px-6 relative text-sm">
       <div className="flex items-center justify-between">
         {activeFilterCount > 0 && (
-          <div className="absolute top-0 right-0">
-            <Button
-              color="accent"
-              variant="contained"
-              onClick={() => setFilters({})}
-              className="hover:underline underline-offset-2"
-            >
-              Clear all
-            </Button>
+          <div className="ml-auto flex items-center gap-2">
             <Badge>{activeFilterCount}</Badge>
+            <Button variant="icon" onClick={reset}>
+              <MdCancel />
+            </Button>
           </div>
         )}
       </div>
@@ -126,9 +93,9 @@ const DirectoryFilter = () => {
             {selectedSpecialization && (
               <Badge
                 as="button"
-                needsMotion={true}
-                className="w-fit capitalize"
-                on={() => !!selectedSpecialization}
+                size="md"
+                className="max-w-fit capitalize"
+                selected={!!selectedSpecialization}
                 onClick={() => handleSpecUpdate(null)}
               >
                 {selectedSpecialization}
@@ -149,59 +116,52 @@ const DirectoryFilter = () => {
         </div>
 
         <div className="filter-div">
-          <Input
-            type="range"
-            name="distance"
-            label="Filter by distance"
-            onChange={(ev) =>
-              handleFilterUpdate("maxDistance", parseInt(ev.target.value))
-            }
-          />
-          <div className="flex justify-between items-center italic font-bold">
-            <span>1 km</span>
-            <span>40 km</span>
-          </div>
+          <Input>
+            <Input.Label color="light">Filter by distance</Input.Label>
+            <Input.InputElement
+              type="range"
+              name="distance"
+              onChange={(ev) =>
+                handleFilterUpdate("maxDistance", parseInt(ev.target.value))
+              }
+            />
+            <div className="flex justify-between items-center italic font-bold">
+              <span>1 km</span>
+              <span>40 km</span>
+            </div>
+          </Input>
         </div>
 
-        {categoryFilters.map((category) => (
+        <div className="flex flex-col gap-4">
           <CategoryFilter
             size="md"
-            key={category.label}
-            label={category.label}
-            options={category.options}
-            onOptionSelect={handleCategoryUpdate}
-            optionIsSelected={filters?.[category.label] ?? undefined}
+            options={RATINGFILTER.options}
+            label={"Filter by " + RATINGFILTER.label}
+            selectedOption={filters["minRating"] ?? undefined}
+            onOptionSelect={handleFilterUpdate.bind(null, "minRating")}
           />
-        ))}
+          <Badge
+            size="md"
+            className="italic max-w-fit ml-auto"
+            selected={filters.currentlyAvailable}
+            onClick={() => handleFilterUpdate("currentlyAvailable", true)}
+          >
+            Available right now !
+          </Badge>
 
-        <Badge
-          onClick={() =>
-            handleFilterUpdate(
-              "currentlyAvailable",
-              (function (p) {
-                return !p;
-              })(filters?.currentlyAvailable)
-            )
-          }
-          className="max-w-fit italic"
-        >
-          Available right now !
-          <Input
-            readOnly
-            type="checkbox"
-            name="availability"
-            className="cursor-pointer"
-            checked={!!filters?.currentlyAvailable}
-          />
-        </Badge>
+          <Badge
+            size="md"
+            selected={filters.mode === "online"}
+            className="italic max-w-fit ml-auto"
+            onClick={() => handleFilterUpdate("mode", "online")}
+          >
+            Online
+          </Badge>
+        </div>
       </section>
 
       <div className="flex items-center gap-4 justify-end">
-        <Button
-          size="md"
-          variant="outlined"
-          onClick={useModalStore.getState().closeModal}
-        >
+        <Button size="md" variant="outlined" onClick={closeModal}>
           Cancel
         </Button>
         <Button size="md" variant="outlined" onClick={applyFiltersHTTP}>

@@ -136,6 +136,11 @@ export const WEEKDAYS = [
   "saturday",
 ] as const;
 
+export const WEEKDAY_MAP: Record<number, string> = WEEKDAYS.reduce(
+  (acc, currDay, index) => ({ ...acc, [index]: currDay }),
+  {}
+);
+
 export const DAYS_OF_WEEK = [...Array.from({ length: 7 })] as const;
 
 // Types for type safety

@@ -36,9 +36,10 @@ function SignIn() {
 
       toast.info("Signed in successfully!", {});
     } catch (ex) {
-      console.log(ex);
+      const { description = "", msg = "" } = ex as any;
+      console.log(description, msg);
 
-      toast.error("Sign in failed");
+      toast.error(description ?? "Sign in failed", { description: msg });
     } finally {
       setLoading(false);
     }
@@ -47,21 +48,26 @@ function SignIn() {
   return (
     <div className="flex flex-col gap-8">
       <article className="flex flex-col gap-8">
-        <Input
-          autoFocus
-          type="email"
-          name="email"
-          label="email"
-          value={user.email}
-          onChange={handleChange}
-        />
-        <Input
-          name="password"
-          type="password"
-          label="password"
-          value={user.password}
-          onChange={handleChange}
-        />
+        <Input>
+          <Input.Label>email</Input.Label>
+          <Input.InputElement
+            autoFocus
+            type="email"
+            name="email"
+            value={user.email}
+            onChange={handleChange}
+          />
+        </Input>
+
+        <Input>
+          <Input.Label>password</Input.Label>
+          <Input.InputElement
+            name="password"
+            type="password"
+            value={user.password}
+            onChange={handleChange}
+          />
+        </Input>
       </article>
       <article className="flex flex-col gap-3">
         <Button type="submit" size="md" onClick={submit} loading={loading}>

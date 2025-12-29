@@ -1,7 +1,3 @@
-@import "./config.css";
-@import "./utils.css";
-
-/* layer components 1 */
 @layer components {
   .navbar {
     @apply container flex min-h-14 justify-between items-center;
@@ -67,28 +63,15 @@
   .input-box {
     @apply flex flex-col tracking-widest;
 
-    &:has(.badge, .icon) {
+    &:has(button) {
       @apply relative;
     }
 
-    &:has(.badge, .icon) > button {
+    & > button {
       @apply italic text-sm w-fit absolute top-1/2 right-2 -translate-y-1/2 shadow-none border-none px-1;
     }
 
     &:has(label) {
-      @apply gap-1.5;
-    }
-  }
-
-  div:is(.filter-div) {
-    @apply flex flex-col gap-4 italic;
-
-    & label {
-      @apply text-sm text-shadow-xs italic font-bold bg-secondary/80 p-2 py-1 
-      text-white;
-    }
-
-    &:has(.input-box) .input-box {
       @apply gap-2;
     }
   }
@@ -103,7 +86,7 @@
 
     &:is(.bottom) {
       @apply fixed bottom-0 left-0 w-full rounded-t-md border-t-slate-300 ring-4 ring-blue-400/40
-      max-h-[628px] overflow-y-scroll;
+       overflow-y-scroll;
 
       scrollbar-width: none;
     }
@@ -153,8 +136,7 @@
       @apply ring-1 ring-accent/20 rotate-[7.5deg];
     }
 
-    &:disabled,
-    &.disabled {
+    &:disabled {
       @apply cursor-default opacity-40 pointer-events-none shadow-none font-semibold;
     }
 
@@ -169,27 +151,34 @@
         @apply bg-amber-400 border-amber-700 shadow-none ring-2 ring-amber-800/10;
       }
     }
-
-    &.dot {
-      @apply z-2 text-white bg-primary rounded-full text-xs font-bold shadow-none 
-        border-none absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 pointer-events-none;
-    }
   }
 
   .spinner {
-    @apply border-4 rounded-full border-black border-b-accent-dark rotate-[360deg] animate-spin 
+    @apply border-4 rounded-full border-secondary border-b-accent-dark rotate-360 animate-spin 
     duration-[infinity];
 
-    &:is(.xs) {
-      @apply size-2;
+    &.xs {
+      @apply size-3;
     }
 
-    &:is(.sm) {
-      @apply size-4;
+    &.sm {
+      @apply size-5;
     }
 
-    &:is(.md) {
+    &.md {
       @apply size-6;
+    }
+
+    &.lg {
+      @apply size-8;
+    }
+  }
+
+  .filter-div {
+    @apply flex flex-col gap-4;
+
+    & label {
+      @apply bg-primary-lightest/80 text-shadow-xs p-2 py-1 text-white italic font-bold capitalize;
     }
   }
 }

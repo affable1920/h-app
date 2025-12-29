@@ -50,7 +50,7 @@ class Model(...):
         your logic
 
 
-if you want the serializer to apply to all fields, use * (includes fields from subclasses)
+if you want the serializer to apply to all fields, use * ('ll includes fields of subclasses)
 
 By default, the decorator will ensure the provided field name(s) are defined on the model. 
 If you want to disable this check during class creation, you can do so by passing 

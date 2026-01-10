@@ -36,3 +36,10 @@ type Config = {
 }
 
 type ReadonlyConfig = DeepRead<Config>
+
+
+
+js target vs current target
+target is the clicked element - talking in context of a click event &&
+event target is the element to which the ev listener is attached -> mostly the document (html) element
+or a button 

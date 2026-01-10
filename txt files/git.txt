@@ -40,3 +40,12 @@ git checkout {branch_name} -> moves from current branch to this branch
 
 
 - remember to switch to some branch after creating it
+
+made changes -> added files and committed as well
+but, forgot adding some files ?
+do this: 
+add those files
+git add "{path}"
+
+git commit --amend -> adds this staged files to the prev commit and opens a widnow for u to edit the commit text
+or use --no-edit flag to keep the original msg -> git commit --amend --no-edit

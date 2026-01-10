@@ -1,0 +1,27 @@
+-- Mutations
+The result we return in a mutation function is passed to all 3 helper methods 
+--- the on-success|error|settled as the 3rd argument
+Inisde the error handler callback, we can rollback our mutation as an error occurs by passing earlier 
+valid data from the mutation function
+
+for example:
+-- 
+useMutation({
+  mutationFn: addTodo,
+  onMutate: (variables, context) => {
+    // A mutation is about to happen!
+
+    // Optionally return a result containing data to use when for example rolling back
+    return { id: 1 }
+  },
+  onError: (error, variables, onMutateResult, context) => {
+    // An error happened!
+    console.log(`rolling back optimistic update with id ${onMutateResult.id}`)
+  },
+  onSuccess: (data, variables, onMutateResult, context) => {
+    // Boom baby!
+  },
+  onSettled: (data, error, variables, onMutateResult, context) => {
+    // Error or success... doesn't matter!
+  },
+})

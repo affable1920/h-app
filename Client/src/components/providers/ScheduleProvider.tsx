@@ -18,7 +18,8 @@ type ScheduleAction =
   | { type: "SET_DATE"; payload: DateTime }
   | { type: "SET_SCHEDULE"; payload: Schedule }
   | { type: "CLEAR_FIELD"; payload: keyof ScheduleState }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "SET"; payload: { key: keyof ScheduleState; val: any } };
 
 const init: ScheduleState = {
   day: null,
@@ -39,7 +40,7 @@ function reducer(state: ScheduleState, action: ScheduleAction) {
     case "SET_DATE":
       return {
         ...state,
-        date: state.date?.startOf("day").equals(action.payload)
+        date: state.date?.startOf("day").equals(action.payload.startOf("day"))
           ? null
           : action.payload,
       };
@@ -68,6 +69,9 @@ function reducer(state: ScheduleState, action: ScheduleAction) {
 
     case "RESET":
       return init;
+
+    case "SET":
+      return { ...state, [action.payload.key]: action.payload.val };
   }
 }
 
@@ -81,6 +85,7 @@ type ScheduleContextType = {
     setSchedule: (schedule: Schedule) => void;
     clearField: (field: keyof ScheduleState) => void;
     reset: () => void;
+    set: <K extends keyof ScheduleState>(key: K, val: ScheduleState[K]) => void;
   };
 };
 
@@ -104,13 +109,14 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({
       clearField: (field: keyof ScheduleState) =>
         dispatch({ type: "CLEAR_FIELD", payload: field }),
       reset: () => dispatch({ type: "RESET" }),
+
+      set: <K extends keyof ScheduleState>(key: K, val: ScheduleState[K]) =>
+        dispatch({ type: "SET", payload: { key, val } }),
     }),
     []
   );
 
   const contextVal = useMemo(() => ({ state, actions }), [state, actions]);
-
-  console.log(state);
 
   return (
     <ScheduleContext.Provider value={contextVal}>

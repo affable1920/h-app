@@ -1,4 +1,4 @@
-import APIClient from "./ApiClient";
+import { doctorApi } from "./ApiClient";
 import { type operations } from "@/types/api";
 
 type GetAllDrParams = operations["get_doctors"]["parameters"]["query"];
@@ -15,14 +15,10 @@ type BookScheduleData =
 type BookScheduleResponse =
   operations["book_schedule"]["responses"]["200"]["content"]["application/json"];
 
-class DoctorService extends APIClient {
-  constructor() {
-    super("/doctors");
-  }
-
+class DoctorService {
   // Add error handling
   async getAll(params: GetAllDrParams): Promise<GetAllDrResponse> {
-    const response = await this.get<GetAllDrResponse>(undefined, {
+    const response = await doctorApi.get<GetAllDrResponse>(undefined, {
       params,
     });
 
@@ -30,18 +26,17 @@ class DoctorService extends APIClient {
   }
 
   async getById(id: string): Promise<GetSingleDrResponse> {
-    return (await this.get<GetSingleDrResponse>(id)).data;
+    return (await doctorApi.get<GetSingleDrResponse>(id)).data;
   }
 
   async schedule(
     id: string,
     data: BookScheduleData
   ): Promise<BookScheduleResponse> {
+    const slug = `${id}/book`;
+
     return (
-      await this.post<BookScheduleResponse, BookScheduleData>(
-        `${id}/book`,
-        data
-      )
+      await doctorApi.post<BookScheduleResponse, BookScheduleData>(slug, data)
     ).data;
   }
 }

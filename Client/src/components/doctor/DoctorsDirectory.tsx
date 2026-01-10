@@ -11,7 +11,7 @@ import DrCardSecondaryInfo from "./DrCardSecondaryInfo";
 
 function DrCardFront({ drEssentials }: { drEssentials: DoctorSummary }) {
   return (
-    <article className="flex flex-col gap-4">
+    <article className="flex flex-col gap-8">
       <DrCardEssentials doctor={drEssentials} />
       <DrCardSecondaryInfo doctor={drEssentials} />
     </article>

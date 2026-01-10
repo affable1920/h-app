@@ -18,6 +18,12 @@ export default defineConfig({
     },
   },
 
+  dev: {
+    sourcemap: {
+      css: true,
+    },
+  },
+
   build: {
     rollupOptions: {
       output: {

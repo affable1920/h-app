@@ -13,8 +13,7 @@ import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
 import useModalStore from "@/stores/modalStore";
 import useQueryStore from "@/stores/queryStore";
 
-import { AiOutlineSortAscending } from "react-icons/ai";
-import { AiOutlineSortDescending } from "react-icons/ai";
+import { ArrowDown01, ArrowDown10 } from "lucide-react";
 
 const Directory = () => {
   const navigate = useNavigate();
@@ -80,9 +79,9 @@ const Directory = () => {
             data-tooltip={sortOrder}
           >
             {sortOrder === "asc" ? (
-              <AiOutlineSortAscending />
+              <ArrowDown01 />
             ) : (
-              sortOrder === "desc" && <AiOutlineSortDescending />
+              sortOrder === "desc" && <ArrowDown10 />
             )}
           </Button>
         </div>
@@ -108,7 +107,7 @@ const Directory = () => {
           </Button>
         </div>
       </section>
-      <section className="directory-layout">
+      <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(400px,1fr))]">
         {/* outlet renders either the Doctor or clinic directory */}
         <Suspense fallback={<Spinner />}>
           <Outlet />

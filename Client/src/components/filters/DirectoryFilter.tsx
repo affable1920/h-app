@@ -1,9 +1,9 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import useModalStore from "@/stores/modalStore";
 import Badge from "@components/common/Badge";
 import { AnimatePresence } from "motion/react";
-import { MdCancel } from "react-icons/md";
+import { X } from "lucide-react";
 import Button from "../common/Button";
 import Input from "../common/Input";
 import CategoryFilter from "./CategoryFilter";
@@ -12,7 +12,6 @@ import SelectFilter from "./SelectFilter";
 import * as constants from "@/utils/constants";
 import { useSearchParams } from "react-router-dom";
 import type { paths } from "@/types/api";
-import useQueryStore from "@/stores/queryStore";
 
 const RATINGFILTER = {
   label: "rating",
@@ -28,7 +27,21 @@ type FilterKey = keyof FilterState;
 
 const DirectoryFilter = () => {
   const [filters, setFilters] = useState<Partial<FilterState>>({});
-  const { reset } = useQueryStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  function reset() {
+    setFilters({});
+  }
+
+  useEffect(function () {
+    setFilters({
+      minRating: Number(searchParams.get("minRating")),
+      specialization: searchParams.get("specialization"),
+      maxDistance: Number(searchParams.get("maxDistance")),
+      mode: searchParams.get("mode") === "online" ? "online" : null,
+      currentlyAvailable: searchParams.get("currentlyAvailable") === "true",
+    });
+  }, []);
 
   function handleFilterUpdate<K extends FilterKey>(
     key: K,
@@ -43,7 +56,6 @@ const DirectoryFilter = () => {
   }
 
   const selectedSpecialization = filters.specialization ?? null;
-  const [, setSearchParams] = useSearchParams();
 
   const handleSpecUpdate = useCallback(function (spec: string | null) {
     handleFilterUpdate("specialization", spec);
@@ -82,7 +94,7 @@ const DirectoryFilter = () => {
           <div className="ml-auto flex items-center gap-2">
             <Badge>{activeFilterCount}</Badge>
             <Button variant="icon" onClick={reset}>
-              <MdCancel />
+              <X />
             </Button>
           </div>
         )}
@@ -116,8 +128,8 @@ const DirectoryFilter = () => {
         </div>
 
         <div className="filter-div">
+          <label>Filter by distance</label>
           <Input>
-            <Input.Label color="light">Filter by distance</Input.Label>
             <Input.InputElement
               type="range"
               name="distance"

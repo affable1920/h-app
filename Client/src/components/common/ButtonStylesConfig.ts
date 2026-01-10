@@ -72,8 +72,8 @@ export function getClassConfig<T extends Variant>({
   ...props
 }: ButtonProps<T>): string {
   const base = `tracking-widest leading-tight font-semibold select-none cursor-pointer transition-colors 
-  capitalize duration-[225ms] ease-in text-center inline-flex items-center justify-center line-clamp-1 
-  truncate text-sm disabled:opacity-60 disabled:pointer-events-none [&:has(.spinner)]:gap-1`;
+  capitalize duration-225 ease-in text-center inline-flex items-center justify-center 
+  text-sm disabled:opacity-60 disabled:pointer-events-none [&:has(.spinner)]:gap-1`;
 
   const { variant = "contained", size = "sm", className = "" } = props;
   const variantStyle = variantStyles[variant];

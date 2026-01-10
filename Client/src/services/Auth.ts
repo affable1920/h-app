@@ -1,6 +1,7 @@
 import type { paths } from "@/types/api";
 import type { AxiosError, AxiosResponse } from "axios";
 import APIClient from "@/services/ApiClient";
+import type { APIError } from "@/types/errors";
 
 type LoginUser =
   paths["/auth/login"]["post"]["requestBody"]["content"]["application/json"];
@@ -50,10 +51,11 @@ function SetSessionToken(
 
     if (token) {
       localStorage.setItem("token", token);
-      console.log(token);
+    } else {
+      throw new Error("No token received from server ...");
     }
 
-    return response.data;
+    return response;
   };
 
   return descriptor;
@@ -61,7 +63,7 @@ function SetSessionToken(
 
 class AuthClient extends APIClient {
   constructor() {
-    super("/auth");
+    super("auth");
 
     this.instance.interceptors.request.use(
       function (config) {
@@ -69,10 +71,13 @@ class AuthClient extends APIClient {
 
         if (token) {
           config.headers["Authorization"] = `Bearer ${token}`;
+        } else {
+          delete config.headers["Authorization"];
         }
 
         return config;
       },
+
       function (ex) {
         return Promise.reject(ex);
       }
@@ -80,8 +85,14 @@ class AuthClient extends APIClient {
 
     this.instance.interceptors.response.use(
       (response) => response,
-      function (ex: AxiosError) {
-        return ex;
+      (ex) => {
+        const { status, detail } = ex as APIError;
+        const isSessionExp = detail?.headers?.["x-session-expire"];
+
+        if (status === 401 && (isSessionExp || isSessionExp === "true")) {
+          console.log("Session expired! logging out ...");
+          this.logout();
+        }
       }
     );
   }
@@ -93,14 +104,13 @@ class AuthClient extends APIClient {
 
   @SetSessionToken
   async register(user: CreateUser) {
-    await this.post<DBUser, CreateUser>("register", {
+    return await this.post<DBUser, CreateUser>("register", {
       ...user,
     });
   }
 
   async profile() {
-    const response = await this.get("me");
-    console.log(response.data);
+    return await this.get<DBUser>("me");
   }
 
   async logout() {

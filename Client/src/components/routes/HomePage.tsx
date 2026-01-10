@@ -1,19 +1,30 @@
 import { useState } from "react";
-import ButtonElement from "../common/Button";
-import { Link } from "react-router-dom";
-import { MdSend } from "react-icons/md";
+import { Link, useLocation } from "react-router-dom";
+
+import Button from "../common/Button";
+import { SendHorizonal as Send } from "lucide-react";
 
 const HomePage = () => {
   const [userQuery, setUserQuery] = useState("");
 
+  const loc = useLocation();
+  console.log(loc);
+
   return (
     <section className="flex flex-col h-1/2 max-h-full py-12 pb-2 gap-4">
-      <ul className="flex items-center gap-4">
+      <ul className="flex items-center gap-4 justify-center">
         <li>
-          <Link to="/doctors">
-            <ButtonElement size="md" variant="contained" color="primary">
-              See Directories
-            </ButtonElement>
+          <Link to="dir/doctors">
+            <Button size="md" variant="contained" color="primary">
+              view doctors
+            </Button>
+          </Link>
+        </li>
+        <li>
+          <Link to="dir/clinics">
+            <Button size="md" variant="contained" color="primary">
+              View Clinics
+            </Button>
           </Link>
         </li>
       </ul>
@@ -36,9 +47,13 @@ const HomePage = () => {
           />
         </div>
         <div className="flex justify-end">
-          <button onClick={() => setUserQuery(userQuery)}>
-            <MdSend />
-          </button>
+          <Button
+            size="xs"
+            variant="icon"
+            onClick={() => setUserQuery(userQuery)}
+          >
+            <Send />
+          </Button>
         </div>
       </section>
     </section>

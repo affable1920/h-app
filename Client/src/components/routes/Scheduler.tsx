@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { motion } from "motion/react";
 import { useLocation } from "react-router-dom";
 
@@ -13,6 +13,7 @@ const Scheduler = memo(() => {
   const { data: dr, isPending, isError } = useDoctor(id as string);
 
   const [showClinicsView, setShowClinicsView] = useState(false);
+  const toggleView = useCallback(() => setShowClinicsView((p) => !p), []);
 
   if (isPending) return <Spinner />;
 
@@ -25,14 +26,10 @@ const Scheduler = memo(() => {
 
   const { fullname, schedules = [] } = dr;
 
-  function toggleView() {
-    setShowClinicsView((p) => !p);
-  }
-
   return (
     <section className="font-semibold flex flex-col pb-12 gap-8 mt-4">
       <header className="flex items-center gap-4">
-        <h2 className="card-h2 text-2xl font-black">Dr. {fullname} Tanner</h2>
+        <h2 className="card-h2 text-2xl font-black">Dr. {fullname}</h2>
         <motion.button
           onClick={toggleView}
           animate={{ rotate: showClinicsView ? 90 : 0 }}

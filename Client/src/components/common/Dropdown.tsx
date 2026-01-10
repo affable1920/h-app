@@ -11,7 +11,7 @@ type DropdownProps = {
 const optionListClasses = `flex flex-col font-bold text-secondary-dark bg-transparent 
 rounded-md border-2 max-h-48 overflow-y-scroll border-secondary-lightest/50`;
 
-const optionClasses = `hover:bg-slate-50 cursor-pointer capitalize border-[1px] 
+const optionClasses = `hover:bg-slate-50 cursor-pointer capitalize border 
 transition-colors p-2 py-3 border-inherit`;
 
 const Dropdown = ({ show = false, options, onOptionSelect }: DropdownProps) => {
@@ -31,13 +31,13 @@ const Dropdown = ({ show = false, options, onOptionSelect }: DropdownProps) => {
           style={{ scrollbarWidth: "none" }}
           className={optionListClasses}
         >
-          {options.map((option) => (
+          {options.map((opt) => (
             <motion.li
-              key={option}
+              key={opt}
               className={optionClasses}
-              onClick={() => onOptionSelect?.(option)}
+              onClick={() => onOptionSelect?.(opt)}
             >
-              {option}
+              {opt as string}
             </motion.li>
           ))}
         </motion.ul>

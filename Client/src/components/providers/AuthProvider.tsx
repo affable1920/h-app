@@ -1,19 +1,23 @@
 import {
-  createContext,
   useState,
   useMemo,
-  type ReactNode,
   useEffect,
   useContext,
+  createContext,
+  type ReactNode,
 } from "react";
 import { jwtDecode } from "jwt-decode";
+import type { paths } from "@/types/api";
+
+type User =
+  paths["/auth/me"]["get"]["responses"]["200"]["content"]["application/json"];
 
 interface AuthContextType {
-  user: {} | null;
-  setUser: (user: any) => void;
+  user: User | null;
+  setUser: (user: User) => void;
 }
 
-export const AuthContext = createContext<AuthContextType>({
+const AuthContext = createContext<AuthContextType>({
   user: null,
   setUser: () => {},
 });
@@ -21,8 +25,11 @@ export const AuthContext = createContext<AuthContextType>({
 AuthContext.displayName = "AuthContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<{} | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const state = useMemo(() => ({ user, setUser }), [user]);
+
+  console.log("Auth provider rendered !");
+  console.log("Auth state :", state);
 
   useEffect(function () {
     const token = localStorage.getItem("token");

@@ -21,7 +21,7 @@ const Button = memo(
       <button
         disabled={disabled || loading}
         className={`${classConfig} ${className}`}
-        {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}
+        {...rest}
       >
         {startIcon}
         {children}

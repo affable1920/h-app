@@ -31,7 +31,12 @@ const Text = <T extends TextTypes = "p">({
 
   const classConfig = useMemo(
     function () {
-      return [SIZES[size], bold ? "font-bold" : "font-semibold", className]
+      return [
+        SIZES[size],
+        bold ? "font-bold" : "font-semibold",
+        "first-letter:capitalize",
+        className,
+      ]
         .filter(Boolean)
         .join(" ");
     },

@@ -1,22 +1,28 @@
-import { useNavigate } from "react-router-dom";
-import { useState, type ChangeEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useContext, useState, type ChangeEvent } from "react";
 
 import Input from "@components/common/Input";
 import Button from "@components/common/Button";
 
 import { toast } from "sonner";
-import { type paths } from "@/types/api";
 
 import authClient from "@/services/Auth";
-
-type LoginUser =
-  paths["/auth/login"]["post"]["requestBody"]["content"]["application/json"];
+import type { APIError } from "@/types/errors";
+import { type LoginUser, LoginSchema } from "@/schemas";
+import { useAuth } from "../providers/AuthProvider";
 
 function SignIn() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const auth = useAuth();
+
   const [user, setUser] = useState<LoginUser>({
+    email: "",
+    password: "",
+  });
+
+  const [errors, setErrros] = useState<Record<keyof LoginUser, string>>({
     email: "",
     password: "",
   });
@@ -26,27 +32,44 @@ function SignIn() {
   }: ChangeEvent<HTMLInputElement>) {
     setUser((p) => ({ ...p, [name]: value }));
   }
+  const location = useLocation();
 
   async function submit() {
+    const validation = LoginSchema.safeParse(user);
+
+    if (!validation.success) {
+      validation.error.issues.forEach((issue) => {
+        setErrros((p) => ({ ...p, [issue.path[0]]: issue.message }));
+      });
+
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await authClient.login(user);
+      const authUser = (await authClient.login(user)).data;
+      auth.setUser(authUser);
+
+      console.log("Recieved user after signin ...", authUser);
+
       navigate("/");
-
-      toast.info("Signed in successfully!", {});
+      toast.info("Signed in successfully!");
     } catch (ex) {
-      const { description = "", msg = "" } = ex as any;
-      console.log(description, msg);
+      console.log(ex);
 
-      toast.error(description ?? "Sign in failed", { description: msg });
+      const { type = "", msg = "", detail } = ex as APIError;
+      toast.error(type ?? "Sign in failed", { description: type });
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="box gap-8 max-w-xs mx-auto">
+      <h2 className="card-h2 text-xl text-center uppercase font-extrabold">
+        Sign In
+      </h2>
       <article className="flex flex-col gap-8">
         <Input>
           <Input.Label>email</Input.Label>
@@ -57,6 +80,7 @@ function SignIn() {
             value={user.email}
             onChange={handleChange}
           />
+          {errors.email && <Input.Error msg={errors.email} />}
         </Input>
 
         <Input>
@@ -67,12 +91,19 @@ function SignIn() {
             value={user.password}
             onChange={handleChange}
           />
+          {errors.password && <Input.Error msg={errors.password} />}
         </Input>
       </article>
-      <article className="flex flex-col gap-3">
-        <Button type="submit" size="md" onClick={submit} loading={loading}>
+      <article className="flex flex-col gap-2">
+        <Button size="md" type="submit" onClick={submit} loading={loading}>
           sign in
         </Button>
+        <article className="flex items-center justify-center gap-4 text-sm">
+          <p className="first-letter:capitalize font-bold">New here ?</p>
+          <Button variant="link">
+            <Link to="/auth/register">sign up instead</Link>
+          </Button>
+        </article>
       </article>
     </div>
   );

@@ -33,6 +33,7 @@ const Modal = React.memo(() => {
       {!!ModalElement && (
         <Overlay viewOverlay={modalProps.viewOverlay ?? false}>
           <motion.div
+            id="modal"
             key={currModal}
             variants={variants}
             {...{ ...variants }}

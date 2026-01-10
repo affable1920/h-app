@@ -1,6 +1,7 @@
 import { memo, useMemo } from "react";
-import { type Color, type Size } from "@/types/button";
-import type { ReactNode, ElementType, ComponentPropsWithoutRef } from "react";
+import type { ElementType, ReactNode, ComponentPropsWithoutRef } from "react";
+
+import type { IconSize, Color } from "@/types/button";
 
 interface BaseBadgeProps {
   full?: boolean;
@@ -11,16 +12,25 @@ interface BaseBadgeProps {
   disabled?: boolean;
   selected?: boolean;
   rotate?: boolean;
-  size?: "xs" | Exclude<Size, "xl">;
+  size?: IconSize;
 }
 
 // element type in react represents any valid renderable element
 // can be a string like "div", "a" etc or custom react component such as a
 // function or class component
 
-type BadgeProps<T extends ElementType = "button"> = BaseBadgeProps & {
+export type BadgeProps<T extends ElementType = "button"> = BaseBadgeProps & {
   as?: T;
 } & Omit<ComponentPropsWithoutRef<T>, "as" | keyof BaseBadgeProps>;
+
+const sizes: Record<IconSize, string> = {
+  xs: "p-0",
+  sm: "p-1",
+  md: "p-2",
+  lg: "p-3",
+};
+
+const enableRotate = `hover:ring-1 hover:ring-accent/20 hover:rotate-[7.5deg]`;
 
 const Badge = memo(
   <T extends ElementType>({
@@ -42,13 +52,13 @@ const Badge = memo(
     const classConfig = useMemo(() => {
       return [
         "badge",
-        size,
+        sizes[size],
         color,
         current && "current",
         selected && "selected",
         disabled && "disabled",
         full && "w-full",
-        rotate && "enable-rotate",
+        rotate && enableRotate,
         className,
       ]
         .filter(Boolean)
@@ -56,7 +66,7 @@ const Badge = memo(
     }, [current, selected, full, rotate, className, size, color, disabled]);
 
     return (
-      <Component className={classConfig} {...rest}>
+      <Component disabled={disabled} className={classConfig} {...rest}>
         {content || children}
       </Component>
     );

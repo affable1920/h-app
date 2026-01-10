@@ -2,9 +2,9 @@ import type { components } from "./api";
 
 // essentials has just the required properties for rendering
 export type DoctorSummary = components["schemas"]["DoctorSummary"];
-export type Doctor = components["schemas"]["Doctor"];
 
 // Full dr including schedules, slots etc ...
+export type Doctor = components["schemas"]["Doctor"];
 
 export type Status = DoctorSummary["status"];
 

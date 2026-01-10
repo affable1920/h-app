@@ -2,15 +2,29 @@ import axios from "axios";
 import type {
   AxiosError,
   AxiosInstance,
-  AxiosRequestConfig,
   AxiosResponse,
+  AxiosRequestConfig,
 } from "axios";
 
-const CONFIG: Record<number, { name: string }> = {
-  400: { name: "Bad Request" },
-  401: { name: "Unauthenticated" },
-  422: { name: "Invalid data" },
-  500: { name: "Server Error" },
+import {
+  isPydanticError,
+  type APIError,
+  type PydanticValidationError,
+} from "@/types/errors";
+
+const CONFIG: Record<number, string> = {
+  400: "Bad Request",
+  401: "Not authenticated",
+  403: "Unauthorized",
+  404: "Resource Not Found",
+  422: "Invalid data",
+};
+
+const internalServerError: APIError = {
+  status: 500,
+  type: "Internal Server Error",
+  msg: "No response from the server!",
+  detail: "The server is likely down, Please try after sometime!",
 };
 
 class APIClient {
@@ -19,71 +33,75 @@ class APIClient {
 
   protected instance: AxiosInstance;
 
-  constructor(public readonly endpoint: string) {
+  constructor(slug: string) {
     this.instance = axios.create({
-      baseURL: this._baseUrl,
+      baseURL: this._baseUrl + `/${slug}`,
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    this.endpoint = endpoint;
-
     this.instance.interceptors.response.use(
       (response) => response,
-      function (e: AxiosError) {
-        if (e.request && !e.response) {
-          return Promise.reject({
-            status: e.status,
-            detail: null,
-            msg: "No response from the server!",
-            description:
-              "The server is likely down, Please try after sometime!",
-          });
+      (ex: AxiosError) => {
+        /*
+        Our api client has no idea what an error is about. Keep it that way, but rather minimalize 
+        errors here in a structured regular and predictable order for the components|hooks to handle
+        */
+
+        if (ex.request && !ex.response) {
+          return Promise.reject(internalServerError);
         }
 
-        const { response, status } = e;
-        const clientError = status && status < 500 && status >= 400;
-
-        if (clientError) {
-          return Promise.reject({
-            status,
-            detail: e,
-            description: CONFIG[status ?? 500]?.name,
-            msg: (response?.data as any)?.detail,
-          });
-        }
-
-        return Promise.reject({
-          status,
-          detail: e,
-          msg: (response?.data as any).detail,
-          description: CONFIG[status ?? 500].name,
-        });
+        return Promise.reject(this.normalizeErrors(ex));
       }
     );
+  }
+
+  private formatValidationMsg(error: PydanticValidationError) {
+    if (error!.length > 0) {
+      const field = error?.[0].loc.slice(1).join(".");
+      return `${field}: ${field} ${error?.[0].msg
+        .split(" ")
+        .slice(1)
+        .join(" ")
+        .trim()}`;
+    }
+  }
+
+  private normalizeErrors(error: AxiosError): APIError {
+    const { status, response } = error;
+
+    if (status === 422 && isPydanticError((response?.data as any).detail)) {
+      return {
+        msg: this.formatValidationMsg((response?.data as any).detail) as string,
+        status,
+        detail: response,
+        type: CONFIG[status],
+      };
+    }
+
+    return {
+      detail: response,
+      status: status as number,
+      msg: (response?.data as any).detail?.["msg"],
+      type: CONFIG[status as number] ?? response?.statusText,
+    };
   }
 
   async get<T>(
     path?: string,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
-    console.log(this.endpoint);
-
-    const url = this.endpoint + (path ? `/${path}` : "");
-    return await this.instance.get<T>(url, config);
+    return await this.instance.get<T>(path ? `/${path}` : "", config);
   }
 
-  // T as the post request's data and R as the response's type.
   async post<TResponse, TBody>(
     path: string,
     data: TBody,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<TResponse>> {
-    const url = this.endpoint + "/" + (path ?? "");
-    return await this.instance.post<TResponse>(url, data, {
-      ...config,
-    });
+    return await this.instance.post<TResponse>(`/${path}`, data, config);
   }
 
   async request(config: AxiosRequestConfig) {
@@ -91,4 +109,5 @@ class APIClient {
   }
 }
 
+export const doctorApi = new APIClient("doctors");
 export default APIClient;

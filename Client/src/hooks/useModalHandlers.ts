@@ -17,7 +17,7 @@ function useInjectModalHandlers() {
     function handleClick(ev: MouseEvent) {
       if (
         currModal &&
-        !document.querySelector(".modal")?.contains(ev.target as Node)
+        !document.getElementById("modal")?.contains(ev.target as Node)
       )
         removeModal();
     }

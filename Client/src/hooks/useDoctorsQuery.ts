@@ -1,7 +1,8 @@
-import drService from "@/services/DoctorService";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+
 import type { paths } from "@/types/api";
+import drService from "@/services/DoctorService";
 
 type Params = paths["/doctors"]["get"]["parameters"]["query"];
 

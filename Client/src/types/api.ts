@@ -195,6 +195,39 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AppointmentRecord */
+        AppointmentRecord: {
+            slot: components["schemas"]["Slot"];
+            /**
+             * Date
+             * Format: date-time
+             */
+            date: string;
+            doctor: components["schemas"]["Doctor"];
+            clinic: components["schemas"]["Clinic"];
+            patient: components["schemas"]["Patient"];
+        };
+        /** BookingRequestData */
+        BookingRequestData: {
+            /**
+             * Date
+             * Format: date-time
+             */
+            date: string;
+            patient: components["schemas"]["Patient"];
+            /**
+             * Slotid
+             * Format: uuid
+             */
+            slotId: string;
+            /**
+             * Scheduleid
+             * Format: uuid
+             */
+            scheduleId: string;
+            /** Clinicid */
+            clinicId?: string | null;
+        };
         /** Clinic */
         Clinic: {
             /**
@@ -346,19 +379,6 @@ export interface components {
             /** Primary Specialization */
             primary_specialization: string;
         };
-        /** DrScheduleData */
-        DrScheduleData: {
-            /** Slotid */
-            slotId: string;
-            /** Clinicid */
-            clinicId: string;
-            /** Scheduleid */
-            scheduleId: string;
-            /** Patientname */
-            patientName: string;
-            /** Patientcontact */
-            patientContact: string;
-        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -411,12 +431,27 @@ export interface components {
             /** Paginated Count */
             paginated_count: number;
         };
+        /** Patient */
+        Patient: {
+            /** Name */
+            name: string;
+            /** Contact */
+            contact: string;
+        };
         /** ResponseUser */
         ResponseUser: {
-            /** Id */
-            id: string;
             /** Username */
             username: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
         };
         /**
          * Schedule
@@ -684,7 +719,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DrScheduleData"];
+                "application/json": components["schemas"]["BookingRequestData"];
             };
         };
         responses: {
@@ -694,7 +729,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AppointmentRecord"];
                 };
             };
             /** @description Validation Error */

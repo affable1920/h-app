@@ -1,6 +1,11 @@
-import { lazy, useEffect } from "react";
-import { Navigate, type LoaderFunctionArgs } from "react-router-dom";
-import { createBrowserRouter, Outlet, useLocation } from "react-router-dom";
+import { lazy } from "react";
+import {
+  Navigate,
+  useLoaderData,
+  useLocation,
+  type LoaderFunctionArgs,
+} from "react-router-dom";
+import { createBrowserRouter, Outlet } from "react-router-dom";
 
 //
 import Layout from "@routes/Layout";
@@ -12,8 +17,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 
 import SignIn from "@/components/auth/SignIn";
 import Register from "@components/auth/Register";
-import authClient from "@/services/Auth";
+import UserProfile from "./routes/UserProfile";
+
 import { toast } from "sonner";
+import { useAuth } from "./providers/AuthProvider";
+import authClient from "@/services/Auth";
 
 /*
 API Routes Structure:
@@ -50,25 +58,20 @@ const router = createBrowserRouter([
       { index: true, Component: HomePage },
 
       {
+        path: "dir",
         Component: Directory,
         children: [
           {
             path: "doctors",
+            Component: DoctorsDirectory,
+          },
+
+          {
+            path: "clinics",
             children: [
               {
                 index: true,
-                loader: loadDoctor,
-                Component: DoctorsDirectory,
-              },
-
-              {
-                path: "clinics",
-                children: [
-                  {
-                    index: true,
-                    Component: ClinicsDirectory,
-                  },
-                ],
+                Component: ClinicsDirectory,
               },
             ],
           },
@@ -76,19 +79,27 @@ const router = createBrowserRouter([
       },
 
       {
-        path: "doctors/:id",
+        path: "doctor/:id",
         loader: loadDoctor,
-        Component: () => <div>Doctor's Profile</div>,
+        Component: () => {
+          return <div>Doctor's Profile</div>;
+        },
       },
 
       {
-        path: "doctors/:id/schedule",
+        path: "doctor/:id/schedule",
         Component: Scheduler,
       },
 
       {
         path: "chat",
         Component: Chat,
+      },
+
+      {
+        path: "auth/me",
+        Component: UserProfile,
+        loader: async () => (await authClient.profile()).data,
       },
     ],
   },
@@ -102,47 +113,20 @@ const router = createBrowserRouter([
       { path: "register", Component: Register },
     ],
   },
-
-  {
-    path: "auth/me",
-    Component: () => {
-      useEffect(function () {
-        async function fetchProfile() {
-          const response = await authClient.profile();
-        }
-
-        fetchProfile();
-      });
-
-      return <div>Profile component</div>;
-    },
-  },
 ]);
 
 export default router;
 
 function AuthLayout() {
-  const route = useLocation().pathname;
-  const formName = route.endsWith("register") ? "Sign Up" : "Sign In";
+  const { user } = useAuth();
 
-  const token = localStorage.getItem("token");
-
-  if (token) {
-    toast.info("Already logged in.", {
-      description: "Why would anyone wanna login while being logged in ?",
-    });
-
-    return <Navigate to="/" />;
+  if (user) {
+    return <Navigate to="/dir/doctors" />;
   }
 
   return (
-    <div className="container pt-24">
-      <div className="box max-w-xs mx-auto gap-8 px-8 pt-6">
-        <h2 className="card-h2 text-center uppercase text-xl font-extrabold">
-          {formName}
-        </h2>
-        <Outlet />
-      </div>
-    </div>
+    <main className="container py-24">
+      <Outlet />
+    </main>
   );
 }

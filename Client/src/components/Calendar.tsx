@@ -1,9 +1,8 @@
 import { memo, useState, useCallback } from "react";
 import { DateTime } from "luxon";
 import CalendarBody from "./CalendarBody";
-import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { motion, type Variant } from "motion/react";
-import { IoInformationCircleSharp } from "react-icons/io5";
+import { Info, ArrowRight, ArrowLeft } from "lucide-react";
 import Button from "@components/common/Button";
 import type { Schedule } from "@/types/doctorAPI";
 
@@ -43,8 +42,8 @@ const Calendar = memo(({ schedules }: { schedules: Schedule[] }) => {
   );
 
   return (
-    <section className="box relative">
-      <header>
+    <section className="box relative gap-6">
+      <header className="flex flex-col">
         <div
           className="absolute right-2 top-1 flex items-center justify-end overflow-hidden 
         italic font-bold text-sm gap-2 text-sky-900 opacity-75 selection:bg-transparent"
@@ -58,10 +57,13 @@ const Calendar = memo(({ schedules }: { schedules: Schedule[] }) => {
             Select any day that fits your schedule
           </motion.p>
 
-          <IoInformationCircleSharp
-            className="cursor-pointer z-1"
+          <Button
+            size="xs"
+            variant="icon"
             onClick={() => setShowInfo((prev) => !prev)}
-          />
+          >
+            <Info />
+          </Button>
         </div>
 
         <article className="flex items-center justify-between">
@@ -71,18 +73,20 @@ const Calendar = memo(({ schedules }: { schedules: Schedule[] }) => {
 
           <div className="flex flex-col">
             <Button
+              size="xs"
               variant="icon"
               onClick={handleMonthChange.bind(null, "right")}
             >
-              <BsArrowRight />
+              <ArrowRight />
             </Button>
 
             <Button
+              size="xs"
               variant="icon"
               disabled={monthInView.month <= currDate.month}
               onClick={handleMonthChange.bind(null, "left")}
             >
-              <BsArrowLeft />
+              <ArrowLeft />
             </Button>
           </div>
         </article>

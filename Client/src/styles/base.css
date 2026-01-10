@@ -1,0 +1,79 @@
+/* Default DOM tag styles */
+@layer base {
+  *,
+  *::after,
+  *::before {
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    box-sizing: border-box;
+  }
+
+  html {
+    min-height: 100vh;
+  }
+
+  body {
+    height: 100%;
+    letter-spacing: 1.2px;
+    font-size: var(--text-base);
+  }
+
+  #root {
+    all: inherit;
+  }
+
+  main {
+    padding-block: 24px;
+  }
+
+  h2 {
+    line-clamp: 1;
+    font-weight: bold;
+    line-height: 1.2;
+  }
+
+  button,
+  a {
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+  }
+
+  input[aria-invalid="true"] {
+    border: var(--spacing * 1);
+    border-color: var(--color-error);
+  }
+
+  [data-tooltip] {
+    cursor: pointer;
+    position: relative;
+  }
+
+  [data-tooltip]::after {
+    opacity: 0;
+    color: white;
+    padding: 8px 4px;
+    position: absolute;
+    bottom: 100%; /* Position above the element */
+    visibility: hidden;
+    pointer-events: none;
+    background: var(--color-gray-800);
+    font-size: var(--text-xs);
+    border-radius: var(--rounded-md);
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  [data-tooltip]:hover::after {
+    content: attr(data-tooltip); /* Accesses the attribute's value */
+    /* Add styling for the tooltip box (position, background, etc.) */
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}

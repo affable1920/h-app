@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 
 import { DateTime } from "luxon";
 import CalendarDay from "./CalendarDay";
@@ -6,6 +6,7 @@ import CalendarDay from "./CalendarDay";
 import { WEEKDAYS } from "@/utils/constants";
 import type { Schedule } from "@/types/doctorAPI";
 import { createCalendarData } from "@/utils/calendarUtils";
+import { useSchedule } from "./providers/ScheduleProvider";
 
 interface CalendarBodyProps {
   monthInView: DateTime;
@@ -15,7 +16,17 @@ interface CalendarBodyProps {
 
 const today = DateTime.local();
 
+function isDateToday(date: DateTime) {
+  return date.startOf("day").equals(today.startOf("day"));
+}
+
+function areDatesEqual(dtA: DateTime, dtB: DateTime) {
+  return dtA.startOf("day").equals(dtB.startOf("day"));
+}
+
 const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
+  const { state } = useSchedule();
+
   const calendar = useMemo(
     function () {
       return createCalendarData(monthInView);
@@ -31,21 +42,26 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
         days.push(schedule.weekdays);
       }
 
-      return days.flat().sort((a, b) => a - b);
+      return [...new Set(days.flat())].sort((a, b) => a - b);
     },
     [schedules]
   );
 
-  function isDateGone(date: DateTime) {
+  const isDateGone = useCallback(function isDateGone(date: DateTime) {
+    const isFromPrevYear = date.year < today.year;
+    const isFromPrevMonth = date.month < today.month;
+    const hasDayPassed = date.day < today.day;
+
     return (
-      date.month < monthInView.month ||
-      (date.month === monthInView.month && date.day < monthInView.day)
+      isFromPrevYear ||
+      isFromPrevMonth ||
+      (date.month === today.month && hasDayPassed)
     );
-  }
+  }, []);
 
   function isWkdayToday(day: (typeof WEEKDAYS)[number]) {
     return (
-      day.toLowerCase() === today.weekdayLong?.toLowerCase() &&
+      day.toLowerCase().trim() === today.weekdayLong?.toLowerCase().trim() &&
       monthInView.month === today.month
     );
   }
@@ -70,7 +86,9 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
         return (
           <CalendarDay
             date={date}
+            current={isDateToday(date)}
             key={`${date.day}-${date.month}-${date.year}`}
+            selected={state.date ? areDatesEqual(date, state.date) : false}
             disabled={
               isDateGone(date) || !allScheduleDays.includes(date.weekday)
             }

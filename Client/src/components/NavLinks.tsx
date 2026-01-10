@@ -22,8 +22,8 @@ const NavLinks = ({ showRoutes = false }: { showRoutes: boolean }) => {
     <motion.ul
       initial={false}
       animate={{
-        opacity: showRoutes ? 1 : 0,
         y: showRoutes ? 0 : -30,
+        opacity: showRoutes ? 1 : 0,
         pointerEvents: showRoutes ? "auto" : "none",
       }}
       transition={{

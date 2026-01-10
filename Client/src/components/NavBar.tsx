@@ -6,7 +6,7 @@ import NavLinks from "./NavLinks.js";
 import Button from "@components/common/Button";
 import { Menu, Search } from "lucide-react";
 import { useAuth } from "./providers/AuthProvider";
-import { BiSolidUser } from "react-icons/bi";
+import { CircleUser } from "lucide-react";
 import useModalStore from "@/stores/modalStore";
 
 const NavBar = () => {
@@ -49,8 +49,15 @@ const NavBar = () => {
   }
 
   return (
-    <motion.nav ref={ref} className="navbar">
-      <Button variant="icon" onClick={() => setShowRoutes((p) => !p)}>
+    <motion.nav
+      ref={ref}
+      className="container flex min-h-14 justify-between items-center"
+    >
+      <Button
+        variant="icon"
+        className="lg:hidden"
+        onClick={() => setShowRoutes((p) => !p)}
+      >
         <Menu />
       </Button>
 
@@ -64,7 +71,7 @@ const NavBar = () => {
 
         {user && (
           <Button onClick={showAuthOptions} variant="icon">
-            <BiSolidUser />
+            <CircleUser />
           </Button>
         )}
       </div>

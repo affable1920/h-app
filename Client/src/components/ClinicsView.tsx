@@ -1,8 +1,7 @@
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, type Variant } from "motion/react";
 
-import { BsArrowRight } from "react-icons/bs";
-import { BiSolidMapPin } from "react-icons/bi";
+import { ArrowRight, MapPinCheckInside } from "lucide-react";
 
 import Button from "./common/Button";
 import { ClockArrowDown } from "lucide-react";
@@ -54,7 +53,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
 
   const {
     state: scheduleState,
-    actions: { clearField, setSlot, setDay, setClinic },
+    actions: { clearField, setSlot, setDay, setClinic, setSchedule },
   } = useSchedule();
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -93,18 +92,20 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
     });
   }, []);
 
-  async function handleBook() {
-    if (!scheduleState.slot || !(scheduleState.date || scheduleState.day)) {
-      toast.error("Please select all required fields!", {
+  async function handleBook(schedule: Schedule) {
+    if (!scheduleState.date) {
+      toast.info("Missing fields.", {
         description() {
-          return "slot and a date .";
+          return "Please select a date for your appointment !";
         },
-        className: "text-black font-black uppercase",
       });
+
       return;
     }
-
-    useModalStore.getState().openModal("schedule", { dr: doctor });
+    setSchedule(schedule);
+    useModalStore
+      .getState()
+      .openModal("schedule", { dr: doctor, viewOverlay: true });
   }
 
   return (
@@ -147,7 +148,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                       className={`flex items-center gap-1 text-sm underline underline-offset-2`}
                     >
                       {clinic?.address}
-                      <BiSolidMapPin size={8} />
+                      <MapPinCheckInside size={8} />
                     </Link>
                   </div>
 
@@ -158,7 +159,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                       rotate: isExpanded(id!) ? 90 : 0,
                     }}
                   >
-                    <BsArrowRight size={12} />
+                    <ArrowRight size={12} />
                   </motion.button>
                 </header>
 
@@ -185,7 +186,9 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                             className="px-4"
                             onClick={() => {
                               setDay(wkday);
-                              clearField("date");
+                              if (scheduleState?.date?.weekday !== wkday) {
+                                clearField("date");
+                              }
                             }}
                             selected={scheduleState.day === wkday}
                           >
@@ -223,7 +226,10 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                         {slots.some(
                           (slot) => slot.id === scheduleState.slot?.id
                         ) && (
-                          <Button onClick={handleBook} className="self-end">
+                          <Button
+                            className="self-end"
+                            onClick={() => handleBook(schedule)}
+                          >
                             book slot
                             <ClockArrowDown />
                           </Button>

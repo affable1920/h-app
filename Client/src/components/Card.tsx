@@ -1,6 +1,6 @@
 import { useState, useCallback, type ReactElement } from "react";
 import { motion } from "motion/react";
-import { MdFlip } from "react-icons/md";
+import { FlipVertical } from "lucide-react";
 
 interface CardProps<T> {
   entity: T;
@@ -14,7 +14,8 @@ const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
 
   return (
     <motion.article
-      className="card relative"
+      className="rounded-md p-4 pb-3 font-semibold shadow-sm 
+    shadow-slate-200/40 border-2 border-slate-300/50 h-full min-h-32 relative"
       animate={{
         rotateY: isFlipped ? 180 : 0,
         transition: { duration: 0.25 },
@@ -58,7 +59,7 @@ const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
             : "right-full translate-x-1/2"
         } `}
       >
-        <MdFlip size={16} />
+        <FlipVertical size={14} />
       </motion.button>
     </motion.article>
   );

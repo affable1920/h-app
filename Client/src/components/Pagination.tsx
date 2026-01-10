@@ -3,8 +3,11 @@ import { useAllDoctors } from "@/hooks/useDoctorsQuery";
 
 import ButtonElement from "./common/Button";
 import useQueryStore from "@/stores/queryStore";
-import { ArrowBigRightDash, ArrowBigLeftDash } from "lucide-react";
-import { MdLockReset } from "react-icons/md";
+import {
+  ArrowBigRightDash,
+  ArrowBigLeftDash,
+  RotateCcwSquare,
+} from "lucide-react";
 import Button from "./common/Button";
 
 const Pagination = () => {
@@ -30,7 +33,7 @@ const Pagination = () => {
         className="flex justify-center items-center"
       >
         <Button onClick={reset} variant="icon" size="md">
-          <MdLockReset />
+          <RotateCcwSquare />
         </Button>
       </article>
     );

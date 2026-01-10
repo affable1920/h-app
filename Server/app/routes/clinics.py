@@ -2,7 +2,7 @@ from enum import Enum
 from fastapi import APIRouter
 
 from app.schemas.dr_extra import Clinic
-from app.schemas.responses import PaginatedResponse
+from app.schemas.http import PaginatedResponse
 from app.services.clinic_service import service as clinic_service
 
 

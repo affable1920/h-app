@@ -1,8 +1,9 @@
 from fastapi import HTTPException
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+from sqlalchemy.exc import SQLAlchemyError
 
-from app.database.models import User, UserRole
+from app.database.models import User
 
 
 class UserService:
@@ -13,8 +14,15 @@ class UserService:
 
     #
 
-    def get_user(self, email: str) -> User | None:
-        return self.db.query(User).filter(User.email == email).first()
+    def get_by_email(self, email: str) -> User | None:
+        rqstd_user = self.db.query(User).filter(User.email == email).first()
+        return rqstd_user if rqstd_user else None
+
+    #
+
+    def get_by_id(self, id: str) -> User | None:
+        rqstd_user = self.db.query(User).filter(User.id == id).first()
+        return rqstd_user if rqstd_user else None
 
     #
 
@@ -28,28 +36,33 @@ class UserService:
 
     #
 
-    def create(self, email: str, password: str, username: str, role: UserRole) -> User:
-        created_user = User(
-            email=email, username=username, password=password, role=role
-        )
-        return created_user
-
-    #
-
-    def save(self, email: str, password: str, username: str, role: UserRole):
+    def save(self, email: str, password: str, username: str):
         hashed_pwd = self.hash_pwd(password)
 
         try:
-            db_user = self.create(
-                email=email, username=username, password=hashed_pwd, role=role
+            db_user = User(
+                email=email,
+                username=username,
+                password=hashed_pwd,
             )
 
             self.db.add(db_user)
             self.db.commit()
 
-        except Exception as e:
+            return db_user
+
+        except SQLAlchemyError as e:
             print(e)
+            self.db.rollback()
             raise HTTPException(
-                status_code=500,
-                detail="Error saving users !",
+                500,
+                {
+                    "detail": e,
+                    "type": "DATABASE ERROR",
+                    "msg": "An unexpected error occurred.",
+                },
             )
+
+        except Exception as e:
+            self.db.rollback()
+            raise

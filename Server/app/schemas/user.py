@@ -1,5 +1,12 @@
 from enum import Enum
-from pydantic import BaseModel, ConfigDict, EmailStr
+from typing import Annotated
+from uuid import UUID
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    PlainSerializer,
+)
 
 
 class UserRole(Enum):
@@ -25,7 +32,14 @@ class LoginUser(BaseModel):
     password: str
 
 
+def serialize(val: UUID):
+    return str(val)
+
+
 class ResponseUser(BaseModel):
-    id: str
     username: str
+    email: EmailStr
+    id: Annotated[UUID, PlainSerializer(serialize)]
+
+    appointments: list | None = []
     model_config = ConfigDict(from_attributes=True)

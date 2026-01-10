@@ -1,8 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
+from app.routes import users
 from app.routes import auth, clinics, doctors
 
 from app.services.data_generator import seed_db
@@ -16,6 +19,7 @@ async def root(app: FastAPI):
     from app.database.entry import Base, engine
 
     Base.metadata.create_all(engine)
+    # await seed_db()
     app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
 
     yield
@@ -25,6 +29,19 @@ async def root(app: FastAPI):
 app = FastAPI(
     lifespan=root, openapi_url="/openapi.json", docs_url="/docs", redoc_url="/redoc"
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_err_handler(req: Request, e: RequestValidationError):
+    body = await req.body()
+
+    print(f"Request Body: {body.decode()}")
+    print(f"Errors: {e.errors()}")
+
+    print(f"route: {req.url}")
+
+    return JSONResponse(content={"detail": e.errors()}, status_code=422)
+
 
 origins = ["http://localhost:5173", "https://h-app-omega.vercel.app"]
 
@@ -40,6 +57,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(doctors.router)
 app.include_router(clinics.router)
+app.include_router(users.router)
 
 
 @app.get("/")

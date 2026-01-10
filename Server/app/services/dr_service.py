@@ -4,13 +4,14 @@ from uuid import UUID
 from fastapi import Depends, HTTPException
 
 from sqlalchemy.orm import Session, Query
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import Mode
-from app.database.entry import get_db
-from app.database.models import Doctor as DBDoctor
+from app.database.models import Appointment, Patient as DBPatient, Doctor as DBDoctor
 
+from app.schemas.dr_extra import Clinic, Slot
 from app.schemas.doctor import Doctor, DoctorSummary
-from app.schemas.responses import PaginatedResponse, SlotRecord
+from app.schemas.http import PaginatedResponse, Patient, AppointmentRecord
 from app.schemas.query_params import FilterParams, PaginationParams, SortOrder
 
 
@@ -22,6 +23,15 @@ class DoctorService:
             detail={
                 "msg": "Invalid page !",
                 "desc": "The user is requesting a non-existing bigger page number.",
+            },
+        )
+
+        self.DoctorNotFoundError = HTTPException(
+            404,
+            detail={
+                "detail": {"id": id},
+                "msg": "Doctor not found !",
+                "desc": "No such doctor exists in our db",
             },
         )
 
@@ -110,80 +120,106 @@ class DoctorService:
     #
 
     def get_by_id(self, id: UUID) -> Doctor | None:
-        rqstd_doctor = self.db.query(DBDoctor).where(DBDoctor.id == id).first()
+        try:
+            rqstd_doctor = self.db.query(DBDoctor).where(DBDoctor.id == id).first()
+            return self.get_full_dr(rqstd_doctor) if rqstd_doctor else None
 
-        if not rqstd_doctor:
+        except SQLAlchemyError as e:
+            print(e)
             raise HTTPException(
-                404,
-                detail={
-                    "detail": {"id": id},
-                    "msg": "Doctor not found !",
-                    "desc": "No such doctor exists in our db",
+                500,
+                {
+                    "detail": e,
+                    "desc": "DATABASE ERROR",
+                    "msg": "Something went wrong, please try again later !",
                 },
             )
 
-        return self.get_full_dr(rqstd_doctor) if rqstd_doctor else None
-
-    def update_doctor(self, id: UUID):
-        pass
-
-
-class DoctorHelper:
-    def __init__(self, id: str, db: Session):
-        self.db = db
-
-    async def book(
+    def book(
         self,
-        dr_id: UUID,
-        schedule_id: str,
-        slot_id: str,
-        patient_name: str,
-        patient_contact: str,
-        db: Session = Depends(get_db),
-    ) -> SlotRecord | None:
-        dr_service = DoctorService(db)
+        id: UUID,
+        date: datetime,
+        clinic_id: UUID | None,
+        schedule_id: UUID,
+        slot_id: UUID,
+        patient: dict,
+    ):
+        try:
+            rqstd_doctor = self.db.query(DBDoctor).where(DBDoctor.id == id).first()
 
-        rqstd_doctor = dr_service.get_by_id(dr_id)
+            if not rqstd_doctor:
+                raise ValueError("Doctor not found !")
 
-        if not rqstd_doctor:
-            raise HTTPException(404, "Doctor not found !")
-
-        dr = rqstd_doctor.model_copy(deep=True)
-        rqstd_schedule = next((s for s in dr.schedules if s.id == schedule_id), None)
-
-        if not rqstd_schedule:
-            raise HTTPException(404, "Schedule not found !")
-
-        if not rqstd_schedule.is_active:
-            raise HTTPException(
-                400,
-                "The doctor has not started in-person consultations yet. Please check back later!",
+            target_schedule = next(
+                (s for s in rqstd_doctor.schedules if s.id == schedule_id), None
             )
 
-        slots = rqstd_schedule.slots
-        rqstd_slot = next((slot for slot in slots if slot.id == slot_id))
+            if not target_schedule:
+                raise ValueError("Schedule not found !")
 
-        if not rqstd_slot:
-            raise HTTPException(
-                404,
-                "The requested slot could not found. Please try with another one or check again!",
+            if not target_schedule.is_active:
+                raise ValueError(
+                    "The doctor has not started in-person consultations yet."
+                )
+
+            target_slot = next(
+                (s for s in target_schedule.slots if s.id == slot_id), None
+            )
+            if not target_slot:
+                raise ValueError(
+                    "The requested slot could not found. Please try with another one or check again!"
+                )
+
+            if target_slot.booked:
+                raise ValueError("Slot already booked !")
+
+            db_patient = DBPatient(**patient)
+
+            self.db.add(db_patient)
+            self.db.flush()  # This generates the PatientID without committing
+
+            print(f"creating appointment for patient {db_patient.id}")
+            created_appointment = Appointment(
+                date=date,
+                doctor_id=id,
+                slot_id=target_slot.id,
+                patient_id=db_patient.id,
+                schedule_id=target_schedule.id,
+                clinic_id=clinic_id if clinic_id else target_schedule.clinic_id,
             )
 
-        if rqstd_slot.booked:
-            raise HTTPException(400, "The slot has already been booked!")
+            target_slot.booked = True
+            self.db.add(created_appointment)
+            self.db.commit()
 
-        updated_slot = rqstd_slot.model_copy(update={"booked": True})
+            print(
+                f"Appointment successfullt created and saved with id: {created_appointment.id}"
+            )
+            self.db.refresh(target_schedule)
 
-        slot_record: SlotRecord = SlotRecord(
-            **{
-                "patient_name": patient_name,
-                "patient_contact": patient_contact,
-                "dept": dr.primary_specialization,
-                "doctor_name": dr.fullname,
-                "metadata": {"target_slot": updated_slot},
-                "booked_at": datetime.now().isoformat(),
-            }
-        )
+            response = AppointmentRecord(
+                patient=Patient.model_validate(patient),
+                date=date,
+                slot=Slot.model_validate(target_slot),
+                doctor=self.get_full_dr(rqstd_doctor),
+                clinic=Clinic.model_validate(target_schedule.clinic),
+            )
 
-        dr_service.update_doctor(id=dr_id)
-        return slot_record
+            return response
+
+        except ValueError as e:
+            print(e)
+            self.db.rollback()
+            raise
+
+        except SQLAlchemyError as e:
+            print(e)
+            self.db.rollback()
+            raise HTTPException(
+                500,
+                {
+                    "detail": e,
+                    "desc": "DATABASE ERROR",
+                    "msg": "An unexpected error occurred.",
+                },
+            )

@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 from datetime import datetime
 from typing import Any, List
 
+
 from app.database.entry import Base
 from app.config import UserRole, Mode, Status
 
@@ -32,9 +33,7 @@ class User(Base):
     id: Mapped[UUID] = mapped_column(
         Uuid(as_uuid=True),
         primary_key=True,
-        index=True,
         default=gen_id,
-        unique=True,
     )
 
     email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
@@ -69,7 +68,7 @@ class Doctor(Base):
     __tablename__ = "doctors"
 
     id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, unique=True, default=gen_id, index=True
+        Uuid(as_uuid=True), primary_key=True, unique=True, default=gen_id
     )
 
     password: Mapped[str] = mapped_column(nullable=False)
@@ -185,7 +184,7 @@ class Slot(Base):
     __tablename__ = "slots"
 
     id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, index=True, default=gen_id
+        Uuid(as_uuid=True), primary_key=True, default=gen_id
     )
 
     booked: Mapped[bool]
@@ -194,15 +193,15 @@ class Slot(Base):
     begin: Mapped[Time] = mapped_column(SQLTime, nullable=False)
     mode: Mapped[Mode] = mapped_column(SQLEnum(Mode), default="in person")
 
-    schedule_id: Mapped[str] = mapped_column(ForeignKey("schedules.id"))
     schedule: Mapped["Schedule"] = relationship(back_populates="slots")
+    schedule_id: Mapped[str] = mapped_column(ForeignKey("schedules.id"))
 
 
 class Clinic(Base):
     __tablename__ = "clinics"
 
     id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=gen_id, index=True
+        Uuid(as_uuid=True), primary_key=True, default=gen_id
     )
 
     head: Mapped[str] = mapped_column(nullable=False)
@@ -227,3 +226,43 @@ class Clinic(Base):
     doctors: Mapped[list["Doctor"]] = relationship(
         back_populates="clinics", lazy="joined", secondary=junction
     )
+
+
+class Patient(Base):
+    __tablename__ = "patients"
+
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=gen_id
+    )
+
+    name: Mapped[str] = mapped_column(index=True, nullable=False)
+    contact: Mapped[int] = mapped_column(Numeric(10), index=True, nullable=False)
+
+    appointments: Mapped[list["Appointment"]] = relationship(
+        back_populates="patient",
+        cascade="all, delete-orphan",
+    )
+
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=gen_id
+    )
+
+    patient_id: Mapped[UUID] = mapped_column(ForeignKey("patients.id"), nullable=False)
+    doctor_id: Mapped[UUID] = mapped_column(ForeignKey("doctors.id"), nullable=False)
+    slot_id: Mapped[UUID] = mapped_column(ForeignKey("slots.id"), nullable=False)
+
+    schedule_id: Mapped[UUID] = mapped_column(
+        ForeignKey("schedules.id"), nullable=False
+    )
+    clinic_id: Mapped[UUID] = mapped_column(ForeignKey("clinics.id"), nullable=False)
+
+    date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.now
+    )
+
+    patient: Mapped[Patient] = relationship(back_populates="appointments")

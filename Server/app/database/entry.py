@@ -17,7 +17,7 @@ or otherwise the url would break
 """
 
 
-DATABASE_URL = "postgresql://postgres:Ss%402332253@localhost:5432/sopore_i_fix"
+DATABASE_URL = "postgresql://postgres:Ss%402332253@localhost:5432/soporefix"
 
 
 class Base(DeclarativeBase):

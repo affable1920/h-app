@@ -1,14 +1,15 @@
+import json
 from enum import Enum
 from uuid import UUID
 from sqlalchemy.orm import Session
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, HTTPException
 
 from app.database.entry import get_db
 from app.services.dr_service import DoctorService
-from app.schemas.query_params import FilterParams, PaginationParams
 
 from app.schemas.doctor import Doctor, DoctorSummary
-from app.schemas.responses import DrScheduleData, PaginatedResponse
+from app.schemas.query_params import FilterParams, PaginationParams
+from app.schemas.http import BookingRequestData, PaginatedResponse, AppointmentRecord
 
 
 base_route = "/doctors"
@@ -32,7 +33,19 @@ async def get_doctor(id: UUID, db: Session = Depends(get_db)):
     return DoctorService(db).get_by_id(id=id)
 
 
-@router.post("/{id}/book")
-async def book_schedule(id: str, data: DrScheduleData, db: Session = Depends(get_db)):
-    print(id)
-    print(data)
+@router.post("/{id}/book", response_model=AppointmentRecord)
+async def book_schedule(
+    id: UUID, booking_data: BookingRequestData, db: Session = Depends(get_db)
+):
+    try:
+        return DoctorService(db).book(id=id, **booking_data.model_dump())
+
+    except ValueError as e:
+        print(e)
+        raise HTTPException(400, detail={"msg": str(e)})
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            500, detail={"msg": "Unexpected server error", "desc": json.dumps(e)}
+        )

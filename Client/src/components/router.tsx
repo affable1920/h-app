@@ -40,7 +40,7 @@ const Scheduler = lazy(() => import("@routes/Scheduler"));
 
 const ClinicsDirectory = lazy(() => import("@components/ClinicsDirectory"));
 const DoctorsDirectory = lazy(
-  () => import("@components/doctor/DoctorsDirectory")
+  () => import("@components/doctor/DoctorsDirectory"),
 );
 
 async function loadDoctor({ params }: LoaderFunctionArgs) {
@@ -99,7 +99,6 @@ const router = createBrowserRouter([
       {
         path: "auth/me",
         Component: UserProfile,
-        loader: async () => (await authClient.profile()).data,
       },
     ],
   },

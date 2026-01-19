@@ -32,7 +32,6 @@ function SignIn() {
   }: ChangeEvent<HTMLInputElement>) {
     setUser((p) => ({ ...p, [name]: value }));
   }
-  const location = useLocation();
 
   async function submit() {
     const validation = LoginSchema.safeParse(user);
@@ -49,6 +48,8 @@ function SignIn() {
 
     try {
       const authUser = (await authClient.login(user)).data;
+      console.log(authUser);
+
       auth.setUser(authUser);
 
       console.log("Recieved user after signin ...", authUser);
@@ -70,41 +71,44 @@ function SignIn() {
       <h2 className="card-h2 text-xl text-center uppercase font-extrabold">
         Sign In
       </h2>
-      <article className="flex flex-col gap-8">
-        <Input>
-          <Input.Label>email</Input.Label>
-          <Input.InputElement
-            autoFocus
-            type="email"
-            name="email"
-            value={user.email}
-            onChange={handleChange}
-          />
-          {errors.email && <Input.Error msg={errors.email} />}
-        </Input>
+      <form className="flex flex-col gap-8" onSubmit={submit}>
+        <article className="flex flex-col gap-8">
+          <Input>
+            <Input.Label>email</Input.Label>
+            <Input.InputElement
+              autoFocus
+              type="email"
+              name="email"
+              value={user.email}
+              onChange={handleChange}
+            />
+            {errors.email && <Input.Error msg={errors.email} />}
+          </Input>
 
-        <Input>
-          <Input.Label>password</Input.Label>
-          <Input.InputElement
-            name="password"
-            type="password"
-            value={user.password}
-            onChange={handleChange}
-          />
-          {errors.password && <Input.Error msg={errors.password} />}
-        </Input>
-      </article>
-      <article className="flex flex-col gap-2">
-        <Button size="md" type="submit" onClick={submit} loading={loading}>
-          sign in
-        </Button>
-        <article className="flex items-center justify-center gap-4 text-sm">
-          <p className="first-letter:capitalize font-bold">New here ?</p>
-          <Button variant="link">
-            <Link to="/auth/register">sign up instead</Link>
-          </Button>
+          <Input>
+            <Input.Label>password</Input.Label>
+            <Input.InputElement
+              name="password"
+              type="password"
+              value={user.password}
+              onChange={handleChange}
+            />
+            {errors.password && <Input.Error msg={errors.password} />}
+          </Input>
         </article>
-      </article>
+        <article className="flex flex-col gap-2">
+          <Button size="md" type="submit" onClick={submit} loading={loading}>
+            sign in
+          </Button>
+
+          <article className="flex items-center justify-between text-sm">
+            <p className="first-letter:capitalize font-bold">New here ?</p>
+            <Button variant="link">
+              <Link to="/auth/register">sign up instead</Link>
+            </Button>
+          </article>
+        </article>
+      </form>
     </div>
   );
 }

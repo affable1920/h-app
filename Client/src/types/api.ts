@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/me/appointments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Appointments */
+        get: operations["get_appointments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/doctors": {
         parameters: {
             query?: never;
@@ -100,6 +117,23 @@ export interface paths {
         put?: never;
         /** Book Schedule */
         post: operations["book_schedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctors/unbook/{app_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Unbook Schedule */
+        get: operations["unbook_schedule"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -195,17 +229,33 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** AppointmentRecord */
-        AppointmentRecord: {
+        /** Appointment */
+        Appointment: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id?: string;
+            doctor: components["schemas"]["Doctor"];
+            /** Patient Id */
+            patient_id: string;
             slot: components["schemas"]["Slot"];
             /**
              * Date
              * Format: date-time
              */
             date: string;
-            doctor: components["schemas"]["Doctor"];
-            clinic: components["schemas"]["Clinic"];
-            patient: components["schemas"]["Patient"];
+            /** Guest Name */
+            guest_name: string | null;
+            /** Guest Contact */
+            guest_contact: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        } & {
+            [key: string]: unknown;
         };
         /** BookingRequestData */
         BookingRequestData: {
@@ -214,7 +264,18 @@ export interface components {
              * Format: date-time
              */
             date: string;
-            patient: components["schemas"]["Patient"];
+            /**
+             * Patientid
+             * @description the id of a existing user in our db if logged in.
+             */
+            patientId?: string | null;
+            /**
+             * Name
+             * @description the patient's name, originally None, a string for a non-existing user.
+             */
+            name?: string | null;
+            /** Contact */
+            contact?: string | null;
             /**
              * Slotid
              * Format: uuid
@@ -431,14 +492,12 @@ export interface components {
             /** Paginated Count */
             paginated_count: number;
         };
-        /** Patient */
-        Patient: {
-            /** Name */
-            name: string;
-            /** Contact */
-            contact: string;
-        };
-        /** ResponseUser */
+        /**
+         * ResponseUser
+         * @description this class is purely for http responses so when creating a model using this class,
+         *     it's safe to exclude the password even before creating this model as this model as nothing to
+         *     do with our database
+         */
         ResponseUser: {
             /** Username */
             username: string;
@@ -447,10 +506,7 @@ export interface components {
              * Format: email
              */
             email: string;
-            /**
-             * Id
-             * Format: uuid
-             */
+            /** Id */
             id: string;
         };
         /**
@@ -637,19 +693,39 @@ export interface operations {
             };
         };
     };
+    get_appointments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Appointment"][];
+                };
+            };
+        };
+    };
     get_doctors: {
         parameters: {
             query?: {
-                page?: number;
-                max?: number;
-                sortBy?: string | null;
-                sortOrder?: components["schemas"]["SortOrder"] | null;
                 specialization?: string | null;
                 mode?: "online" | null;
                 currentlyAvailable?: boolean;
                 searchQuery?: string | null;
                 maxDistance?: number | null;
                 minRating?: number | null;
+                page?: number;
+                max?: number;
+                sortBy?: string | null;
+                sortOrder?: components["schemas"]["SortOrder"] | null;
             };
             header?: never;
             path?: never;
@@ -729,7 +805,38 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AppointmentRecord"];
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unbook_schedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                app_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

@@ -6,15 +6,24 @@ import drService from "@/services/DoctorService";
 type BookScheduleData =
   operations["book_schedule"]["requestBody"]["content"]["application/json"];
 
-export default function useSchedulesMutation(id: string) {
+export default function useSchedulesMutation() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (data: BookScheduleData) =>
-      await drService.schedule(id, data),
+  const bookMutation = (doctorId: string) =>
+    useMutation({
+      mutationFn: (data: BookScheduleData) =>
+        drService.schedule(doctorId, data),
 
-    onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ["doctor", id] });
+      onSuccess() {
+        queryClient.invalidateQueries({ queryKey: ["doctor", doctorId] });
+      },
+    });
+
+  const unBookMutation = useMutation({
+    mutationFn: (appId: string) => {
+      console.log(appId);
     },
   });
+
+  return { bookMutation, unBookMutation };
 }

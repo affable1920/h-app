@@ -43,6 +43,6 @@ export type ButtonProps<TVariant extends Variant = Variant> = {
   size?: SizeForVariant<TVariant>;
   variant?: Variant;
   loading?: boolean;
-} & ColorForVariant<TVariant> &
-  IconsForVariant<TVariant> &
+  color?: ColorForVariant<TVariant>;
+} & IconsForVariant<TVariant> &
   ButtonHTMLAttributes<HTMLButtonElement>;

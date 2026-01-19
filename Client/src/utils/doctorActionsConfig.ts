@@ -1,5 +1,13 @@
 import type { Status } from "@/types/doctorAPI";
-import type { DrCTA } from "@/types/doctorActions";
+
+type DrActionName = "call" | "schedule" | "message" | "profile";
+
+type DrCTA = {
+  label: string;
+  name: DrActionName;
+  isPrimary?: boolean;
+  showsModal?: boolean;
+};
 
 const callAction: DrCTA = {
   name: "call",
@@ -21,39 +29,41 @@ const profileAction: DrCTA = {
   label: "View profile",
 };
 
-const actionConfigs: Record<Exclude<Status, "unknown">, DrCTA[]> = {
-  available: [
-    {
-      ...callAction,
-      isPrimary: true,
-    },
-    {
-      ...scheduleAction,
-      showsModal: true,
-    },
-  ],
+export default function getActionsByStatus(status: Status) {
+  const actionConfigs: Record<Exclude<Status, "unknown">, DrCTA[]> = {
+    available: [
+      {
+        ...callAction,
+        isPrimary: true,
+      },
+      {
+        ...scheduleAction,
+        showsModal: true,
+      },
+    ],
 
-  in_patient: [
-    {
-      ...scheduleAction,
-      showsModal: true,
-      isPrimary: true,
-    },
-    {
-      ...callAction,
-      showsModal: true,
-    },
-  ],
+    in_patient: [
+      {
+        ...scheduleAction,
+        showsModal: true,
+        isPrimary: true,
+      },
+      {
+        ...callAction,
+        showsModal: true,
+      },
+    ],
 
-  away: [
-    {
-      ...messageAction,
-      isPrimary: true,
-    },
-    {
-      ...profileAction,
-    },
-  ],
-};
+    away: [
+      {
+        ...messageAction,
+        isPrimary: true,
+      },
+      {
+        ...profileAction,
+      },
+    ],
+  };
 
-export default actionConfigs;
+  return actionConfigs[status];
+}

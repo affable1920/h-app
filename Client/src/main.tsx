@@ -25,7 +25,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <QueryClientProvider client={client}>
-        <Toaster richColors position="top-center" />
+        <Toaster duration={1750} richColors position="top-center" />
         <RouterProvider router={router} />
         {import.meta.env.DEV && (
           <ReactQueryDevtools buttonPosition="bottom-left" />

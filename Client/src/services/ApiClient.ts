@@ -18,9 +18,10 @@ const CONFIG: Record<number, string> = {
   403: "Unauthorized",
   404: "Resource Not Found",
   422: "Invalid data",
+  500: "Internal Server Error",
 };
 
-const internalServerError: APIError = {
+const serverDownError: APIError = {
   status: 500,
   type: "Internal Server Error",
   msg: "No response from the server!",
@@ -28,33 +29,64 @@ const internalServerError: APIError = {
 };
 
 class APIClient {
-  private _baseUrl: string =
+  private baseUrl: string =
     import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   protected instance: AxiosInstance;
 
-  constructor(slug: string) {
+  constructor(private endpoint: string) {
     this.instance = axios.create({
-      baseURL: this._baseUrl + `/${slug}`,
+      baseURL: this.baseUrl,
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    this.instance.interceptors.response.use(
-      (response) => response,
-      (ex: AxiosError) => {
-        /*
-        Our api client has no idea what an error is about. Keep it that way, but rather minimalize 
-        errors here in a structured regular and predictable order for the components|hooks to handle
-        */
+    this.endpoint = endpoint;
 
-        if (ex.request && !ex.response) {
-          return Promise.reject(internalServerError);
+    this.instance.interceptors.request.use(
+      function (config) {
+        const token = localStorage.getItem("token");
+
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
         }
 
-        return Promise.reject(this.normalizeErrors(ex));
-      }
+        return config;
+      },
+      function (error) {
+        return Promise.reject(error);
+      },
+    );
+
+    this.instance.interceptors.response.use(
+      function (response) {
+        return response;
+      },
+      (error) => {
+        /*
+        Our api client has no idea what an error is about. Keep it that way, but rather minimalize 
+        errors here in a structured, regular and predictable order for the components|hooks to handle
+        */
+
+        if (error.request && !error.response) {
+          return Promise.reject(serverDownError);
+        }
+
+        const { status, response, config } = error as AxiosError;
+        const expiryHeader = response?.headers["x-session-expire"];
+
+        const expired = !!expiryHeader || expiryHeader === "true";
+
+        if (status === 401 && (expired || !config?.headers.Authorization)) {
+          console.log("Session expired! logging out ...");
+          localStorage.removeItem("token");
+
+          window.location.href = "/auth";
+        }
+
+        return Promise.reject(this.normalizeErrors(error));
+      },
     );
   }
 
@@ -91,23 +123,28 @@ class APIClient {
 
   async get<T>(
     path?: string,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<T>> {
-    return await this.instance.get<T>(path ? `/${path}` : "", config);
+    return await this.instance.get<T>(`${this.endpoint}/${path ?? ""}`, config);
   }
 
   async post<TResponse, TBody>(
     path: string,
     data: TBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<TResponse>> {
-    return await this.instance.post<TResponse>(`/${path}`, data, config);
+    return await this.instance.post<TResponse>(
+      `${this.endpoint}/${path}`,
+      data,
+      config,
+    );
   }
 
-  async request(config: AxiosRequestConfig) {
-    return await axios(config);
+  async put() {}
+
+  async delete(path: string) {
+    await this.instance.delete(`${this.endpoint}/${path}`);
   }
 }
 
-export const doctorApi = new APIClient("doctors");
 export default APIClient;

@@ -1,5 +1,4 @@
-import { useCallback } from "react";
-import { useAllDoctors } from "@/hooks/useDoctorsQuery";
+import useDoctorsQueries from "@/hooks/useDoctorsQueries";
 
 import ButtonElement from "./common/Button";
 import useQueryStore from "@/stores/queryStore";
@@ -11,22 +10,22 @@ import {
 import Button from "./common/Button";
 
 const Pagination = () => {
-  const { data: { has_next = true, has_prev = false, paginated_count } = {} } =
-    useAllDoctors();
+  const { getAll } = useDoctorsQueries();
+  const { data } = getAll();
   const { page = 1, setPage, reset } = useQueryStore();
 
-  const handlePageChange = useCallback((direction: "next" | "prev") => {
+  const handlePageChange = (direction: "next" | "prev") => {
     if (
-      (!has_prev && direction === "prev") ||
-      (!has_next && direction === "next")
+      (!data?.has_prev && direction === "prev") ||
+      (!data?.has_next && direction === "next")
     )
       return;
 
     const nextPage = direction === "next" ? page + 1 : page - 1;
     setPage(nextPage);
-  }, []);
+  };
 
-  if (paginated_count === 0)
+  if (data?.paginated_count === 0)
     return (
       <article
         data-tooltip="Reset all filters !"
@@ -40,7 +39,7 @@ const Pagination = () => {
 
   return (
     <article className="flex self-end items-center gap-4">
-      {has_prev && (
+      {data?.has_prev && (
         <ButtonElement
           size="md"
           variant="icon"
@@ -50,7 +49,7 @@ const Pagination = () => {
         </ButtonElement>
       )}
 
-      {has_next && (
+      {data?.has_next && (
         <ButtonElement
           size="md"
           variant="icon"

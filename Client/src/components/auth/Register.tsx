@@ -75,58 +75,60 @@ function Register() {
       <h2 className="card-h2 text-center text-2xl uppercase font-extrabold">
         sign up
       </h2>
-      <article className="flex flex-col gap-8">
-        <Input>
-          <Input.Label>Email</Input.Label>
-          <Input.InputElement
-            ref={ref}
-            name="email"
-            type="email"
-            value={user.email}
-            onChange={handleChange}
-            aria-invalid={!!errors.email}
-          />
-          {errors.email && <Input.Error msg={errors.email} />}
-        </Input>
+      <form className="flex flex-col gap-8" onSubmit={submit}>
+        <article className="flex flex-col gap-8">
+          <Input>
+            <Input.Label>Email</Input.Label>
+            <Input.InputElement
+              ref={ref}
+              name="email"
+              type="email"
+              value={user.email}
+              onChange={handleChange}
+              aria-invalid={!!errors.email}
+            />
+            {errors.email && <Input.Error msg={errors.email} />}
+          </Input>
 
-        <Input>
-          <Input.Label>password</Input.Label>
-          <Input.InputElement
-            name="password"
-            type="password"
-            value={user.password}
-            onChange={handleChange}
-            aria-invalid={!!errors.password}
-          />
-          {errors.password && <Input.Error msg={errors.password} />}
-        </Input>
+          <Input>
+            <Input.Label>password</Input.Label>
+            <Input.InputElement
+              name="password"
+              type="password"
+              value={user.password}
+              onChange={handleChange}
+              aria-invalid={!!errors.password}
+            />
+            {errors.password && <Input.Error msg={errors.password} />}
+          </Input>
 
-        <Input>
-          <Input.Label>username</Input.Label>
-          <Input.InputElement
-            name="username"
-            value={user.username}
-            onChange={handleChange}
-            aria-invalid={!!errors.username}
-          />
-          {errors.username && <Input.Error msg={errors.username} />}
-        </Input>
-      </article>
-
-      <article className="flex flex-col gap-4">
-        <Button size="md" type="submit" onClick={submit} loading={loading}>
-          Register
-        </Button>
-
-        <article className="flex items-center justify-center gap-2 text-sm">
-          <p className="first-letter:capitalize font-bold">
-            already a member !
-          </p>
-          <Button variant="link">
-            <Link to="/auth">Sign in</Link>
-          </Button>
+          <Input>
+            <Input.Label>username</Input.Label>
+            <Input.InputElement
+              name="username"
+              value={user.username}
+              onChange={handleChange}
+              aria-invalid={!!errors.username}
+            />
+            {errors.username && <Input.Error msg={errors.username} />}
+          </Input>
         </article>
-      </article>
+
+        <article className="flex flex-col gap-4">
+          <Button size="md" type="submit" onClick={submit} loading={loading}>
+            Register
+          </Button>
+
+          <article className="flex items-center justify-center gap-2 text-sm">
+            <p className="first-letter:capitalize font-bold">
+              already a member !
+            </p>
+            <Button variant="link">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+          </article>
+        </article>
+      </form>
     </section>
   );
 }

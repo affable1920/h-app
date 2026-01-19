@@ -1,7 +1,7 @@
 import Card from "@components/Card";
 import Spinner from "@components/Spinner";
 
-import { useAllDoctors } from "@/hooks/useDoctorsQuery";
+import useDoctorsQueries from "@/hooks/useDoctorsQueries";
 
 import DrCardBack from "./DrCardBack";
 import type { DoctorSummary } from "@/types/doctorAPI";
@@ -19,28 +19,12 @@ function DrCardFront({ drEssentials }: { drEssentials: DoctorSummary }) {
 }
 
 function DoctorsDirectory() {
-  const { isPending, data: { entities = [] } = {} } = useAllDoctors();
+  const { getAll } = useDoctorsQueries();
+  const all = getAll();
 
-  if (isPending) return <Spinner />;
+  if (all.isPending) return <Spinner />;
 
-  // if (applied_filters && !total_count) {
-  //   return (
-  //     <div className="flex flex-col justify-center items-center gap-2 mt-4">
-  //       <h2 className="text-lg uppercase font-bold font-mono">
-  //         No matching doctors found!
-  //       </h2>
-  //       <div className="flex items-center gap-2">
-  //         <Button onClick={reset} size="md">
-  //           Reset filters
-  //         </Button>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // console.log(applied_filters);
-
-  return (entities || []).map((doctor) => (
+  return (all.data?.entities || []).map((doctor) => (
     <Card
       key={doctor.id}
       entity={doctor}

@@ -48,9 +48,9 @@ function useQueryStore(): StoreState & StoreActions {
     });
   }
 
-  function setPage(cp: number) {
+  function setPage(pg: number) {
     setSearchParams((p) => {
-      p.set("page", cp.toString());
+      p.set("page", pg.toString());
       return p;
     });
   }

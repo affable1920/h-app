@@ -5,33 +5,34 @@ import { useLocation } from "react-router-dom";
 import Calendar from "@components/Calendar";
 import ClinicsView from "@components/ClinicsView";
 import { ArrowRight } from "lucide-react";
-import { useDoctor } from "@/hooks/useDoctorsQuery";
+import useDoctorsQueries from "@/hooks/useDoctorsQueries";
 import Spinner from "../Spinner";
 
 const Scheduler = memo(() => {
   const id = useLocation().pathname.split("/").at(2);
-  const { data: dr, isPending, isError } = useDoctor(id as string);
+  const { getById } = useDoctorsQueries();
 
   const [showClinicsView, setShowClinicsView] = useState(false);
-  const toggleView = useCallback(() => setShowClinicsView((p) => !p), []);
+  const { data: dr, isPending, isError } = getById(id as string);
 
-  if (isPending) return <Spinner />;
+  if (isPending) {
+    return <Spinner />;
+  }
 
-  if (isError)
+  if (isError) {
     return (
       <div className="card-h2">
         Hold your breathe. Doctor onboarding in process ...
       </div>
     );
-
-  const { fullname, schedules = [] } = dr;
+  }
 
   return (
     <section className="font-semibold flex flex-col pb-12 gap-8 mt-4">
       <header className="flex items-center gap-4">
-        <h2 className="card-h2 text-2xl font-black">Dr. {fullname}</h2>
+        <h2 className="card-h2 text-2xl font-black">Dr. {dr.fullname}</h2>
         <motion.button
-          onClick={toggleView}
+          onClick={() => setShowClinicsView((p) => !p)}
           animate={{ rotate: showClinicsView ? 90 : 0 }}
         >
           <ArrowRight size={14} />
@@ -40,13 +41,12 @@ const Scheduler = memo(() => {
 
       <ClinicsView
         doctor={dr}
-        schedules={schedules}
         onShow={setShowClinicsView}
         showClinicsView={showClinicsView}
       />
 
       <section className="flex flex-col gap-8 md:flex-row w-full">
-        <Calendar schedules={schedules} />
+        <Calendar schedules={dr.schedules} />
       </section>
     </section>
   );

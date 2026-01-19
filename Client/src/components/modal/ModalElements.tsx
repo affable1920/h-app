@@ -7,6 +7,9 @@ import Button from "../common/Button";
 import authClient from "@/services/Auth";
 import { Link, useNavigate } from "react-router-dom";
 import useModalStore from "@/stores/modalStore";
+import drService from "@/services/DoctorService";
+import { removeModal } from "@/stores/modalStore";
+import useAuthApi from "@/hooks/useAuthApi";
 
 const MODALS: Record<string, React.ElementType> = {
   aiGenerateModal: function AIGenerateModal() {
@@ -35,6 +38,28 @@ const MODALS: Record<string, React.ElementType> = {
     return (
       <div>
         <h2 className="card-h2">{tagline}</h2>
+      </div>
+    );
+  },
+
+  confirmation(props: { tagline: string; context: any }) {
+    const {
+      unBook: { mutate },
+    } = useAuthApi();
+
+    return (
+      <div className="flex flex-col items-center gap-8 p-4">
+        <h2 className="card-h2 capitalize my-4">{props.tagline}</h2>
+
+        <div className="flex justify-between w-full">
+          <Button onClick={removeModal}>no</Button>
+          <Button
+            color="danger"
+            onClick={() => mutate((props.context as { id: string }).id)}
+          >
+            confirm
+          </Button>
+        </div>
       </div>
     );
   },

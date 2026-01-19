@@ -43,13 +43,13 @@ const articleVariants: Record<string, Variant> = {
 
 interface ClinicsViewProps {
   doctor: Doctor;
-  schedules: Schedule[];
   showClinicsView: boolean;
   onShow: (show: boolean) => void;
 }
 
 const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
-  const { doctor, onShow, schedules, showClinicsView } = props;
+  const { doctor, onShow, showClinicsView } = props;
+  const { schedules } = doctor;
 
   const {
     state: scheduleState,
@@ -60,7 +60,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
 
   const isExpanded = useCallback(
     (id: string) => expandedIds.has(id),
-    [expandedIds]
+    [expandedIds],
   );
 
   useEffect(() => {
@@ -224,7 +224,8 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                         </div>
 
                         {slots.some(
-                          (slot) => slot.id === scheduleState.slot?.id
+                          (slot) =>
+                            slot.id === scheduleState.slot?.id && !slot.booked,
                         ) && (
                           <Button
                             className="self-end"

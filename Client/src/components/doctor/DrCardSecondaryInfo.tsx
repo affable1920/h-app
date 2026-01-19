@@ -1,16 +1,13 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { DrActionService } from "@/services/DrActionService";
 
 import Button from "../common/Button";
 
-import type { DrActionName } from "@/types/doctorActions";
 import type { DoctorSummary } from "../../types/doctorAPI";
-
 import { CalendarFold, PhoneOutgoing, User, Waypoints } from "lucide-react";
+import getActionsByStatus from "@/utils/doctorActionsConfig";
 
-const iconMap: Record<DrActionName, any> = {
+const iconMap: Record<string, any> = {
   profile: User,
   message: Waypoints,
   call: PhoneOutgoing,
@@ -19,12 +16,18 @@ const iconMap: Record<DrActionName, any> = {
 
 const DrCardSecondaryInfo = React.memo(
   ({ doctor }: { doctor: DoctorSummary }) => {
-    const dr = new DrActionService(doctor);
+    const actions = useMemo(
+      function () {
+        return getActionsByStatus(doctor.status);
+      },
+      [doctor.status],
+    );
+
     const navigate = useNavigate();
 
     return (
       <div className="flex items-center italic gap-1 self-end mt-2">
-        {(dr.availableActions || []).map((action, i) => {
+        {(actions || []).map((action, i) => {
           const { isPrimary, label = "", name } = action;
           const Icon = iconMap[name];
 
@@ -45,7 +48,7 @@ const DrCardSecondaryInfo = React.memo(
         })}
       </div>
     );
-  }
+  },
 );
 
 export default DrCardSecondaryInfo;

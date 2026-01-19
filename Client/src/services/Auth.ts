@@ -1,7 +1,5 @@
 import type { paths } from "@/types/api";
-import type { AxiosError, AxiosResponse } from "axios";
 import APIClient from "@/services/ApiClient";
-import type { APIError } from "@/types/errors";
 
 type LoginUser =
   paths["/auth/login"]["post"]["requestBody"]["content"]["application/json"];
@@ -18,7 +16,7 @@ type CreateUser =
 function SetSessionToken(
   target: any,
   propertyKey: string | symbol,
-  descriptor: PropertyDescriptor
+  descriptor: PropertyDescriptor,
 ) {
   /*
   
@@ -47,6 +45,7 @@ function SetSessionToken(
   // like set the session token (first, get a ref to the actual function)
   descriptor.value = async function (this: AuthClient, ...args: any) {
     const response = await originalMethod.apply(this, args);
+
     const token = response.headers?.["x-auth-token"];
 
     if (token) {
@@ -64,53 +63,16 @@ function SetSessionToken(
 class AuthClient extends APIClient {
   constructor() {
     super("auth");
-
-    this.instance.interceptors.request.use(
-      function (config) {
-        const token = localStorage.getItem("token");
-
-        if (token) {
-          config.headers["Authorization"] = `Bearer ${token}`;
-        } else {
-          delete config.headers["Authorization"];
-        }
-
-        return config;
-      },
-
-      function (ex) {
-        return Promise.reject(ex);
-      }
-    );
-
-    this.instance.interceptors.response.use(
-      (response) => response,
-      (ex) => {
-        const { status, detail } = ex as APIError;
-        const isSessionExp = detail?.headers?.["x-session-expire"];
-
-        if (status === 401 && (isSessionExp || isSessionExp === "true")) {
-          console.log("Session expired! logging out ...");
-          this.logout();
-        }
-      }
-    );
   }
 
   @SetSessionToken
   async login(user: LoginUser) {
-    return await this.post<DBUser, LoginUser>("login", { ...user });
+    return await this.post<DBUser, LoginUser>("login", user);
   }
 
   @SetSessionToken
   async register(user: CreateUser) {
-    return await this.post<DBUser, CreateUser>("register", {
-      ...user,
-    });
-  }
-
-  async profile() {
-    return await this.get<DBUser>("me");
+    return await this.post<DBUser, CreateUser>("register", user);
   }
 
   async logout() {

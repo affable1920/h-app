@@ -5,28 +5,30 @@ import Text from "@components/common/Text";
 import Input from "@components/common/Input";
 import Button from "@components/common/Button";
 
-import type { Doctor, Slot } from "@/types/doctorAPI";
-
-import useModalStore from "@stores/modalStore";
-import useSchedulesMutation from "@hooks/useSchedulesMutation";
+import type { Doctor } from "@/types/doctorAPI";
 
 import { toast } from "sonner";
+import useModalStore from "@stores/modalStore";
+import useSchedulesMutation from "@/hooks/useSchedulesMutation";
+
+import { useAuth } from "./providers/AuthProvider";
 import { Pencil, MapPinCheckInside } from "lucide-react";
 import { useSchedule } from "./providers/ScheduleProvider";
-import type { APIError } from "@/types/errors";
-import Dropdown from "./common/Dropdown";
 
 const PatientSchema = z.object({
-  name: z.string().min(4, "A name is required"),
-  contact: z.string().min(10, "contact number should exactly have 10 digits"),
+  name: z.string("please input a valid name").min(4, "A name is required"),
+  contact: z
+    .string("please input a valid 10 digit contact number")
+    .min(10, "contact number should exactly have 10 digits"),
 });
 
 type Patient = z.infer<typeof PatientSchema>;
 
 function ScheduleModal() {
-  const { state: scheduleState, actions } = useSchedule();
+  const { state: scheduleState } = useSchedule();
   const { date, clinic, slot, schedule } = scheduleState;
 
+  const { user } = useAuth();
   const dateString = date?.toFormat("dd LLL yyyy");
 
   const { dr } = useModalStore((s) => s.modalProps) as {
@@ -34,11 +36,9 @@ function ScheduleModal() {
   };
 
   const [patient, setPatient] = useState<Patient>({
-    name: "",
+    name: user?.username ?? "",
     contact: "",
   });
-
-  const [isSlotEditable, setIsSlotEditable] = useState(false);
 
   const [errors, setErrors] = useState<{ [K in keyof Patient]?: string }>({});
 
@@ -51,37 +51,40 @@ function ScheduleModal() {
     }));
   }
 
-  const openModal = useModalStore((s) => s.openModal);
   const closeModal = useModalStore((s) => s.closeModal);
 
-  const { mutateAsync, isPending } = useSchedulesMutation(dr.id);
+  const { bookMutation } = useSchedulesMutation();
+  const { mutateAsync, isPending } = bookMutation(dr.id);
 
   async function confirmSlot(e: FormEvent) {
+    e.preventDefault();
+    setErrors({});
+
+    const validation = PatientSchema.safeParse(patient);
+
+    if (!validation.success) {
+      validation.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof Patient;
+        setErrors((prev) => ({ ...prev, [field]: issue.message }));
+      });
+
+      return;
+    }
+
+    let data: any = {
+      slotId: slot?.id!,
+      clinicId: clinic?.id!,
+      date: date?.toISO() as string,
+      scheduleId: schedule?.id as string,
+    };
+
+    if (user?.id) {
+      data.patientId = user.id;
+    } else {
+      data = { ...data, ...patient };
+    }
+
     try {
-      e.preventDefault();
-
-      const validation = PatientSchema.safeParse(patient);
-
-      if (!validation.success) {
-        validation.error.issues.forEach((issue) => {
-          setErrors((prev) => ({
-            ...prev,
-            [issue.path[0]]: issue.message,
-          }));
-        });
-
-        return;
-      }
-
-      const data = {
-        patient: { ...patient },
-
-        slotId: slot?.id!,
-        clinicId: clinic?.id!,
-        date: date?.toISO() as string,
-        scheduleId: schedule?.id as string,
-      };
-
       await mutateAsync(data);
 
       toast.info("Slot booked successfully !", {
@@ -91,22 +94,14 @@ function ScheduleModal() {
             /* Implement slot undo later. */
           },
         },
+        duration: 4000,
       });
 
       closeModal();
-
-      setTimeout(function () {
-        openModal("memberModal");
-      }, 2000);
     } catch (error) {
-      const ex = error as APIError;
+      console.log(error);
 
-      toast.error(ex.type, {
-        description() {
-          return ex.msg;
-        },
-        className: "toast-error",
-      });
+      // toast.error(error as string);
     }
   }
 
@@ -149,9 +144,9 @@ function ScheduleModal() {
           <div className="flex items-center gap-1 -mt-1.5">
             <Text bold size="sm" content={slot.begin} />
             <Button
+              disabled
               size="xs"
               variant="icon"
-              onClick={() => setIsSlotEditable(true)}
               data-tooltip="Edit slot !"
             >
               <Pencil color="gray" />
@@ -166,6 +161,7 @@ function ScheduleModal() {
           <Input.InputElement
             autoFocus
             name="name"
+            value={patient.name}
             onChange={handleChange}
             aria-invalid={!!errors.name}
             className={`italic font-semibold text-sm`}
@@ -173,10 +169,23 @@ function ScheduleModal() {
           {errors.name && <Input.Error msg={errors.name} />}
         </Input>
 
-        <Input>
+        {user?.email && (
+          <Input>
+            <Input.Label>email</Input.Label>
+            <Input.InputElement
+              name="email"
+              value={user.email}
+              onChange={(e) => console.log(e)}
+              className="italic font-semibold text-sm"
+            />
+          </Input>
+        )}
+
+        <Input className="relative">
           <Input.Label>contact</Input.Label>
           <Input.InputElement
             name="contact"
+            value={patient.contact}
             onChange={handleChange}
             aria-invalid={!!errors.contact}
             className="italic font-semibold text-sm"
@@ -189,12 +198,7 @@ function ScheduleModal() {
             cancel
           </Button>
 
-          <Button
-            type="submit"
-            color="accent"
-            loading={isPending}
-            onClick={confirmSlot}
-          >
+          <Button type="submit" loading={isPending} onClick={confirmSlot}>
             Confirm Slot
           </Button>
         </div>

@@ -38,4 +38,12 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.cache
-.temp/
+.temp
+*.txt
+backend/
+
+
+.ini
+.pyc
+__pycache__/
+alembic.ini

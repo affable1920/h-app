@@ -55,18 +55,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/me/appointments": {
+    "/auth/me/appointments/{app_id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get Appointments */
-        get: operations["get_appointments"];
+        get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        /** Unbook */
+        delete: operations["unbook"];
         options?: never;
         head?: never;
         patch?: never;
@@ -117,23 +117,6 @@ export interface paths {
         put?: never;
         /** Book Schedule */
         post: operations["book_schedule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/doctors/unbook/{app_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Unbook Schedule */
-        get: operations["unbook_schedule"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -254,9 +237,16 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** @default active */
+            status: components["schemas"]["AppointmentStatus"];
         } & {
             [key: string]: unknown;
         };
+        /**
+         * AppointmentStatus
+         * @enum {string}
+         */
+        AppointmentStatus: "active" | "cancelled" | "completed";
         /** BookingRequestData */
         BookingRequestData: {
             /**
@@ -508,6 +498,11 @@ export interface components {
             email: string;
             /** Id */
             id: string;
+            /**
+             * Appointments
+             * @default []
+             */
+            appointments: components["schemas"]["Appointment"][];
         };
         /**
          * Schedule
@@ -693,11 +688,13 @@ export interface operations {
             };
         };
     };
-    get_appointments: {
+    unbook: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                app_id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -708,7 +705,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Appointment"][];
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -798,37 +804,6 @@ export interface operations {
                 "application/json": components["schemas"]["BookingRequestData"];
             };
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    unbook_schedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                app_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {

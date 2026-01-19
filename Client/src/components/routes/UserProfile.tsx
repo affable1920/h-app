@@ -10,10 +10,9 @@ import useAuthApi from "@/hooks/useAuthApi";
 
 const UserProfile = () => {
   const [view, setView] = useState(false);
-  const { profileQuery, getAppointments } = useAuthApi();
+  const { profileQuery } = useAuthApi();
 
-  const { data: profile, isError } = profileQuery;
-  const { data: bookings, isPending: bookingsPending } = getAppointments(view);
+  const { data: profile, isError, isPending } = profileQuery;
 
   if (isError) {
     return (
@@ -57,11 +56,11 @@ const UserProfile = () => {
               }}
               exit={{ x: "20px", opacity: 0, transition: { duration: 0.1 } }}
             >
-              {bookingsPending ? (
+              {isPending ? (
                 <Spinner />
               ) : (
                 <div className="flex flex-col gap-4 mt-2">
-                  {bookings?.map((booking) => (
+                  {profile.appointments?.map((booking) => (
                     <div
                       key={booking.id}
                       className="flex flex-col gap-4 bg-slate-100/25 border-2
@@ -96,6 +95,11 @@ const UserProfile = () => {
                             >
                               cancel appointment
                             </Button>
+                          )}
+                          {booking.status === "cancelled" && (
+                            <p className="capitalize font-black">
+                              appointment cancelled
+                            </p>
                           )}
                         </motion.div>
                       </AnimatePresence>

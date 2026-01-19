@@ -7,9 +7,9 @@ import Button from "../common/Button";
 import authClient from "@/services/Auth";
 import { Link, useNavigate } from "react-router-dom";
 import useModalStore from "@/stores/modalStore";
-import drService from "@/services/DoctorService";
 import { removeModal } from "@/stores/modalStore";
 import useAuthApi from "@/hooks/useAuthApi";
+import { toast } from "sonner";
 
 const MODALS: Record<string, React.ElementType> = {
   aiGenerateModal: function AIGenerateModal() {
@@ -44,8 +44,19 @@ const MODALS: Record<string, React.ElementType> = {
 
   confirmation(props: { tagline: string; context: any }) {
     const {
-      unBook: { mutate },
+      unBook: { mutate, isPending },
     } = useAuthApi();
+
+    function cancelBooking() {
+      try {
+        mutate((props.context as { id: string }).id);
+        removeModal();
+
+        toast("appointment successfully cancelled", {
+          className: "toast-error",
+        });
+      } catch {}
+    }
 
     return (
       <div className="flex flex-col items-center gap-8 p-4">
@@ -53,10 +64,7 @@ const MODALS: Record<string, React.ElementType> = {
 
         <div className="flex justify-between w-full">
           <Button onClick={removeModal}>no</Button>
-          <Button
-            color="danger"
-            onClick={() => mutate((props.context as { id: string }).id)}
-          >
+          <Button color="danger" loading={isPending} onClick={cancelBooking}>
             confirm
           </Button>
         </div>

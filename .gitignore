@@ -38,4 +38,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.cache
-.temp/
+.temp
+*.txt
+backend/

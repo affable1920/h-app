@@ -3,9 +3,6 @@ import authClient from "@/services/Auth";
 import { useAuth } from "@/components/providers/AuthProvider";
 import type { paths } from "@/types/api";
 
-type Bookings =
-  paths["/auth/me/appointments"]["get"]["responses"]["200"]["content"]["application/json"];
-
 type DBUser =
   paths["/auth/login"]["post"]["responses"]["200"]["content"]["application/json"];
 
@@ -19,15 +16,6 @@ function useAuthApi() {
     enabled: !!user?.id,
   });
 
-  const getAppointments = (enabled: boolean) => {
-    return useQuery({
-      queryKey: ["auth", user?.id, "appointments"],
-      queryFn: async () =>
-        authClient.get<Bookings>("me/appointments").then((res) => res.data),
-      enabled,
-    });
-  };
-
   const unBook = useMutation({
     mutationFn: (id: string) => authClient.delete(`me/appointments/${id}`),
     onSuccess() {
@@ -35,7 +23,7 @@ function useAuthApi() {
     },
   });
 
-  return { profileQuery, getAppointments, unBook };
+  return { profileQuery, unBook };
 }
 
 export default useAuthApi;

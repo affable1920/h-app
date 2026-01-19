@@ -1,39 +1,37 @@
-from datetime import datetime
 from math import ceil
 from uuid import UUID
-from fastapi import Depends, HTTPException
+from datetime import datetime
+from fastapi import Depends, HTTPException, status
 
 from sqlalchemy.orm import Session, Query
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import Mode
-from app.database.models import Appointment, Patient as DBPatient, Doctor as DBDoctor
+from app.database.models import Appointment, Doctor as DBDoctor, Schedule, Slot
 
-from app.schemas.dr_extra import Clinic, Slot
+from app.schemas.http import PaginatedResponse
 from app.schemas.doctor import Doctor, DoctorSummary
-from app.schemas.http import PaginatedResponse, Patient, AppointmentRecord
 from app.schemas.query_params import FilterParams, PaginationParams, SortOrder
+
+
+class InvalidPageException(Exception):
+    def __init__(self, msg: str, page_rqstd: int, max_page: int):
+        super().__init__(msg)
+        self.max_page = max_page
+        self.page_rqstd = page_rqstd
+
+
+class DoctorNotFoundException(Exception):
+    def __init__(self, msg: str):
+        super().__init__(status.HTTP_400_BAD_REQUEST, msg)
+
+
+#
 
 
 class DoctorService:
     def __init__(self, db: Session):
         self.db = db
-        self.InvalidPageError = HTTPException(
-            404,
-            detail={
-                "msg": "Invalid page !",
-                "desc": "The user is requesting a non-existing bigger page number.",
-            },
-        )
-
-        self.DoctorNotFoundError = HTTPException(
-            404,
-            detail={
-                "detail": {"id": id},
-                "msg": "Doctor not found !",
-                "desc": "No such doctor exists in our db",
-            },
-        )
 
     @staticmethod
     def get_summaried(dr: DBDoctor) -> DoctorSummary:
@@ -41,7 +39,7 @@ class DoctorService:
 
     @staticmethod
     def get_full_dr(dr: DBDoctor) -> Doctor:
-        return Doctor.model_validate(dr, from_attributes=True)
+        return Doctor.model_validate(dr)
 
     @staticmethod
     def __filter(
@@ -86,7 +84,14 @@ class DoctorService:
         last_page = ceil(total_count / (pagination.max))
 
         if pagination.page > last_page:
-            raise self.InvalidPageError
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "type": "invalid page request",
+                    "msg": "invalid page reuested by the user.",
+                    "details": {"max_page": last_page, "page_rqstd": pagination.page},
+                },
+            )
 
         try:
             query = self.__filter(query, filters)
@@ -102,110 +107,131 @@ class DoctorService:
 
             query = query.offset(pagination.offset).limit(pagination.max)
 
+            doctors = [self.get_summaried(dr) for dr in query.all()]
+            paginated_count = len(doctors)
+
+            return PaginatedResponse(
+                entities=doctors,
+                total_count=total_count,
+                has_prev=pagination.page != 1,
+                paginated_count=paginated_count,
+                has_next=pagination.page < last_page,
+            )
+
+        except SQLAlchemyError as e:
+            raise HTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                {
+                    "detail": str(e),
+                    "type": "DATABASE ERROR",
+                    "msg": "Something went wrong, please try again later !",
+                },
+            )
+
         except Exception as e:
             print(e)
-            raise HTTPException(500, f"Something went wrong, {str(e)}")
-
-        doctors = [self.get_summaried(dr) for dr in query.all()]
-        paginated_count = len(doctors)
-
-        return PaginatedResponse(
-            entities=doctors,
-            total_count=total_count,
-            has_prev=pagination.page != 1,
-            paginated_count=paginated_count,
-            has_next=pagination.page < ceil(total_count / pagination.max),
-        )
+            raise HTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                {
+                    "detail": str(e),
+                    "type": "internal server error",
+                    "msg": "an internal server error occurred.",
+                },
+            )
 
     #
 
     def get_by_id(self, id: UUID) -> Doctor | None:
         try:
             rqstd_doctor = self.db.query(DBDoctor).where(DBDoctor.id == id).first()
-            return self.get_full_dr(rqstd_doctor) if rqstd_doctor else None
+            if not rqstd_doctor:
+                raise DoctorNotFoundException("the requested doctor does not exist")
+
+            return self.get_full_dr(rqstd_doctor)
 
         except SQLAlchemyError as e:
             print(e)
             raise HTTPException(
                 500,
                 {
-                    "detail": e,
-                    "desc": "DATABASE ERROR",
+                    "detail": str(e),
+                    "type": "DATABASE ERROR",
                     "msg": "Something went wrong, please try again later !",
                 },
             )
+
+    #
 
     def book(
         self,
         id: UUID,
         date: datetime,
-        clinic_id: UUID | None,
-        schedule_id: UUID,
         slot_id: UUID,
-        patient: dict,
+        schedule_id: UUID,
+        guest_name: str | None,
+        clinic_id: UUID | None,
+        patient_id: UUID | None,
+        guest_contact: str | None,
     ):
         try:
-            rqstd_doctor = self.db.query(DBDoctor).where(DBDoctor.id == id).first()
-
-            if not rqstd_doctor:
-                raise ValueError("Doctor not found !")
-
-            target_schedule = next(
-                (s for s in rqstd_doctor.schedules if s.id == schedule_id), None
-            )
-
-            if not target_schedule:
-                raise ValueError("Schedule not found !")
-
-            if not target_schedule.is_active:
-                raise ValueError(
-                    "The doctor has not started in-person consultations yet."
+            target_slot = (
+                self.db.query(Slot)
+                .join(Slot.schedule)
+                .where(
+                    Slot.id == slot_id,
+                    Slot.schedule_id == schedule_id,
+                    Schedule.doctor_id == id,
+                    Schedule.clinic_id == clinic_id,
                 )
-
-            target_slot = next(
-                (s for s in target_schedule.slots if s.id == slot_id), None
+                .with_for_update()
+                .first()
             )
+
             if not target_slot:
-                raise ValueError(
-                    "The requested slot could not found. Please try with another one or check again!"
-                )
+                raise ValueError("No such slot exists for the doctor")
 
             if target_slot.booked:
                 raise ValueError("Slot already booked !")
 
-            db_patient = DBPatient(**patient)
-
-            self.db.add(db_patient)
-            self.db.flush()  # This generates the PatientID without committing
-
-            print(f"creating appointment for patient {db_patient.id}")
-            created_appointment = Appointment(
-                date=date,
-                doctor_id=id,
-                slot_id=target_slot.id,
-                patient_id=db_patient.id,
-                schedule_id=target_schedule.id,
-                clinic_id=clinic_id if clinic_id else target_schedule.clinic_id,
-            )
-
             target_slot.booked = True
+            created_appointment: Appointment
+
+            if patient_id:
+                created_appointment = Appointment(
+                    date=date,
+                    doctor_id=id,
+                    patient_id=patient_id,
+                    slot_id=target_slot.id,
+                    schedule_id=target_slot.schedule_id,
+                    clinic_id=clinic_id
+                    if clinic_id
+                    else target_slot.schedule.clinic_id,
+                )
+
+            else:
+                created_appointment = Appointment(
+                    date=date,
+                    doctor_id=id,
+                    slot_id=target_slot.id,
+                    guest_name=guest_name,
+                    guest_contact=guest_contact,
+                    schedule_id=target_slot.schedule_id,
+                    clinic_id=clinic_id
+                    if clinic_id
+                    else target_slot.schedule.clinic_id,
+                )
+
             self.db.add(created_appointment)
+            target_slot.booked = True
+
             self.db.commit()
+            self.db.refresh(target_slot)
 
             print(
-                f"Appointment successfullt created and saved with id: {created_appointment.id}"
-            )
-            self.db.refresh(target_schedule)
-
-            response = AppointmentRecord(
-                patient=Patient.model_validate(patient),
-                date=date,
-                slot=Slot.model_validate(target_slot),
-                doctor=self.get_full_dr(rqstd_doctor),
-                clinic=Clinic.model_validate(target_schedule.clinic),
+                f"Appointment successfully created and saved with id: {created_appointment.id}"
             )
 
-            return response
+            return created_appointment
 
         except ValueError as e:
             print(e)

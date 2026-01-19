@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException, Depends, status
 
-from app.database.models import User
 from app.database.entry import get_db
 from app.services.users_service import UserService
 
@@ -57,9 +56,7 @@ def create_access_token(
         )
 
 
-def decode_and_get_current(
-    token: str = Depends(auth_scheme), db: Session = Depends(get_db)
-) -> dict | None:
+def decode_access_token(token: str = Depends(auth_scheme)) -> dict | None:
     """
     This function uses the auth scheme as a dependency which
     automatically extracts the bearer token
@@ -81,5 +78,21 @@ def decode_and_get_current(
     except jwt.PyJWTError as e:
         raise HTTPException(
             status.HTTP_401_UNAUTHORIZED,
-            {"msg": "Invalid token", "type": "Token decode error", "desc": str(e)},
+            {"msg": "Invalid token", "type": "Token decode error", "detail": str(e)},
         )
+
+
+def decode_and_verify(
+    payload: dict = Depends(decode_access_token), db: Session = Depends(get_db)
+):
+    id = payload.get("sub")
+
+    if not id:
+        raise ValueError("invalid token")
+
+    service = UserService(db=db)
+    user = service.get_by_id(id=id)
+
+    if not user:
+        raise ValueError("invalid token")
+    return user

@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request, status
 
 from contextlib import asynccontextmanager
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+import jwt
 
-from app.routes import users
 from app.routes import auth, clinics, doctors
 
 from app.services.data_generator import seed_db
@@ -40,7 +40,14 @@ async def validation_err_handler(req: Request, e: RequestValidationError):
 
     print(f"route: {req.url}")
 
-    return JSONResponse(content={"detail": e.errors()}, status_code=422)
+    return JSONResponse(
+        content={
+            "detail": e.errors(),
+            "msg": "invalid data",
+            "type": "request validation error",
+        },
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+    )
 
 
 origins = ["http://localhost:5173", "https://h-app-omega.vercel.app"]
@@ -57,7 +64,6 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(doctors.router)
 app.include_router(clinics.router)
-app.include_router(users.router)
 
 
 @app.get("/")
@@ -77,17 +83,10 @@ async def generate_data():
     return {"message": "Data generated successfully"}
 
 
-# @app.middleware("http")
-# async def logger(req: Request, call_next):
-#     print(f"Request-Headers: {req.headers}")
-
-#     body = await req.body()
-#     print(f"Request-Body: {body}")
-
-#     response = await call_next(req)
-#     print(f"Response: {response.status_code}")
-
-#     return response
+@app.middleware("http")
+async def logger(req: Request, call_next):
+    response = await call_next(req)
+    return response
 
 
 if __name__ == "__main__":

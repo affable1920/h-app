@@ -14,7 +14,13 @@ class Mode(Enum):
     IN_PERSON = "in person"
 
 
-class Status(str, Enum):
+class Status(Enum):
     AWAY = "away"
     AVAILABLE = "available"
     IN_PATIENT = "in_patient"
+
+
+class AppointmentStatus(Enum):
+    active = "active"
+    cancelled = "cancelled"
+    completed = "completed"

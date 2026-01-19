@@ -24,7 +24,7 @@ class Base(DeclarativeBase):
     pass
 
 
-engine = create_engine(url=DATABASE_URL, echo=True)
+engine = create_engine(url=DATABASE_URL)
 
 
 def get_db():

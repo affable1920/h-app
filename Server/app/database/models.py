@@ -4,9 +4,11 @@ from uuid import UUID, uuid4
 from datetime import datetime
 from typing import Any, List
 
+import sqlalchemy
+
 
 from app.database.entry import Base
-from app.config import UserRole, Mode, Status
+from app.config import AppointmentStatus, Mode, Status
 
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from sqlalchemy import (
@@ -14,11 +16,11 @@ from sqlalchemy import (
     JSON,
     Column,
     DateTime,
-    Time as SQLTime,
     ForeignKey,
     Numeric,
     String,
     Table,
+    Time as SQLTime,
     Enum as SQLEnum,
 )
 
@@ -27,8 +29,8 @@ def gen_id():
     return uuid4()
 
 
-class User(Base):
-    __tablename__ = "users"
+class Patient(Base):
+    __tablename__ = "patients"
 
     id: Mapped[UUID] = mapped_column(
         Uuid(as_uuid=True),
@@ -36,24 +38,35 @@ class User(Base):
         default=gen_id,
     )
 
+    """
+    Sign up related fields:
+    email, username and password
+
+    user details:
+    name, contact, apps etc ..
+    """
+
     email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.now
-    )
 
     username: Mapped[str] = mapped_column(index=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
 
-    role: Mapped[UserRole | None] = mapped_column(
-        SQLEnum(UserRole), default=UserRole.PATIENT
+    name: Mapped[str] = mapped_column(nullable=True)
+    contact: Mapped[int] = mapped_column(Numeric(10), index=True, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.now
     )
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "role": self.role,
-            "username": self.username,
-        }
+    last_updated: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=sqlalchemy.func.now(),
+        onupdate=sqlalchemy.func.now(),
+    )
+
+    appointments: Mapped[list["Appointment"]] = relationship(
+        back_populates="patient", cascade="all, delete-orphan", lazy="joined"
+    )
 
 
 junction = Table(
@@ -188,13 +201,13 @@ class Slot(Base):
     )
 
     booked: Mapped[bool]
-    duration: Mapped[int]
+    duration: Mapped[int] = mapped_column(default=20)
 
     begin: Mapped[Time] = mapped_column(SQLTime, nullable=False)
     mode: Mapped[Mode] = mapped_column(SQLEnum(Mode), default="in person")
 
-    schedule: Mapped["Schedule"] = relationship(back_populates="slots")
     schedule_id: Mapped[str] = mapped_column(ForeignKey("schedules.id"))
+    schedule: Mapped["Schedule"] = relationship(back_populates="slots")
 
 
 class Clinic(Base):
@@ -228,22 +241,6 @@ class Clinic(Base):
     )
 
 
-class Patient(Base):
-    __tablename__ = "patients"
-
-    id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=gen_id
-    )
-
-    name: Mapped[str] = mapped_column(index=True, nullable=False)
-    contact: Mapped[int] = mapped_column(Numeric(10), index=True, nullable=False)
-
-    appointments: Mapped[list["Appointment"]] = relationship(
-        back_populates="patient",
-        cascade="all, delete-orphan",
-    )
-
-
 class Appointment(Base):
     __tablename__ = "appointments"
 
@@ -251,7 +248,10 @@ class Appointment(Base):
         Uuid(as_uuid=True), primary_key=True, default=gen_id
     )
 
-    patient_id: Mapped[UUID] = mapped_column(ForeignKey("patients.id"), nullable=False)
+    patient_id: Mapped[UUID] = mapped_column(ForeignKey("patients.id"), nullable=True)
+    guest_name: Mapped[str] = mapped_column(nullable=True)
+    guest_contact: Mapped[int] = mapped_column(Numeric(10), nullable=True)
+
     doctor_id: Mapped[UUID] = mapped_column(ForeignKey("doctors.id"), nullable=False)
     slot_id: Mapped[UUID] = mapped_column(ForeignKey("slots.id"), nullable=False)
 
@@ -265,4 +265,11 @@ class Appointment(Base):
         DateTime(timezone=True), default=datetime.now
     )
 
-    patient: Mapped[Patient] = relationship(back_populates="appointments")
+    status: Mapped[AppointmentStatus] = mapped_column(
+        SQLEnum(AppointmentStatus, name="appointment_status_enum")
+    )
+
+    doctor: Mapped[Doctor] = relationship(lazy="joined")
+    patient: Mapped["Patient"] = relationship(back_populates="appointments")
+
+    slot: Mapped[Slot] = relationship(lazy="joined")

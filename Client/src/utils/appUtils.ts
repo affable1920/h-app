@@ -5,25 +5,25 @@ import { DateTime } from "luxon";
 export const paginate = <T>(
   items: T[] = [],
   currPage: number = 1,
-  max: number = 10
+  max: number = 10,
 ): T[] => {
   if (!Array.isArray(items) || items.length === 0) return [];
 
   const start = (currPage - 1) * max;
-  const end = start + max;
+  const end = start + Math.min(max, items.length);
 
   return items.slice(start, end);
 };
 
 export const filter = <T extends { name: string }>(
   items: T[] = [],
-  sq?: string
+  sq?: string,
 ): T[] => {
   if (!sq) return items;
   const sqNormalized = sq.toLowerCase().trim();
 
   return items.filter((item) =>
-    item.name.toLowerCase().trim().includes(sqNormalized)
+    item.name.toLowerCase().trim().includes(sqNormalized),
   );
 };
 
@@ -31,7 +31,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function exponentialBackoff(
   func: () => Promise<AxiosResponse | void>,
-  maxRetries: number = 3
+  maxRetries: number = 3,
 ) {
   // config for exp backoff
   // const callId = Math.random().toString(36).substring(2, 8);
@@ -88,7 +88,7 @@ export const daysPerMonth = MONTHS.reduce(
     ...acc,
     [i + 1]: { name: month, days: getDaysPerMonth(i + 1) },
   }),
-  {}
+  {},
 );
 
 export function capitalize(str: string) {

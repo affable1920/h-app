@@ -1,134 +1,103 @@
-import z from "zod";
-import React, { useState, type FormEvent } from "react";
-
-import Text from "@components/common/Text";
 import Input from "@components/common/Input";
 import Button from "@components/common/Button";
 
-import type { Doctor } from "@/types/doctorAPI";
-
+import type { Doctor } from "@/types/http";
+import { useBookingMutation, useUnbookingMutation } from "@/hooks/bookings";
 import { toast } from "sonner";
 import useModalStore from "@stores/modalStore";
-import useSchedulesMutation from "@/hooks/useSchedulesMutation";
 
 import { useAuth } from "./providers/AuthProvider";
 import { Pencil, MapPinCheckInside } from "lucide-react";
 import { useSchedule } from "./providers/ScheduleProvider";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const PatientSchema = z.object({
-  name: z.string("please input a valid name").min(4, "A name is required"),
-  contact: z
-    .string("please input a valid 10 digit contact number")
-    .min(10, "contact number should exactly have 10 digits"),
-});
-
-type Patient = z.infer<typeof PatientSchema>;
+import { type PatientDetails, PatientSchema } from "@/schemas";
 
 function ScheduleModal() {
-  const { state: scheduleState } = useSchedule();
-  const { date, clinic, slot, schedule } = scheduleState;
-
   const { user } = useAuth();
+  const { state: scheduleState } = useSchedule();
+
+  const { date, clinic, slot, schedule } = scheduleState;
   const dateString = date?.toFormat("dd LLL yyyy");
 
+  const form = useForm<PatientDetails>({
+    resolver: zodResolver(PatientSchema),
+  });
+
+  const {
+    formState: { errors },
+  } = form;
+
+  const closeModal = useModalStore((s) => s.closeModal);
   const { dr } = useModalStore((s) => s.modalProps) as {
     dr: Doctor;
   };
 
-  const [patient, setPatient] = useState<Patient>({
-    name: user?.username ?? "",
-    contact: "",
-  });
+  const { mutateAsync: book, isPending } = useBookingMutation(dr.id);
+  const { mutate: unBook } = useUnbookingMutation();
 
-  const [errors, setErrors] = useState<{ [K in keyof Patient]?: string }>({});
+  async function confirmSlot(details: PatientDetails) {
+    const validated = PatientSchema.parse(details);
 
-  function handleChange({
-    target: { name = "", value = "" },
-  }: React.ChangeEvent<HTMLInputElement>) {
-    setPatient((p) => ({
-      ...p,
-      [name]: value,
-    }));
-  }
-
-  const closeModal = useModalStore((s) => s.closeModal);
-
-  const { bookMutation } = useSchedulesMutation();
-  const { mutateAsync, isPending } = bookMutation(dr.id);
-
-  async function confirmSlot(e: FormEvent) {
-    e.preventDefault();
-    setErrors({});
-
-    const validation = PatientSchema.safeParse(patient);
-
-    if (!validation.success) {
-      validation.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof Patient;
-        setErrors((prev) => ({ ...prev, [field]: issue.message }));
-      });
-
+    if (!slot?.id || !date || !schedule?.id) {
       return;
     }
 
     let data: any = {
-      slotId: slot?.id!,
-      clinicId: clinic?.id!,
-      date: date?.toISO() as string,
-      scheduleId: schedule?.id as string,
+      slotId: slot.id,
+      clinicId: clinic?.id,
+      date: date.toISO(),
+      scheduleId: schedule.id,
     };
 
     if (user?.id) {
-      data.patientId = user.id;
+      data = { ...data, patientId: user.id };
     } else {
-      data = { ...data, ...patient };
+      data = { ...data, ...validated };
     }
 
-    try {
-      await mutateAsync(data);
+    const createdAppointment = await book(data, {
+      successFn() {
+        toast.info("Slot booked successfully !", {
+          action: {
+            label: "Undo",
 
-      toast.info("Slot booked successfully !", {
-        action: {
-          label: "Undo",
-          onClick() {
-            /* Implement slot undo later. */
+            onClick() {
+              unBook({ appointmentId: createdAppointment.id, doctorId: dr.id });
+            },
           },
-        },
-        duration: 4000,
-      });
 
-      closeModal();
-    } catch (error) {
-      console.log(error);
+          duration: 4000,
+        });
 
-      // toast.error(error as string);
-    }
+        closeModal();
+      },
+
+      onError(error) {
+        toast.error(error.name, {
+          description() {
+            return error.message;
+          },
+        });
+      },
+    });
   }
 
   return (
-    <section className="flex flex-col justify-end gap-8 p-4">
+    <section className="flex flex-col text-sm justify-end gap-8 p-4">
       <div className="flex flex-col bg-primary-light/90 gap-1 text-white p-2 rounded-sm min-h-fit">
-        <Text bold content={"Dr. " + dr?.fullname} className="card-h2" />
+        <h2 className="card-h2">{dr.fullname}</h2>
         <span className="inline-flex flex-col items-end-safe">
-          <Text
-            bold
-            size="sm"
-            className="capitalize"
-            content={date?.weekdayShort as string}
-          />
-          {dateString && <Text bold size="xs" content={dateString} />}
+          <h2 className="capitalize">{date?.weekdayShort}</h2>
+          {dateString && <h2 className="card-h2">{dateString}</h2>}
         </span>
       </div>
 
       <div className="flex flex-col gap-2">
         {clinic && (
           <div className="flex items-center justify-between">
-            <Text
-              bold
-              size="sm"
-              content={clinic.head}
-              className="line-clamp-1"
-            />
+            <h2 className="line-clamp-1">{clinic.head}</h2>
 
             <Button
               size="xs"
@@ -142,7 +111,7 @@ function ScheduleModal() {
 
         {slot && (
           <div className="flex items-center gap-1 -mt-1.5">
-            <Text bold size="sm" content={slot.begin} />
+            <h2 className="card-h2">{slot.begin}</h2>
             <Button
               disabled
               size="xs"
@@ -155,18 +124,19 @@ function ScheduleModal() {
         )}
       </div>
 
-      <form onSubmit={confirmSlot} className="flex flex-col gap-6">
+      <form
+        onSubmit={form.handleSubmit(confirmSlot)}
+        className="flex flex-col gap-6"
+      >
         <Input>
           <Input.Label>name</Input.Label>
           <Input.InputElement
             autoFocus
-            name="name"
-            value={patient.name}
-            onChange={handleChange}
+            {...form.register("name")}
             aria-invalid={!!errors.name}
             className={`italic font-semibold text-sm`}
           />
-          {errors.name && <Input.Error msg={errors.name} />}
+          {errors.name && <Input.Error msg={errors.name.message} />}
         </Input>
 
         {user?.email && (
@@ -174,8 +144,6 @@ function ScheduleModal() {
             <Input.Label>email</Input.Label>
             <Input.InputElement
               name="email"
-              value={user.email}
-              onChange={(e) => console.log(e)}
               className="italic font-semibold text-sm"
             />
           </Input>
@@ -184,13 +152,11 @@ function ScheduleModal() {
         <Input className="relative">
           <Input.Label>contact</Input.Label>
           <Input.InputElement
-            name="contact"
-            value={patient.contact}
-            onChange={handleChange}
+            {...form.register("contact")}
             aria-invalid={!!errors.contact}
             className="italic font-semibold text-sm"
           />
-          {errors.contact && <Input.Error msg={errors.contact} />}
+          {errors.contact && <Input.Error msg={errors.contact.message} />}
         </Input>
 
         <div className="flex items-center justify-between">
@@ -198,7 +164,7 @@ function ScheduleModal() {
             cancel
           </Button>
 
-          <Button type="submit" loading={isPending} onClick={confirmSlot}>
+          <Button type="submit" loading={isPending}>
             Confirm Slot
           </Button>
         </div>

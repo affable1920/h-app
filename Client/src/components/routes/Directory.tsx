@@ -1,4 +1,4 @@
-import { useState, useMemo, Suspense } from "react";
+import { useState, useMemo, Suspense, useCallback } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Spinner from "../Spinner";
@@ -8,12 +8,12 @@ import Pagination from "@components/Pagination";
 import Button from "@/components/common/Button";
 
 import { debounce } from "@/utils/appUtils";
-import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
 
 import useModalStore from "@/stores/modalStore";
 import useQueryStore from "@/stores/queryStore";
 
 import { ArrowDown01, ArrowDown10 } from "lucide-react";
+import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
 
 const Directory = () => {
   const navigate = useNavigate();
@@ -35,9 +35,8 @@ const Directory = () => {
     setSort,
   } = useQueryStore();
 
-  const setQueryCached = useMemo(function () {
-    return debounce(setSearchQuery, 200);
-  }, []);
+  // const setQueryCached = useCallback(debounce((sq) => setSearchQuery(sq)), []);
+  const setQueryCached = useCallback(debounce(setSearchQuery), []);
 
   const location = useLocation().pathname.split("/").at(1) ?? "doctors";
 

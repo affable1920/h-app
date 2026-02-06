@@ -17,11 +17,11 @@ type ModalActions = {
   openModal: (modal: string, options?: ModalProps) => void;
 };
 
-const useModalStore = create<ModalState & ModalActions>((set, get) => ({
+const useModalStore = create<ModalState & ModalActions>((set) => ({
   currModal: null,
   modalProps: {},
 
-  openModal(modal: string, options) {
+  openModal(modal, options) {
     set({
       currModal: modal,
       modalProps: options ?? {},

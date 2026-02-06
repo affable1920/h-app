@@ -8,10 +8,11 @@ import sqlalchemy
 
 
 from app.database.entry import Base
-from app.config import AppointmentStatus, Mode, Status
+from app.shared.schemas import AppointmentStatus, Mode, Status
 
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from sqlalchemy import (
+    VARCHAR,
     Uuid,
     JSON,
     Column,
@@ -65,7 +66,9 @@ class Patient(Base):
     )
 
     appointments: Mapped[list["Appointment"]] = relationship(
-        back_populates="patient", cascade="all, delete-orphan", lazy="joined"
+        back_populates="patient",
+        cascade="all, delete-orphan",
+        lazy="joined",
     )
 
 
@@ -249,8 +252,8 @@ class Appointment(Base):
     )
 
     patient_id: Mapped[UUID] = mapped_column(ForeignKey("patients.id"), nullable=True)
-    guest_name: Mapped[str] = mapped_column(nullable=True)
-    guest_contact: Mapped[int] = mapped_column(Numeric(10), nullable=True)
+    guest_name: Mapped[str | None] = mapped_column(nullable=True)
+    guest_contact: Mapped[str | None] = mapped_column(VARCHAR(10), nullable=True)
 
     doctor_id: Mapped[UUID] = mapped_column(ForeignKey("doctors.id"), nullable=False)
     slot_id: Mapped[UUID] = mapped_column(ForeignKey("slots.id"), nullable=False)
@@ -266,7 +269,8 @@ class Appointment(Base):
     )
 
     status: Mapped[AppointmentStatus] = mapped_column(
-        SQLEnum(AppointmentStatus, name="appointment_status_enum")
+        SQLEnum(AppointmentStatus, name="appointment_status_enum"),
+        default=AppointmentStatus.active,
     )
 
     doctor: Mapped[Doctor] = relationship(lazy="joined")

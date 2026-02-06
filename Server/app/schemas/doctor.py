@@ -5,7 +5,7 @@ from datetime import datetime
 from . import dr_extra as DrType
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-from app.config import Status
+from app.shared.schemas import Status
 
 
 class DoctorSummary(BaseModel):

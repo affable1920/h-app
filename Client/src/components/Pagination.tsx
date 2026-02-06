@@ -1,4 +1,4 @@
-import useDoctorsQueries from "@/hooks/useDoctorsQueries";
+import { useGetAll } from "@/hooks/doctors";
 
 import ButtonElement from "./common/Button";
 import useQueryStore from "@/stores/queryStore";
@@ -10,8 +10,7 @@ import {
 import Button from "./common/Button";
 
 const Pagination = () => {
-  const { getAll } = useDoctorsQueries();
-  const { data } = getAll();
+  const { data } = useGetAll();
   const { page = 1, setPage, reset } = useQueryStore();
 
   const handlePageChange = (direction: "next" | "prev") => {

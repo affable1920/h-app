@@ -1,12 +1,10 @@
 import {
   useState,
   useMemo,
-  useEffect,
   useContext,
   createContext,
   type ReactNode,
 } from "react";
-import { jwtDecode } from "jwt-decode";
 import type { paths } from "@/types/api";
 
 type User =
@@ -28,13 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const state = useMemo(() => ({ user, setUser }), [user]);
 
-  console.log("Auth provider rendered !");
   console.log("Auth state :", state);
-
-  useEffect(function () {
-    const token = localStorage.getItem("token");
-    if (token) setUser(jwtDecode(token));
-  }, []);
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
 }

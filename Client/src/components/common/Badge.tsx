@@ -70,7 +70,7 @@ const Badge = memo(
         {content || children}
       </Component>
     );
-  }
+  },
 );
 
 export default Badge;

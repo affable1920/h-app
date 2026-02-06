@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.config import AppointmentStatus
+from app.shared.schemas import AppointmentStatus
 from app.database.models import Appointment, Patient
 
 

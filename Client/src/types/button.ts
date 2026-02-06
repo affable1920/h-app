@@ -21,28 +21,40 @@ export type IconSize = (typeof ICONSIZES)[number];
 export type Color = (typeof COLORS)[number];
 export type Variant = (typeof VARIANTS)[number];
 
-// these are props on all buttons
-
-type ColorForVariant<T extends Variant> = T extends "contained"
-  ? { variant?: "contained"; color?: Color }
-  : { variant?: Exclude<Variant, "contained"> };
-
-type SizeForVariant<T extends Variant> = T extends "icon" ? IconSize : Size;
-
-type IconsForVariant<T extends Variant> = T extends "contained" | "outlined"
-  ? {
-      startIcon?: ReactNode;
-      endIcon?: ReactNode;
-    }
-  : {
-      startIcon?: never;
-      endIcon?: never;
-    };
-
-export type ButtonProps<TVariant extends Variant = Variant> = {
-  size?: SizeForVariant<TVariant>;
-  variant?: Variant;
+type ButtonBase = {
   loading?: boolean;
-  color?: ColorForVariant<TVariant>;
-} & IconsForVariant<TVariant> &
-  ButtonHTMLAttributes<HTMLButtonElement>;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
+
+type ContainedButton = ButtonBase & {
+  variant?: "contained";
+  color: Color;
+  endIcon?: ReactNode;
+  startIcon?: ReactNode;
+  size?: Size;
+};
+
+type OutlinedButton = ButtonBase & {
+  variant?: "outlined";
+  endIcon?: ReactNode;
+  startIcon?: ReactNode;
+  size?: Size;
+};
+
+type LinkButton = ButtonBase & {
+  variant?: "link";
+  size?: IconSize;
+  to: string;
+  endIcon?: ReactNode;
+};
+
+type IconButton = ButtonBase & {
+  size?: IconSize;
+  color?: Color;
+  variant?: "icon";
+};
+
+export type ButtonProps =
+  | ContainedButton
+  | OutlinedButton
+  | LinkButton
+  | IconButton;

@@ -13,6 +13,7 @@
     "dev:with-types": "concurrently \"npm run generate-types\" \"npm run dev\""
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
     "jwt-decode": "^4.0.0",
@@ -21,10 +22,11 @@
     "openapi-typescript": "^7.10.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-hook-form": "^7.71.1",
     "react-router-dom": "^7.9.6",
     "tailwindcss": "^4.1.18",
     "uuid": "^13.0.0",
-    "zod": "^4.2.1",
+    "zod": "^4.3.6",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

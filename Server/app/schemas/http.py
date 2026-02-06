@@ -1,19 +1,22 @@
 from enum import Enum
+import enum
 from uuid import UUID
 from datetime import datetime
-from typing import Annotated, Generic, TypeVar
+from typing import Annotated, Any, Generic, TypeVar
 from pydantic import (
     BaseModel,
     ConfigDict,
     EmailStr,
     Field,
     PlainSerializer,
+    field_serializer,
+    model_serializer,
     model_validator,
 )
 
 from app.schemas.doctor import Doctor
 from app.schemas.dr_extra import Slot
-from app.config import AppointmentStatus
+from app.shared.schemas import AppointmentStatus
 
 
 T = TypeVar("T")
@@ -36,9 +39,9 @@ class UserRole(Enum):
 
 
 class Appointment(BaseModel):
-    id: Annotated[UUID, Field(PlainSerializer(serialize))]
+    id: Annotated[UUID, PlainSerializer(serialize, str, when_used="unless-none")]
     doctor: Doctor
-    patient_id: Annotated[UUID | None, PlainSerializer(serialize)]
+    patient_id: Annotated[UUID | None, PlainSerializer(serialize, str)]
 
     slot: Slot
     date: datetime
@@ -75,6 +78,8 @@ class BookingRequestData(BaseModel):
             description="the id of a existing user in our db if logged in.",
         ),
     ]
+
+    email: EmailStr | None = None
 
     guest_name: Annotated[
         str | None,
@@ -131,8 +136,8 @@ class ResponseUser(BaseModel):
     username: str
     email: EmailStr
 
-    id: Annotated[UUID, PlainSerializer(serialize)]
-    appointments: Annotated[list[Appointment], Field(default=[])]
+    id: Annotated[UUID, PlainSerializer(serialize, str)]
+    appointments: list[Appointment] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -144,7 +149,37 @@ class ResponseUser(BaseModel):
         return data
 
 
-"""
-the model validator with mode = before validates our dict before passing it to the pydantic class
-and then creates the actual pydantic model
-"""
+class Payload(BaseModel):
+    sub: UUID = Field(alias="id")
+    exp: float
+    iat: float
+
+    email: str | None = None
+    token_type: str = "access"
+
+    model_config = ConfigDict()
+
+    @field_serializer("sub", return_type=str, when_used="always")
+    def serialize_uuid(self, val: UUID):
+        return str(val) if str else None
+
+
+class MsgType(enum.Enum):
+    USER_JOIN = "user_join"
+    OFFER = "offer"
+    ANSWER = "answer"
+    USER_LEFT = "user_left"
+    OFFER_DECLINE = "offer_decline"
+
+
+class Message(BaseModel):
+    msg: str
+    to: Annotated[str | UUID, PlainSerializer(serialize, str)]
+    data: Any
+    msg_type: MsgType = Field(alias="msgType")
+
+    model_config = ConfigDict(use_enum_values=True)
+
+    # @model_serializer()
+    # def serialize_model(self):
+    #     return self.model_dump(mode="json")

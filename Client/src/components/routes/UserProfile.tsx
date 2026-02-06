@@ -1,18 +1,18 @@
-import { AnimatePresence, motion } from "motion/react";
-
-import { ArrowRight, ArrowRightIcon } from "lucide-react";
 import { useState } from "react";
-import Spinner from "../Spinner";
 import { DateTime } from "luxon";
+
+import Spinner from "../Spinner";
 import Button from "../common/Button";
+
+import { useProfile } from "@/hooks/auth";
 import useModalStore from "@/stores/modalStore";
-import useAuthApi from "@/hooks/useAuthApi";
+
+import { AnimatePresence, motion } from "motion/react";
+import { ArrowRight, ArrowRightIcon } from "lucide-react";
 
 const UserProfile = () => {
   const [view, setView] = useState(false);
-  const { profileQuery } = useAuthApi();
-
-  const { data: profile, isError, isPending } = profileQuery;
+  const { data: profile, isError, isPending } = useProfile();
 
   if (isError) {
     return (

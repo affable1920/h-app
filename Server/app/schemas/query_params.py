@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Annotated, Literal
 from pydantic import BaseModel, Field, field_serializer
 
-from app.config import Mode
+from app.shared.schemas import Mode
 
 
 # providing a default value -> field optional

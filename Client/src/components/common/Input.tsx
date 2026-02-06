@@ -8,14 +8,11 @@ import type {
 
 type Size = "xs" | "sm" | "md" | "lg";
 
-interface InputElementProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+interface InputElementProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "size"
+> {
   size?: Size;
-}
-
-interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
-  size?: Size;
-  color?: "dark" | "light";
 }
 
 function Input({
@@ -23,6 +20,13 @@ function Input({
   className = "",
 }: { children: ReactNode } & HTMLAttributes<HTMLDivElement>) {
   return <div className={`input-box ${className}`}>{children}</div>;
+}
+
+// - - -  - -- -  - -- - -- - - - - - - - -- - - --  --------------------- - - - - - - --
+
+interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
+  size?: Size;
+  color?: "dark" | "light";
 }
 
 const baseLabel = `italic font-bold capitalize`;
@@ -58,6 +62,8 @@ Input.Label = ({
   );
 };
 
+// ----------- - -- -  -- -  -- -- - ----------------------------
+
 const sizeClasses: Record<Size, string> = {
   xs: "h-6 p-0.5 px-1",
   sm: "h-8 p-1 px-2",
@@ -76,7 +82,7 @@ Input.InputElement = React.forwardRef<HTMLInputElement, InputElementProps>(
           .join(" ")
           .trim();
       },
-      [size, className]
+      [size, className],
     );
 
     return (
@@ -88,37 +94,15 @@ Input.InputElement = React.forwardRef<HTMLInputElement, InputElementProps>(
         className={`${classConfig}`}
       />
     );
-  }
+  },
 );
 
-// Input.InputElement = ({
-//   name,
-//   type = "text",
-//   size = "sm",
-//   className = "",
-//   ...rest
-// }: InputElementProps) => {
-//   const classConfig = useMemo(
-//     function () {
-//       return ["input", sizeClasses[size], className]
-//         .filter(Boolean)
-//         .join(" ")
-//         .trim();
-//     },
-//     [size, className]
-//   );
-
-//   return (
-//     <input {...rest} type={type} name={name} className={`${classConfig}`} />
-//   );
-// };
-
-Input.Error = ({ msg }: { msg: string }) => {
-  return (
+Input.Error = ({ msg }: { msg?: string }) => {
+  return msg ? (
     <p className="text-[9px] italic text-error-dark font-semibold first-letter:capitalize">
       {msg} !
     </p>
-  );
+  ) : null;
 };
 
 export default Input;

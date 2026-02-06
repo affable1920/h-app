@@ -1,15 +1,15 @@
 import Card from "@components/Card";
 import Spinner from "@components/Spinner";
 
-import useDoctorsQueries from "@/hooks/useDoctorsQueries";
+import { useGetAll } from "@/hooks/doctors";
 
 import DrCardBack from "./DrCardBack";
-import type { DoctorSummary } from "@/types/doctorAPI";
+import type { Doctor } from "@/types/http";
 
 import DrCardEssentials from "./DrCardEssentials";
 import DrCardSecondaryInfo from "./DrCardSecondaryInfo";
 
-function DrCardFront({ drEssentials }: { drEssentials: DoctorSummary }) {
+function DrCardFront({ drEssentials }: { drEssentials: Doctor }) {
   return (
     <article className="flex flex-col gap-8">
       <DrCardEssentials doctor={drEssentials} />
@@ -19,17 +19,16 @@ function DrCardFront({ drEssentials }: { drEssentials: DoctorSummary }) {
 }
 
 function DoctorsDirectory() {
-  const { getAll } = useDoctorsQueries();
-  const all = getAll();
+  const { data, isPending } = useGetAll();
 
-  if (all.isPending) return <Spinner />;
+  if (isPending) return <Spinner />;
 
-  return (all.data?.entities || []).map((doctor) => (
+  return (data?.entities || []).map((doctor) => (
     <Card
       key={doctor.id}
       entity={doctor}
       CardBack={<DrCardBack doctor={doctor} />}
-      CardFront={<DrCardFront drEssentials={doctor} />}
+      CardFront={<DrCardFront drEssentials={doctor as Doctor} />}
     />
   ));
 }

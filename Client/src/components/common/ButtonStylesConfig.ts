@@ -68,9 +68,7 @@ const variantStyles: Record<Variant, string> = {
   link: "underline underline-offset-2 p-0 border-0 bg-transparent p-0 inline-flex items-center",
 };
 
-export function getClassConfig<T extends Variant>({
-  ...props
-}: ButtonProps<T>): string {
+export function getClassConfig({ ...props }: ButtonProps): string {
   const base = `tracking-widest leading-tight font-semibold select-none cursor-pointer transition-colors 
   capitalize duration-225 ease-in text-center inline-flex items-center justify-center 
   text-sm disabled:opacity-60 disabled:pointer-events-none [&:has(.spinner)]:gap-1`;

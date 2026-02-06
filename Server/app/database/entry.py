@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
+from app.core.config import DATABASE_URL
+
 
 """
 posgresql database url format -
@@ -15,9 +17,6 @@ or otherwise the url would break
 
 @ - after encoding is mapped to %40
 """
-
-
-DATABASE_URL = "postgresql://postgres:Ss%402332253@localhost:5432/soporefix"
 
 
 class Base(DeclarativeBase):

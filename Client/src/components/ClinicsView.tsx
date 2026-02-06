@@ -10,7 +10,7 @@ import Badge from "./common/Badge";
 import { Link } from "react-router-dom";
 
 import { getWeekday } from "@/utils/calendarUtils";
-import type { Doctor, Clinic, Schedule } from "../types/doctorAPI";
+import type { Doctor, Clinic, Schedule } from "@/types/http";
 
 import useModalStore from "@/stores/modalStore";
 import { useSchedule } from "./providers/ScheduleProvider";

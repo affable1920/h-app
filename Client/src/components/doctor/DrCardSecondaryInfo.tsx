@@ -1,45 +1,45 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Button from "../common/Button";
+import type { Doctor } from "@/types/http";
+import useModalStore from "@/stores/modalStore";
+import getActions from "@/utils/doctorActionsConfig";
 
-import type { DoctorSummary } from "../../types/doctorAPI";
-import { CalendarFold, PhoneOutgoing, User, Waypoints } from "lucide-react";
-import getActionsByStatus from "@/utils/doctorActionsConfig";
+const DrCardSecondaryInfo = ({ doctor }: { doctor: Doctor }) => {
+  const navigate = useNavigate();
 
-const iconMap: Record<string, any> = {
-  profile: User,
-  message: Waypoints,
-  call: PhoneOutgoing,
-  schedule: CalendarFold,
-};
+  const actions = useMemo(
+    () =>
+      getActions(doctor.status, {
+        consult: (doctor: Doctor) =>
+          useModalStore.getState().openModal("consultation", { dr: doctor }),
+        schedule: (doctor: Doctor) => navigate(`/doctor/${doctor.id}/schedule`),
+        message: (doctor: Doctor) => navigate(`doctor/${doctor.id}/message`),
+      }),
+    [doctor.status, navigate],
+  );
 
-const DrCardSecondaryInfo = React.memo(
-  ({ doctor }: { doctor: DoctorSummary }) => {
-    const actions = useMemo(
-      function () {
-        return getActionsByStatus(doctor.status);
-      },
-      [doctor.status],
-    );
-
-    const navigate = useNavigate();
-
-    return (
+  return (
+    <div className="flex flex-col items-end">
+      {doctor.status === "available" && (
+        <h2 className="capitalize card-h2 italic text-sm text-success-dark">
+          online
+        </h2>
+      )}
       <div className="flex items-center italic gap-1 self-end mt-2">
         {(actions || []).map((action, i) => {
-          const { isPrimary, label = "", name } = action;
-          const Icon = iconMap[name];
+          const { name, label = "", icon: Icon } = action;
 
           return (
             <Button
               name={name}
               key={`${action.label}-${i}`}
-              {...(isPrimary
+              {...(action.isPrimary
                 ? { variant: "contained", color: "primary" }
                 : { variant: "outlined" })}
-              style={{ order: isPrimary ? 1 : -1 }}
-              onClick={() => navigate(`/doctor/${doctor.id}/schedule`)}
+              onClick={() => action.handler(doctor)}
+              style={{ order: action.isPrimary ? 1 : -1 }}
             >
               {label}
               {Icon && <Icon />}
@@ -47,8 +47,8 @@ const DrCardSecondaryInfo = React.memo(
           );
         })}
       </div>
-    );
-  },
-);
+    </div>
+  );
+};
 
 export default DrCardSecondaryInfo;

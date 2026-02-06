@@ -1,5 +1,5 @@
 import Button from "./common/Button";
-import { isRouteErrorResponse, Link, useRouteError } from "react-router-dom";
+import { isRouteErrorResponse, useRouteError } from "react-router-dom";
 
 const ErrorBoundary = () => {
   const ex = useRouteError();
@@ -15,8 +15,8 @@ const ErrorBoundary = () => {
     >
       <h1 className="label text-error-dark">{msg}</h1>
 
-      <Button variant="link">
-        <Link to="/">Go back to home</Link>
+      <Button variant="link" to="/">
+        Go back to home
       </Button>
     </div>
   );

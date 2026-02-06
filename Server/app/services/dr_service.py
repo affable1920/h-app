@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session, Query
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.config import Mode
+from app.shared.schemas import Mode
 from app.database.models import Appointment, Doctor as DBDoctor, Schedule, Slot
 
 from app.schemas.http import PaginatedResponse
@@ -172,6 +172,7 @@ class DoctorService:
         clinic_id: UUID | None,
         patient_id: UUID | None,
         guest_contact: str | None,
+        **kwargs: dict | None,
     ):
         try:
             target_slot = (
@@ -194,44 +195,33 @@ class DoctorService:
                 raise ValueError("Slot already booked !")
 
             target_slot.booked = True
-            created_appointment: Appointment
+
+            appointment = Appointment(
+                date=date,
+                doctor_id=id,
+                slot_id=target_slot.id,
+                schedule_id=target_slot.schedule_id,
+                clinic_id=clinic_id if clinic_id else target_slot.schedule.clinic_id,
+            )
 
             if patient_id:
-                created_appointment = Appointment(
-                    date=date,
-                    doctor_id=id,
-                    patient_id=patient_id,
-                    slot_id=target_slot.id,
-                    schedule_id=target_slot.schedule_id,
-                    clinic_id=clinic_id
-                    if clinic_id
-                    else target_slot.schedule.clinic_id,
-                )
+                appointment.patient_id = patient_id
 
             else:
-                created_appointment = Appointment(
-                    date=date,
-                    doctor_id=id,
-                    slot_id=target_slot.id,
-                    guest_name=guest_name,
-                    guest_contact=guest_contact,
-                    schedule_id=target_slot.schedule_id,
-                    clinic_id=clinic_id
-                    if clinic_id
-                    else target_slot.schedule.clinic_id,
-                )
+                appointment.guest_name = guest_name
+                appointment.guest_contact = guest_contact
 
-            self.db.add(created_appointment)
+            self.db.add(appointment)
             target_slot.booked = True
 
             self.db.commit()
             self.db.refresh(target_slot)
 
             print(
-                f"Appointment successfully created and saved with id: {created_appointment.id}"
+                f"Appointment successfully created and saved with id: {appointment.id}"
             )
 
-            return created_appointment
+            return appointment
 
         except ValueError as e:
             print(e)

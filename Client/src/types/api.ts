@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/authlogout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Logout */
+        get: operations["logout"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/me/appointments/{app_id}": {
         parameters: {
             query?: never;
@@ -214,11 +231,8 @@ export interface components {
     schemas: {
         /** Appointment */
         Appointment: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id?: string;
+            /** Id */
+            id: string;
             doctor: components["schemas"]["Doctor"];
             /** Patient Id */
             patient_id: string;
@@ -237,7 +251,6 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
-            /** @default active */
             status: components["schemas"]["AppointmentStatus"];
         } & {
             [key: string]: unknown;
@@ -246,7 +259,7 @@ export interface components {
          * AppointmentStatus
          * @enum {string}
          */
-        AppointmentStatus: "active" | "cancelled" | "completed";
+        AppointmentStatus: "active" | "completed" | "cancelled";
         /** BookingRequestData */
         BookingRequestData: {
             /**
@@ -259,6 +272,8 @@ export interface components {
              * @description the id of a existing user in our db if logged in.
              */
             patientId?: string | null;
+            /** Email */
+            email?: string | null;
             /**
              * Name
              * @description the patient's name, originally None, a string for a non-existing user.
@@ -621,7 +636,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ResponseUser"];
                 };
             };
             /** @description Validation Error */
@@ -673,7 +688,9 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-            cookie?: never;
+            cookie: {
+                access_token: string;
+            };
         };
         requestBody?: never;
         responses: {
@@ -686,16 +703,25 @@ export interface operations {
                     "application/json": components["schemas"]["ResponseUser"];
                 };
             };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
     };
-    unbook: {
+    logout: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                app_id: string;
+            path?: never;
+            cookie?: {
+                token?: string | null;
             };
-            cookie?: never;
         };
         requestBody?: never;
         responses: {
@@ -706,6 +732,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unbook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                app_id: string;
+            };
+            cookie: {
+                access_token: string;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
                 };
             };
             /** @description Validation Error */
@@ -811,7 +870,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Appointment"];
                 };
             };
             /** @description Validation Error */

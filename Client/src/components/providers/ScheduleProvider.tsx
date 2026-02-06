@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 
 import { DateTime } from "luxon";
-import type { Clinic, Schedule, Slot } from "@/types/doctorAPI";
+import type { Clinic, Schedule, Slot } from "@/types/http";
 
 interface ScheduleState {
   day: number | null;
@@ -25,8 +25,8 @@ const init: ScheduleState = {
   day: null,
   slot: null,
   clinic: null,
-  schedule: null,
   date: null,
+  schedule: null,
 };
 
 function reducer(state: ScheduleState, action: ScheduleAction) {
@@ -113,7 +113,7 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({
       set: <K extends keyof ScheduleState>(key: K, val: ScheduleState[K]) =>
         dispatch({ type: "SET", payload: { key, val } }),
     }),
-    []
+    [],
   );
 
   const contextVal = useMemo(() => ({ state, actions }), [state, actions]);

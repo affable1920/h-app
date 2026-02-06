@@ -7,7 +7,7 @@ from app.database.entry import get_db
 from app.services.dr_service import DoctorNotFoundException, DoctorService
 
 from app.schemas.doctor import Doctor, DoctorSummary
-from app.schemas.http import BookingRequestData, PaginatedResponse
+from app.schemas.http import Appointment, BookingRequestData, PaginatedResponse
 from app.schemas.query_params import FilterParams, PaginationParams
 
 
@@ -47,16 +47,18 @@ async def get_doctor(id: UUID, db: Session = Depends(get_db)):
         raise HTTPException(404, detail={"msg": str(e), "type": "not found"})
 
 
-@router.post("/{id}/book")
+@router.post("/{id}/book", response_model=Appointment)
 async def book_schedule(
     id: UUID, booking_data: BookingRequestData, db: Session = Depends(get_db)
 ):
     try:
-        DoctorService(db).book(id=id, **booking_data.model_dump(by_alias=False))
+        return DoctorService(db).book(id=id, **booking_data.model_dump(by_alias=False))
 
     except ValueError as e:
         print(e)
-        raise HTTPException(400, detail={"msg": str(e)})
+        raise HTTPException(
+            400, detail={"msg": str(e), "type": "bad request", "detail": str(e)}
+        )
 
     except Exception as e:
         print(e)

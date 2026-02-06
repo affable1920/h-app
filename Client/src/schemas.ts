@@ -13,3 +13,12 @@ export const LoginSchema = z.object({
   email: z.email("a valid email id is required"),
   password: z.string().min(6, "Please enter a valid password"),
 });
+
+export const PatientSchema = z.object({
+  name: z.string("please input a valid name").min(4, "A name is required"),
+  contact: z
+    .string("please input a valid 10 digit contact number")
+    .min(10, "contact number should exactly have 10 digits"),
+});
+
+export type PatientDetails = z.infer<typeof PatientSchema>;

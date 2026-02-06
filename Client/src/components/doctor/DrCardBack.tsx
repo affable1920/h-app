@@ -1,5 +1,5 @@
 import React from "react";
-import type { DoctorSummary } from "../../types/doctorAPI";
+import type { DoctorSummary } from "@/types/http";
 
 const DrCardBack = React.memo(
   ({ doctor }: { doctor: DoctorSummary }) => {
@@ -13,7 +13,7 @@ const DrCardBack = React.memo(
       </div>
     );
   },
-  (prev, next) => prev.doctor.id === next.doctor.id
+  (prev, next) => prev.doctor.id === next.doctor.id,
 );
 
 export default DrCardBack;

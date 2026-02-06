@@ -1,15 +1,17 @@
-import type { DoctorSummary } from "@/types/doctorAPI";
-import DirectoryFilter from "../filters/DirectoryFilter";
+import type { DoctorSummary } from "@/types/http";
+import DirectoryFilter from "@components/filters/DirectoryFilter";
 import ScheduleModal from "../ScheduleModal";
 import { motion } from "motion/react";
 import { Heart, LogOut, Bell, User } from "lucide-react";
 import Button from "../common/Button";
-import authClient from "@/services/Auth";
 import { Link, useNavigate } from "react-router-dom";
 import useModalStore from "@/stores/modalStore";
 import { removeModal } from "@/stores/modalStore";
-import useAuthApi from "@/hooks/useAuthApi";
 import { toast } from "sonner";
+import { useAuth } from "../providers/AuthProvider";
+import Consultation from "./Consultation";
+import { useUnbookingMutation } from "@/hooks/bookings";
+import useAuthStore from "@/stores/authStore";
 
 const MODALS: Record<string, React.ElementType> = {
   aiGenerateModal: function AIGenerateModal() {
@@ -42,20 +44,28 @@ const MODALS: Record<string, React.ElementType> = {
     );
   },
 
-  confirmation(props: { tagline: string; context: any }) {
-    const {
-      unBook: { mutate, isPending },
-    } = useAuthApi();
+  confirmation({
+    ...props
+  }: {
+    tagline: string;
+    doctorId: string;
+    appointmentId: string;
+  }) {
+    const { mutate: unBook, isPending } = useUnbookingMutation();
 
     function cancelBooking() {
-      try {
-        mutate((props.context as { id: string }).id);
-        removeModal();
-
-        toast("appointment successfully cancelled", {
-          className: "toast-error",
-        });
-      } catch {}
+      unBook(
+        {
+          doctorId: props.doctorId,
+          appointmentId: props.appointmentId,
+        },
+        {
+          successFn() {
+            removeModal();
+            toast.success("appointment cancelled successfully");
+          },
+        },
+      );
     }
 
     return (
@@ -76,6 +86,8 @@ const MODALS: Record<string, React.ElementType> = {
     const navigate = useNavigate();
     const options = ["history", "settings", "view booked appointments"];
 
+    const user = useAuthStore((s) => s.user);
+
     const icons = [
       {
         icon: Heart,
@@ -91,7 +103,7 @@ const MODALS: Record<string, React.ElementType> = {
         },
         text: "profile",
       },
-      { icon: LogOut, onClick: authClient.logout, text: "logout" },
+      { icon: LogOut, onClick() {}, text: "logout" },
     ];
 
     return (
@@ -103,22 +115,32 @@ const MODALS: Record<string, React.ElementType> = {
             </motion.li>
           ))}
         </motion.ul>
-        <ul className="flex items-center gap-4">
-          {icons.map(({ icon: Icon, onClick, text = "" }, i) => (
-            <Button
-              key={i}
-              size="xs"
-              variant="icon"
-              onClick={onClick}
-              data-tooltip={text}
-            >
-              <Icon />
+        {user ? (
+          <ul className="flex items-center gap-4">
+            {icons.map(({ icon: Icon, onClick, text = "" }, i) => (
+              <Button
+                key={i}
+                size="xs"
+                variant="icon"
+                onClick={onClick}
+                data-tooltip={text}
+              >
+                <Icon />
+              </Button>
+            ))}
+          </ul>
+        ) : (
+          <div className="flex items-center gap-4">
+            <Button variant="link" to="/auth">
+              Sign in
             </Button>
-          ))}
-        </ul>
+          </div>
+        )}
       </section>
     );
   },
+
+  consultation: Consultation,
 };
 
 export default MODALS;

@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import CalendarDay from "./CalendarDay";
 
 import { WEEKDAYS } from "@/utils/constants";
-import type { Schedule } from "@/types/doctorAPI";
+import type { Schedule } from "@/types/http";
 import { createCalendarData } from "@/utils/calendarUtils";
 import { useSchedule } from "./providers/ScheduleProvider";
 
@@ -31,7 +31,7 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
     function () {
       return createCalendarData(monthInView);
     },
-    [monthInView]
+    [monthInView],
   );
 
   const allScheduleDays = useMemo(
@@ -44,7 +44,7 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
 
       return [...new Set(days.flat())].sort((a, b) => a - b);
     },
-    [schedules]
+    [schedules],
   );
 
   const isDateGone = useCallback(function isDateGone(date: DateTime) {

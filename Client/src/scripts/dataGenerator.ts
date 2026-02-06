@@ -5,10 +5,9 @@ import { DateTime } from "luxon";
 import type {
   DoctorSummary,
   Clinic,
-  Fee,
   Slot as TimeSlot,
   Schedule,
-} from "../types/doctorAPI.ts";
+} from "@/types/http";
 import * as constants from "../utils/constants.ts";
 
 const chance = new Chance();
@@ -32,7 +31,7 @@ class DataGenerator {
           lng: chance.longitude(),
         },
         parking_available: chance.bool({ likelihood: 50 }),
-      })
+      }),
     );
 
     return single ? clinics[0] : clinics;
@@ -52,7 +51,7 @@ class DataGenerator {
   }
 
   private generateSchedules(
-    baseDuration: constants.ConsultationDuration = 30
+    baseDuration: constants.ConsultationDuration = 30,
   ): Schedule[] {
     let weekdayCached: number;
 
@@ -69,7 +68,7 @@ class DataGenerator {
 
     const startSlice = constants.TIME_SLOTS.slice(
       0,
-      constants.TIME_SLOTS.length - 2
+      constants.TIME_SLOTS.length - 2,
     );
 
     const start = chance.pickone(startSlice);
@@ -86,12 +85,12 @@ class DataGenerator {
   }
 
   private generateTimeSlots(
-    baseDuration: constants.ConsultationDuration = 30
+    baseDuration: constants.ConsultationDuration = 30,
   ): TimeSlot[] {
     const maxSlots = 6;
     const slots = chance.pickset(
       constants.TIME_SLOTS,
-      chance.natural({ max: maxSlots })
+      chance.natural({ max: maxSlots }),
     );
 
     return slots.map((slotTime) => ({
@@ -122,7 +121,7 @@ class DataGenerator {
       currently_available: chance.bool(),
       secondary_specializations: chance.pickset(
         constants.SPECIALIZATIONS,
-        chance.natural({ max: 3 })
+        chance.natural({ max: 3 }),
       ),
       consults_online: chance.bool(),
       reviews: chance.natural({ max: 420 }),
@@ -158,7 +157,7 @@ class DataGenerator {
 
   static generateDoctors(count: number = 40) {
     return Array.from({ length: count }, () =>
-      new DataGenerator().generateDoctor()
+      new DataGenerator().generateDoctor(),
     );
   }
 }

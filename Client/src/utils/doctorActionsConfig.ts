@@ -1,69 +1,62 @@
-import type { Status } from "@/types/doctorAPI";
+import type { ElementType } from "react";
+import type { Status, Doctor } from "@/types/http";
+import { CalendarFold, PhoneOutgoing, Waypoints } from "lucide-react";
 
-type DrActionName = "call" | "schedule" | "message" | "profile";
+type DrActionName = "consult" | "schedule" | "message";
+type ActionHandler = (doctor: Doctor, ...args: any[]) => void;
+type ActionConfig = DrCTA & { handler: ActionHandler };
 
 type DrCTA = {
   label: string;
   name: DrActionName;
   isPrimary?: boolean;
-  showsModal?: boolean;
+  icon?: ElementType;
+};
+
+const map: { [K in DrActionName]: any } = {
+  message: Waypoints,
+  consult: PhoneOutgoing,
+  schedule: CalendarFold,
 };
 
 const callAction: DrCTA = {
-  name: "call",
+  name: "consult",
   label: "consult now",
+  icon: map["consult"],
 };
 
 const scheduleAction: DrCTA = {
   name: "schedule",
   label: "schedule",
+  icon: map["schedule"],
 };
 
 const messageAction: DrCTA = {
   name: "message",
   label: "Get in touch",
+  icon: map["message"],
 };
 
-const profileAction: DrCTA = {
-  name: "profile",
-  label: "View profile",
-};
-
-export default function getActionsByStatus(status: Status) {
-  const actionConfigs: Record<Exclude<Status, "unknown">, DrCTA[]> = {
+export default function getActions(
+  status: Status,
+  handlers: Record<DrActionName, ActionHandler>,
+): ActionConfig[] {
+  const config: Record<Exclude<Status, "unknown">, ActionConfig[]> = {
     available: [
-      {
-        ...callAction,
-        isPrimary: true,
-      },
-      {
-        ...scheduleAction,
-        showsModal: true,
-      },
+      { ...callAction, isPrimary: true, handler: handlers.consult },
+      { ...scheduleAction, handler: handlers.schedule },
     ],
 
     in_patient: [
-      {
-        ...scheduleAction,
-        showsModal: true,
-        isPrimary: true,
-      },
-      {
-        ...callAction,
-        showsModal: true,
-      },
+      { ...scheduleAction, isPrimary: true, handler: handlers.schedule },
+      { ...callAction, handler: handlers.consult },
     ],
 
     away: [
-      {
-        ...messageAction,
-        isPrimary: true,
-      },
-      {
-        ...profileAction,
-      },
+      { ...messageAction, isPrimary: true, handler: handlers.message },
+      { ...scheduleAction, handler: handlers.schedule },
     ],
   };
 
-  return actionConfigs[status];
+  return config[status];
 }

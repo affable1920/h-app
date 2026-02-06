@@ -1,27 +1,18 @@
 import { lazy } from "react";
-import {
-  Navigate,
-  useLoaderData,
-  useLocation,
-  type LoaderFunctionArgs,
-} from "react-router-dom";
-import { createBrowserRouter, Outlet } from "react-router-dom";
+import { createBrowserRouter, Outlet, Navigate } from "react-router-dom";
 
 //
 import Layout from "@routes/Layout";
 import HomePage from "@routes/HomePage";
 import Directory from "@routes/Directory";
 
-import drService from "@services/DoctorService";
 import ErrorBoundary from "@components/ErrorBoundary";
 
 import SignIn from "@/components/auth/SignIn";
 import Register from "@components/auth/Register";
 import UserProfile from "./routes/UserProfile";
 
-import { toast } from "sonner";
 import { useAuth } from "./providers/AuthProvider";
-import authClient from "@/services/Auth";
 
 /*
 API Routes Structure:
@@ -42,11 +33,6 @@ const ClinicsDirectory = lazy(() => import("@components/ClinicsDirectory"));
 const DoctorsDirectory = lazy(
   () => import("@components/doctor/DoctorsDirectory"),
 );
-
-async function loadDoctor({ params }: LoaderFunctionArgs) {
-  if (!params?.id) return;
-  return await drService.getById(params.id);
-}
 
 const router = createBrowserRouter([
   {
@@ -80,7 +66,6 @@ const router = createBrowserRouter([
 
       {
         path: "doctor/:id",
-        loader: loadDoctor,
         Component: () => {
           return <div>Doctor's Profile</div>;
         },

@@ -1,31 +1,37 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-
-import Button from "../common/Button";
 import { SendHorizonal as Send } from "lucide-react";
+
+import Input from "../common/Input";
+import Button from "../common/Button";
 
 const HomePage = () => {
   const [userQuery, setUserQuery] = useState("");
 
-  const loc = useLocation();
-  console.log(loc);
-
   return (
     <section className="flex flex-col h-1/2 max-h-full py-12 pb-2 gap-4">
+      <form className="flex flex-col gap-4 mb-8">
+        <Input>
+          <Input.Label>Talk to server</Input.Label>
+          <Input.InputElement
+            name="message"
+            value={userQuery}
+            autoComplete="off"
+            onChange={(e) => setUserQuery(e.target.value)}
+          />
+        </Input>
+        <Button className="self-center">Send</Button>
+      </form>
+
       <ul className="flex items-center gap-4 justify-center">
         <li>
-          <Link to="dir/doctors">
-            <Button size="md" variant="contained" color="primary">
-              view doctors
-            </Button>
-          </Link>
+          <Button variant="link" to="dir/doctors" color="primary">
+            view doctors
+          </Button>
         </li>
         <li>
-          <Link to="dir/clinics">
-            <Button size="md" variant="contained" color="primary">
-              View Clinics
-            </Button>
-          </Link>
+          <Button variant="link" to="dir/clinics" color="primary">
+            View Clinics
+          </Button>
         </li>
       </ul>
 
@@ -43,15 +49,10 @@ const HomePage = () => {
           <div
             contentEditable
             className="border-none shadow-none outline-none h-full"
-            onInput={(e) => setUserQuery(e.currentTarget.textContent || "")}
           />
         </div>
         <div className="flex justify-end">
-          <Button
-            size="xs"
-            variant="icon"
-            onClick={() => setUserQuery(userQuery)}
-          >
+          <Button size="xs" variant="icon">
             <Send />
           </Button>
         </div>

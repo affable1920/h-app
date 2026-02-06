@@ -4,7 +4,7 @@ import CalendarBody from "./CalendarBody";
 import { motion, type Variant } from "motion/react";
 import { Info, ArrowRight, ArrowLeft } from "lucide-react";
 import Button from "@components/common/Button";
-import type { Schedule } from "@/types/doctorAPI";
+import type { Schedule } from "@/types/http";
 
 const currDate = DateTime.local();
 type Direction = "left" | "right";
@@ -38,7 +38,7 @@ const Calendar = memo(({ schedules }: { schedules: Schedule[] }) => {
 
       setMonthInView((p) => p.set({ month: newMonth }));
     },
-    [monthInView]
+    [monthInView],
   );
 
   return (

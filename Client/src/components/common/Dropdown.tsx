@@ -2,8 +2,6 @@ import { AnimatePresence, motion } from "motion/react";
 
 type DropdownProps = {
   show?: boolean;
-  label?: string;
-  isSearchable?: boolean;
   options: readonly string[];
   onOptionSelect?: (option: string) => void;
 };

@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 
 import useModalStore from "../../stores/modalStore";
-import useInjectModalHandlers from "../../hooks/useModalHandlers";
+import useInjectModalHandlers from "../../hooks/modalHandlers";
 
 import Overlay from "./Overlay";
 import MODALS from "./ModalElements";
@@ -20,7 +20,7 @@ const Modal = React.memo(() => {
     function () {
       return getModalConfig(modalProps.position);
     },
-    [modalProps.position]
+    [modalProps.position],
   );
 
   const portal = document.getElementById("portal");
@@ -44,7 +44,7 @@ const Modal = React.memo(() => {
         </Overlay>
       )}
     </AnimatePresence>,
-    portal
+    portal,
   );
 });
 

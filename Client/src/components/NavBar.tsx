@@ -4,10 +4,8 @@ import { useLocation } from "react-router-dom";
 
 import NavLinks from "./NavLinks.js";
 import Button from "@components/common/Button";
-import { Menu, Search } from "lucide-react";
-import { useAuth } from "./providers/AuthProvider";
-import { CircleUser } from "lucide-react";
 import useModalStore from "@/stores/modalStore";
+import { Menu, Search, SquareChevronDown } from "lucide-react";
 
 const NavBar = () => {
   const { pathname = "" } = useLocation();
@@ -39,11 +37,8 @@ const NavBar = () => {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [showRoutes]);
 
-  const { user } = useAuth();
-
   function showAuthOptions() {
     useModalStore.getState().openModal("authOptions", {
-      user,
       position: "top",
     });
   }
@@ -51,7 +46,7 @@ const NavBar = () => {
   return (
     <motion.nav
       ref={ref}
-      className="container flex min-h-14 justify-between items-center"
+      className="container flex min-h-14 justify-between items-center relative"
     >
       <Button
         variant="icon"
@@ -59,6 +54,7 @@ const NavBar = () => {
         onClick={() => setShowRoutes((p) => !p)}
       >
         <Menu />
+        <span className="sr-only">Toggle menu</span>
       </Button>
 
       <div className="flex items-center gap-4 italic font-bold cursor-pointer lg:order-10">
@@ -69,11 +65,9 @@ const NavBar = () => {
           </Button>
         </div>
 
-        {user && (
-          <Button onClick={showAuthOptions} variant="icon">
-            <CircleUser />
-          </Button>
-        )}
+        <Button onClick={showAuthOptions} variant="icon">
+          <SquareChevronDown />
+        </Button>
       </div>
 
       <NavLinks showRoutes={showRoutes} />

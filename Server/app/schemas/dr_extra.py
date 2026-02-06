@@ -3,7 +3,7 @@ from uuid import UUID
 from typing import Annotated
 from pydantic import ConfigDict, EmailStr, Field, BaseModel
 
-from app.config import Mode
+from app.shared.schemas import Mode
 
 
 class Clinic(BaseModel):

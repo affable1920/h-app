@@ -11,6 +11,9 @@ import {
   type APIError,
   type PydanticValidationError,
 } from "@/types/http";
+import useAuthStore, { logout } from "@/stores/authStore";
+import { config } from "@/config";
+import { toast } from "sonner";
 
 const CONFIG: Record<number, string> = {
   400: "Bad Request",
@@ -29,8 +32,7 @@ const serverDownError: APIError = {
 };
 
 class APIClient {
-  private baseUrl: string = "http://localhost:8000";
-  // import.meta.env.VITE_NGROK_URL ||
+  private baseUrl: string = config.api_url;
   protected instance: AxiosInstance;
 
   constructor(private readonly endpoint: string) {
@@ -45,14 +47,15 @@ class APIClient {
 
     this.instance.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem("token");
-
-        console.log(token);
+        const token = useAuthStore.getState().token;
 
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         } else {
           delete config.headers.Authorization;
+          console.log(
+            "Config headers deleted in api client. Not authenticated ...",
+          );
         }
 
         return config;
@@ -73,15 +76,27 @@ class APIClient {
         errors here in a structured, regular and predictable order for the components|hooks to handle
         */
 
+        console.log("api client response interceptor error\n", error);
+
         if (error.request && !error.response) {
           return Promise.reject(serverDownError);
         }
 
         const { status, response } = error as AxiosError;
 
-        if (status === 401 && response?.headers?.["x-auth-token"] === "true") {
-          const msg = "sessioen expired. Please login again";
+        if (
+          status === 401 &&
+          response?.headers?.["x-session-expire"] === "true"
+        ) {
+          const msg = "session expired. Please login again";
+
           console.log(msg);
+          toast.info(msg);
+
+          logout();
+          window.location.href = "/";
+
+          return;
         }
 
         return Promise.reject(this.normalizeErrors(error));
@@ -140,7 +155,6 @@ class APIClient {
     path?: string,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<T>> {
-    console.log(this.baseUrl);
     return await this.instance.get<T>(this.getSlug(path), config);
   }
 
@@ -149,8 +163,6 @@ class APIClient {
     data: TBody,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<TResponse>> {
-    console.log("axios instance defaults:", this.instance.defaults);
-
     return await this.instance.post<TResponse>(
       this.getSlug(path),
       data,

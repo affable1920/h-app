@@ -10,7 +10,6 @@ from pydantic import (
     Field,
     PlainSerializer,
     field_serializer,
-    model_serializer,
     model_validator,
 )
 
@@ -24,6 +23,8 @@ T = TypeVar("T")
 """
 This module has all pydantic models to be used for http rqsts and responses.
 """
+
+UUIDSerializer = Annotated[UUID, PlainSerializer(lambda v: str(v), return_type=str)]
 
 
 def serialize(val: UUID) -> str:
@@ -41,7 +42,7 @@ class UserRole(Enum):
 class Appointment(BaseModel):
     id: Annotated[UUID, PlainSerializer(serialize, str, when_used="unless-none")]
     doctor: Doctor
-    patient_id: Annotated[UUID | None, PlainSerializer(serialize, str)]
+    patient_id: UUIDSerializer | None
 
     slot: Slot
     date: datetime
@@ -136,17 +137,10 @@ class ResponseUser(BaseModel):
     username: str
     email: EmailStr
 
-    id: Annotated[UUID, PlainSerializer(serialize, str)]
+    id: UUIDSerializer
     appointments: list[Appointment] = []
 
-    model_config = ConfigDict(from_attributes=True)
-
-    @model_validator(mode="before")
-    def check_pwd_in_response(cls, data: dict):
-        """Remove password from response data before model creation & return"""
-        if isinstance(data, dict) and "password" in data:
-            data.pop("password")
-        return data
+    model_config = ConfigDict(from_attributes=True, extra="allow")
 
 
 class Payload(BaseModel):
@@ -164,22 +158,40 @@ class Payload(BaseModel):
         return str(val) if str else None
 
 
-class MsgType(enum.Enum):
-    USER_JOIN = "user_join"
+# Websocket communication
+
+
+class MsgType(str, enum.Enum):
+    JOIN = "join"
+    ACK = "acknowledgement"
     OFFER = "offer"
     ANSWER = "answer"
-    USER_LEFT = "user_left"
-    OFFER_DECLINE = "offer_decline"
+    USER_LEFT = "user-left"
+    OFFER_DECLINE = "offer-decline"
+    ICE = "ice-candidate"
+    TEXT = "text"
+    OFFLINE = "offline"
+    BROADCAST = "broadcast"
 
 
-class Message(BaseModel):
-    msg: str
-    to: Annotated[str | UUID, PlainSerializer(serialize, str)]
-    data: Any
-    msg_type: MsgType = Field(alias="msgType")
+class Metadata(BaseModel):
+    to_: Annotated[str, Field(alias="to")]
+    # Annotated[
+    #     UUID,
+    #     Field(serialization_alias="to"),
+    #     PlainSerializer(serialize, str, when_used="always"),
+    # ]
+    from_: Annotated[UUIDSerializer | None, Field(default=None, alias="from")]
 
-    model_config = ConfigDict(use_enum_values=True)
 
-    # @model_serializer()
-    # def serialize_model(self):
-    #     return self.model_dump(mode="json")
+class WS_Message(BaseModel):
+    msg_type: MsgType = Field(alias="type")
+    payload: Any
+    metadata: Metadata | None = None
+
+    model_config = ConfigDict(
+        extra="allow",
+        from_attributes=True,
+        use_enum_values=True,
+        serialize_by_alias=True,
+    )

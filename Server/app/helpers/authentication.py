@@ -1,11 +1,10 @@
-from fastapi.security import OAuth2PasswordBearer
 import jwt
 from datetime import datetime, timedelta
+from fastapi.security import OAuth2PasswordBearer
 
 from fastapi import (
     HTTPException,
     Depends,
-    status,
 )
 from sqlalchemy.orm import Session
 
@@ -29,16 +28,14 @@ OAuth2PwdBearer is a dependency that auomatically extracts the bearer "token" in
 bearer = OAuth2PasswordBearer(tokenUrl="auth")
 
 
-def create_access_token(
-    data: dict, exp_dur: timedelta | None = timedelta(hours=2)
-) -> str:
+def create_access_token(data: dict, exp_dur: timedelta = timedelta(days=2)) -> str:
     payload = data.copy()
 
     if "password" in payload:
         del payload["password"]
 
     iat = datetime.now()
-    exp = iat + exp_dur if exp_dur else iat + timedelta(hours=2)
+    exp = iat + exp_dur
 
     payload = Payload(
         **data,
@@ -61,65 +58,55 @@ def create_access_token(
         )
 
 
-def decode_access_token(token: str = Depends(bearer)) -> dict:
+def decode_http_token(token: str = Depends(bearer)) -> dict:
     """
     This function uses the bearer as a dependency.
 
     The auth scheme automatically extracts the bearer token and the function itself returns
     the decoded user to any function which uses this function as a dependency
     """
+
     if not token:
         raise HTTPException(
-            status_code=401, detail={"msg": "no token found", "type": "missing token"}
+            401,
+            {
+                "msg": "no token found in your request config.",
+                "type": "invalid request",
+            },
         )
-
     try:
-        return jwt.decode(token, key=JWT_SECRET, algorithms=[ALG])
+        return jwt.decode(jwt=token, key=JWT_SECRET, algorithms=[ALG])
 
-    except jwt.ExpiredSignatureError as e:
-        print("Token expired:", e)
+    except jwt.ExpiredSignatureError:
         raise HTTPException(
-            headers={"x-session-expire": "true"},
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token expired ! Please log in again.",
+            401,
+            {"msg": "Token expired. please login again", "type": "Session expiry"},
+            {"x-session-expire": "true"},
         )
-
-    except (jwt.InvalidTokenError, jwt.PyJWTError) as e:
-        raise HTTPException(
-            status.HTTP_401_UNAUTHORIZED,
-            {"msg": "Invalid token", "type": "Token decode error", "detail": str(e)},
-        )
+    except (jwt.InvalidTokenError, jwt.PyJWTError):
+        raise HTTPException(401, {"type": "generic jwt error", "msg": "invalid token"})
 
 
-def get_curr_user(
-    access_token: str = Depends(decode_access_token),
+def get_user_http(
     session: Session = Depends(get_db),
+    payload: dict = Depends(decode_http_token),
 ) -> Patient:
-    if not access_token:
-        print("no access token found in cookie...")
-
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"msg": "No token found", "type": "auth"},
-        )
-
-    print("access token recieved in auth dependency", access_token)
     service = UserService(db=session)
-
-    payload = decode_access_token(access_token)
     user_id = payload.get("sub")
 
     if not user_id:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"msg": "Invalid token", "type": "auth"},
+            401, {"type": "invalid token", "msg": "no subject (id) found in token"}
         )
 
     user = service.get_by_id(id=user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"msg": "User not found", "type": "auth"},
+            401, {"type": "invalid token", "msg": "No user found with hashed token"}
         )
 
     return user
+
+
+def decode_token(token: str) -> dict:
+    return jwt.decode(jwt=token, key=JWT_SECRET, algorithms=[ALG])

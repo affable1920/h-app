@@ -38,7 +38,7 @@ class UserService:
 
     #
 
-    def save(self, email: str, password: str, username: str):
+    def save(self, email: str, password: str, username: str, commit: bool = False):
         try:
             hashed_pwd = self.hash_pwd(password)
 
@@ -49,7 +49,12 @@ class UserService:
             )
 
             self.db.add(db_user)
-            self.db.commit()
+
+            if commit:
+                self.db.commit
+
+            else:
+                self.db.flush()
 
             return db_user
 
@@ -72,7 +77,7 @@ class UserService:
         appointment = self.db.get(Appointment, ident=appointment_id)
 
         if not appointment or not appointment.patient_id == patient_id:
-            raise ValueError("invalid appointment")
+            raise ValueError([400, "invalid appointment"])
 
         try:
             appointment.slot.booked = False

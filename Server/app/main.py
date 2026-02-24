@@ -1,26 +1,26 @@
-import json
+from pathlib import Path
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi import (
-    Depends,
     FastAPI,
     Request,
-    WebSocketDisconnect,
-    WebSocketException,
     status,
-    WebSocket,
 )
 
 
-from app.database.models import Patient
+from app.routes import websocket
 from app.routes import auth, clinics, doctors
-from app.helpers.authentication import get_curr_user
 
 from app.services.data_generator import seed_db
 from app.services.openapi_spec import generate_openapi_spec
+
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename=Path(__file__), level=logging.INFO)
 
 
 @asynccontextmanager
@@ -61,19 +61,11 @@ async def validation_err_handler(req: Request, e: RequestValidationError):
     )
 
 
-origins = [
-    "http://localhost:5173",
-    "http://localhost:5100",
-    "http://10.66.208.207:5173",
-    "http://10.185.226.176:5173",
-    "https://h-app-omega.vercel.app",
-]
-
 app.add_middleware(
     CORSMiddleware,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     expose_headers=["x-session-expire", "x-auth-token"],
 )
@@ -81,6 +73,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(doctors.router)
 app.include_router(clinics.router)
+app.add_websocket_route("/ws", websocket.ws_endpoint)
 
 html = """
 <!DOCTYPE html>
@@ -144,93 +137,27 @@ async def generate_data():
     return {"message": "Data generated successfully"}
 
 
-@app.middleware("http")
-async def logger(req: Request, call_next):
-    print("cookies recieved with http rqst: ", req.cookies)
+if __name__ == "__main__":
+    import uvicorn
+    from .core.config import USE_HTTPS
 
-    response = await call_next(req)
-    return response
+    """
+    Hardcoding the base directory path to the root of the app for now
+    later, use a loop until the base dir becomes .h-app 
+    """
 
+    BASE_DIR = Path(__file__).parent.parent.parent
+    is_https = int(USE_HTTPS) == 1
 
-ws_conns: dict[str, WebSocket] = {}
+    logging.info(
+        f"running server in {'https' if is_https else 'http'} mode".capitalize()
+    )
 
-print("active ws conns: ", ws_conns)
-
-
-@app.websocket("/ws")
-async def websocket_endpoint(ws: WebSocket, db_user: Patient = Depends(get_curr_user)):
-    print("ws conn request recieved ...")
-
-    if not db_user:
-        raise WebSocketException(
-            code=status.WS_1008_POLICY_VIOLATION, reason="not authenticated"
-        )
-
-    ws_conns[str(db_user.id)] = ws
-
-    await ws.accept()
-    await ws.send_text(f"Welcome User {db_user.id}")
-
-    print(f"ws connection established with user {db_user.id}")
-    print(f"total joined members {len(ws_conns)}")
-
-    try:
-        while True:
-            msg = await ws.receive_text()
-
-            try:
-                msg = json.loads(msg)
-
-            except json.JSONDecodeError:
-                print("recieved plain string as message ...")
-                print("msg sent by connection: ", msg)
-                continue
-
-            msg_type = msg.get("type", None)
-            if not msg_type:
-                pass
-
-            match msg_type:
-                case "offer":
-                    callee: str = msg.get("to", None)
-
-                    print("calle: ", callee)
-
-                    if callee is None:
-                        print("reciever offline")
-                        reply = {
-                            "type": "not available",
-                            "msg": "doctor seems to be offline",
-                        }
-                        await ws.send_text(json.dumps(reply))
-
-                    if callee in ws_conns:
-                        print(
-                            "callee online. trying to connect... \n\nsending offer to callee ..."
-                        )
-
-                        res = {"type": "answer", "answer": msg.get("offer", "")}
-                        await ws_conns[callee].send_text(json.dumps(res))
-                        pass
-
-                case "answer":
-                    pass
-
-                case "ice-candidate":
-                    pass
-
-                case "user-join":
-                    pass
-
-    except WebSocketDisconnect:
-        ws_conns.pop(str(db_user.id), None)
-        raise WebSocketException(
-            code=status.WS_1000_NORMAL_CLOSURE, reason="websocket disconnect"
-        )
-
-
-# if __name__ == "__main__":
-#     import uvicorn
-
-#     # update host === localhost to 0.0.0.0 and reload from false to true in prod
-#     uvicorn.run("app.main:app", host="localhost", port=8000, reload=True)
+    uvicorn.run(
+        app="app.main:app",
+        port=8000,
+        host="0.0.0.0",
+        reload=True,
+        ssl_keyfile=str(BASE_DIR / "key.pem") if is_https else None,
+        ssl_certfile=str(BASE_DIR / "cert.pem") if is_https else None,
+    )

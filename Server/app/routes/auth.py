@@ -15,7 +15,7 @@ from app.schemas.http import (
 )
 from app.helpers.authentication import (
     create_access_token,
-    get_curr_user,
+    get_user_http,
 )
 
 base = "/auth"
@@ -34,7 +34,7 @@ async def register(user: CreateUser, db: Session = Depends(get_db)):
         created_user = service.save(**user.model_dump())
         payload = ResponseUser.model_validate(created_user)
 
-        token = create_access_token(payload.model_dump(mode="python"))
+        token = create_access_token(payload.model_dump())
         response = JSONResponse(
             content=payload.model_dump(mode="json"),
             headers={"x-auth-token": token},
@@ -44,11 +44,13 @@ async def register(user: CreateUser, db: Session = Depends(get_db)):
         return response
 
     except ValueError as e:
+        db.rollback()
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST, detail={"msg": str(e), "type": "bad request"}
         )
 
     except Exception as e:
+        db.rollback()
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
@@ -62,6 +64,7 @@ async def register(user: CreateUser, db: Session = Depends(get_db)):
 @router.post("/login", response_model=ResponseUser)
 async def login(user_cred: LoginUser, db: Session = Depends(get_db)):
     service = UserService(db)
+    print(user_cred)
 
     try:
         db_user = service.get_by_email(user_cred.email)
@@ -72,14 +75,15 @@ async def login(user_cred: LoginUser, db: Session = Depends(get_db)):
 
         if not is_authenticated:
             raise ValueError("Invalid password !")
+        print(db_user.__dict__)
 
         payload = ResponseUser.model_validate(db_user)
         token = create_access_token(payload.model_dump())
 
         return JSONResponse(
             headers={"x-auth-token": token},
-            content=payload.model_dump(mode="json"),
             status_code=status.HTTP_200_OK,
+            content=payload.model_dump(mode="json"),
         )
 
     except ValueError as e:
@@ -102,7 +106,7 @@ async def login(user_cred: LoginUser, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=ResponseUser, status_code=200)
-async def profile(db_user: DBUser = Depends(get_curr_user)):
+async def profile(db_user: DBUser = Depends(get_user_http)):
     """"""
     return db_user
 
@@ -111,7 +115,7 @@ async def profile(db_user: DBUser = Depends(get_curr_user)):
 async def unbook(
     app_id: UUID,
     session: Session = Depends(get_db),
-    user: DBUser = Depends(get_curr_user),
+    user: DBUser = Depends(get_user_http),
 ):
     service = UserService(db=session)
 
@@ -120,10 +124,9 @@ async def unbook(
 
     except ValueError as e:
         raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
+            status_code=e.args[0],
             detail={
-                "msg": str(e),
-                "type": "bad request",
+                "msg": e.args[1],
                 "detail": "invalid request sent by the user. no such appointment exists",
             },
         )

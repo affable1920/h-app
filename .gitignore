@@ -49,3 +49,4 @@ backend/
 __pycache__/
 alembic.ini
 .sh
+get-ip.sh

@@ -1,3 +1,4 @@
+
 # Dependencies
 node_modules/
 venv/
@@ -41,12 +42,10 @@ Thumbs.db
 .temp
 *.txt
 backend/
-<<<<<<< HEAD
 
 
 .ini
 .pyc
 __pycache__/
 alembic.ini
-=======
->>>>>>> 41e4c5a08d75fdf70f45b259ad11f10eadf96078
+.sh

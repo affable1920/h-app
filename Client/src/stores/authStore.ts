@@ -10,24 +10,52 @@ interface AuthStore {
   token: string | null;
   user: User | null;
   setUser: (jwt: string) => void;
+  getUser: () => User | null;
 }
 
 const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       token: null,
       user: null,
 
-      setUser: (jwt) => {
-        const decoded: User | null = jwtDecode(jwt);
-        set({ token: jwt, user: decoded });
+      getUser() {
+        const jwt = get().token;
+
+        if (jwt) {
+          return jwtDecode(jwt);
+        } else {
+          return null;
+        }
+      },
+
+      setUser(jwt) {
+        const decoded = jwtDecode<User>(jwt);
+        set({ user: decoded, token: jwt });
       },
     }),
+
     {
-      name: "token",
-      partialize: ({ token }) => token,
+      name: "auth-storage",
+
+      partialize(state) {
+        return { token: state.token };
+      },
+
+      onRehydrateStorage() {
+        return (store) => {
+          if (store?.token) {
+            store.setUser(store.token);
+          }
+        };
+      },
     },
   ),
 );
+
+export const logout = () => {
+  useAuthStore.persist.clearStorage();
+  window.location.href = "/";
+};
 
 export default useAuthStore;

@@ -1,5 +1,4 @@
-import Button from "./common/Button";
-import { isRouteErrorResponse, useRouteError } from "react-router-dom";
+import { isRouteErrorResponse, Link, useRouteError } from "react-router-dom";
 
 const ErrorBoundary = () => {
   const ex = useRouteError();
@@ -15,9 +14,13 @@ const ErrorBoundary = () => {
     >
       <h1 className="label text-error-dark">{msg}</h1>
 
-      <Button variant="link" to="/">
-        Go back to home
-      </Button>
+      <Link
+        className="underline underline-offset-4 text-sm rounded-md p-2 hover:bg-secondary 
+        hover:text-white transition-colors duration-200"
+        to="/"
+      >
+        Back to home
+      </Link>
     </div>
   );
 };

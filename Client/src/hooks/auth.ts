@@ -12,6 +12,8 @@ export function useProfile() {
       const response = await api.get<UserDB>("me");
       return response.data;
     },
+    staleTime: 7200,
+    retry: false,
   });
 }
 

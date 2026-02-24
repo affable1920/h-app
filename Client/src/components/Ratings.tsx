@@ -7,7 +7,7 @@ const attrs = {
 
 const Ratings = ({ rating }: { rating: number }) => {
   return (
-    <div className="flex relative">
+    <div className="flex relative p-1">
       {Array.from({ length: 5 }, (_, i) => (
         <StarIcon key={i + 1} fill="#111" {...attrs} />
       ))}

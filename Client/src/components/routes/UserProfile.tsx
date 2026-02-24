@@ -72,7 +72,7 @@ const UserProfile = () => {
                             "dd LLL yyyy",
                           )}
                         </h2>
-                        <Button size="xs" variant="icon">
+                        <Button size="sm" variant="ghost">
                           <ArrowRightIcon />
                         </Button>
                       </header>
@@ -82,7 +82,6 @@ const UserProfile = () => {
                           <p className="font-semibold">{booking.slot.begin}</p>
                           {booking.slot.booked && (
                             <Button
-                              color="danger"
                               onClick={() =>
                                 useModalStore
                                   .getState()

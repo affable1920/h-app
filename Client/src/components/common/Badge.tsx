@@ -1,18 +1,18 @@
 import { memo, useMemo } from "react";
 import type { ElementType, ReactNode, ComponentPropsWithoutRef } from "react";
 
-import type { IconSize, Color } from "@/types/button";
+import type { Size, COLORS } from "@/types/button";
 
 interface BaseBadgeProps {
   full?: boolean;
-  color?: Color;
+  color?: (typeof COLORS)[number] | "slate";
   className?: string;
   content?: ReactNode;
   current?: boolean;
   disabled?: boolean;
   selected?: boolean;
   rotate?: boolean;
-  size?: IconSize;
+  size?: Size;
 }
 
 // element type in react represents any valid renderable element
@@ -23,11 +23,10 @@ export type BadgeProps<T extends ElementType = "button"> = BaseBadgeProps & {
   as?: T;
 } & Omit<ComponentPropsWithoutRef<T>, "as" | keyof BaseBadgeProps>;
 
-const sizes: Record<IconSize, string> = {
-  xs: "p-0",
-  sm: "p-1",
-  md: "p-2",
-  lg: "p-3",
+const sizes: Record<Size, string> = {
+  sm: "p-1 text-[8px]",
+  md: "p-2 text-xs",
+  lg: "p-3 text-md",
 };
 
 const enableRotate = `hover:ring-1 hover:ring-accent/20 hover:rotate-[7.5deg]`;

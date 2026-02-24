@@ -1,5 +1,6 @@
 @theme {
   /* Primary: Black-Gray */
+  --color-foreground: #ffffff;
   --color-primary: #202020;
   --color-primary-dark: #141414;
   --color-primary-light: #343434;
@@ -10,36 +11,19 @@
   --color-secondary-light: var(--color-gray-500);
 
   /* Accent - sky */
-  --color-accent: var(--color-sky-500);
-  --color-accent-dark: var(--color-sky-600);
-  --color-accent-light: var(--color-sky-400);
+  --color-accent: var(--color-blue-500);
+  --color-accent-dark: var(--color-blue-600);
+  --color-accent-light: var(--color-blue-400);
 
-  /* Alerts */
-  --color-error: var(--color-red-600);
-  --color-error-dark: var(--color-red-700);
-  --color-error-light: var(--color-red-500);
+  --animate-spin: spin 600ms linear infinite;
+  --breakpoint-7xl: 80rem;
 
-  --color-success: var(--color-green-600);
-  --color-success-dark: var(--color-green-700);
-  --color-success-light: var(--color-green-500);
-
-  --color-warning: var(--color-yellow-600);
-  --color-warning-dark: var(--color-yellow-700);
-  --color-warning-light: var(--color-yellow-500);
-
-  /* Defaults */
-  --default-transition-duration: 240ms;
-
-  /* Font-size */
-  --text-xs: 0.5rem;
-  --text-sm: 0.65rem;
-  --text-base: 0.75rem;
-  --text-lg: 0.9rem;
-  --text-xl: 1.075rem;
-  --text-2xl: 1.2rem;
-
-  /* Animations */
-  --animate-spin: spin 1s linear infinite;
+  --text-xs: 0.6rem;
+  --text-sm: 0.7rem;
+  --text-base: 0.8rem;
+  --text-md: 1rem;
+  --text-lg: 1.2rem;
+  --text-xl: 1.4rem;
 
   @keyframes spin {
     to {

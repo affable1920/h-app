@@ -38,58 +38,46 @@ function Register() {
   }
 
   return (
-    <section className="box max-w-xs mx-auto gap-8">
-      <h2 className="card-h2 text-center text-2xl uppercase font-extrabold">
+    <section className="max-w-sm mx-auto bg-transparent border-2 border-slate-200/75 p-8 rounded-xl shadow-xl shadow-secondary/20">
+      <h1 className="text-center uppercase mb-8 font-extrabold text-xl">
         sign up
-      </h2>
+      </h1>
       <form
         className="flex flex-col gap-8"
         onSubmit={form.handleSubmit(submit)}
       >
         <article className="flex flex-col gap-8">
-          <Input>
-            <Input.Label>Email</Input.Label>
-            <Input.InputElement
-              type="email"
-              {...form.register("email")}
-              aria-invalid={!!errors.email}
-            />
-            {errors.email && <Input.Error msg={errors.email.message ?? ""} />}
-          </Input>
+          <Input
+            id="email"
+            autoFocus
+            label="email"
+            type="email"
+            {...form.register("email")}
+            error={errors?.email?.message}
+          />
 
-          <Input>
-            <Input.Label>password</Input.Label>
-            <Input.InputElement
-              type="password"
-              {...form.register("password")}
-              aria-invalid={!!errors.password}
-            />
-            {errors.password && <Input.Error msg={errors.password.message} />}
-          </Input>
+          <Input
+            id="password"
+            type="password"
+            label="password"
+            {...form.register("password")}
+            error={errors.password?.message}
+          />
 
-          <Input>
-            <Input.Label>username</Input.Label>
-            <Input.InputElement
-              {...form.register("username")}
-              aria-invalid={!!errors.username}
-            />
-            {errors.username && <Input.Error msg={errors.username.message} />}
-          </Input>
+          <Input
+            id="username"
+            label="username"
+            {...form.register("username")}
+            error={errors.username?.message}
+          />
         </article>
 
         <article className="flex flex-col gap-4">
-          <Button size="md" type="submit" loading={register.isPending}>
+          <Button type="submit" color="accent" loading={register.isPending}>
             Register
           </Button>
 
-          <article className="flex items-center justify-center gap-2 text-sm">
-            <p className="first-letter:capitalize font-bold">
-              already a member !
-            </p>
-            <Button variant="link" to="/auth">
-              sign in
-            </Button>
-          </article>
+          <Button onClick={() => navigate("/auth")}>sign in</Button>
         </article>
       </form>
     </section>

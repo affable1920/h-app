@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import Input from "@components/common/Input";
 import Button from "@components/common/Button";
@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type LoginUser, LoginSchema } from "@/schemas";
+import Text from "../common/Label";
 
 function SignIn() {
   const signin = useSignin();
@@ -37,8 +38,8 @@ function SignIn() {
   }
 
   return (
-    <div className="box gap-8 max-w-xs mx-auto">
-      <h2 className="card-h2 text-xl text-center uppercase font-extrabold">
+    <div className="max-w-sm mx-auto bg-transparent border-2 border-slate-200/75 p-8 px-12 rounded-xl shadow-xl shadow-secondary/20">
+      <h2 className="text-xl text-center uppercase font-extrabold mb-8">
         Sign In
       </h2>
       <form
@@ -46,38 +47,39 @@ function SignIn() {
         onSubmit={form.handleSubmit(submit)}
       >
         <article className="flex flex-col gap-8">
-          <Input>
-            <Input.Label>email</Input.Label>
-            <Input.InputElement
-              autoFocus
-              type="email"
-              {...form.register("email")}
-            />
-            {errors.email && <Input.Error msg={errors.email.message ?? ""} />}
-          </Input>
+          <Input
+            autoFocus
+            label="email"
+            type="email"
+            id="email"
+            {...form.register("email")}
+            error={errors?.email?.message}
+          />
 
-          <Input>
-            <Input.Label>password</Input.Label>
-            <Input.InputElement
-              type="password"
-              {...form.register("password")}
-            />
-            {errors.password && (
-              <Input.Error msg={errors.password.message ?? ""} />
-            )}
-          </Input>
+          <Input
+            id="password"
+            label="password"
+            type="password"
+            error={errors?.password?.message}
+            {...form.register("password")}
+          />
         </article>
 
         <article className="flex flex-col gap-2">
-          <Button size="md" type="submit" loading={signin.isPending}>
+          <Button
+            size="md"
+            color="accent"
+            type="submit"
+            loading={signin.isPending}
+          >
             sign in
           </Button>
 
-          <article className="flex items-center justify-between text-sm">
-            <p className="first-letter:capitalize font-bold">New here ?</p>
-            <Button variant="link" to="/auth/register">
+          <article className="flex items-center text-xs justify-between capitalize font-semibold">
+            <Text>New here ?</Text>
+            <Link className="underline underline-offset-2" to="/auth/register">
               sign up instead
-            </Button>
+            </Link>
           </article>
         </article>
       </form>

@@ -1,37 +1,21 @@
 import { memo, useMemo } from "react";
-import { Link } from "react-router-dom";
 
 import Spinner from "../Spinner";
 import { getClassConfig } from "./ButtonStylesConfig";
 import type { ButtonProps } from "@/types/button";
 
 const Button = memo((props: ButtonProps) => {
-  const classConfig = useMemo(() => getClassConfig(props), [props]);
+  const classConfig = useMemo(() => getClassConfig(props), [{ ...props }]);
 
   const {
     children,
     disabled = false,
     loading = false,
     className,
+    startIcon,
+    endIcon,
     ...rest
   } = props;
-
-  if (props.variant === "link") {
-    const href = props.to as string;
-
-    return (
-      <Link to={href}>
-        <button
-          disabled={disabled || loading}
-          className={`${classConfig} ${className}`}
-          {...rest}
-        >
-          {children}
-          {loading && <Spinner size="xs" />}
-        </button>
-      </Link>
-    );
-  }
 
   return (
     <button
@@ -39,8 +23,10 @@ const Button = memo((props: ButtonProps) => {
       className={`${classConfig} ${className}`}
       {...rest}
     >
+      {startIcon && startIcon}
       {children}
-      {loading && <Spinner size="xs" />}
+      {endIcon && endIcon}
+      {loading && <Spinner />}
     </button>
   );
 });

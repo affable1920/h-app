@@ -24,21 +24,22 @@ const containerVariants: Record<string, Variant> = {
     transition: {
       staggerChildren: 0.1,
       delayChildren: 0.25,
+      ease: "easeOut",
+      duration: 0.3,
     },
   },
   exit: {
-    y: -40,
     opacity: 0,
   },
 };
 
 const articleVariants: Record<string, Variant> = {
-  initial: { opacity: 0, x: -20 },
+  initial: { opacity: 0, x: -30 },
   animate: {
     opacity: 1,
     x: 0,
   },
-  exit: { opacity: 0 },
+  exit: { opacity: 0, x: -30 },
 };
 
 interface ClinicsViewProps {
@@ -121,7 +122,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
           initial="initial"
           animate="animate"
           exit="exit"
-          className="box py-4 flex flex-col w-full gap-14 text-sm"
+          className="flex flex-col gap-12 text-sm shadow-lg rounded-xl border-2 border-slate-300/20 p-4 font-semibold"
         >
           {schedules.map((schedule) => {
             const {
@@ -135,7 +136,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
               <motion.article
                 key={id}
                 variants={articleVariants}
-                className="schedule-view-box flex flex-col gap-6 "
+                className="flex flex-col gap-6"
               >
                 <header className="flex justify-between items-center">
                   <div className="flex flex-col gap-0.5">
@@ -143,10 +144,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                       {clinic?.head}
                     </Link>
 
-                    <Link
-                      to="/"
-                      className={`flex items-center gap-1 text-sm underline underline-offset-2`}
-                    >
+                    <Link to="/" className={`flex items-center gap-1 text-sm`}>
                       {clinic?.address}
                       <MapPinCheckInside size={8} />
                     </Link>
@@ -154,6 +152,9 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
 
                   <motion.button
                     initial={false}
+                    style={{
+                      cursor: "pointer",
+                    }}
                     onClick={() => toggleExpansion(id!)}
                     animate={{
                       rotate: isExpanded(id!) ? 90 : 0,

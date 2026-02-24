@@ -6,12 +6,6 @@ type DropdownProps = {
   onOptionSelect?: (option: string) => void;
 };
 
-const optionListClasses = `flex flex-col font-bold text-secondary-dark bg-transparent 
-rounded-md border-2 max-h-48 overflow-y-scroll border-secondary-lightest/50`;
-
-const optionClasses = `hover:bg-slate-50 cursor-pointer capitalize border 
-transition-colors p-2 py-3 border-inherit`;
-
 const Dropdown = ({ show = false, options, onOptionSelect }: DropdownProps) => {
   return (
     <AnimatePresence mode="wait">
@@ -27,12 +21,14 @@ const Dropdown = ({ show = false, options, onOptionSelect }: DropdownProps) => {
           }}
           exit={{ opacity: 0, height: 0 }}
           style={{ scrollbarWidth: "none" }}
-          className={optionListClasses}
+          className={`max-h-32 overflow-y-scroll ring-2 rounded-lg divide-y
+            ring-zinc-400/25 divide-zinc-400/25 shadow-lg shadow-slate-300/20`}
         >
           {options.map((opt) => (
             <motion.li
               key={opt}
-              className={optionClasses}
+              className={`hover:bg-zinc-50 p-2 py-2.5 transition-colors capitalize 
+                cursor-pointer font-semibold italic tracking-wide`}
               onClick={() => onOptionSelect?.(opt)}
             >
               {opt as string}

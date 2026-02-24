@@ -30,7 +30,7 @@ const Pagination = () => {
         data-tooltip="Reset all filters !"
         className="flex justify-center items-center"
       >
-        <Button onClick={reset} variant="icon" size="md">
+        <Button onClick={reset} variant="ghost" size="md">
           <RotateCcwSquare />
         </Button>
       </article>
@@ -41,7 +41,7 @@ const Pagination = () => {
       {data?.has_prev && (
         <ButtonElement
           size="md"
-          variant="icon"
+          variant="ghost"
           onClick={() => handlePageChange("prev")}
         >
           <ArrowBigLeftDash />
@@ -51,7 +51,7 @@ const Pagination = () => {
       {data?.has_next && (
         <ButtonElement
           size="md"
-          variant="icon"
+          variant="ghost"
           onClick={() => handlePageChange("next")}
         >
           <ArrowBigRightDash />

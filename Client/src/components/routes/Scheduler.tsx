@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useState } from "react";
 import { motion } from "motion/react";
 import { useLocation } from "react-router-dom";
 
@@ -27,26 +27,27 @@ const Scheduler = memo(() => {
   }
 
   return (
-    <section className="font-semibold flex flex-col pb-12 gap-8 mt-4">
-      <header className="flex items-center gap-4">
-        <h2 className="card-h2 text-2xl font-black">Dr. {data.fullname}</h2>
-        <motion.button
-          onClick={() => setShowClinicsView((p) => !p)}
-          animate={{ rotate: showClinicsView ? 90 : 0 }}
-        >
-          <ArrowRight size={14} />
-        </motion.button>
+    <section className="space-y-12">
+      <header className="flex flex-col gap-8">
+        <div className="flex items-center gap-4 self-center">
+          <h2 className="card-h2 text-lg font-black">Dr. {data.fullname}</h2>
+          <motion.button
+            className="cursor-pointer"
+            onClick={() => setShowClinicsView((p) => !p)}
+            animate={{ rotate: showClinicsView ? 90 : 0 }}
+          >
+            <ArrowRight size={14} />
+          </motion.button>
+        </div>
+
+        <ClinicsView
+          doctor={data}
+          onShow={setShowClinicsView}
+          showClinicsView={showClinicsView}
+        />
       </header>
 
-      <ClinicsView
-        doctor={data}
-        onShow={setShowClinicsView}
-        showClinicsView={showClinicsView}
-      />
-
-      <section className="flex flex-col gap-8 md:flex-row w-full">
-        <Calendar schedules={data.schedules} />
-      </section>
+      <Calendar schedules={data.schedules} />
     </section>
   );
 });

@@ -1,108 +1,40 @@
-import React, { useMemo } from "react";
-import type {
-  HTMLAttributes,
-  InputHTMLAttributes,
-  LabelHTMLAttributes,
-  ReactNode,
-} from "react";
+import React from "react";
+import Text from "./Label";
 
-type Size = "xs" | "sm" | "md" | "lg";
-
-interface InputElementProps extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  "size"
-> {
-  size?: Size;
+interface AnimatedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  id?: string;
+  label?: string;
+  error?: string;
 }
 
-function Input({
-  children,
-  className = "",
-}: { children: ReactNode } & HTMLAttributes<HTMLDivElement>) {
-  return <div className={`input-box ${className}`}>{children}</div>;
-}
-
-// - - -  - -- -  - -- - -- - - - - - - - -- - - --  --------------------- - - - - - - --
-
-interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
-  size?: Size;
-  color?: "dark" | "light";
-}
-
-const baseLabel = `italic font-bold capitalize`;
-const labelSizes: Record<Size, string> = {
-  xs: "text-xs",
-  sm: "text-sm",
-  md: "text-lg",
-  lg: "text-xl",
-};
-
-Input.Label = ({
-  htmlFor,
-  children,
-  size = "sm",
-  className = "",
-  color = "dark",
-  ...rest
-}: LabelProps) => {
-  const classConfig = [
-    baseLabel,
-    color === "dark" ? "text-primary" : "text-white",
-    labelSizes[size],
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .trim();
-
-  return (
-    <label htmlFor={htmlFor} className={classConfig} {...rest}>
-      {children}
-    </label>
-  );
-};
-
-// ----------- - -- -  -- -  -- -- - ----------------------------
-
-const sizeClasses: Record<Size, string> = {
-  xs: "h-6 p-0.5 px-1",
-  sm: "h-8 p-1 px-2",
-  md: "h-10 p-2 px-4",
-  lg: "h-12 p-3 px-6",
-};
-
-Input.InputElement = React.forwardRef<HTMLInputElement, InputElementProps>(
-  (props, ref) => {
-    const { name, type, size = "sm", className = "", ...rest } = props;
-
-    const classConfig = useMemo(
-      function () {
-        return ["input", sizeClasses[size], className]
-          .filter(Boolean)
-          .join(" ")
-          .trim();
-      },
-      [size, className],
-    );
-
+const Input = React.forwardRef<HTMLInputElement, AnimatedInputProps>(
+  ({ label, id, className, error, ...props }, ref) => {
     return (
-      <input
-        ref={ref}
-        {...rest}
-        type={type}
-        name={name}
-        className={`${classConfig}`}
-      />
+      <div className="flex flex-col gap-2">
+        {label && (
+          <Text as="label" italic bold htmlFor={id}>
+            {label}
+          </Text>
+        )}
+
+        <div className="relative">
+          <input
+            id={id}
+            ref={ref}
+            {...props}
+            className={`border-2 border-slate-200 rounded-md outline-none w-full font-semibold placeholder:italic
+            hover:border-secondary/40 hover:ring-2 transition-colors hover:ring-accent/20 focus:ring-2 focus:ring-accent/20 p-3 text-xs ${className}`}
+          />
+          {error && (
+            <Text italic bold className="mt-2 text-[9px] text-red-600!">
+              {error} !
+            </Text>
+          )}
+        </div>
+      </div>
     );
   },
 );
 
-Input.Error = ({ msg }: { msg?: string }) => {
-  return msg ? (
-    <p className="text-[9px] italic text-error-dark font-semibold first-letter:capitalize">
-      {msg} !
-    </p>
-  ) : null;
-};
-
+Input.displayName = "Input";
 export default Input;

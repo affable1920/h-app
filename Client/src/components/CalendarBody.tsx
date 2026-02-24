@@ -67,7 +67,7 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
   }
 
   const rows = calendar.length < 42 ? 5 : 6;
-  const classConfig = `grid gap-6 justify-items-center grid-cols-7 grid-rows-${rows} min-h-96`;
+  const classConfig = `grid gap-4 justify-items-center grid-cols-7 grid-rows-${rows} min-h-96`;
 
   return (
     <div className={classConfig}>
@@ -75,7 +75,7 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
         <h2
           key={i}
           className={`opacity-80 font-black underline-offset-4 capitalize  ${
-            isWkdayToday(day) ? "text-accent-dark underline font-black" : ""
+            isWkdayToday(day) ? "text-accent-dark underline" : ""
           }`}
         >
           {day.slice(0, 3)}

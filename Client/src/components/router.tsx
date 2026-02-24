@@ -11,8 +11,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import SignIn from "@/components/auth/SignIn";
 import Register from "@components/auth/Register";
 import UserProfile from "./routes/UserProfile";
-
-import { useAuth } from "./providers/AuthProvider";
+import useAuthStore from "@/stores/authStore";
+import Consultation from "./modal/Consultation";
 
 /*
 API Routes Structure:
@@ -65,6 +65,11 @@ const router = createBrowserRouter([
       },
 
       {
+        path: "doctor/:id/consult",
+        Component: Consultation,
+      },
+
+      {
         path: "doctor/:id",
         Component: () => {
           return <div>Doctor's Profile</div>;
@@ -102,7 +107,7 @@ const router = createBrowserRouter([
 export default router;
 
 function AuthLayout() {
-  const { user } = useAuth();
+  const user = useAuthStore((s) => s.user);
 
   if (user) {
     return <Navigate to="/dir/doctors" />;

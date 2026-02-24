@@ -9,12 +9,7 @@
     box-sizing: border-box;
   }
 
-  html {
-    min-height: 100vh;
-  }
-
   body {
-    height: 100%;
     letter-spacing: 1.2px;
     font-size: var(--text-base);
   }
@@ -23,20 +18,19 @@
     all: inherit;
   }
 
-  main {
-    padding-block: 24px;
+  button > a {
+    all: unset;
   }
 
-  h2 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     line-clamp: 1;
     font-weight: bold;
     line-height: 1.2;
-  }
-
-  button,
-  a {
-    outline: none;
-    cursor: pointer;
   }
 
   input[type="number"]::-webkit-inner-spin-button,

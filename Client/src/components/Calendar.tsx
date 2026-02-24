@@ -42,57 +42,35 @@ const Calendar = memo(({ schedules }: { schedules: Schedule[] }) => {
   );
 
   return (
-    <section className="box relative gap-6">
-      <header className="flex flex-col">
-        <div
-          className="absolute right-2 top-1 flex items-center justify-end overflow-hidden 
-        italic font-bold text-sm gap-2 text-sky-900 opacity-75 selection:bg-transparent"
-        >
-          <motion.p
-            initial={false}
-            variants={variants}
-            transition={{ duration: 0.1 }}
-            animate={showInfo ? "visible" : "hidden"}
-          >
-            Select any day that fits your schedule
-          </motion.p>
-
-          <Button
-            size="xs"
-            variant="icon"
-            onClick={() => setShowInfo((prev) => !prev)}
-          >
-            <Info />
-          </Button>
-        </div>
-
-        <article className="flex items-center justify-between">
-          <motion.h2 className="card-h2 text-lg uppercase font-black">
+    <section className="relative shadow-xl shadow-slate-300/40 rounded-xl border border-slate-400/20">
+      <div className="flex flex-col gap-8 p-4 py-6">
+        <header className="flex items-center justify-between px-2">
+          <h2 className="text-lg uppercase font-black">
             {monthInView.monthLong}
-          </motion.h2>
+          </h2>
 
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-0.5">
             <Button
-              size="xs"
-              variant="icon"
+              size="sm"
+              variant="ghost"
               onClick={handleMonthChange.bind(null, "right")}
             >
               <ArrowRight />
             </Button>
 
             <Button
-              size="xs"
-              variant="icon"
+              size="sm"
+              variant="ghost"
               disabled={monthInView.month <= currDate.month}
               onClick={handleMonthChange.bind(null, "left")}
             >
               <ArrowLeft />
             </Button>
           </div>
-        </article>
-      </header>
+        </header>
 
-      <CalendarBody schedules={schedules} monthInView={monthInView} />
+        <CalendarBody schedules={schedules} monthInView={monthInView} />
+      </div>
     </section>
   );
 });

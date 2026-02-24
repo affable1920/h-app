@@ -17,19 +17,6 @@ const SelectFilter = ({
 }: SelectFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  function chevron() {
-    return (
-      <motion.svg
-        animate={{
-          rotate: isOpen ? -180 : 0,
-          transition: { duration: 0.15 },
-        }}
-      >
-        <ChevronDown size={12} />
-      </motion.svg>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <Dropdown
@@ -38,13 +25,20 @@ const SelectFilter = ({
         onOptionSelect={onOptionSelect}
       />
       <Button
-        size="lg"
+        size="md"
         variant="outlined"
         className="italic"
-        endIcon={chevron()}
         onClick={() => setIsOpen((p) => !p)}
       >
         Filter by {label}
+        <motion.svg
+          animate={{
+            rotate: isOpen ? -180 : 0,
+            transition: { duration: 0.15 },
+          }}
+        >
+          <ChevronDown size={12} />
+        </motion.svg>
       </Button>
     </div>
   );

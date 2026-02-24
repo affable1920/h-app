@@ -8,8 +8,6 @@ import { Link, useNavigate } from "react-router-dom";
 import useModalStore from "@/stores/modalStore";
 import { removeModal } from "@/stores/modalStore";
 import { toast } from "sonner";
-import { useAuth } from "../providers/AuthProvider";
-import Consultation from "./Consultation";
 import { useUnbookingMutation } from "@/hooks/bookings";
 import useAuthStore from "@/stores/authStore";
 
@@ -74,7 +72,7 @@ const MODALS: Record<string, React.ElementType> = {
 
         <div className="flex justify-between w-full">
           <Button onClick={removeModal}>no</Button>
-          <Button color="danger" loading={isPending} onClick={cancelBooking}>
+          <Button loading={isPending} onClick={cancelBooking}>
             confirm
           </Button>
         </div>
@@ -120,8 +118,7 @@ const MODALS: Record<string, React.ElementType> = {
             {icons.map(({ icon: Icon, onClick, text = "" }, i) => (
               <Button
                 key={i}
-                size="xs"
-                variant="icon"
+                variant="ghost"
                 onClick={onClick}
                 data-tooltip={text}
               >
@@ -131,16 +128,12 @@ const MODALS: Record<string, React.ElementType> = {
           </ul>
         ) : (
           <div className="flex items-center gap-4">
-            <Button variant="link" to="/auth">
-              Sign in
-            </Button>
+            <Button>Sign in</Button>
           </div>
         )}
       </section>
     );
   },
-
-  consultation: Consultation,
 };
 
 export default MODALS;

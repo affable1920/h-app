@@ -45,7 +45,7 @@ const DirectoryFilter = () => {
 
   function handleFilterUpdate<K extends FilterKey>(
     key: K,
-    val: FilterState[K]
+    val: FilterState[K],
   ) {
     if (filters[key] === val) {
       setFilters((p) => ({ ...p, [key]: undefined }));
@@ -88,12 +88,17 @@ const DirectoryFilter = () => {
   }
 
   return (
-    <section className="flex flex-col h-full gap-8 p-4 px-6 relative text-sm">
+    <section className="flex flex-col h-full gap-8 p-4 px-6 relative text-xs">
       <div className="flex items-center justify-between">
         {activeFilterCount > 0 && (
           <div className="ml-auto flex items-center gap-2">
-            <Badge>{activeFilterCount}</Badge>
-            <Button variant="icon" onClick={reset}>
+            <p>{activeFilterCount}</p>
+            <Button
+              className="p-2"
+              variant="ghost"
+              color="secondary"
+              onClick={reset}
+            >
               <X />
             </Button>
           </div>
@@ -117,31 +122,23 @@ const DirectoryFilter = () => {
           <SelectFilter
             label="specialization"
             options={constants.SPECIALIZATIONS}
-            /*
-            How bind in js works:
-            bind creates a new fn below and attaches "specialization" as the key to it, now it's fixed
-
-            and down inside function where it is passed as a prop, we only require one more arg: [the key].
-            */
             onOptionSelect={handleSpecUpdate}
           />
         </div>
 
         <div className="filter-div">
           <label>Filter by distance</label>
-          <Input>
-            <Input.InputElement
-              type="range"
-              name="distance"
-              onChange={(ev) =>
-                handleFilterUpdate("maxDistance", parseInt(ev.target.value))
-              }
-            />
-            <div className="flex justify-between items-center italic font-bold">
-              <span>1 km</span>
-              <span>40 km</span>
-            </div>
-          </Input>
+          <Input
+            type="range"
+            name="distance"
+            onChange={(ev) =>
+              handleFilterUpdate("maxDistance", parseInt(ev.target.value))
+            }
+          />
+          <div className="flex justify-between items-center italic font-bold">
+            <span>1 km</span>
+            <span>40 km</span>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -173,10 +170,16 @@ const DirectoryFilter = () => {
       </section>
 
       <div className="flex items-center gap-4 justify-end">
-        <Button size="md" variant="outlined" onClick={closeModal}>
+        <Button
+          size="md"
+          onClick={function () {
+            reset();
+            closeModal();
+          }}
+        >
           Cancel
         </Button>
-        <Button size="md" variant="outlined" onClick={applyFiltersHTTP}>
+        <Button size="md" color="accent" onClick={applyFiltersHTTP}>
           Apply
         </Button>
       </div>

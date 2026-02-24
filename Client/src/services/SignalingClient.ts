@@ -17,6 +17,8 @@ type Message = {
   metadata: { to: string; from?: string };
 };
 
+type EventHandler = (ev: CustomEvent) => void;
+
 class SignalingClient extends EventTarget {
   private ws: WebSocket | null = null;
   private readonly url: string = config.ws_url;
@@ -25,17 +27,40 @@ class SignalingClient extends EventTarget {
   private shouldReconnect = true;
 
   private attempt = 1;
-  private maxAttempts = 3;
+  private readonly maxAttempts = 3;
 
-  on = (type: MsgType, handler: (ev: CustomEvent) => void) => {
+  private evs: Set<{ type: MsgType; handler: EventHandler }> = new Set();
+
+  private detachAll() {
+    for (const { type, handler } of this.evs) {
+      this.removeEventListener(type, handler as EventListener);
+    }
+
+    this.evs.clear();
+  }
+
+  on(type: MsgType, handler: EventHandler) {
+    console.log(
+      `\nAttaching ev listener to signaling client\n Type -> (${type})`,
+    );
+
     this.addEventListener(type, handler as EventListener);
-  };
+    this.evs.add({ type, handler });
+  }
 
-  off = (type: MsgType, handler: (ev: CustomEvent) => void) => {
+  off = (type: MsgType, handler: EventHandler) => {
+    console.log(
+      `\nRemoving ev listener on signaling client\n Type -> (${type})`,
+    );
     this.removeEventListener(type, handler as EventListener);
+    this.evs.delete({ type, handler });
   };
 
   connect = (token: string) => {
+    if (this.ws) {
+      return;
+    }
+
     this.ws = new WebSocket(`${this.url}`, token);
 
     this.ws.onopen = () => {
@@ -47,54 +72,41 @@ class SignalingClient extends EventTarget {
       this.delay = 1000;
     };
 
+    this.addEventListener("broadcast", (ev) => {
+      console.log(
+        "\nRecieved a broadcast message from the server. The msg is logged below ->\n",
+        ev,
+      );
+      toast("BROADCAST");
+    });
+
     this.ws.onmessage = (ev) => {
-      var message;
-
       try {
-        message = JSON.parse(ev.data) as Message;
-        console.log("\nWS message recieved\n", message);
-
-        switch (message?.type) {
-          case "offline":
-            toast("Target ws offline ...", {
-              description: message.payload,
-            });
-            break;
-
-          case "text":
-            toast("Websocket text message", { description: message.payload });
-            break;
-
-          case "broadcast":
-            toast("Broadcast", { description: message.payload });
-            break;
-
-          default:
-            this.dispatchEvent(
-              new CustomEvent(message.type, { detail: message }),
-            );
-        }
+        this.onMessage(JSON.parse(ev.data));
       } catch {
         console.log(
-          `JSON parsing error for the recieved socket message.\nMESSAGE ->\n${message}`,
+          `JSON parsing error for the recieved socket message.\nMESSAGE ->\n`,
         );
       }
     };
 
     this.ws.onerror = () => {
-      this.dispatchEvent(new CustomEvent("error"));
+      console.log("\nWebsocket error occurred !");
     };
 
     this.ws.onclose = (ev) => {
-      console.log("\nWebsocket closed. EV ->:\n", ev);
+      console.log("\nWebsocket close event raised. ev ->\n", ev);
 
       if (ev.code === 4444) {
-        const msg =
-          "\nSocket conn closed because your session expired. Relogin to continue.";
-        console.log(msg);
+        const msg = "\nLogging out. Relogin to continue.";
 
         this.close();
+        this.shouldReconnect = false;
+
+        toast("4444", { description: msg });
+        console.log(4444, msg);
         logout();
+        return;
       }
 
       if (ev.code === 1006 && !ev.wasClean) {
@@ -147,14 +159,7 @@ class SignalingClient extends EventTarget {
   }
 
   send = (type: MsgType, data: any) => {
-    console.log(
-      "SEND CALLED",
-      type,
-      "ws:",
-      this.ws,
-      "readyState:",
-      this.ws?.readyState,
-    );
+    console.info("\nWEBSOCKET SEND CALLED\nWebsocket ->\n", this.ws);
 
     if (!this.ws) {
       console.log("Cannot send websocket message. Websocket not connected.");
@@ -172,6 +177,52 @@ class SignalingClient extends EventTarget {
   close = (code: number = 1000, reason: string = "") => {
     console.log(`"\nClosing ws connection ...\nReason -> ${reason}"`);
     this.ws?.close(code, reason);
+
+    this.detachAll();
+  };
+
+  private onMessage = (msg: any) => {
+    const message: Message = JSON.parse(msg);
+    switch (message.type) {
+      case "text":
+        toast("Websocket text message", { description: message.payload });
+        break;
+
+      case "offline":
+        this.dispatchEvent(
+          new CustomEvent("offline", { detail: message.payload }),
+        );
+        break;
+
+      case "broadcast":
+        this.dispatchEvent(
+          new CustomEvent("broadcast", { detail: message.payload }),
+        );
+        break;
+
+      case "offer":
+        this.dispatchEvent(
+          new CustomEvent("offer", { detail: message.payload }),
+        );
+        break;
+
+      case "answer":
+        this.dispatchEvent(
+          new CustomEvent("answer", { detail: message.payload }),
+        );
+        break;
+
+      case "ice-candidate":
+        this.dispatchEvent(
+          new CustomEvent("ice-candidate", { detail: message.payload }),
+        );
+        break;
+
+      default:
+        this.dispatchEvent(
+          new CustomEvent(message.type, { detail: message.payload }),
+        );
+    }
   };
 }
 

@@ -1,4 +1,4 @@
-import { useState, useMemo, Suspense, useCallback } from "react";
+import { useState, Suspense, useCallback } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Spinner from "../Spinner";
@@ -66,12 +66,12 @@ const Directory = () => {
     <section className="flex flex-col gap-4 mx-auto">
       <section className="w-full rounded-md flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Button variant="icon" onClick={openDirectoryFilter}>
+          <Button variant="ghost" onClick={openDirectoryFilter}>
             <SlidersHorizontal />
           </Button>
 
           <Button
-            variant="icon"
+            variant="ghost"
             onClick={() =>
               setSort(sortBy ?? "rating", sortOrder === "asc" ? "desc" : "asc")
             }
@@ -87,21 +87,20 @@ const Directory = () => {
 
         <div className="flex items-center gap-2">
           {/* search bar */}
-          <Input>
-            <Input.InputElement
-              value={localSQ}
-              placeholder="Search"
-              className="italic placeholder:text-sm"
-              onChange={(ev) => handleSearch(ev.target.value)}
-            />
-            {searchQuery && (
-              <Button variant="icon" size="xs">
-                <X onClick={removeSearchQuery} />
-              </Button>
-            )}
-          </Input>
+          <Input
+            id="searchQuery"
+            value={localSQ}
+            placeholder="Search"
+            className="italic placeholder:text-sm py-2"
+            onChange={(ev) => handleSearch(ev.target.value)}
+          />
+          {searchQuery && (
+            <Button variant="ghost" size="sm">
+              <X onClick={removeSearchQuery} />
+            </Button>
+          )}
 
-          <Button variant="icon" onClick={handleDirectorySwitch}>
+          <Button variant="ghost" onClick={handleDirectorySwitch}>
             <ArrowLeftRight />
           </Button>
         </div>

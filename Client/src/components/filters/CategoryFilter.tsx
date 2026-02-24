@@ -22,7 +22,7 @@ const CategoryFilter = ({
       <div className="flex gap-2 items-center ml-auto">
         {options.map((option) => (
           <Badge
-            size="md"
+            size="sm"
             key={option}
             selected={option == selectedOption}
             onClick={() => onOptionSelect(option)}

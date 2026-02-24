@@ -32,11 +32,11 @@ const DrCardEssentials = React.memo(({ doctor }: { doctor: DoctorSummary }) => {
             }
           </div>
           <div className="flex gap-2 text-sm">
-            <h2 className="card-h2">{doctor.primary_specialization}</h2>
+            <h2>{doctor.primary_specialization}</h2>
             <p>({doctor.experience}y)</p>
           </div>
         </div>
-        <div className="flex gap-2 items-center font-semibold text-sm">
+        <div className="flex gap-2 items-center font-semibold">
           <Ratings rating={doctor?.rating || 0} />
           <h3 className="underline">({doctor.reviews})</h3>
         </div>

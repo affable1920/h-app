@@ -2,15 +2,7 @@
   /* Utility classes with directive @"utility" are auto. added to layer utilities */
   width: 100%;
   margin-inline: auto;
-  max-width: calc(100% - 4rem);
-
-  @variant md {
-    max-width: calc(100% - 8rem);
-  }
-
-  @variant lg {
-    max-width: calc(100% - 12rem);
-  }
+  max-width: var(--breakpoint-7xl);
 }
 
 @utility scrollbar-hidden {
@@ -20,11 +12,6 @@
 }
 
 @layer components {
-  .box {
-    @apply bg-white shadow-md shadow-slate-400/60 rounded-lg flex flex-col border-2
-    border-slate-400/25 gap-4 p-8;
-  }
-
   .badge {
     @apply rounded-md border-2 border-slate-200 text-secondary-dark font-bold transition-all
     capitalize shadow-xs shadow-slate-300/60 flex items-center justify-center cursor-pointer 
@@ -47,30 +34,6 @@
     }
   }
 
-  .input {
-    @apply border-2 border-slate-200 rounded-md outline-none italic placeholder:italic;
-
-    @variant focus {
-      @apply border-secondary/40 ring-2 ring-blue-600/20;
-    }
-  }
-
-  .input-box {
-    @apply flex flex-col tracking-widest;
-
-    &:has(button) {
-      @apply relative;
-    }
-
-    & > button {
-      @apply italic text-sm w-fit absolute top-1/2 right-2 -translate-y-1/2 shadow-none border-none px-1;
-    }
-
-    &:has(label) {
-      @apply gap-1;
-    }
-  }
-
   .overlay {
     position: fixed;
     inset: 0;
@@ -79,34 +42,11 @@
     background: rgba(0, 0, 0, 0.25);
   }
 
-  .navlinks {
-    @apply absolute flex flex-col bg-white shadow-md w-full gap-16 top-full left-0 p-8 pt-4 
-    lg:w-auto lg:static lg:flex-row lg:bg-transparent lg:p-0 lg:shadow-none lg:opacity-100 lg:translate-0 
-    lg:pointer-events-auto;
-  }
-
-  .navlink {
-    @apply font-bold text-secondary-dark cursor-pointer relative py-2 rounded-sm;
-
-    &:has(a > svg) a {
-      @apply flex items-center justify-between gap-4;
-
-      & > svg {
-        @apply size-4;
-      }
-    }
-
-    &:hover {
-      @apply bg-gray-200/80 transition-all duration-180 ease-in shadow-sm underline
-      underline-offset-2 shadow-gray-300/50;
-    }
-  }
-
   .filter-div {
     @apply flex flex-col gap-4;
 
     & > label {
-      @apply bg-primary-light/80 text-shadow-xs p-2 py-1 text-white italic font-bold capitalize;
+      @apply bg-secondary/80 text-shadow-xs p-2 py-1 text-foreground italic font-bold capitalize;
     }
   }
 }

@@ -32,6 +32,7 @@ const CalendarDay = memo(
         rotate
         as="button"
         color="slate"
+        size="md"
         disabled={disabled}
         onClick={handleStateUpdate}
         content={date.day.toString()}
@@ -39,7 +40,7 @@ const CalendarDay = memo(
         {...rest}
       />
     );
-  }
+  },
 );
 
 export default CalendarDay;

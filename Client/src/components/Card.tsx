@@ -53,7 +53,7 @@ const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
         whileTap={{
           scale: 0.7,
         }}
-        className={`absolute top-3/5 ${
+        className={`cursor-pointer absolute top-3/5 ${
           isFlipped
             ? "left-full -translate-x-1/2"
             : "right-full translate-x-1/2"

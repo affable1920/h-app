@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "^4.2.1",
     "@vitejs/plugin-basic-ssl": "^2.1.4",
     "axios": "^1.13.2",
     "jwt-decode": "^4.0.0",
@@ -25,7 +25,7 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.71.1",
     "react-router-dom": "^7.9.6",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.2.1",
     "uuid": "^13.0.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.8"
@@ -37,7 +37,7 @@
     "@tanstack/react-query-devtools": "^5.91.1",
     "@types/chance": "^1.1.7",
     "@types/luxon": "^3.7.1",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.4.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",

@@ -12,17 +12,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
 
   server: {
-    watch: {
-      ignored: [
-        "**/Server/**",
-        "**/server/**",
-        "**/data/**",
-        "**/node_modules/**",
-        "**/.git/**",
-      ],
-    },
-    allowedHosts: ["unsecretively-nontraditional-alana.ngrok-free.dev"],
-
     https: useHttps
       ? {
           key: fs.readFileSync(path.resolve(__dirname, "../key.pem")),

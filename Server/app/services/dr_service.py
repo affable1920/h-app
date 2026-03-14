@@ -3,10 +3,12 @@ from uuid import UUID
 from datetime import datetime
 from fastapi import Depends, HTTPException, status
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session, Query
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.shared.schemas import Mode
+from app.database.entry import get_db
+from app.shared.enums import Mode, Status
 from app.database.models import Appointment, Doctor as DBDoctor, Schedule, Slot
 
 from app.schemas.http import PaginatedResponse
@@ -30,8 +32,10 @@ class DoctorNotFoundException(Exception):
 
 
 class DoctorService:
-    def __init__(self, db: Session):
-        self.db = db
+    db: Session = Depends(get_db)
+
+    def __init__(self, db: Session = Depends(get_db)):
+        pass
 
     @staticmethod
     def get_summaried(dr: DBDoctor) -> DoctorSummary:
@@ -55,31 +59,42 @@ class DoctorService:
 
         So, this func has nothing to do with sorting and paginating.
         """
+        resultant_query = query
 
         if filters.specialization:
-            query = query.filter(
+            resultant_query = query.filter(
                 DBDoctor.primary_specialization == filters.specialization
             )
 
         if filters.min_rating:
-            query = query.filter(DBDoctor.rating >= filters.min_rating)
+            resultant_query = query.filter(
+                DBDoctor.rating >= filters.min_rating)
 
         if filters.currently_available:
-            query = query.filter(DBDoctor.currently_available)
+            resultant_query = query.filter(DBDoctor.status == Status.AVAILABLE)
 
         if filters.search_query:
-            query = query.filter(DBDoctor.fullname.icontains(filters.search_query))
+            resultant_query = query.filter(
+                DBDoctor.name.icontains(filters.search_query))
 
         if filters.mode == Mode.ONLINE:
-            query = query.filter(DBDoctor.consults_online)
+            resultant_query = query.filter(DBDoctor.consults_online)
 
-        return query
+        return resultant_query
 
     #
 
-    def get(self, pagination: PaginationParams, filters: FilterParams):
+    def get_all(self, pagination: PaginationParams, filters: FilterParams):
         query = self.db.query(DBDoctor)
         total_count = query.count()
+
+        if total_count <= 0:
+            return PaginatedResponse(
+                entities=[],
+                total_count=0,
+                has_next=False,
+                paginated_count=0
+            )
 
         last_page = ceil(total_count / (pagination.max))
 
@@ -113,15 +128,15 @@ class DoctorService:
             return PaginatedResponse(
                 entities=doctors,
                 total_count=total_count,
-                has_prev=pagination.page != 1,
+                has_prev=pagination.page > 1,
                 paginated_count=paginated_count,
                 has_next=pagination.page < last_page,
             )
 
         except SQLAlchemyError as e:
             raise HTTPException(
-                status.HTTP_500_INTERNAL_SERVER_ERROR,
-                {
+                status_code=500,
+                detail={
                     "detail": str(e),
                     "type": "DATABASE ERROR",
                     "msg": "Something went wrong, please try again later !",
@@ -131,8 +146,8 @@ class DoctorService:
         except Exception as e:
             print(e)
             raise HTTPException(
-                status.HTTP_500_INTERNAL_SERVER_ERROR,
-                {
+                status_code=500,
+                detail={
                     "detail": str(e),
                     "type": "internal server error",
                     "msg": "an internal server error occurred.",
@@ -142,100 +157,66 @@ class DoctorService:
     #
 
     def get_by_id(self, id: UUID) -> Doctor | None:
-        try:
-            rqstd_doctor = self.db.query(DBDoctor).where(DBDoctor.id == id).first()
-            if not rqstd_doctor:
-                raise DoctorNotFoundException("the requested doctor does not exist")
+        rqstd_doctor = self.db.get(entity=DBDoctor, ident=id)
+        if not rqstd_doctor:
+            raise DoctorNotFoundException(
+                "the requested doctor does not exist")
 
-            return self.get_full_dr(rqstd_doctor)
-
-        except SQLAlchemyError as e:
-            print(e)
-            raise HTTPException(
-                500,
-                {
-                    "detail": str(e),
-                    "type": "DATABASE ERROR",
-                    "msg": "Something went wrong, please try again later !",
-                },
-            )
+        return self.get_full_dr(rqstd_doctor)
 
     #
 
     def book(
         self,
-        id: UUID,
-        date: datetime,
+        doctor_id: UUID,
+        wkday: int | None,
+        date: datetime | None,
         slot_id: UUID,
         schedule_id: UUID,
         guest_name: str | None,
-        clinic_id: UUID | None,
         patient_id: UUID | None,
         guest_contact: str | None,
-        **kwargs: dict | None,
+        **kwargs
     ):
-        try:
-            target_slot = (
-                self.db.query(Slot)
-                .join(Slot.schedule)
-                .where(
-                    Slot.id == slot_id,
-                    Slot.schedule_id == schedule_id,
-                    Schedule.doctor_id == id,
-                    Schedule.clinic_id == clinic_id,
-                )
-                .with_for_update()
-                .first()
+        stmt = select(DBDoctor).join(
+            Schedule, onclause=Schedule.doctor_id == doctor_id)
+
+        result = self.db.scalars(stmt).first()
+
+        target_slot = (
+            self.db.query(Slot)
+            .join(Slot.schedule)
+            .where(
+                Slot.id == slot_id,
+                Slot.schedule_id == schedule_id,
+                Schedule.doctor_id == doctor_id,
             )
+            .with_for_update()
+            .first()
+        )
 
-            if not target_slot:
-                raise ValueError("No such slot exists for the doctor")
+        if not target_slot:
+            raise ValueError("No such slot exists for the doctor")
+        if target_slot.booked:
+            raise ValueError("Slot already booked !")
 
-            if target_slot.booked:
-                raise ValueError("Slot already booked !")
+        target_slot.booked = True
+        appointment = Appointment(
+            scheduled_date=date,
+            doctor_id=doctor_id,
+            slot_id=target_slot.id,
+            schedule_id=target_slot.schedule_id,
+            clinic_id=target_slot.schedule.clinic_id,
+        )
 
-            target_slot.booked = True
+        if patient_id:
+            appointment.patient_id = patient_id
 
-            appointment = Appointment(
-                date=date,
-                doctor_id=id,
-                slot_id=target_slot.id,
-                schedule_id=target_slot.schedule_id,
-                clinic_id=clinic_id if clinic_id else target_slot.schedule.clinic_id,
-            )
+        else:
+            appointment.guest_name = guest_name
+            appointment.guest_contact = guest_contact
 
-            if patient_id:
-                appointment.patient_id = patient_id
+        self.db.add(appointment)
+        self.db.flush([appointment, target_slot])
 
-            else:
-                appointment.guest_name = guest_name
-                appointment.guest_contact = guest_contact
-
-            self.db.add(appointment)
-            target_slot.booked = True
-
-            self.db.commit()
-            self.db.refresh(target_slot)
-
-            print(
-                f"Appointment successfully created and saved with id: {appointment.id}"
-            )
-
-            return appointment
-
-        except ValueError as e:
-            print(e)
-            self.db.rollback()
-            raise
-
-        except SQLAlchemyError as e:
-            print(e)
-            self.db.rollback()
-            raise HTTPException(
-                500,
-                {
-                    "detail": e,
-                    "desc": "DATABASE ERROR",
-                    "msg": "An unexpected error occurred.",
-                },
-            )
+        return appointment

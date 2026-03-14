@@ -13,9 +13,10 @@ from pydantic import (
     model_validator,
 )
 
+from app.schemas.base import FromORM, IDMixin
 from app.schemas.doctor import Doctor
 from app.schemas.dr_extra import Slot
-from app.shared.schemas import AppointmentStatus
+from app.shared.enums import AppointmentStatus
 
 
 T = TypeVar("T")
@@ -24,11 +25,9 @@ T = TypeVar("T")
 This module has all pydantic models to be used for http rqsts and responses.
 """
 
-UUIDSerializer = Annotated[UUID, PlainSerializer(lambda v: str(v), return_type=str)]
 
-
-def serialize(val: UUID) -> str:
-    return str(val)
+IDSerialized = Annotated[UUID, PlainSerializer(
+    func=lambda x: str(x), return_type=str)]
 
 
 class UserRole(Enum):
@@ -39,22 +38,18 @@ class UserRole(Enum):
     GUEST = "guest"
 
 
-class Appointment(BaseModel):
-    id: Annotated[UUID, PlainSerializer(serialize, str, when_used="unless-none")]
+class Appointment(FromORM, IDMixin):
     doctor: Doctor
-    patient_id: UUIDSerializer | None
+    patient_id: IDSerialized | None
 
     slot: Slot
-    date: datetime
+    scheduled_date: datetime
 
     guest_name: str | None
     guest_contact: int | None
 
     created_at: datetime
     status: AppointmentStatus
-
-    # permits extra fields from sqlalchemy models
-    model_config = ConfigDict(from_attributes=True, extra="allow")
 
 
 # Incoming
@@ -69,17 +64,11 @@ class LoginUser(BaseModel):
     password: str
 
 
-class BookingRequestData(BaseModel):
-    date: datetime
-    patient_id: Annotated[
-        UUID | None,
-        Field(
-            default=None,
-            alias="patientId",
-            description="the id of a existing user in our db if logged in.",
-        ),
-    ]
+class BookingRequestData(FromORM):
+    date: datetime | None
+    wkday: int | None
 
+    patient_id: UUID | None = None
     email: EmailStr | None = None
 
     guest_name: Annotated[
@@ -87,28 +76,38 @@ class BookingRequestData(BaseModel):
         Field(
             default=None,
             alias="name",
-            description="the patient's name, originally None, a string for a non-existing user.",
+            description="the patient's name, originally None, a string specifically for a non-existing user.",
         ),
     ]
 
     guest_contact: Annotated[
-        str | None, Field(default=None, min_length=10, max_length=10, alias="contact")
+        str | None, Field(default=None, min_length=10,
+                          max_length=10, alias="contact")
     ]
 
     slot_id: Annotated[UUID, Field(alias="slotId")]
-
-    schedule_id: Annotated[UUID, Field(alias="scheduleId")]
-    clinic_id: Annotated[UUID | None, Field(default=None, alias="clinicId")]
+    schedule_id: Annotated[UUID | None, Field(alias="scheduleId")]
 
     @model_validator(mode="after")
     def check_patient(self):
         """
         Either the patient_id or guest_details required
         """
-
-        is_guest = self.guest_contact and self.guest_name
-        if not self.patient_id and not is_guest:
+        if not self.patient_id and not self.guest_name:
             raise ValueError("either log in or mention your name and contact.")
+
+        return self
+
+    #
+    @model_validator(mode="after")
+    def check_for_valid_req(self):
+        """
+        Either the date or day required for an appointment to be 
+        booked successfully.
+        """
+        if not (self.wkday or self.date):
+            raise ValueError(
+                "Please mention either a day or date for your schedule!")
 
         return self
 
@@ -127,20 +126,15 @@ class PaginatedResponse(BaseModel, Generic[T]):
     paginated_count: int
 
 
-class ResponseUser(BaseModel):
+class ResponseUser(FromORM, IDMixin):
     """
     this class is purely for http responses so when creating a model using this class,
     it's safe to exclude the password even before creating this model as this model as nothing to
     do with our database
     """
-
     username: str
     email: EmailStr
-
-    id: UUIDSerializer
     appointments: list[Appointment] = []
-
-    model_config = ConfigDict(from_attributes=True, extra="allow")
 
 
 class Payload(BaseModel):
@@ -181,7 +175,8 @@ class Metadata(BaseModel):
     #     Field(serialization_alias="to"),
     #     PlainSerializer(serialize, str, when_used="always"),
     # ]
-    from_: Annotated[UUIDSerializer | None, Field(default=None, alias="from")]
+    from_: Annotated[UUID | None, PlainSerializer(
+        func=lambda x: str(x)), Field(alias="from")]
 
 
 class WS_Message(BaseModel):

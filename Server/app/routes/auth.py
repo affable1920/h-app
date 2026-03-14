@@ -46,10 +46,12 @@ async def register(user: CreateUser, db: Session = Depends(get_db)):
     except ValueError as e:
         db.rollback()
         raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, detail={"msg": str(e), "type": "bad request"}
+            status.HTTP_400_BAD_REQUEST, detail={
+                "msg": str(e), "type": "bad request"}
         )
 
     except Exception as e:
+        print(e)
         db.rollback()
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -71,7 +73,8 @@ async def login(user_cred: LoginUser, db: Session = Depends(get_db)):
         if not db_user:
             raise ValueError("Invalid email !")
 
-        is_authenticated = service.verify_pwd(user_cred.password, db_user.password)
+        is_authenticated = service.verify_pwd(
+            user_cred.password, db_user.password)
 
         if not is_authenticated:
             raise ValueError("Invalid password !")

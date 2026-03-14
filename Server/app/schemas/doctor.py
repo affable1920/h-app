@@ -2,16 +2,17 @@ from uuid import UUID
 from typing import Annotated
 from datetime import datetime
 
+from app.schemas.base import FromORM, IDMixin
+
 from . import dr_extra as DrType
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import ConfigDict, EmailStr, Field
 
-from app.shared.schemas import Status
+from app.shared.enums import Status
 
 
-class DoctorSummary(BaseModel):
-    id: UUID
+class DoctorSummary(FromORM, IDMixin):
     fee: int
-    fullname: str
+    name: str
     email: EmailStr
     rating: float
     reviews: int
@@ -21,10 +22,8 @@ class DoctorSummary(BaseModel):
     verified: bool = False
     primary_specialization: str
 
-    model_config = ConfigDict(from_attributes=True)
 
-
-class Doctor(DoctorSummary, BaseModel):
+class Doctor(DoctorSummary):
     consults_online: bool = False
     booking_enabled: bool = False
 
@@ -38,7 +37,3 @@ class Doctor(DoctorSummary, BaseModel):
 
     office: DrType.Clinic | None = None
     schedules: list[DrType.Schedule] = []
-
-    # Flexible metadata for future flags without breaking changes
-
-    model_config = ConfigDict(from_attributes=True, extra="allow")

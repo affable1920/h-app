@@ -1,279 +1,236 @@
-from sqlite3 import Time
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from datetime import datetime
-from typing import Any, List
+from datetime import datetime, time
+from typing import Annotated, List, Optional
 
-import sqlalchemy
-
+import sqlalchemy as sa
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from app.database.entry import Base
-from app.shared.schemas import AppointmentStatus, Mode, Status
+from app.shared.enums import UserRole, AppointmentStatus, Mode, Status
 
-from sqlalchemy.orm import relationship, mapped_column, Mapped
-from sqlalchemy import (
-    VARCHAR,
-    Uuid,
-    JSON,
-    Column,
-    DateTime,
-    ForeignKey,
-    Numeric,
-    String,
-    Table,
-    Time as SQLTime,
-    Enum as SQLEnum,
-)
+PrimaryKey = Annotated[UUID, mapped_column(
+    primary_key=True, server_default=sa.text("gen_random_uuid()"))]
 
 
-def gen_id():
-    return uuid4()
+class TimeStampMixin:
+    created_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True), server_default=sa.func.now())
+    last_updated: Mapped[datetime] = mapped_column(
+        server_onupdate=sa.func.now(), server_default=sa.func.now(), nullable=True)
 
 
-class Patient(Base):
-    __tablename__ = "patients"
-
-    id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True),
-        primary_key=True,
-        default=gen_id,
-    )
-
+class User(TimeStampMixin, Base):
+    __tablename__ = "user"
     """
-    Sign up related fields:
-    email, username and password
-
-    user details:
-    name, contact, apps etc ..
+    The id attr which is defined as the "PrimaryKey" above - can be overridden below as well.
     """
+    id: Mapped[PrimaryKey]
 
     email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
-
     username: Mapped[str] = mapped_column(index=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
-
     name: Mapped[str] = mapped_column(nullable=True)
-    contact: Mapped[int] = mapped_column(Numeric(10), index=True, nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.now
-    )
+    role: Mapped[UserRole] = mapped_column(
+        sa.Enum(UserRole, name="user_role"), server_default=sa.text("'PATIENT'"))
 
-    last_updated: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=sqlalchemy.func.now(),
-        onupdate=sqlalchemy.func.now(),
-    )
+    __mapper_args__ = {
+        "polymorphic_on": role,
+        "polymorphic_identity": None
+    }
+
+
+class Patient(User):
+    __tablename__ = "patient"
+
+    id: Mapped[UUID] = mapped_column(
+        sa.ForeignKey("user.id"), primary_key=True)
 
     appointments: Mapped[list["Appointment"]] = relationship(
         back_populates="patient",
-        cascade="all, delete-orphan",
-        lazy="joined",
+        cascade="all, delete-orphan"
     )
+    __mapper_args__ = {
+        "polymorphic_identity": "PATIENT"
+    }
 
 
-junction = Table(
+junction = sa.Table(
     "doctor_clinics",
     Base.metadata,
-    Column("doctor_id", Uuid, ForeignKey("doctors.id"), primary_key=True),
-    Column("clinic_id", Uuid, ForeignKey("clinics.id"), primary_key=True),
+    sa.Column("doctor_id", sa.ForeignKey("doctor.id"), primary_key=True),
+    sa.Column("clinic_id", sa.ForeignKey("clinic.id"), primary_key=True),
 )
 
 
-class Doctor(Base):
-    __tablename__ = "doctors"
-
+class Doctor(User):
+    __tablename__ = "doctor"
     id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, unique=True, default=gen_id
-    )
+        sa.ForeignKey("user.id"), primary_key=True)
 
-    password: Mapped[str] = mapped_column(nullable=False)
-    username: Mapped[str] = mapped_column(nullable=False)
-
-    email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
-
-    rating: Mapped[Numeric] = mapped_column(Numeric(2), default=0.0)
-    reviews: Mapped[int] = mapped_column(default=0)
+    rating: Mapped[float] = mapped_column(
+        sa.DECIMAL(2, 1), server_default="0.0")
+    reviews: Mapped[int] = mapped_column(server_default="0")
 
     experience: Mapped[int]
-    verified: Mapped[bool] = mapped_column(default=False)
+    verified: Mapped[bool]
 
     primary_specialization: Mapped[str]
     secondary_specializations: Mapped[list[str]] = mapped_column(
-        JSON, server_default="[]"
+        sa.JSON, server_default="[]"
     )
-
-    fullname: Mapped[str]
-    credentials: Mapped[str]
 
     fee: Mapped[int]
-    consults_online: Mapped[bool] = mapped_column(default=False)
+    credentials: Mapped[str] = mapped_column(nullable=False)
+    consults_online: Mapped[bool]
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.now
-    )
+    next_available: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
-    currently_available: Mapped[bool] = mapped_column(default=True)
-    next_available: Mapped[datetime | None] = mapped_column(default=None)
-
-    last_updated: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.now
-    )
-
-    status: Mapped[Status] = mapped_column(SQLEnum(Status), default=Status.AVAILABLE)
+    status: Mapped[Status] = mapped_column(
+        sa.Enum(Status, name="doctor_availability_status"), default=Status.UNKNOWN)
 
     """
     A dr has One to many relationship with schedules
     A dr can have mutiple schedules but a schedule can only be a single doctor's
 
-    But, a dr has many to many relationship with clinics, a clinic can have many drs and vice versa
+    But a dr has many to many relationship with clinics, a clinic can have many drs and vice versa
     """
 
-    # cascade on clinics makes no sense, clinics are their own entities
     clinics: Mapped[list["Clinic"]] = relationship(
         back_populates="doctors", secondary=junction
     )
-
-    """
-    No reason to a keep a dr's schedule if the dr is not going to be in our table
-    all -> propogate all changes
-    delete-orphan -> delete a schedule, it's deleted from the database
-    delete dr -> his|her schedules are also deleted.
-    """
-
     schedules: Mapped[List["Schedule"]] = relationship(
-        back_populates="doctor", cascade="all, delete-orphan", lazy="joined"
+        back_populates="doctor", cascade="all, delete-orphan"
     )
 
-    def __getitem__(self, name: str) -> Any:
-        return self[name] if name else self.username
+    __mapper_args__ = {
+        "polymorphic_identity": "DOCTOR"
+    }
+    __table_args__ = (
+        sa.CheckConstraint(
+            sqltext="rating >= 0.0 and rating <= 5.0", name="chk_for_doctor_rating"),
+    )
+
+
+class Clinic:
+    __tablename__ = "clinic"
+    id: Mapped[PrimaryKey]
+
+    name: Mapped[str] = mapped_column(nullable=False)
+    owner: Mapped[UUID] = mapped_column(sa.ForeignKey("user.id"))
+
+    reviews: Mapped[int] = mapped_column(server_default="0")
+    rating: Mapped[float] = mapped_column(
+        sa.DECIMAL(2, 1), server_default="0.0")
+
+    pincode: Mapped[int]
+    location: Mapped[str] = mapped_column(sa.VARCHAR)
+
+    contact_numbers: Mapped[list[str]] = mapped_column(
+        sa.ARRAY(sa.String(length=10)), server_default="{}")
+    whatsapp: Mapped[str] = mapped_column(sa.String(length=10))
+
+    facilities: Mapped[list[str]] = mapped_column(sa.JSON, server_default="[]")
+    specializations: Mapped[list[str]] = mapped_column(
+        sa.JSON, server_default="[]")
+
+    doctors: Mapped[list["Doctor"]] = relationship(
+        back_populates="clinics", secondary=junction
+    )
+
+    __table_args__ = (
+        sa.CheckConstraint(
+            sqltext="rating >= 0.0 and rating <= 5.0", name="chk_for_clinic_rating"),
+    )
 
 
 class Schedule(Base):
-    __tablename__ = "schedules"
+    __tablename__ = "schedule"
 
-    """
-    A schedule resonates with a particular doctor's schedule 
-    at a particular clinic for any set of given days of a week ( 0 - 6 )
-    """
+    id: Mapped[PrimaryKey]
+    weekdays: Mapped[list[int]] = mapped_column(sa.JSON, server_default="[]")
 
-    id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=gen_id
-    )
-    weekdays: Mapped[List[int]] = mapped_column(JSON, server_default="[]")
-
-    date: Mapped[datetime | None]
-    hours_available: Mapped[int | None]
+    scheduled_date: Mapped[Optional[datetime]] = mapped_column(
+        sa.DateTime(timezone=True), nullable=True)
+    hours_available: Mapped[Optional[int]]
 
     is_active: Mapped[bool] = mapped_column(default=True)
     is_recurring: Mapped[bool] = mapped_column(default=True)
 
-    start: Mapped[Time] = mapped_column(SQLTime, nullable=False)
-    end: Mapped[Time] = mapped_column(SQLTime)
-
-    clinic_id: Mapped[str] = mapped_column(ForeignKey("clinics.id"), nullable=False)
-    doctor_id: Mapped[str] = mapped_column(ForeignKey("doctors.id"), nullable=False)
-
+    start_time: Mapped[time] = mapped_column(
+        sa.Time(timezone=True), nullable=False)
+    # end is a reserved keyword in sql
+    end_time: Mapped[time] = mapped_column(
+        sa.Time(timezone=True), nullable=False)
     base_slot_duration: Mapped[int] = mapped_column(default=20)
 
-    # effective_from: Mapped[datetime] = mapped_column(default=datetime.now)
-    # effective_until: Mapped[datetime] = mapped_column(nullable=True)
-
-    """
-    The dr id as a foreign key will be a column in this schedules table, where this id will 
-    point to that particular dr whose schedule this is
-
-    But the dr is simply for python -> so we can do schedule.doctor
-    
-    No reason to add clinic like dr bcz clinic being back populated doesn't make sense as we
-    won't store clinic.schedules - but at last intuition -> where is the schedule taking place ?
-    """
-
+    doctor_id: Mapped[str] = mapped_column(
+        sa.ForeignKey("doctor.id"), nullable=False)
     doctor: Mapped["Doctor"] = relationship(back_populates="schedules")
+
+    clinic_id: Mapped[str] = mapped_column(
+        sa.ForeignKey("clinic.id"), nullable=False)
     clinic: Mapped["Clinic"] = relationship(lazy="joined")
+
     slots: Mapped[list["Slot"]] = relationship(
         back_populates="schedule", cascade="all, delete-orphan"
     )
 
+    __table_args__ = (
+        sa.CheckConstraint(sqltext="start_time < end_time",
+                           name="chk_for_schedule_timing"),
+    )
+
 
 class Slot(Base):
-    __tablename__ = "slots"
+    __tablename__ = "slot"
 
-    id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=gen_id
-    )
+    id: Mapped[PrimaryKey]
 
     booked: Mapped[bool]
-    duration: Mapped[int] = mapped_column(default=20)
+    duration: Mapped[int]
 
-    begin: Mapped[Time] = mapped_column(SQLTime, nullable=False)
-    mode: Mapped[Mode] = mapped_column(SQLEnum(Mode), default="in person")
+    begin: Mapped[time] = mapped_column(sa.Time(timezone=True), nullable=False)
+    mode: Mapped[Mode] = mapped_column(
+        sa.Enum(Mode, name="consultation_mode"), server_default=sa.text("'IN_PERSON'"))
 
-    schedule_id: Mapped[str] = mapped_column(ForeignKey("schedules.id"))
-    schedule: Mapped["Schedule"] = relationship(back_populates="slots")
-
-
-class Clinic(Base):
-    __tablename__ = "clinics"
-
-    id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=gen_id
-    )
-
-    head: Mapped[str] = mapped_column(nullable=False)
-    owner_name: Mapped[str] = mapped_column(nullable=False, index=True)
-    email: Mapped[str] = mapped_column(index=True, nullable=False)
-
-    username: Mapped[str] = mapped_column(nullable=False)
-    password: Mapped[str] = mapped_column(nullable=False)
-
-    reviews: Mapped[int] = mapped_column(default=0)
-    rating: Mapped[Numeric] = mapped_column(Numeric(2), default=0.0)
-
-    address: Mapped[str] = mapped_column(nullable=False)
-    pincode: Mapped[int] = mapped_column(nullable=False)
-
-    mobile: Mapped[str] = mapped_column(String(10))
-    whatsapp: Mapped[str] = mapped_column(String(10))
-
-    facilities: Mapped[list[str]] = mapped_column(JSON, server_default="[]")
-    specializations: Mapped[list[str]] = mapped_column(JSON, server_default="[]")
-
-    doctors: Mapped[list["Doctor"]] = relationship(
-        back_populates="clinics", lazy="joined", secondary=junction
-    )
+    schedule_id: Mapped[UUID] = mapped_column(sa.ForeignKey("schedule.id"))
+    schedule: Mapped[Schedule] = relationship(back_populates="slots")
 
 
-class Appointment(Base):
-    __tablename__ = "appointments"
+class Appointment(TimeStampMixin, Base):
+    __tablename__ = "appointment"
 
-    id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=gen_id
-    )
+    id: Mapped[PrimaryKey]
 
-    patient_id: Mapped[UUID] = mapped_column(ForeignKey("patients.id"), nullable=True)
-    guest_name: Mapped[str | None] = mapped_column(nullable=True)
-    guest_contact: Mapped[str | None] = mapped_column(VARCHAR(10), nullable=True)
+    patient_id: Mapped[Optional[UUID]] = mapped_column(
+        sa.ForeignKey("patient.id"), nullable=True)
+    patient: Mapped[Patient] = relationship(back_populates="appointment")
 
-    doctor_id: Mapped[UUID] = mapped_column(ForeignKey("doctors.id"), nullable=False)
-    slot_id: Mapped[UUID] = mapped_column(ForeignKey("slots.id"), nullable=False)
+    guest_name: Mapped[Optional[str]] = mapped_column(nullable=True)
+    guest_contact: Mapped[Optional[str]] = mapped_column(
+        sa.String(length=10),  nullable=True)
 
-    schedule_id: Mapped[UUID] = mapped_column(
-        ForeignKey("schedules.id"), nullable=False
-    )
-    clinic_id: Mapped[UUID] = mapped_column(ForeignKey("clinics.id"), nullable=False)
+    slot_id: Mapped[UUID] = mapped_column(
+        sa.ForeignKey("slot.id"), nullable=False)
+    slot: Mapped[Slot] = relationship()
 
-    date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.now
-    )
+    scheduled_date: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True))
 
     status: Mapped[AppointmentStatus] = mapped_column(
-        SQLEnum(AppointmentStatus, name="appointment_status_enum"),
-        default=AppointmentStatus.active,
+        sa.Enum(AppointmentStatus, name="appointment_status"),
+        server_default=sa.text("'ACTIVE'"),
     )
 
-    doctor: Mapped[Doctor] = relationship(lazy="joined")
-    patient: Mapped["Patient"] = relationship(back_populates="appointments")
+    """
+    if we wanted only one out of the patient_id or guest_name to be present, never both, we'd do
+    -> (patient_id IS NOT NULL) != (guest_name IS NOT NULL)
 
-    slot: Mapped[Slot] = relationship(lazy="joined")
+    The != acts as the XOR operator in terms of postgresql
+    """
+    __table_args__ = (
+        sa.CheckConstraint(
+            sqltext="(patient_id IS NOT NULL) or (guest_name IS NOT NULL)", name="chk_patient_identity"),
+    )

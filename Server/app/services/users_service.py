@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.shared.schemas import AppointmentStatus
-from app.database.models import Appointment, Patient
+from app.shared.enums import AppointmentStatus
+from app.database.models import Appointment, User
 
 
 class UserService:
@@ -16,14 +16,14 @@ class UserService:
 
     #
 
-    def get_by_email(self, email: str) -> Patient | None:
-        rqstd_user = self.db.query(Patient).filter(Patient.email == email).first()
+    def get_by_email(self, email: str) -> User | None:
+        rqstd_user = self.db.query(User).where(User.email == email).first()
         return rqstd_user if rqstd_user else None
 
     #
 
-    def get_by_id(self, id: str) -> Patient | None:
-        rqstd_user = self.db.query(Patient).filter(Patient.id == id).first()
+    def get_by_id(self, id: str) -> User | None:
+        rqstd_user = self.db.get(User, ident=id)
         return rqstd_user if rqstd_user else None
 
     #
@@ -42,7 +42,7 @@ class UserService:
         try:
             hashed_pwd = self.hash_pwd(password)
 
-            db_user = Patient(
+            db_user = User(
                 email=email,
                 username=username,
                 password=hashed_pwd,
@@ -81,7 +81,7 @@ class UserService:
 
         try:
             appointment.slot.booked = False
-            appointment.status = AppointmentStatus.cancelled
+            appointment.status = AppointmentStatus.CANCELLED
 
             self.db.commit()
             self.db.refresh(appointment)

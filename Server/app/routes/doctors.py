@@ -1,5 +1,6 @@
 from enum import Enum
 from uuid import UUID
+from fastapi.exceptions import ResponseValidationError
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter, HTTPException, status
 
@@ -19,17 +20,18 @@ router = APIRouter(prefix=base_route, tags=tags)
 
 @router.get("", response_model=PaginatedResponse[DoctorSummary])
 async def get_doctors(
-    db: Session = Depends(get_db),
     filters: FilterParams = Depends(),
     pagination_params: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
 ):
     try:
         service = DoctorService(db)
-        return service.get(pagination=pagination_params, filters=filters)
+        return service.get_all(pagination=pagination_params, filters=filters)
 
     except Exception as e:
+        print(e)
         raise HTTPException(
-            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=500,
             detail={
                 "detail": str(e),
                 "type": "unexpected error",
@@ -47,21 +49,29 @@ async def get_doctor(id: UUID, db: Session = Depends(get_db)):
         raise HTTPException(404, detail={"msg": str(e), "type": "not found"})
 
 
-@router.post("/{id}/book", response_model=Appointment)
+@router.post("/{doctor_id}/book", response_model=Appointment)
 async def book_schedule(
-    id: UUID, booking_data: BookingRequestData, db: Session = Depends(get_db)
+    doctor_id: UUID, booking_data: BookingRequestData, db: Session = Depends(get_db)
 ):
+    service = DoctorService(db=db)
+
     try:
-        return DoctorService(db).book(id=id, **booking_data.model_dump(by_alias=False))
+        created_appointment = service.book(
+            doctor_id=doctor_id, **booking_data.model_dump())
+
+        db.commit()
+        return created_appointment
 
     except ValueError as e:
         print(e)
+        db.rollback()
         raise HTTPException(
             400, detail={"msg": str(e), "type": "bad request", "detail": str(e)}
         )
 
     except Exception as e:
         print(e)
+        db.rollback()
         raise HTTPException(
             500,
             detail={

@@ -50,3 +50,9 @@ __pycache__/
 alembic.ini
 .sh
 get-ip.sh
+
+env.py
+.mako
+
+data/
+alembic/env.py

@@ -14,6 +14,13 @@ class Mode(enum.Enum):
     IN_PERSON = "in person"
 
 
+class UserRoleV2(enum.Enum):
+    CLINIC_ADMIN = "clinic_admin"
+    DOCTOR = "doctor"
+    PATIENT = "patient"
+    NA = "na"
+
+
 class Status(enum.Enum):
     AWAY = "away"
     AVAILABLE = "available"

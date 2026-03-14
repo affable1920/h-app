@@ -1,56 +1,43 @@
 from sqlite3 import Time
 from uuid import UUID
 from typing import Annotated
-from pydantic import ConfigDict, EmailStr, Field, BaseModel
+from pydantic import EmailStr, Field
 
-from app.shared.schemas import Mode
+from app.shared.enums import Mode
+from app.schemas.base import ContactMixin, FromORM, IDMixin
 
 
-class Clinic(BaseModel):
-    id: UUID
-    head: str
+class Clinic(FromORM, IDMixin, ContactMixin):
+    name: str
 
     email: EmailStr
     username: str
     owner_name: str
 
     address: str
-    facilities: list[str] = []
+    facilities: list[str]
     pincode: int
-    contact: str = Field(alias="mobile")
-
-    whatsapp: str | None = None
-    reviews: int | None = None
-    rating: int | float = 0.0
-
-    model_config = ConfigDict(from_attributes=True)
+    reviews: int = Field(default=0)
+    rating: float
 
 
-class Slot(BaseModel):
-    id: UUID
+class Slot(FromORM, IDMixin):
     duration: int
-
     booked: bool = False
     mode: Mode | None = None
-
     begin: Annotated[Time, Field(..., description="The slot start time")]
-    model_config = ConfigDict(from_attributes=True)
 
 
-class Schedule(BaseModel):
+class Schedule(FromORM, IDMixin):
     """
-
     use datetime as main schedule date getter if doctors
     don't seem to have a fixed schedule, else better off with weekdays
-
     """
-
-    id: UUID
 
     weekdays: list[int]
 
-    is_active: bool = True
-    is_recurring: bool = True
+    is_active: bool
+    is_recurring: bool
 
     clinic_id: UUID
     doctor_id: UUID
@@ -59,8 +46,6 @@ class Schedule(BaseModel):
 
     slots: list[Slot]
 
-    start: Time = Field(...)
+    start_time: Time
     hours_available: int | None = Field(default=None)
-    end: Time | None = Field(default=None)
-
-    model_config = ConfigDict(from_attributes=True, extra="allow")
+    end_time: Time

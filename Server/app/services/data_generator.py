@@ -1,17 +1,22 @@
 import random
 from typing import Optional
-from uuid import UUID, uuid4
+from uuid import UUID
 from faker import Faker
 
 from passlib.context import CryptContext
 
+from app.shared.enums import Status
 from app.database.entry import get_db, engine
 from app.constants import index as constants
 from datetime import date, datetime, time, timedelta
 
-from app.database.models import Clinic, Mode, Slot, Schedule, Doctor, Base
+from app.database.models import Clinic, Mode, Patient, Slot, Schedule, Doctor, Base
 
 faker = Faker()
+
+
+def get_bool(threshold: float = .5):
+    return random.random() > threshold
 
 
 class DataGenerator:
@@ -50,7 +55,7 @@ class DataGenerator:
         now = datetime.now()
 
         for schedule in schedules:
-            if today.weekday() in schedule.weekdays and now.time() <= schedule.end:
+            if today.weekday() in schedule.weekdays and now.time() <= schedule.end_time:
                 return True
 
         return False
@@ -83,24 +88,22 @@ class DataGenerator:
 
     def create_clinic(self) -> Clinic:
         """Generate a single clinic record."""
-        phone = faker.phone_number()[:10]
-        name = faker.name()
-
-        pwd = self.context.hash(str(uuid4()))
+        name = random.choice(constants.HOSPITALS)
+        contact = faker.phone_number()[:10]
 
         return Clinic(
-            head=f"{random.choice(constants.HOSPITALS)} City Hospital",
-            mobile=phone,
-            whatsapp=phone,
+            owner_name=faker.user_name(),
+            username=name,
+            contact=contact,
+            whatsapp=contact,
+            password=faker.password(),
+            email=faker.email(),
+            name=f"{name} City Hospital",
             reviews=random.randint(1, 100),
-            rating=random.random(),
+            rating=round(random.uniform(1.0, 5.0), 2),
             facilities=[],
             specializations=[],
-            password=pwd,
-            owner_name=random.choice(constants.NAMES),
-            username=f"{name}",
-            pincode=random.choice([193201, 193202, 190001]),
-            email=faker.email(),
+            pincode=random.choice([193201, 193202, 190001, 190002, 190010]),
             address=faker.street_address(),
         )
 
@@ -112,7 +115,7 @@ class DataGenerator:
         """Generate realistic schedules with multiple clinics possible on same weekday."""
         all_days = [0, 1, 2, 3, 4, 5, 6]
         wkdays = random.sample(all_days, k=random.randint(1, 4))
-        is_morning = random.choice([True, False])
+        is_morning = get_bool()
 
         if is_morning:
             start = time(7, 30)
@@ -123,8 +126,8 @@ class DataGenerator:
             end = time(20, 0)
 
         return Schedule(
-            start=start,
-            end=end,
+            start_time=start,
+            end_time=end,
             weekdays=wkdays,
             doctor_id=doctor.id,
             clinic_id=clinic.id,
@@ -140,39 +143,35 @@ class DataGenerator:
 
     #
 
-    #
-
     def create_doctor(self) -> Doctor:
         """Generate secondary doctor information."""
-        fee = random.randint(150, 400)
-        consults_online = random.choice([True, False])
 
-        currently_available = False
-        name = faker.name()
-        pwd = self.context.hash(str(uuid4()))
+        dr_name = faker.name()
 
         return Doctor(
-            username=name,
-            fullname=name,
-            password=pwd,
+            name=dr_name,
+            username=dr_name,
+            password=faker.password(),
             email=faker.email(),
+            contact=faker.phone_number()[:10],
             reviews=random.randint(0, 100),
             credentials=random.choice(constants.CREDENTIALS),
             primary_specialization=random.choice(constants.SPECIALIZATIONS),
-            fee=fee,
-            currently_available=currently_available,
+            fee=random.randint(100, 400),
+            currently_available=get_bool(3),
             secondary_specializations=random.sample(
                 constants.SPECIALIZATIONS, k=random.randint(0, 3)
             ),
             last_updated=datetime.now(),
-            verified=random.random() < 0.7,
-            consults_online=consults_online,
+            verified=get_bool(),
+            consults_online=get_bool(.3),
             experience=random.randint(1, 35),
-            status=random.choice(constants.STATUSES),
+            status=Status.AVAILABLE,
             rating=round(random.uniform(1.5, 5.0), 2),
         )
 
     #
+
     def create_slots(
         self, start: time, end: time, schedule_id: UUID, duration: int = 20
     ) -> list[Slot]:
@@ -194,20 +193,20 @@ class DataGenerator:
         schedule_start = datetime.combine(datetime.today(), start)
         schedule_end = datetime.combine(datetime.today(), end)
 
-        while (schedule_start + timedelta(minutes=duration)) <= schedule_end:
-            slot_start = schedule_start
+        slot_window = schedule_start
 
+        while slot_window <= schedule_end:
             slots.append(
                 Slot(
                     duration=duration,
-                    begin=slot_start.time(),
-                    booked=random.random() > 0.5,
+                    begin=slot_window.time(),
+                    booked=get_bool(.6),
                     schedule_id=schedule_id,
-                    mode=random.choice([Mode.IN_PERSON, Mode.ONLINE]),
+                    mode=random.choice(list(Mode)),
                 )
             )
 
-            schedule_start += timedelta(minutes=duration)
+            slot_window += timedelta(minutes=duration)
         return slots
 
     #
@@ -219,13 +218,18 @@ class DataGenerator:
     def generate_clinics(self, count: int = 40):
         return [self.create_clinic() for _ in range(count)]
 
-    def generate_schedules(self, doctor: Doctor, count: int = 40):
-        num_clinics = random.sample(doctor.clinics, min(3, len(doctor.clinics)))
+#
 
-        schedules = [self.create_schedule(doctor, clinic) for clinic in num_clinics]
+    def generate_schedules(self, doctor: Doctor, count: int = 40):
+        num_clinics = random.sample(
+            doctor.clinics, min(3, len(doctor.clinics)))
+
+        schedules = [self.create_schedule(doctor, clinic)
+                     for clinic in num_clinics]
 
         for schedule in schedules:
-            slots = self.create_slots(schedule.start, schedule.end, schedule.id)
+            slots = self.create_slots(
+                schedule.start_time, schedule.end_time, schedule.id)
             schedule.slots.extend(slots)
 
         doctor.schedules.extend(schedules)
@@ -258,8 +262,8 @@ class DataGenerator:
 async def seed_db():
     try:
         Base.metadata.drop_all(bind=engine)
-        db = next(get_db())
 
+        db = next(get_db())
         generator = DataGenerator()
 
         Base.metadata.create_all(bind=engine)

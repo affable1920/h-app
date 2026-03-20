@@ -39,9 +39,7 @@ class UserRole(Enum):
 
 
 class Appointment(FromORM, IDMixin):
-    doctor: Doctor
     patient_id: IDSerialized | None
-
     slot: Slot
     scheduled_date: datetime
 
@@ -65,12 +63,9 @@ class LoginUser(BaseModel):
 
 
 class BookingRequestData(FromORM):
-    date: datetime | None
-    wkday: int | None
+    scheduled_date: datetime
 
     patient_id: UUID | None = None
-    email: EmailStr | None = None
-
     guest_name: Annotated[
         str | None,
         Field(
@@ -86,7 +81,6 @@ class BookingRequestData(FromORM):
     ]
 
     slot_id: Annotated[UUID, Field(alias="slotId")]
-    schedule_id: Annotated[UUID | None, Field(alias="scheduleId")]
 
     @model_validator(mode="after")
     def check_patient(self):
@@ -98,19 +92,6 @@ class BookingRequestData(FromORM):
 
         return self
 
-    #
-    @model_validator(mode="after")
-    def check_for_valid_req(self):
-        """
-        Either the date or day required for an appointment to be 
-        booked successfully.
-        """
-        if not (self.wkday or self.date):
-            raise ValueError(
-                "Please mention either a day or date for your schedule!")
-
-        return self
-
 
 # Outgoing
 class PaginatedResponse(BaseModel, Generic[T]):
@@ -119,11 +100,9 @@ class PaginatedResponse(BaseModel, Generic[T]):
     entities: list[T]
 
     # has more boolean val for pagination
-    has_next: bool
+    count: int
+    has_next: bool | None = None
     has_prev: bool = False
-
-    total_count: int
-    paginated_count: int
 
 
 class ResponseUser(FromORM, IDMixin):

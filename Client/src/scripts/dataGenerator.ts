@@ -8,7 +8,7 @@ import type {
   Slot as TimeSlot,
   Schedule,
 } from "@/types/http";
-import * as constants from "../utils/constants.ts";
+import * as constants from "../utils/dataConstants.ts";
 
 const chance = new Chance();
 

@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 
 import useModalStore from "@/stores/modalStore";
-import Badge from "@components/common/Badge";
+import Badge from "@/components/ui/Badge";
 import { AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
-import Button from "../common/Button";
-import Input from "../common/Input";
+import Button from "./Button";
+import Input from "./Input";
 import CategoryFilter from "./CategoryFilter";
 import SelectFilter from "./SelectFilter";
 
-import * as constants from "@/utils/constants";
+import * as constants from "@/utils/dataConstants";
 import { useSearchParams } from "react-router-dom";
 import type { paths } from "@/types/api";
 
@@ -25,13 +25,9 @@ type FilterState = Omit<
 
 type FilterKey = keyof FilterState;
 
-const DirectoryFilter = () => {
+function DirectoryFilter() {
   const [filters, setFilters] = useState<Partial<FilterState>>({});
   const [searchParams, setSearchParams] = useSearchParams();
-
-  function reset() {
-    setFilters({});
-  }
 
   useEffect(function () {
     setFilters({
@@ -43,39 +39,34 @@ const DirectoryFilter = () => {
     });
   }, []);
 
+  const handleSpecUpdate = useCallback(
+    handleFilterUpdate.bind(null, "specialization"),
+    [],
+  );
+  const closeModal = useModalStore((s) => s.closeModal);
+
+  function reset() {
+    setFilters({});
+  }
+
   function handleFilterUpdate<K extends FilterKey>(
     key: K,
     val: FilterState[K],
   ) {
-    if (filters[key] === val) {
-      setFilters((p) => ({ ...p, [key]: undefined }));
-      return;
-    }
-
-    setFilters((prev) => ({ ...prev, [key]: val }));
+    setFilters(function (prev) {
+      return { ...prev, [key]: filters[key] === val ? undefined : val };
+    });
   }
 
   const selectedSpecialization = filters.specialization ?? null;
 
-  const handleSpecUpdate = useCallback(function (spec: string | null) {
-    handleFilterUpdate("specialization", spec);
-  }, []);
-
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
-  const closeModal = useModalStore((s) => s.closeModal);
 
   async function applyFiltersHTTP() {
-    // Required before applying filters -
-    // curr directory
-    // filters applied
-    // access to directory hook
-
     const newParams = new URLSearchParams();
 
     for (const [key, val] of Object.entries(filters)) {
       console.info("adding filters: ", key, val);
-
-      if (!val) continue;
       newParams.set(key, String(val));
     }
 
@@ -90,7 +81,7 @@ const DirectoryFilter = () => {
   return (
     <section className="flex flex-col h-full gap-8 p-4 px-6 relative text-xs">
       <div className="flex items-center justify-between">
-        {activeFilterCount > 0 && (
+        {!!activeFilterCount && (
           <div className="ml-auto flex items-center gap-2">
             <p>{activeFilterCount}</p>
             <Button
@@ -110,10 +101,11 @@ const DirectoryFilter = () => {
             {selectedSpecialization && (
               <Badge
                 as="button"
-                size="md"
                 className="max-w-fit capitalize"
                 selected={!!selectedSpecialization}
-                onClick={() => handleSpecUpdate(null)}
+                onClick={function () {
+                  handleSpecUpdate(null);
+                }}
               >
                 {selectedSpecialization}
               </Badge>
@@ -131,9 +123,9 @@ const DirectoryFilter = () => {
           <Input
             type="range"
             name="distance"
-            onChange={(ev) =>
-              handleFilterUpdate("maxDistance", parseInt(ev.target.value))
-            }
+            onChange={function (ev) {
+              handleFilterUpdate("maxDistance", parseInt(ev.target.value));
+            }}
           />
           <div className="flex justify-between items-center italic font-bold">
             <span>1 km</span>
@@ -153,7 +145,7 @@ const DirectoryFilter = () => {
             size="md"
             className="italic max-w-fit ml-auto"
             selected={filters.currentlyAvailable}
-            onClick={() => handleFilterUpdate("currentlyAvailable", true)}
+            onClick={handleFilterUpdate.bind(null, "currentlyAvailable", true)}
           >
             Available right now !
           </Badge>
@@ -162,7 +154,7 @@ const DirectoryFilter = () => {
             size="md"
             selected={filters.mode === "online"}
             className="italic max-w-fit ml-auto"
-            onClick={() => handleFilterUpdate("mode", "online")}
+            onClick={handleFilterUpdate.bind(null, "mode", "online")}
           >
             Online
           </Badge>
@@ -185,6 +177,6 @@ const DirectoryFilter = () => {
       </div>
     </section>
   );
-};
+}
 
 export default DirectoryFilter;

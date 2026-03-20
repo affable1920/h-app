@@ -1,5 +1,5 @@
 import Ratings from "../Ratings";
-import Badge from "../common/Badge";
+import Badge from "./Badge";
 import type { ButtonProps } from "@/types/button";
 
 interface CategoryFilterProps {
@@ -25,7 +25,7 @@ const CategoryFilter = ({
             size="sm"
             key={option}
             selected={option == selectedOption}
-            onClick={() => onOptionSelect(option)}
+            onClick={onOptionSelect.bind(null, option)}
           >
             {label.toLowerCase().includes("rating") ? (
               <Ratings rating={option as number} />

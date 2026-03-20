@@ -1,10 +1,12 @@
-import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import Code from "../ui/Code";
 
 const HomePage = () => {
   return (
     <section className="flex flex-col h-1/2 text-center items-center gap-2 max-h-full py-12 pb-2">
-      <h1>In Production. Hold on tight</h1>
+      <h1>
+        In <Code>Production</Code>, Hold on tight
+      </h1>
 
       <Link
         to="dir/doctors"

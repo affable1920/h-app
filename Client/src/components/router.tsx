@@ -8,8 +8,8 @@ import Directory from "@routes/Directory";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 
-import SignIn from "@/components/auth/SignIn";
-import Register from "@components/auth/Register";
+import SignIn from "@/components/routes/SignIn";
+import Register from "@/components/routes/Register";
 import UserProfile from "./routes/UserProfile";
 import useAuthStore from "@/stores/authStore";
 import Consultation from "./modal/Consultation";
@@ -30,9 +30,7 @@ const Chat = lazy(() => import("@routes/Chat"));
 const Scheduler = lazy(() => import("@routes/Scheduler"));
 
 const ClinicsDirectory = lazy(() => import("@components/ClinicsDirectory"));
-const DoctorsDirectory = lazy(
-  () => import("@components/doctor/DoctorsDirectory"),
-);
+const DoctorsDirectory = lazy(() => import("@/components/ui/DoctorsDirectory"));
 
 const router = createBrowserRouter([
   {

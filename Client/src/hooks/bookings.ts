@@ -1,33 +1,34 @@
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import APIClient from "@/services/ApiClient";
 import type { Appointment, BookingRequestData } from "@/types/http";
 
 const api = new APIClient("/doctors");
-const queryClient = new QueryClient();
 
 export function useBookingMutation(doctorId: string) {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: async (data: BookingRequestData) => {
+    async mutationFn(data: BookingRequestData) {
       const response = await api.post<Appointment, BookingRequestData>(
-        doctorId,
+        doctorId + "/book",
         data,
       );
+
       return response.data;
     },
 
     onSuccess() {
       queryClient.invalidateQueries({
-        queryKey: [
-          ["doctor", doctorId],
-          ["auth", "me"],
-        ],
+        queryKey: ["doctor", doctorId],
       });
     },
   });
 }
 
 export function useUnbookingMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({
       appointmentId,

@@ -7,7 +7,7 @@ import { Toaster } from "sonner";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import "./styles/index.css";
+import "./styles/main.css";
 
 import router from "./components/router.tsx";
 

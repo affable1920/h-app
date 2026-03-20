@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -7,9 +7,9 @@ import useInjectModalHandlers from "../../hooks/modalHandlers";
 
 import Overlay from "./Overlay";
 import MODALS from "./ModalElements";
-import getModalConfig from "./constants";
+import getModalConfig from "../../utils/modalStyleUtil";
 
-const Modal = React.memo(() => {
+function Modal() {
   // Inject modal handlers for modal closers
   useInjectModalHandlers();
 
@@ -46,6 +46,6 @@ const Modal = React.memo(() => {
     </AnimatePresence>,
     portal,
   );
-});
+}
 
 export default Modal;

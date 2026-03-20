@@ -10,7 +10,7 @@ from app.database.entry import get_db, engine
 from app.constants import index as constants
 from datetime import date, datetime, time, timedelta
 
-from app.database.models import Clinic, Mode, Patient, Slot, Schedule, Doctor, Base
+from app.database.models import Clinic, Mode, Patient, Slot, Schedule, Doctor, Base, User
 
 faker = Faker()
 
@@ -86,25 +86,27 @@ class DataGenerator:
 
         return None
 
-    def create_clinic(self) -> Clinic:
+    def create_clinic_admin(self):
+        name = faker.name()
+        pwd = self.context.hash(faker.password())
+        return User(**{"username": name, "email": faker.email(), "password": pwd})
+
+    def create_clinic(self, owner: User) -> Clinic:
         """Generate a single clinic record."""
         name = random.choice(constants.HOSPITALS)
         contact = faker.phone_number()[:10]
 
         return Clinic(
-            owner_name=faker.user_name(),
-            username=name,
-            contact=contact,
+            owner=owner.id,
+            contact_numbers=[contact, faker.phone_number()[:10]],
             whatsapp=contact,
-            password=faker.password(),
-            email=faker.email(),
             name=f"{name} City Hospital",
             reviews=random.randint(1, 100),
             rating=round(random.uniform(1.0, 5.0), 2),
             facilities=[],
             specializations=[],
             pincode=random.choice([193201, 193202, 190001, 190002, 190010]),
-            address=faker.street_address(),
+            location=faker.street_address(),
         )
 
     #
@@ -153,20 +155,17 @@ class DataGenerator:
             username=dr_name,
             password=faker.password(),
             email=faker.email(),
-            contact=faker.phone_number()[:10],
             reviews=random.randint(0, 100),
             credentials=random.choice(constants.CREDENTIALS),
             primary_specialization=random.choice(constants.SPECIALIZATIONS),
             fee=random.randint(100, 400),
-            currently_available=get_bool(3),
             secondary_specializations=random.sample(
                 constants.SPECIALIZATIONS, k=random.randint(0, 3)
             ),
-            last_updated=datetime.now(),
             verified=get_bool(),
             consults_online=get_bool(.3),
             experience=random.randint(1, 35),
-            status=Status.AVAILABLE,
+            status=random.choice(list(Status)),
             rating=round(random.uniform(1.5, 5.0), 2),
         )
 
@@ -214,9 +213,6 @@ class DataGenerator:
     # Example usage
     def generate_doctors(self, count: int = 40) -> list[Doctor]:
         return [self.create_doctor() for _ in range(count)]
-
-    def generate_clinics(self, count: int = 40):
-        return [self.create_clinic() for _ in range(count)]
 
 #
 
@@ -280,7 +276,15 @@ async def seed_db():
         print(f"\n\n{len(doctors)} added to db doctors successfully!")
 
         print("Generating clinics ...")
-        clinics = generator.generate_clinics()
+
+        clinics: list[Clinic] = []
+
+        for _ in range(40):
+            cl_admin = generator.create_clinic_admin()
+            db.add(cl_admin)
+
+            db.flush([cl_admin])
+            clinics.append(generator.create_clinic(cl_admin))
 
         print(f"\n\nGenerated {len(clinics)} clinics successfully!")
 

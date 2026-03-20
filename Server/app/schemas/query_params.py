@@ -9,6 +9,8 @@ from app.shared.enums import Mode
 # providing a default value but also using field for certain constraints -> field optional
 # All three below are optional
 
+ALLOWED_SORT_COLS = Literal["rating", "reviews", "experience", "fee", "name"]
+
 
 class SortOrder(Enum):
     ASC = "asc"
@@ -19,7 +21,7 @@ class PaginationParams(BaseModel):
     page: int = Field(default=1, gt=0)
     max: int = Field(default=10, gt=0, lt=25)
 
-    sort_by: str | None = Field(default="name", alias="sortBy")
+    sort_by: ALLOWED_SORT_COLS | None = Field(default="name", alias="sortBy")
     sort_order: SortOrder | None = Field(
         default=SortOrder.ASC, alias="sortOrder")
 

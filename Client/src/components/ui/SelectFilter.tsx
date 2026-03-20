@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import Button from "../common/Button";
-import Dropdown from "../common/Dropdown";
-import { ChevronDown } from "lucide-react";
+import Button from "./Button";
+import Dropdown from "./Dropdown";
+import { ChevronRight } from "lucide-react";
 
 interface SelectFilterProps {
   label: string;
@@ -10,15 +10,28 @@ interface SelectFilterProps {
   onOptionSelect: (option: string) => void;
 }
 
-const SelectFilter = ({
+function Chevron({ isOpen }: { isOpen: boolean }) {
+  return (
+    <motion.svg
+      animate={{
+        rotate: isOpen ? -90 : 0,
+        transition: { duration: 0.15 },
+      }}
+    >
+      <ChevronRight size={12} />
+    </motion.svg>
+  );
+}
+
+function SelectFilter({
   label = "",
   options = [],
   onOptionSelect,
-}: SelectFilterProps) => {
+}: SelectFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       <Dropdown
         show={isOpen}
         options={options}
@@ -28,20 +41,13 @@ const SelectFilter = ({
         size="md"
         variant="outlined"
         className="italic"
-        onClick={() => setIsOpen((p) => !p)}
+        endIcon={<Chevron isOpen={isOpen} />}
+        onClick={setIsOpen.bind(Object.create(null), (p) => !p)}
       >
         Filter by {label}
-        <motion.svg
-          animate={{
-            rotate: isOpen ? -180 : 0,
-            transition: { duration: 0.15 },
-          }}
-        >
-          <ChevronDown size={12} />
-        </motion.svg>
       </Button>
     </div>
   );
-};
+}
 
 export default SelectFilter;

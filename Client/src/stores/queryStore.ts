@@ -6,6 +6,8 @@ type StoreState = Pick<
   ServerQuery,
   "max" | "page" | "searchQuery" | "sortBy" | "sortOrder"
 >;
+
+type AllowedSortCol = StoreState["sortBy"];
 type SortOrder = StoreState["sortOrder"];
 
 type StoreActions = {
@@ -24,7 +26,7 @@ function useQueryStore(): StoreState & StoreActions {
   const page = Number(searchParams.get("page") ?? 1);
   const searchQuery = searchParams.get("searchQuery") ?? null;
 
-  const sortBy: StoreState["sortBy"] = searchParams.get("sortBy") ?? "rating";
+  const sortBy: AllowedSortCol = searchParams.get("sortBy") ?? "rating";
   const sortOrderParam = searchParams.get("sortOrder");
   const sortOrder: SortOrder =
     sortOrderParam === "asc" || sortOrderParam === "desc"

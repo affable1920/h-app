@@ -6,13 +6,12 @@ import type { Size, COLORS } from "@/types/button";
 interface BaseBadgeProps {
   full?: boolean;
   color?: (typeof COLORS)[number] | "slate";
-  className?: string;
   content?: ReactNode;
   current?: boolean;
   disabled?: boolean;
   selected?: boolean;
-  rotate?: boolean;
   size?: Size;
+  rounded?: boolean;
 }
 
 // element type in react represents any valid renderable element
@@ -21,15 +20,13 @@ interface BaseBadgeProps {
 
 export type BadgeProps<T extends ElementType = "button"> = BaseBadgeProps & {
   as?: T;
-} & Omit<ComponentPropsWithoutRef<T>, "as" | keyof BaseBadgeProps>;
+} & ComponentPropsWithoutRef<T>;
 
 const sizes: Record<Size, string> = {
-  sm: "p-1 text-[8px]",
-  md: "p-2 text-xs",
-  lg: "p-3 text-md",
+  sm: "text-[0.6rem]",
+  md: "text-[0.75rem]",
+  lg: "text-[0.9rem]",
 };
-
-const enableRotate = `hover:ring-1 hover:ring-accent/20 hover:rotate-[7.5deg]`;
 
 const Badge = memo(
   <T extends ElementType>({
@@ -43,29 +40,33 @@ const Badge = memo(
     current = false,
     disabled = false,
     selected = false,
-    rotate = false,
+    rounded = true,
     ...rest
   }: BadgeProps<T>) => {
     const Component = as || "button";
 
-    const classConfig = useMemo(() => {
-      return [
-        "badge",
-        sizes[size],
-        color,
-        current && "current",
-        selected && "selected",
-        disabled && "disabled",
-        full && "w-full",
-        rotate && enableRotate,
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ");
-    }, [current, selected, full, rotate, className, size, color, disabled]);
+    const classConfig = useMemo(
+      function () {
+        return [
+          "badge",
+          rounded && "rounded-md",
+          sizes[size],
+          full && "w-full",
+          current &&
+            "border-b-2 border-b-accent/50 font-black shadow-inner shadow-accent-dark/60",
+          selected && "bg-amber-400 border-amber-600 font-black shadow-none",
+          disabled &&
+            "cursor-default opacity-70 pointer-events-none shadow-none font-semibold border-none",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ");
+      },
+      [rounded, size, full, current, selected, className, disabled],
+    );
 
     return (
-      <Component disabled={disabled} className={classConfig} {...rest}>
+      <Component className={classConfig} {...rest}>
         {content || children}
       </Component>
     );

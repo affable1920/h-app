@@ -55,23 +55,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/authlogout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Logout */
-        get: operations["logout"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/auth/me/appointments/{app_id}": {
         parameters: {
             query?: never;
@@ -123,7 +106,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/doctors/{id}/book": {
+    "/doctors/{doctor_id}/book": {
         parameters: {
             query?: never;
             header?: never;
@@ -231,17 +214,19 @@ export interface components {
     schemas: {
         /** Appointment */
         Appointment: {
-            /** Id */
+            /**
+             * Id
+             * @description the unique identifier of the record
+             */
             id: string;
-            doctor: components["schemas"]["Doctor"];
             /** Patient Id */
-            patient_id: string;
+            patient_id: string | null;
             slot: components["schemas"]["Slot"];
             /**
-             * Date
+             * Scheduled Date
              * Format: date-time
              */
-            date: string;
+            scheduled_date: string;
             /** Guest Name */
             guest_name: string | null;
             /** Guest Contact */
@@ -263,20 +248,15 @@ export interface components {
         /** BookingRequestData */
         BookingRequestData: {
             /**
-             * Date
+             * Scheduled Date
              * Format: date-time
              */
-            date: string;
-            /**
-             * Patientid
-             * @description the id of a existing user in our db if logged in.
-             */
-            patientId?: string | null;
-            /** Email */
-            email?: string | null;
+            scheduled_date: string;
+            /** Patient Id */
+            patient_id?: string | null;
             /**
              * Name
-             * @description the patient's name, originally None, a string for a non-existing user.
+             * @description the patient's name, originally None, a string specifically for a non-existing user.
              */
             name?: string | null;
             /** Contact */
@@ -286,52 +266,43 @@ export interface components {
              * Format: uuid
              */
             slotId: string;
-            /**
-             * Scheduleid
-             * Format: uuid
-             */
-            scheduleId: string;
-            /** Clinicid */
-            clinicId?: string | null;
+        } & {
+            [key: string]: unknown;
         };
         /** Clinic */
         Clinic: {
             /**
              * Id
-             * Format: uuid
+             * @description the unique identifier of the record
              */
             id: string;
-            /** Head */
-            head: string;
+            /** Name */
+            name: string;
             /**
-             * Email
-             * Format: email
+             * Owner
+             * Format: uuid
              */
-            email: string;
-            /** Username */
-            username: string;
-            /** Owner Name */
-            owner_name: string;
-            /** Address */
-            address: string;
-            /**
-             * Facilities
-             * @default []
-             */
+            owner: string;
+            /** Location */
+            location: string;
+            /** Facilities */
             facilities: string[];
             /** Pincode */
             pincode: number;
-            /** Mobile */
-            mobile: string;
-            /** Whatsapp */
-            whatsapp?: string | null;
-            /** Reviews */
-            reviews?: number | null;
             /**
-             * Rating
+             * Reviews
              * @default 0
              */
+            reviews: number;
+            /** Rating */
             rating: number;
+            /**
+             * Contacts
+             * @default []
+             */
+            contacts: number[];
+        } & {
+            [key: string]: unknown;
         };
         /** CreateUser */
         CreateUser: {
@@ -349,13 +320,13 @@ export interface components {
         Doctor: {
             /**
              * Id
-             * Format: uuid
+             * @description the unique identifier of the record
              */
             id: string;
             /** Fee */
             fee: number;
-            /** Fullname */
-            fullname: string;
+            /** Name */
+            name: string;
             /**
              * Email
              * Format: email
@@ -416,13 +387,13 @@ export interface components {
         DoctorSummary: {
             /**
              * Id
-             * Format: uuid
+             * @description the unique identifier of the record
              */
             id: string;
             /** Fee */
             fee: number;
-            /** Fullname */
-            fullname: string;
+            /** Name */
+            name: string;
             /**
              * Email
              * Format: email
@@ -444,6 +415,8 @@ export interface components {
             verified: boolean;
             /** Primary Specialization */
             primary_specialization: string;
+        } & {
+            [key: string]: unknown;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -469,33 +442,29 @@ export interface components {
         PaginatedResponse_Clinic_: {
             /** Entities */
             entities: components["schemas"]["Clinic"][];
+            /** Count */
+            count: number;
             /** Has Next */
-            has_next: boolean;
+            has_next?: boolean | null;
             /**
              * Has Prev
              * @default false
              */
             has_prev: boolean;
-            /** Total Count */
-            total_count: number;
-            /** Paginated Count */
-            paginated_count: number;
         };
         /** PaginatedResponse[DoctorSummary] */
         PaginatedResponse_DoctorSummary_: {
             /** Entities */
             entities: components["schemas"]["DoctorSummary"][];
+            /** Count */
+            count: number;
             /** Has Next */
-            has_next: boolean;
+            has_next?: boolean | null;
             /**
              * Has Prev
              * @default false
              */
             has_prev: boolean;
-            /** Total Count */
-            total_count: number;
-            /** Paginated Count */
-            paginated_count: number;
         };
         /**
          * ResponseUser
@@ -504,6 +473,11 @@ export interface components {
          *     do with our database
          */
         ResponseUser: {
+            /**
+             * Id
+             * @description the unique identifier of the record
+             */
+            id: string;
             /** Username */
             username: string;
             /**
@@ -511,13 +485,13 @@ export interface components {
              * Format: email
              */
             email: string;
-            /** Id */
-            id: string;
             /**
              * Appointments
              * @default []
              */
             appointments: components["schemas"]["Appointment"][];
+        } & {
+            [key: string]: unknown;
         };
         /**
          * Schedule
@@ -527,20 +501,14 @@ export interface components {
         Schedule: {
             /**
              * Id
-             * Format: uuid
+             * @description the unique identifier of the record
              */
             id: string;
             /** Weekdays */
             weekdays: number[];
-            /**
-             * Is Active
-             * @default true
-             */
+            /** Is Active */
             is_active: boolean;
-            /**
-             * Is Recurring
-             * @default true
-             */
+            /** Is Recurring */
             is_recurring: boolean;
             /**
              * Clinic Id
@@ -556,14 +524,17 @@ export interface components {
             /** Slots */
             slots: components["schemas"]["Slot"][];
             /**
-             * Start
+             * Start Time
              * Format: time
              */
-            start: string;
+            start_time: string;
             /** Hours Available */
             hours_available?: number | null;
-            /** End */
-            end?: string | null;
+            /**
+             * End Time
+             * Format: time
+             */
+            end_time: string;
         } & {
             [key: string]: unknown;
         };
@@ -571,7 +542,7 @@ export interface components {
         Slot: {
             /**
              * Id
-             * Format: uuid
+             * @description the unique identifier of the record
              */
             id: string;
             /** Duration */
@@ -588,6 +559,8 @@ export interface components {
              * @description The slot start time
              */
             begin: string;
+        } & {
+            [key: string]: unknown;
         };
         /**
          * SortOrder
@@ -598,7 +571,7 @@ export interface components {
          * Status
          * @enum {string}
          */
-        Status: "away" | "available" | "in_patient";
+        Status: "away" | "available" | "in_patient" | "unknown";
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -688,9 +661,7 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-            cookie: {
-                access_token: string;
-            };
+            cookie?: never;
         };
         requestBody?: never;
         responses: {
@@ -703,46 +674,6 @@ export interface operations {
                     "application/json": components["schemas"]["ResponseUser"];
                 };
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                token?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
         };
     };
     unbook: {
@@ -752,9 +683,7 @@ export interface operations {
             path: {
                 app_id: string;
             };
-            cookie: {
-                access_token: string;
-            };
+            cookie?: never;
         };
         requestBody?: never;
         responses: {
@@ -789,7 +718,7 @@ export interface operations {
                 minRating?: number | null;
                 page?: number;
                 max?: number;
-                sortBy?: string | null;
+                sortBy?: ("rating" | "reviews" | "experience" | "fee" | "name") | null;
                 sortOrder?: components["schemas"]["SortOrder"] | null;
             };
             header?: never;
@@ -854,7 +783,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                doctor_id: string;
             };
             cookie?: never;
         };

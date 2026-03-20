@@ -1,5 +1,5 @@
 import type { AxiosError, AxiosResponse } from "axios";
-import { MONTHS } from "./constants";
+import { MONTHS } from "./dataConstants";
 import { DateTime } from "luxon";
 
 export const paginate = <T>(

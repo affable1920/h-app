@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from "react";
 import drImg from "@/assets/doctor.jpg";
 
 import rtc from "@/services/RTCManager";
-import Button from "@components/common/Button";
+import Button from "@/components/ui/Button";
 import { Video, AudioLines, MessageSquareText } from "lucide-react";
 import { useGetById } from "@/hooks/doctors";
 import { useLocation } from "react-router-dom";
@@ -73,7 +73,7 @@ const Consultation = () => {
           />
         </div>
         <div>
-          <h2 className="capitalize text-sm">Dr. {dr?.fullname}</h2>
+          <h2 className="capitalize text-sm">Dr. {dr?.name}</h2>
         </div>
 
         <div>
@@ -81,8 +81,8 @@ const Consultation = () => {
             <h2>on call</h2>
           ) : (
             <div className="flex items-center gap-4">
-              {icons.map((i, id) => (
-                <Button key={id} onClick={i.onClick} variant="ghost">
+              {icons.map((i) => (
+                <Button key={i.icon.name} onClick={i.onClick} variant="ghost">
                   <i.icon />
                 </Button>
               ))}

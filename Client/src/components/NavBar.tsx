@@ -2,21 +2,42 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 
-import Button from "@components/common/Button";
-import { ArrowRight, Menu, Minimize2, Search, Stethoscope } from "lucide-react";
-import useAuthStore from "@/stores/authStore";
+import Button from "@/components/ui/Button";
+import {
+  ArrowRight,
+  Home,
+  LogOut,
+  Mail,
+  Menu,
+  Minimize2,
+  Search,
+  Settings,
+  Stethoscope,
+  User,
+  VenetianMask,
+} from "lucide-react";
+import useAuthStore, { logout } from "@/stores/authStore";
+import type { MobileNavItem } from "@/types/utils";
+import MobileNavigationItem from "./MobileNavigationItem";
 
-const navLinks = [
-  { label: "Home", route: "/" },
-  { label: "Find", route: "/" },
-  { label: "Ask", route: "/chat" },
+const navLinks: Array<MobileNavItem> = [
+  { label: "Home", icon: Home },
+  { label: "Find", icon: Search },
+  { label: "Ask", icon: VenetianMask },
+  {
+    label: "profile",
+    icon: User,
+    children: [
+      { label: "settings", icon: Settings },
+      { label: "messages", icon: Mail },
+      { label: "logout", icon: LogOut, onClick: logout },
+    ],
+  },
 ];
 
 const NavBar = () => {
   const { pathname = "" } = useLocation();
-
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showMore, setShowMore] = useState(false);
 
   const user = useAuthStore((s) => s.user);
 
@@ -60,21 +81,14 @@ const NavBar = () => {
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center font-semibold text-sm gap-12">
           {navLinks.map((navItem) => (
-            <NavLink key={navItem.label} to={navItem.route}>
-              {navItem.label}
+            <NavLink key={navItem.label} to={`/${navItem.label}`}>
+              <h1 className="capitalize">{navItem.label}</h1>
             </NavLink>
           ))}
 
-          <Button
-            endIcon={<ArrowRight />}
-            className="w-full"
-            color="accent"
-            style={{ paddingBlock: "6px" }}
-          >
+          <Button endIcon={<ArrowRight />} className="w-full" color="secondary">
             {user ? (
-              <Link to="/" style={{ all: "unset" }}>
-                Get started
-              </Link>
+              <Link to="/">Get started</Link>
             ) : (
               <Link to="/auth">sign in</Link>
             )}
@@ -87,11 +101,7 @@ const NavBar = () => {
             <Search />
           </Button>
 
-          <Button
-            variant="ghost"
-            className=""
-            onClick={() => setShowMobileMenu((p) => !p)}
-          >
+          <Button variant="ghost" onClick={() => setShowMobileMenu((p) => !p)}>
             {showMobileMenu ? <Minimize2 /> : <Menu />}
           </Button>
         </div>
@@ -100,78 +110,35 @@ const NavBar = () => {
         <AnimatePresence>
           {showMobileMenu && (
             <motion.nav
-              style={{ willChange: "contents" }}
               ref={ref}
               className="md:hidden absolute top-full left-0 w-full bg-white 
               flex flex-col gap-6 shadow-lg p-8"
               initial={{
-                y: -20,
+                y: -30,
                 opacity: 0,
               }}
               animate={{
                 y: 0,
                 opacity: 1,
               }}
-              exit={{ y: -20, opacity: 0 }}
+              exit={{
+                y: -20,
+                opacity: 0,
+                transition: { type: "tween", ease: "backOut" },
+              }}
             >
               {navLinks.map((navItem) => (
-                <NavLink
-                  key={navItem.label}
-                  to={navItem.route}
-                  className="font-semibold"
-                >
-                  {navItem.label}
-                </NavLink>
+                <MobileNavigationItem {...navItem} />
               ))}
 
               <Button
                 endIcon={<ArrowRight />}
-                variant="ghost"
-                className={`self-start w-full justify-between!`}
-                onClick={() => setShowMore((p) => !p)}
-              >
-                More
-              </Button>
-
-              <AnimatePresence mode="wait">
-                {showMore && (
-                  <motion.div
-                    initial={{
-                      x: -20,
-                      opacity: 0,
-                    }}
-                    animate={{
-                      x: 0,
-                      opacity: 1,
-                      transition: {
-                        duration: 0.22,
-                        delayChildren: 0.22,
-                        ease: "easeIn",
-                        staggerChildren: 0.1,
-                      },
-                    }}
-                    exit={{ x: -20, opacity: 0 }}
-                    className="flex flex-col gap-4 [&>a]:capitalize"
-                  >
-                    {["profile", "settings", "about us", "privacy policy"].map(
-                      (item) => (
-                        <NavLink to={`/auth/me`}>{item}</NavLink>
-                      ),
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <Button
-                endIcon={<ArrowRight />}
                 className="w-full"
-                color="accent"
+                color="secondary"
                 size="lg"
               >
                 {user ? (
-                  <Link to="/" style={{ all: "unset" }}>
-                    Get started
-                  </Link>
+                  <Link to="/">Get started</Link>
                 ) : (
                   <Link to="/auth">sign in</Link>
                 )}

@@ -1,46 +1,21 @@
 import React, { memo, useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion, type Variant } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 
 import { ArrowRight, MapPinCheckInside } from "lucide-react";
 
-import Button from "./common/Button";
+import Button from "./ui/Button";
 import { ClockArrowDown } from "lucide-react";
 
-import Badge from "./common/Badge";
-import { Link } from "react-router-dom";
+import Badge from "./ui/Badge";
 
 import { getWeekday } from "@/utils/calendarUtils";
-import type { Doctor, Clinic, Schedule } from "@/types/http";
+import type { Doctor, Clinic, Schedule, Slot } from "@/types/http";
 
+import { DateTime } from "luxon";
 import useModalStore from "@/stores/modalStore";
-import { useSchedule } from "./providers/ScheduleProvider";
-import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
 
-const containerVariants: Record<string, Variant> = {
-  initial: { opacity: 0, y: -40 },
-  animate: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.25,
-      ease: "easeOut",
-      duration: 0.3,
-    },
-  },
-  exit: {
-    opacity: 0,
-  },
-};
-
-const articleVariants: Record<string, Variant> = {
-  initial: { opacity: 0, x: -30 },
-  animate: {
-    opacity: 1,
-    x: 0,
-  },
-  exit: { opacity: 0, x: -30 },
-};
+import { ClinicViewVariants } from "@/utils/uiConstants";
 
 interface ClinicsViewProps {
   doctor: Doctor;
@@ -48,81 +23,116 @@ interface ClinicsViewProps {
   onShow: (show: boolean) => void;
 }
 
+const EMPTY = Object.create(null);
+
+type State = {
+  slot?: Slot;
+  clinic?: Clinic;
+  schedule: Schedule | null;
+  weekday?: number;
+};
+
 const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
   const { doctor, onShow, showClinicsView } = props;
   const { schedules } = doctor;
 
-  const {
-    state: scheduleState,
-    actions: { clearField, setSlot, setDay, setClinic, setSchedule },
-  } = useSchedule();
-
+  const [clearDateField, setClearDateField] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [scheduleDetails, setScheduleDetails] = useState<State>({
+    schedule: null,
+  });
+
+  const openModal = useModalStore((s) => s.openModal);
+
+  function updateDetails<K extends keyof State>(
+    this: { schedule: Schedule },
+    key: K,
+    val: State[K],
+  ) {
+    function updater(this: { schedule: Schedule }, prev: State) {
+      return {
+        ...prev,
+        schedule: this.schedule,
+        [key]: prev[key] !== val && val,
+      };
+    }
+
+    setScheduleDetails(updater.bind(this));
+  }
+
+  useEffect(
+    function () {
+      if (clearDateField) {
+        setSearchParams(function (prev) {
+          prev.delete("date");
+          return prev;
+        });
+      }
+
+      setClearDateField(false);
+    },
+    [clearDateField],
+  );
+
   const isExpanded = useCallback(
-    (id: string) => expandedIds.has(id),
+    function (id: string) {
+      return expandedIds.has(id);
+    },
     [expandedIds],
   );
 
-  useEffect(() => {
-    // Auto-expand schedules matching selected date
-    if (scheduleState.date) {
-      const wkday = scheduleState.date.weekday;
+  const paramsDate = searchParams.get("date") ?? "";
 
-      const matchingIds = schedules
-        .filter((s) => s.weekdays.includes(wkday))
-        .map((s) => s.id!);
+  useEffect(
+    function () {
+      // Auto-expand schedules matching selected date
+      if (paramsDate) {
+        const date = DateTime.fromISO(paramsDate);
+        const wkday = date.weekday;
 
-      setExpandedIds(new Set(matchingIds));
-      onShow(true);
-    }
-  }, [schedules, onShow, scheduleState.date]);
+        const matchingIds = schedules
+          .filter((s) => s.weekdays.includes(wkday))
+          .map((s) => s.id!);
 
-  const toggleExpansion = useCallback((id: string) => {
+        onShow(true);
+        setExpandedIds(new Set(matchingIds));
+      }
+    },
+    [paramsDate],
+  );
+
+  const toggleExpansion = useCallback(function (id: string) {
     setExpandedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
       } else {
         next.add(id);
-        if (!expandedIds.has(id)) {
-          clearField("date");
-        }
+        setClearDateField(true);
       }
       return next;
     });
   }, []);
 
-  async function handleBook(schedule: Schedule) {
-    if (!scheduleState.date) {
-      toast.info("Missing fields.", {
-        description() {
-          return "Please select a date for your appointment !";
-        },
-      });
-
-      return;
-    }
-    setSchedule(schedule);
-    useModalStore
-      .getState()
-      .openModal("schedule", { dr: doctor, viewOverlay: true });
+  function isWkdaySelected(wkday: number) {
+    return (
+      scheduleDetails?.weekday === wkday ||
+      DateTime.fromISO(paramsDate)?.weekday === wkday
+    );
   }
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {showClinicsView && (
         <motion.section
           key={`${doctor.id}-schedule-view`}
-          variants={containerVariants}
-          transition={{
-            duration: 0.25,
-            ease: "easeOut",
-          }}
+          variants={ClinicViewVariants.containerVariants}
           initial="initial"
           animate="animate"
           exit="exit"
-          className="flex flex-col gap-12 text-sm shadow-lg rounded-xl border-2 border-slate-300/20 p-4 font-semibold"
+          className="flex flex-1 flex-col gap-12 text-sm shadow-lg rounded-xl border-2 border-slate-300/20 p-4 font-semibold"
         >
           {schedules.map((schedule) => {
             const {
@@ -130,24 +140,24 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
               weekdays = [],
               slots = [],
               clinic = {} as Clinic,
-            } = (schedule || {}) as Schedule & { clinic?: Clinic };
+            } = schedule;
+
+            const updater = updateDetails.bind({ schedule });
 
             return (
               <motion.article
                 key={id}
-                variants={articleVariants}
+                variants={ClinicViewVariants.articleVariants}
                 className="flex flex-col gap-6"
               >
                 <header className="flex justify-between items-center">
                   <div className="flex flex-col gap-0.5">
-                    <Link className="flex items-center gap-2 card-h2" to="/">
-                      {clinic?.head}
-                    </Link>
+                    {clinic?.name}
 
-                    <Link to="/" className={`flex items-center gap-1 text-sm`}>
-                      {clinic?.address}
-                      <MapPinCheckInside size={8} />
-                    </Link>
+                    <div className="flex items-center gap-1">
+                      {clinic?.location}
+                      <MapPinCheckInside size={10} opacity={0.5} />
+                    </div>
                   </div>
 
                   <motion.button
@@ -155,7 +165,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                     style={{
                       cursor: "pointer",
                     }}
-                    onClick={() => toggleExpansion(id!)}
+                    onClick={toggleExpansion.bind(EMPTY, id!)}
                     animate={{
                       rotate: isExpanded(id!) ? 90 : 0,
                     }}
@@ -168,35 +178,36 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                   {isExpanded(id!) && (
                     <motion.div
                       key={id}
-                      variants={articleVariants}
+                      className="flex flex-col gap-6"
+                      variants={ClinicViewVariants.innerContainerVariants}
                       initial="initial"
                       animate="animate"
-                      exit="exit"
-                      className="flex flex-col gap-6"
-                      transition={{
-                        duration: 0.2,
-                        ease: "easeOut",
-                        opacity: { duration: 0.1 },
-                      }}
+                      exit="initial"
                     >
-                      <article className="flex items-center gap-2">
-                        {weekdays.map((wkday) => (
-                          <Badge
-                            full={false}
-                            key={wkday}
-                            className="px-4"
-                            onClick={() => {
-                              setDay(wkday);
-                              if (scheduleState?.date?.weekday !== wkday) {
-                                clearField("date");
-                              }
-                            }}
-                            selected={scheduleState.day === wkday}
-                          >
-                            {getWeekday(wkday).slice(0, 3)}
-                          </Badge>
-                        ))}
-                      </article>
+                      <div className="flex items-center gap-2">
+                        {[...new Set(weekdays)].map((wkday) => {
+                          return (
+                            <motion.button
+                              key={wkday}
+                              variants={ClinicViewVariants.badgeVariants}
+                            >
+                              <Badge
+                                rounded={false}
+                                as={"span"}
+                                full={false}
+                                className="px-4"
+                                onClick={function () {
+                                  updater("weekday", wkday);
+                                }}
+                                selected={isWkdaySelected(wkday)}
+                              >
+                                {getWeekday(wkday).slice(0, 3)}
+                              </Badge>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+
                       <div className="flex flex-col gap-4">
                         <div className="flex flex-wrap gap-4 justify-center items-center">
                           {slots.every((slot) => slot.booked) ? (
@@ -204,33 +215,42 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                               All slots booked !
                             </p>
                           ) : (
-                            slots?.map((slot) => {
-                              return (
-                                <Badge
-                                  as="button"
-                                  full={false}
-                                  key={slot.id}
-                                  className="grow"
-                                  content={slot.begin}
-                                  disabled={slot.booked}
-                                  onClick={() => {
-                                    setSlot(slot);
-                                    setClinic(clinic);
-                                  }}
-                                  selected={slot.id === scheduleState.slot?.id}
-                                />
-                              );
-                            })
+                            slots
+                              ?.sort((slot) => (slot.booked ? 1 : -1))
+                              .map((slot) => {
+                                return (
+                                  <Badge
+                                    rounded={false}
+                                    as="button"
+                                    full={false}
+                                    key={slot.id}
+                                    className="flex-1"
+                                    content={slot.begin}
+                                    onClick={function () {
+                                      updater("slot", slot);
+                                    }}
+                                    disabled={slot.booked}
+                                    selected={
+                                      slot.id === scheduleDetails.slot?.id
+                                    }
+                                  />
+                                );
+                              })
                           )}
                         </div>
 
                         {slots.some(
                           (slot) =>
-                            slot.id === scheduleState.slot?.id && !slot.booked,
+                            slot.id === scheduleDetails.slot?.id &&
+                            !slot.booked,
                         ) && (
                           <Button
+                            color="secondary"
                             className="self-end"
-                            onClick={() => handleBook(schedule)}
+                            onClick={openModal.bind(EMPTY, "schedule", {
+                              dr: doctor,
+                              viewOverlay: true,
+                            })}
                           >
                             book slot
                             <ClockArrowDown />

@@ -1,12 +1,12 @@
-import { memo, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 import { DateTime } from "luxon";
 import CalendarDay from "./CalendarDay";
 
-import { WEEKDAYS } from "@/utils/constants";
+import { WEEKDAYS } from "@/utils/dataConstants";
 import type { Schedule } from "@/types/http";
 import { createCalendarData } from "@/utils/calendarUtils";
-import { useSchedule } from "./providers/ScheduleProvider";
+import { useSearchParams } from "react-router-dom";
 
 interface CalendarBodyProps {
   monthInView: DateTime;
@@ -14,18 +14,35 @@ interface CalendarBodyProps {
   direction?: "right" | "left";
 }
 
-const today = DateTime.local();
-
 function isDateToday(date: DateTime) {
-  return date.startOf("day").equals(today.startOf("day"));
+  return date.startOf("day").equals(DateTime.local().startOf("day"));
+}
+
+function isInPast(dt: DateTime) {
+  return dt.toLocal().startOf("day") < DateTime.local().startOf("day");
 }
 
 function areDatesEqual(dtA: DateTime, dtB: DateTime) {
-  return dtA.startOf("day").equals(dtB.startOf("day"));
+  return dtA.hasSame(dtB, "day");
 }
 
-const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
-  const { state } = useSchedule();
+const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const dtParam = DateTime.fromISO(searchParams.get("date") ?? "");
+
+  function updateDate(dt: DateTime<true>) {
+    setSearchParams(function (prev) {
+      const next = new URLSearchParams(prev);
+
+      if (areDatesEqual(dtParam, dt)) {
+        next.delete("date");
+        return next;
+      }
+
+      next.set("date", dt.toISO());
+      return next;
+    });
+  }
 
   const calendar = useMemo(
     function () {
@@ -47,22 +64,12 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
     [schedules],
   );
 
-  const isDateGone = useCallback(function isDateGone(date: DateTime) {
-    const isFromPrevYear = date.year < today.year;
-    const isFromPrevMonth = date.month < today.month;
-    const hasDayPassed = date.day < today.day;
-
-    return (
-      isFromPrevYear ||
-      isFromPrevMonth ||
-      (date.month === today.month && hasDayPassed)
-    );
-  }, []);
-
   function isWkdayToday(day: (typeof WEEKDAYS)[number]) {
+    const currDt = DateTime.local();
+
     return (
-      day.toLowerCase().trim() === today.weekdayLong?.toLowerCase().trim() &&
-      monthInView.month === today.month
+      monthInView.month === currDt.month &&
+      day.toLowerCase().trim() === currDt.weekdayLong.toLowerCase().trim()
     );
   }
 
@@ -86,18 +93,17 @@ const CalendarBody = memo(({ schedules, monthInView }: CalendarBodyProps) => {
         return (
           <CalendarDay
             date={date}
+            onClick={updateDate.bind(null, date)}
             current={isDateToday(date)}
-            key={`${date.day}-${date.month}-${date.year}`}
-            selected={state.date ? areDatesEqual(date, state.date) : false}
-            disabled={
-              isDateGone(date) || !allScheduleDays.includes(date.weekday)
-            }
+            key={date.toISO()}
+            selected={areDatesEqual(date, dtParam)}
+            disabled={isInPast(date) || !allScheduleDays.includes(date.weekday)}
           />
         );
       })}
     </div>
   );
-});
+};
 
 export default CalendarBody;
 CalendarBody.displayName = "CalendarBody";

@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 
 import Spinner from "../Spinner";
-import { getClassConfig } from "./ButtonStylesConfig";
+import { getClassConfig } from "../../utils/buttonStyleUtil";
 import type { ButtonProps } from "@/types/button";
 
 const Button = memo((props: ButtonProps) => {

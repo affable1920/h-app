@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 
 import { toast } from "sonner";
-import Input from "@components/common/Input";
-import Button from "@components/common/Button";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 
 import { useSignup } from "@/hooks/auth";
 import { useForm } from "react-hook-form";
@@ -22,7 +22,7 @@ function Register() {
     const validation = UserSchema.parse(user);
 
     await register.mutateAsync(validation, {
-      successFn() {
+      onSuccess() {
         navigate("/");
         toast.info("Successfully registered!");
       },

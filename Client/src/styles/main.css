@@ -1,3 +1,43 @@
+@import "tailwindcss";
+@import "./components.css";
+
+@source "../../src/";
+@source not "../../node_modules";
+
+@theme {
+  --color-foreground: #ffffff;
+
+  /* Primary: Black-Gray */
+  --color-primary: #202020;
+  --color-primary-dark: #141414;
+  --color-primary-light: #343434;
+
+  /* Secondary - Gray */
+  --color-secondary: oklch(44.6% 0.03 256.802);
+  --color-secondary-dark: oklch(37.3% 0.034 259.733);
+  --color-secondary-light: oklch(55.1% 0.027 264.364);
+
+  /* Accent - blue */
+  --color-accent: oklch(62.3% 0.214 259.815);
+  --color-accent-dark: oklch(54.6% 0.245 262.881);
+  --color-accent-light: oklch(70.7% 0.165 254.624);
+
+  --text-xs: 0.6rem;
+  --text-sm: 0.7rem;
+  --text-base: 0.8rem;
+  --text-md: 1rem;
+  --text-lg: 1.2rem;
+  --text-xl: 1.4rem;
+
+  --animate-spin: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 /* Default DOM tag styles */
 @layer base {
   *,
@@ -28,7 +68,6 @@
   h4,
   h5,
   h6 {
-    line-clamp: 1;
     font-weight: bold;
     line-height: 1.2;
   }
@@ -37,11 +76,6 @@
   input[type="number"]::-webkit-outer-spin-button {
     margin: 0;
     -webkit-appearance: none;
-  }
-
-  input[aria-invalid="true"] {
-    border: var(--spacing * 1);
-    border-color: var(--color-error);
   }
 
   [data-tooltip] {
@@ -57,9 +91,9 @@
     bottom: 100%; /* Position above the element */
     visibility: hidden;
     pointer-events: none;
-    background: var(--color-gray-800);
+    background: var(--color-secondary);
     font-size: var(--text-xs);
-    border-radius: var(--rounded-md);
+    border-radius: var(--radius-md);
     transition: opacity 0.2s ease-in-out;
   }
 
@@ -70,4 +104,10 @@
     visibility: visible;
     pointer-events: auto;
   }
+}
+
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  max-width: var(--breakpoint-xl);
 }

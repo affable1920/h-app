@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
-import { DAYS_OF_WEEK } from "./constants";
-import { WEEKDAYS } from "./constants";
+import { DAYS_OF_WEEK } from "./dataConstants";
+import { WEEKDAYS } from "./dataConstants";
 
 function getPreviousMonthDays(date: DateTime): DateTime[] {
   const countPrevMonth = DateTime.local().set({
@@ -22,12 +22,12 @@ function getPreviousMonthDays(date: DateTime): DateTime[] {
 
 function getNextMonthDays(
   currLength: number,
-  currMonthIndex: number
+  currMonthIndex: number,
 ): DateTime[] {
   const daysFromNextMonth = Math.abs((currLength % 7) - 7);
 
   return Array.from({ length: daysFromNextMonth }, (_, i) =>
-    DateTime.local().set({ month: currMonthIndex + 1, day: i + 1 })
+    DateTime.local().set({ month: currMonthIndex + 1, day: i + 1 }),
   );
 }
 
@@ -38,7 +38,7 @@ export function createCalendarData(date: DateTime): DateTime[] {
   const calendar = [
     ...prevMonthDays,
     ...Array.from({ length: countCurrMonth ?? 0 }, (_, i) => i + 1).map((day) =>
-      date.set({ day })
+      date.set({ day }),
     ),
   ];
 

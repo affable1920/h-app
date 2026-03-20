@@ -1,4 +1,4 @@
-import { type components } from "./api";
+import { type components, type paths } from "./api";
 
 export type UserLogin = components["schemas"]["LoginUser"];
 export type UserCreate = components["schemas"]["CreateUser"];
@@ -8,7 +8,7 @@ export type BookingRequestData = components["schemas"]["BookingRequestData"];
 export type Appointment = components["schemas"]["Appointment"];
 
 export type GetAllDrResponse =
-  components["schemas"]["PaginatedResponse_DoctorSummary_"];
+  paths["/doctors"]["get"]["responses"]["200"]["content"]["application/json"];
 export type GetByIdResponse = components["schemas"]["Doctor"];
 
 export type ValidationError = components["schemas"]["HTTPValidationError"];

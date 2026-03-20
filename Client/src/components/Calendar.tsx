@@ -1,31 +1,24 @@
-import { memo, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { DateTime } from "luxon";
 import CalendarBody from "./CalendarBody";
-import { motion, type Variant } from "motion/react";
-import { Info, ArrowRight, ArrowLeft } from "lucide-react";
-import Button from "@components/common/Button";
+import { ArrowRight, ArrowLeft } from "lucide-react";
+import Button from "@/components/ui/Button";
 import type { Schedule } from "@/types/http";
+import { motion } from "motion/react";
 
 const currDate = DateTime.local();
 type Direction = "left" | "right";
 
-const variants: Record<string, Variant> = {
-  hidden: {
-    x: 100,
-    opacity: 0,
-  },
-  visible: {
-    x: 0,
-    opacity: 1,
-  },
-};
-
-const Calendar = memo(({ schedules }: { schedules: Schedule[] }) => {
-  const [showInfo, setShowInfo] = useState(false);
+const Calendar = ({
+  schedules,
+}: {
+  schedules: Schedule[];
+  shouldMove: boolean;
+}) => {
   const [monthInView, setMonthInView] = useState<DateTime>(DateTime.local());
 
   const handleMonthChange = useCallback(
-    (dir: Direction) => {
+    function (dir: Direction) {
       const currMonth = monthInView.month;
 
       const max = 12,
@@ -33,8 +26,8 @@ const Calendar = memo(({ schedules }: { schedules: Schedule[] }) => {
 
       let newMonth = dir === "right" ? currMonth + 1 : currMonth - 1;
 
-      if (newMonth < 1) return;
-      if (newMonth === max) newMonth = min;
+      if (newMonth < min) return;
+      if (newMonth > max) newMonth = min;
 
       setMonthInView((p) => p.set({ month: newMonth }));
     },
@@ -42,7 +35,10 @@ const Calendar = memo(({ schedules }: { schedules: Schedule[] }) => {
   );
 
   return (
-    <section className="relative shadow-xl shadow-slate-300/40 rounded-xl border border-slate-400/20">
+    <motion.section
+      layout
+      className="relative shadow-lg shadow-slate-300/40 rounded-xl border-2 border-slate-300/20 w-full max-w-[440px]"
+    >
       <div className="flex flex-col gap-8 p-4 py-6">
         <header className="flex items-center justify-between px-2">
           <h2 className="text-lg uppercase font-black">
@@ -71,8 +67,8 @@ const Calendar = memo(({ schedules }: { schedules: Schedule[] }) => {
 
         <CalendarBody schedules={schedules} monthInView={monthInView} />
       </div>
-    </section>
+    </motion.section>
   );
-});
+};
 
 export default Calendar;

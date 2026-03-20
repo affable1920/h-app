@@ -1,4 +1,4 @@
-import Button from "../common/Button";
+import Button from "../ui/Button";
 import { Check, X } from "lucide-react";
 import useModalStore from "@/stores/modalStore";
 

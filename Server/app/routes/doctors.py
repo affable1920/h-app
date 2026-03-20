@@ -1,8 +1,7 @@
 from enum import Enum
 from uuid import UUID
-from fastapi.exceptions import ResponseValidationError
 from sqlalchemy.orm import Session
-from fastapi import Depends, APIRouter, HTTPException, status
+from fastapi import Depends, APIRouter, HTTPException
 
 from app.database.entry import get_db
 from app.services.dr_service import DoctorNotFoundException, DoctorService
@@ -24,9 +23,14 @@ async def get_doctors(
     pagination_params: PaginationParams = Depends(),
     db: Session = Depends(get_db),
 ):
+    service = DoctorService(db)
+
     try:
-        service = DoctorService(db)
-        return service.get_all(pagination=pagination_params, filters=filters)
+        response = service.get_all(
+            pagination=pagination_params, filters=filters)
+
+        response_model = PaginatedResponse.model_validate(response)
+        return response_model
 
     except Exception as e:
         print(e)
@@ -42,11 +46,14 @@ async def get_doctors(
 
 @router.get("/{id}", response_model=Doctor)
 async def get_doctor(id: UUID, db: Session = Depends(get_db)):
-    try:
-        return DoctorService(db).get_by_id(id=id)
+    service = DoctorService(db=db)
 
-    except DoctorNotFoundException as e:
-        raise HTTPException(404, detail={"msg": str(e), "type": "not found"})
+    try:
+        return service.get_by_id(id=id)
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail={
+                            "msg": e.__str__(), "type": "Invalid doctor id"})
 
 
 @router.post("/{doctor_id}/book", response_model=Appointment)
@@ -66,17 +73,16 @@ async def book_schedule(
         print(e)
         db.rollback()
         raise HTTPException(
-            400, detail={"msg": str(e), "type": "bad request", "detail": str(e)}
+            status_code=400, detail={"msg": e.__str__(), "type": "Unavailable slot request."}
         )
 
     except Exception as e:
         print(e)
         db.rollback()
         raise HTTPException(
-            500,
+            status_code=500,
             detail={
-                "msg": "Unexpected server error",
+                "msg": e.__str__(),
                 "type": "unexpected error",
-                "detail": str(e),
             },
         )

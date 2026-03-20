@@ -1,9 +1,9 @@
 import type { ElementType } from "react";
-import type { Status, Doctor } from "@/types/http";
+import type { Status, DoctorSummary } from "@/types/http";
 import { CalendarFold, PhoneOutgoing, Waypoints } from "lucide-react";
 
 type DrActionName = "consult" | "schedule" | "message";
-type ActionHandler = (doctor: Doctor, ...args: any[]) => void;
+type ActionHandler = (doctor: DoctorSummary, ...args: any[]) => void;
 type ActionConfig = DrCTA & { handler: ActionHandler };
 
 type DrCTA = {
@@ -41,7 +41,7 @@ export default function getActions(
   status: Status,
   handlers: Record<DrActionName, ActionHandler>,
 ): ActionConfig[] {
-  const config: Record<Exclude<Status, "unknown">, ActionConfig[]> = {
+  const config: Record<Status, ActionConfig[]> = {
     available: [
       { ...callAction, isPrimary: true, handler: handlers.consult },
       { ...scheduleAction, handler: handlers.schedule },
@@ -56,6 +56,8 @@ export default function getActions(
       { ...messageAction, isPrimary: true, handler: handlers.message },
       { ...scheduleAction, handler: handlers.schedule },
     ],
+
+    unknown: [],
   };
 
   return config[status];

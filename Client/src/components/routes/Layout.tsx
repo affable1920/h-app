@@ -4,7 +4,6 @@ import NavBar from "../NavBar";
 import Modal from "../modal/Modal";
 import useAuthStore from "@/stores/authStore";
 import signalingClient from "@/services/SignalingClient";
-import { ScheduleProvider } from "@components/providers/ScheduleProvider";
 
 const Layout = () => {
   const jwt = useAuthStore((s) => s.token);
@@ -20,7 +19,7 @@ const Layout = () => {
   }, [jwt]);
 
   return (
-    <ScheduleProvider>
+    <>
       <Modal />
       <NavBar />
       <main className="p-8 py-6">
@@ -28,7 +27,7 @@ const Layout = () => {
           <Outlet />
         </div>
       </main>
-    </ScheduleProvider>
+    </>
   );
 };
 

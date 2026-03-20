@@ -1,9 +1,9 @@
 import type { DoctorSummary } from "@/types/http";
-import DirectoryFilter from "@components/filters/DirectoryFilter";
+import DirectoryFilter from "@/components/ui/DirectoryFilter";
 import ScheduleModal from "../ScheduleModal";
 import { motion } from "motion/react";
 import { Heart, LogOut, Bell, User } from "lucide-react";
-import Button from "../common/Button";
+import Button from "../ui/Button";
 import { Link, useNavigate } from "react-router-dom";
 import useModalStore from "@/stores/modalStore";
 import { removeModal } from "@/stores/modalStore";
@@ -115,9 +115,9 @@ const MODALS: Record<string, React.ElementType> = {
         </motion.ul>
         {user ? (
           <ul className="flex items-center gap-4">
-            {icons.map(({ icon: Icon, onClick, text = "" }, i) => (
+            {icons.map(({ icon: Icon, onClick, text = "" }) => (
               <Button
-                key={i}
+                key={text || Icon.name}
                 variant="ghost"
                 onClick={onClick}
                 data-tooltip={text}

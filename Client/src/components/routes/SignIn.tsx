@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 
-import Input from "@components/common/Input";
-import Button from "@components/common/Button";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 
 import { toast } from "sonner";
 
@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type LoginUser, LoginSchema } from "@/schemas";
-import Text from "../common/Label";
+import Text from "../ui/Label";
 
 function SignIn() {
   const signin = useSignin();

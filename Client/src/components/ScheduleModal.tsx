@@ -1,25 +1,35 @@
-import Input from "@components/common/Input";
-import Button from "@components/common/Button";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 
-import type { Doctor } from "@/types/http";
+import type { Clinic, Doctor, Slot } from "@/types/http";
 import { useBookingMutation, useUnbookingMutation } from "@/hooks/bookings";
 import { toast } from "sonner";
 import useModalStore from "@stores/modalStore";
 
 import useAuthStore from "@stores/authStore";
 import { Pencil, MapPinCheckInside } from "lucide-react";
-import { useSchedule } from "./providers/ScheduleProvider";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { type PatientDetails, PatientSchema } from "@/schemas";
+import { useSearchParams } from "react-router-dom";
+import { DateTime } from "luxon";
 
-function ScheduleModal() {
+function ScheduleModal({
+  dr,
+  slot,
+  clinic,
+}: {
+  dr: Doctor;
+  slot: Slot;
+  clinic: Clinic;
+}) {
   const user = useAuthStore((s) => s.user);
-  const { state: scheduleState } = useSchedule();
 
-  const { date, clinic, slot, schedule } = scheduleState;
-  const dateString = date?.toFormat("dd LLL yyyy");
+  const [searchParams] = useSearchParams();
+  const dtParams = DateTime.fromISO(searchParams.get("date") ?? "");
+
+  const dateString = dtParams.toFormat("dd LLL yyyy");
 
   const form = useForm<PatientDetails>({
     resolver: zodResolver(PatientSchema),
@@ -30,9 +40,6 @@ function ScheduleModal() {
   } = form;
 
   const closeModal = useModalStore((s) => s.closeModal);
-  const { dr } = useModalStore((s) => s.modalProps) as {
-    dr: Doctor;
-  };
 
   const { mutateAsync: book, isPending } = useBookingMutation(dr.id);
   const { mutate: unBook } = useUnbookingMutation();
@@ -40,31 +47,30 @@ function ScheduleModal() {
   async function confirmSlot(details: PatientDetails) {
     const validated = PatientSchema.parse(details);
 
-    if (!slot?.id || !date || !schedule?.id) {
+    if (!(slot && dtParams)) {
       return;
     }
 
-    let data: any = {
+    const baseDetails = {
       slotId: slot.id,
-      clinicId: clinic?.id,
-      date: date.toISO(),
-      scheduleId: schedule.id,
+      scheduled_date: dtParams.toISO()!,
     };
 
-    if (user?.id) {
-      data = { ...data, patientId: user.id };
-    } else {
-      data = { ...data, ...validated };
-    }
+    const appointment = user?.id
+      ? { patientId: user.id, ...baseDetails }
+      : { ...baseDetails, ...validated };
 
-    const createdAppointment = await book(data, {
-      successFn() {
+    const createdAppointment = await book(appointment, {
+      onSuccess() {
         toast.info("Slot booked successfully !", {
           action: {
             label: "Undo",
 
             onClick() {
-              unBook({ appointmentId: createdAppointment.id, doctorId: dr.id });
+              unBook({
+                appointmentId: createdAppointment.id,
+                doctorId: dr.id,
+              });
             },
           },
 
@@ -87,17 +93,17 @@ function ScheduleModal() {
   return (
     <section className="flex flex-col text-sm justify-end gap-8 p-4">
       <div className="flex flex-col bg-primary-light/90 gap-1 text-white p-2 rounded-sm min-h-fit">
-        <h2 className="card-h2">{dr.fullname}</h2>
-        <span className="inline-flex flex-col items-end-safe">
-          <h2 className="capitalize">{date?.weekdayShort}</h2>
-          {dateString && <h2 className="card-h2">{dateString}</h2>}
+        <h2>Dr. {dr.name}</h2>
+        <span className="inline-flex flex-col items-end-safe gap-0.5">
+          <h2 className="capitalize">{dtParams.weekdayShort}</h2>
+          {dateString && <h2>{dateString}</h2>}
         </span>
       </div>
 
       <div className="flex flex-col gap-2">
         {clinic && (
           <div className="flex items-center justify-between">
-            <h2 className="line-clamp-1">{clinic.head}</h2>
+            <h2 className="line-clamp-1">{clinic.name}</h2>
 
             <Button variant="ghost" data-tooltip="Get exact location !">
               <MapPinCheckInside />
@@ -107,7 +113,7 @@ function ScheduleModal() {
 
         {slot && (
           <div className="flex items-center gap-1 -mt-1.5">
-            <h2 className="card-h2">{slot.begin}</h2>
+            <h2>{slot.begin}</h2>
             <Button disabled variant="ghost" data-tooltip="Edit slot !">
               <Pencil color="gray" />
             </Button>
@@ -122,6 +128,7 @@ function ScheduleModal() {
         <Input
           autoFocus
           {...form.register("name")}
+          label="name"
           error={errors.name?.message}
           className={`italic font-semibold text-sm`}
         />
@@ -137,17 +144,18 @@ function ScheduleModal() {
 
         <Input
           {...form.register("contact")}
+          label="contact"
           aria-invalid={!!errors.contact}
           className="italic font-semibold text-sm"
           error={errors.contact?.message}
         />
 
         <div className="flex items-center justify-between">
-          <Button type="button" onClick={closeModal}>
+          <Button type="button" color="secondary" onClick={closeModal}>
             cancel
           </Button>
 
-          <Button type="submit" loading={isPending}>
+          <Button type="submit" color="accent" loading={isPending}>
             Confirm Slot
           </Button>
         </div>

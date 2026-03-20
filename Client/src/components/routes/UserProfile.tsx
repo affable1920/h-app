@@ -2,23 +2,26 @@ import { useState } from "react";
 import { DateTime } from "luxon";
 
 import Spinner from "../Spinner";
-import Button from "../common/Button";
+import Button from "../ui/Button";
 
 import { useProfile } from "@/hooks/auth";
 import useModalStore from "@/stores/modalStore";
 
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, ArrowRightIcon } from "lucide-react";
+import Code from "../ui/Code";
 
 const UserProfile = () => {
   const [view, setView] = useState(false);
   const { data: profile, isError, isPending } = useProfile();
 
+  const openModal = useModalStore((s) => s.openModal);
+
   if (isError) {
     return (
       <div>
         <h2 className="card-h2 text-xl capitalize text-center tracking-widest truncate">
-          error fetching your profile. please try later ...
+          error fetching your <Code>profile</Code>. please try later ...
         </h2>
       </div>
     );
@@ -34,7 +37,7 @@ const UserProfile = () => {
           </h2>
           <motion.button
             animate={{ rotate: view ? 90 : 0 }}
-            onClick={() => setView((p) => !p)}
+            onClick={setView.bind(null, (p) => !p)}
           >
             <ArrowRight size={12} />
           </motion.button>
@@ -82,15 +85,10 @@ const UserProfile = () => {
                           <p className="font-semibold">{booking.slot.begin}</p>
                           {booking.slot.booked && (
                             <Button
-                              onClick={() =>
-                                useModalStore
-                                  .getState()
-                                  .openModal("confirmation", {
-                                    context: booking,
-                                    tagline:
-                                      "confirm appointment cancellation ?",
-                                  })
-                              }
+                              onClick={openModal.bind(null, "confirmation", {
+                                context: booking,
+                                tagline: "confirm appointment cancellation ?",
+                              })}
                             >
                               cancel appointment
                             </Button>

@@ -52,7 +52,7 @@ class Patient(User):
         cascade="all, delete-orphan"
     )
     __mapper_args__ = {
-        "polymorphic_identity": "PATIENT"
+        "polymorphic_identity": UserRole.PATIENT
     }
 
 
@@ -105,7 +105,7 @@ class Doctor(User):
     )
 
     __mapper_args__ = {
-        "polymorphic_identity": "DOCTOR"
+        "polymorphic_identity": UserRole.DOCTOR
     }
     __table_args__ = (
         sa.CheckConstraint(
@@ -113,7 +113,7 @@ class Doctor(User):
     )
 
 
-class Clinic:
+class Clinic(Base):
     __tablename__ = "clinic"
     id: Mapped[PrimaryKey]
 
@@ -171,7 +171,7 @@ class Schedule(Base):
 
     clinic_id: Mapped[str] = mapped_column(
         sa.ForeignKey("clinic.id"), nullable=False)
-    clinic: Mapped["Clinic"] = relationship(lazy="joined")
+    clinic: Mapped["Clinic"] = relationship()
 
     slots: Mapped[list["Slot"]] = relationship(
         back_populates="schedule", cascade="all, delete-orphan"
@@ -206,7 +206,7 @@ class Appointment(TimeStampMixin, Base):
 
     patient_id: Mapped[Optional[UUID]] = mapped_column(
         sa.ForeignKey("patient.id"), nullable=True)
-    patient: Mapped[Patient] = relationship(back_populates="appointment")
+    patient: Mapped[Patient] = relationship(back_populates="appointments")
 
     guest_name: Mapped[Optional[str]] = mapped_column(nullable=True)
     guest_contact: Mapped[Optional[str]] = mapped_column(

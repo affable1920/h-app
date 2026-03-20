@@ -17,7 +17,7 @@ function YModalVariants(
   if (pstn === "bottom") {
     return {
       initial: {
-        y: "100%",
+        y: "50%",
         opacity: 0,
       },
       animate: {
@@ -30,12 +30,11 @@ function YModalVariants(
         },
       },
       exit: {
-        y: "100%",
+        y: "40%",
         opacity: 0,
         transition: {
-          ease: "linear",
+          ease: "easeIn",
           duration: 0.1,
-          opacity: { duration: 0.1 },
         },
       },
     };
@@ -43,15 +42,15 @@ function YModalVariants(
 
   return {
     initial: {
-      y: "-100%",
+      y: "-50%",
     },
     animate: {
       y: 0,
       transition: { duration: 0.22, ease: "easeOut" },
     },
     exit: {
-      y: "-100%",
-      transition: { duration: 0.1, ease: "linear" },
+      y: "-25%",
+      transition: { duration: 0.1, ease: "easeIn" },
     },
   };
 }
@@ -67,20 +66,27 @@ const modalVariants: Record<Position, Record<string, Variant>> = {
     animate: {
       opacity: 1,
       scale: 1,
+      transition: {
+        ease: "easeOut",
+        duration: 0.25,
+        type: "spring",
+        stiffness: 200,
+        damping: 20,
+      },
     },
     exit: {
       scale: 0,
       opacity: 0,
       transition: {
-        duration: 0.1,
-        ease: "linear",
+        duration: 0.12,
+        ease: "easeIn",
       },
     },
   },
 };
 
 export default function getModalConfig(pstn: Position = "center") {
-  const baseModal = `bg-white shadow-lg shadow-slate-400/40 p-2 scrollbar-hidden`;
+  const baseModal = `bg-white shadow-lg shadow-slate-500/80 p-2 scrollbar-hidden`;
   const variants = modalVariants[pstn];
 
   const stylesConfig = [baseModal, modalProperties[pstn]]

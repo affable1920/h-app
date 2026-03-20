@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
@@ -18,6 +20,9 @@ or otherwise the url would break
 @ - after encoding is mapped to %40
 """
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 
 class Base(DeclarativeBase):
     pass
@@ -32,7 +37,9 @@ def get_db():
     session = Session()
 
     try:
+        logger.info(msg="Yielding session ..")
         yield session
 
     finally:
+        logger.info("Closing session instance ...")
         session.close()

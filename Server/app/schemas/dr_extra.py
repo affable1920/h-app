@@ -1,24 +1,23 @@
 from sqlite3 import Time
 from uuid import UUID
 from typing import Annotated
-from pydantic import EmailStr, Field
+from pydantic import Field
 
 from app.shared.enums import Mode
-from app.schemas.base import ContactMixin, FromORM, IDMixin
+from app.schemas.base import FromORM, IDMixin
 
 
-class Clinic(FromORM, IDMixin, ContactMixin):
+class Clinic(FromORM, IDMixin):
     name: str
+    owner: UUID
 
-    email: EmailStr
-    username: str
-    owner_name: str
-
-    address: str
+    location: str
     facilities: list[str]
     pincode: int
     reviews: int = Field(default=0)
     rating: float
+
+    contacts: list[int] = []
 
 
 class Slot(FromORM, IDMixin):

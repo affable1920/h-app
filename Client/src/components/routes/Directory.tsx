@@ -1,11 +1,13 @@
 import { useState, Suspense, useCallback } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import { motion } from "motion/react";
+
 import Spinner from "../Spinner";
-import Input from "@/components/common/Input";
+import Input from "@/components/ui/Input";
 
 import Pagination from "@components/Pagination";
-import Button from "@/components/common/Button";
+import Button from "@/components/ui/Button";
 
 import { debounce } from "@/utils/appUtils";
 
@@ -92,7 +94,9 @@ const Directory = () => {
             value={localSQ}
             placeholder="Search"
             className="italic placeholder:text-sm py-2"
-            onChange={(ev) => handleSearch(ev.target.value)}
+            onChange={function (ev) {
+              handleSearch(ev.target.value);
+            }}
           />
           {searchQuery && (
             <Button variant="ghost" size="sm">

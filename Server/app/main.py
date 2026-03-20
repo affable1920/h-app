@@ -29,7 +29,7 @@ async def root(app: FastAPI):
 
     from app.database.entry import Base, engine
 
-    Base.metadata.create_all(engine)
+    # Base.metadata.create_all(engine)
     # await seed_db()
     app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
 

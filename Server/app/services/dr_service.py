@@ -1,19 +1,20 @@
 from math import ceil
+from typing import Any, Sequence
 from uuid import UUID
 from datetime import datetime
+from certifi import where
 from fastapi import Depends, HTTPException, status
 
-from sqlalchemy import select
+from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session, Query
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.database.entry import get_db
 from app.shared.enums import Mode, Status
 from app.database.models import Appointment, Doctor as DBDoctor, Schedule, Slot
 
 from app.schemas.http import PaginatedResponse
 from app.schemas.doctor import Doctor, DoctorSummary
-from app.schemas.query_params import FilterParams, PaginationParams, SortOrder
+from app.schemas.query_params import ALLOWED_SORT_COLS, FilterParams, PaginationParams, SortOrder
 
 
 class InvalidPageException(Exception):
@@ -32,23 +33,21 @@ class DoctorNotFoundException(Exception):
 
 
 class DoctorService:
-    db: Session = Depends(get_db)
-
-    def __init__(self, db: Session = Depends(get_db)):
-        pass
+    def __init__(self, db: Session):
+        self.session = db
 
     @staticmethod
-    def get_summaried(dr: DBDoctor) -> DoctorSummary:
+    def get_DR_summary_model(dr: DBDoctor) -> DoctorSummary:
         return DoctorSummary.model_validate(dr)
 
     @staticmethod
-    def get_full_dr(dr: DBDoctor) -> Doctor:
+    def get_DR_model(dr: DBDoctor) -> Doctor:
         return Doctor.model_validate(dr)
 
     @staticmethod
     def __filter(
-        query: Query[DBDoctor], filters: FilterParams = Depends()
-    ) -> Query[DBDoctor]:
+        query: Select, filters: FilterParams = Depends()
+    ) -> Select:
         """
         (args): all filters to be used for doctors
 
@@ -62,76 +61,56 @@ class DoctorService:
         resultant_query = query
 
         if filters.specialization:
-            resultant_query = query.filter(
+            resultant_query = query.where(
                 DBDoctor.primary_specialization == filters.specialization
             )
 
         if filters.min_rating:
-            resultant_query = query.filter(
+            resultant_query = query.where(
                 DBDoctor.rating >= filters.min_rating)
 
         if filters.currently_available:
             resultant_query = query.filter(DBDoctor.status == Status.AVAILABLE)
 
         if filters.search_query:
-            resultant_query = query.filter(
+            resultant_query = query.where(
                 DBDoctor.name.icontains(filters.search_query))
 
         if filters.mode == Mode.ONLINE:
-            resultant_query = query.filter(DBDoctor.consults_online)
+            resultant_query = query.where(DBDoctor.consults_online)
 
         return resultant_query
 
     #
 
     def get_all(self, pagination: PaginationParams, filters: FilterParams):
-        query = self.db.query(DBDoctor)
-        total_count = query.count()
-
-        if total_count <= 0:
-            return PaginatedResponse(
-                entities=[],
-                total_count=0,
-                has_next=False,
-                paginated_count=0
-            )
-
-        last_page = ceil(total_count / (pagination.max))
-
-        if pagination.page > last_page:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "type": "invalid page request",
-                    "msg": "invalid page reuested by the user.",
-                    "details": {"max_page": last_page, "page_rqstd": pagination.page},
-                },
-            )
-
         try:
-            query = self.__filter(query, filters)
+            stmt = select(DBDoctor)
+            stmt = self.__filter(stmt, filters)
 
             if pagination.sort_by:
                 sort_column = getattr(DBDoctor, pagination.sort_by)
-                order = pagination.sort_order
 
-                if order == SortOrder.DESC:
+                if pagination.sort_order == SortOrder.DESC:
                     sort_column = sort_column.desc()
 
-                query = query.order_by(sort_column)
+                stmt = stmt.order_by(sort_column)
 
-            query = query.offset(pagination.offset).limit(pagination.max)
+            stmt = stmt.offset(pagination.offset).limit(pagination.max)
+            result = self.session.execute(stmt).scalars().all()
 
-            doctors = [self.get_summaried(dr) for dr in query.all()]
-            paginated_count = len(doctors)
+            doctors = [self.get_DR_summary_model(dr) for dr in result]
 
-            return PaginatedResponse(
-                entities=doctors,
-                total_count=total_count,
-                has_prev=pagination.page > 1,
-                paginated_count=paginated_count,
-                has_next=pagination.page < last_page,
-            )
+            count = self.session.execute(
+                select(func.count()).select_from(DBDoctor)).scalar()
+
+            last_page = (count or 0) // pagination.max
+
+            response = {
+                "entities": doctors, "count": count, "has_prev": pagination.page != 1,
+                "has_next": pagination.page < last_page
+            }
+            return response
 
         except SQLAlchemyError as e:
             raise HTTPException(
@@ -157,57 +136,49 @@ class DoctorService:
     #
 
     def get_by_id(self, id: UUID) -> Doctor | None:
-        rqstd_doctor = self.db.get(entity=DBDoctor, ident=id)
-        if not rqstd_doctor:
-            raise DoctorNotFoundException(
-                "the requested doctor does not exist")
+        stmt = select(DBDoctor).where(DBDoctor.id == id)
+        db_doctor = self.session.execute(stmt).scalar()
 
-        return self.get_full_dr(rqstd_doctor)
+        if not db_doctor:
+            raise ValueError("Doctor not found.")
+        return self.get_DR_model(db_doctor)
 
     #
 
     def book(
         self,
         doctor_id: UUID,
-        wkday: int | None,
-        date: datetime | None,
+        scheduled_date: datetime,
         slot_id: UUID,
-        schedule_id: UUID,
-        guest_name: str | None,
         patient_id: UUID | None,
+        guest_name: str | None,
         guest_contact: str | None,
-        **kwargs
     ):
-        stmt = select(DBDoctor).join(
-            Schedule, onclause=Schedule.doctor_id == doctor_id)
+        stmt = (select(Slot, Schedule)
+                .join(Schedule, Slot.schedule_id == Schedule.id)
+                .join(DBDoctor, Schedule.doctor_id == DBDoctor.id)
+                .where(Slot.id == slot_id)
+                .where(DBDoctor.id == doctor_id))
 
-        result = self.db.scalars(stmt).first()
+        result = self.session.execute(stmt).one_or_none()
 
-        target_slot = (
-            self.db.query(Slot)
-            .join(Slot.schedule)
-            .where(
-                Slot.id == slot_id,
-                Slot.schedule_id == schedule_id,
-                Schedule.doctor_id == doctor_id,
-            )
-            .with_for_update()
-            .first()
-        )
+        if result is None:
+            raise ValueError("Slot not found.")
 
-        if not target_slot:
-            raise ValueError("No such slot exists for the doctor")
-        if target_slot.booked:
-            raise ValueError("Slot already booked !")
+        slot, schedule = result.tuple()
 
-        target_slot.booked = True
+        if slot.booked:
+            raise ValueError("Slot already booked ..")
+
+        if not schedule.is_active:
+            raise ValueError("This scheduled is no longer active ..")
+
+        if scheduled_date.weekday() not in schedule.weekdays:
+            raise ValueError("Slot doesn't match schedule ..")
+
+        slot.booked = True
         appointment = Appointment(
-            scheduled_date=date,
-            doctor_id=doctor_id,
-            slot_id=target_slot.id,
-            schedule_id=target_slot.schedule_id,
-            clinic_id=target_slot.schedule.clinic_id,
-        )
+            slot_id=slot.id, scheduled_date=scheduled_date)
 
         if patient_id:
             appointment.patient_id = patient_id
@@ -216,7 +187,7 @@ class DoctorService:
             appointment.guest_name = guest_name
             appointment.guest_contact = guest_contact
 
-        self.db.add(appointment)
-        self.db.flush([appointment, target_slot])
+        self.session.add(appointment)
+        self.session.flush([appointment, slot, schedule])
 
         return appointment

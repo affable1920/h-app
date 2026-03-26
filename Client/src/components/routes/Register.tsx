@@ -73,11 +73,18 @@ function Register() {
         </article>
 
         <article className="flex flex-col gap-4">
-          <Button type="submit" color="accent" loading={register.isPending}>
+          <Button
+            type="submit"
+            size="md"
+            color="accent"
+            loading={register.isPending}
+          >
             Register
           </Button>
 
-          <Button onClick={() => navigate("/auth")}>sign in</Button>
+          <Button size="md" onClick={() => navigate("/auth")}>
+            sign in
+          </Button>
         </article>
       </form>
     </section>

@@ -37,7 +37,7 @@ const Calendar = ({
   return (
     <motion.section
       layout
-      className="relative shadow-lg shadow-slate-300/40 rounded-xl border-2 border-slate-300/20 w-full max-w-[440px]"
+      className="relative shadow-lg shadow-slate-300/40 rounded-xl border-2 border-slate-300/20 w-full md:max-w-110"
     >
       <div className="flex flex-col gap-8 p-4 py-6">
         <header className="flex items-center justify-between px-2">

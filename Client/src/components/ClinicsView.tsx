@@ -83,13 +83,13 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
     [expandedIds],
   );
 
-  const paramsDate = searchParams.get("date") ?? "";
+  const dtParam = searchParams.get("date") ?? "";
 
   useEffect(
     function () {
       // Auto-expand schedules matching selected date
-      if (paramsDate) {
-        const date = DateTime.fromISO(paramsDate);
+      if (dtParam) {
+        const date = DateTime.fromISO(dtParam);
         const wkday = date.weekday;
 
         const matchingIds = schedules
@@ -100,7 +100,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
         setExpandedIds(new Set(matchingIds));
       }
     },
-    [paramsDate],
+    [dtParam],
   );
 
   const toggleExpansion = useCallback(function (id: string) {
@@ -119,7 +119,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
   function isWkdaySelected(wkday: number) {
     return (
       scheduleDetails?.weekday === wkday ||
-      DateTime.fromISO(paramsDate)?.weekday === wkday
+      DateTime.fromISO(dtParam)?.weekday === wkday
     );
   }
 
@@ -228,6 +228,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                                     content={slot.begin}
                                     onClick={function () {
                                       updater("slot", slot);
+                                      updater("clinic", clinic);
                                     }}
                                     disabled={slot.booked}
                                     selected={
@@ -250,6 +251,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                             onClick={openModal.bind(EMPTY, "schedule", {
                               dr: doctor,
                               viewOverlay: true,
+                              ...scheduleDetails,
                             })}
                           >
                             book slot

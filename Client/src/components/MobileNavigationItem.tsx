@@ -33,16 +33,24 @@ const tabChildrenVariants: Record<string, Variant> = {
 
 const EMPTY = Object.create(null);
 
-function MobileNavigationItem({ label, icon: Icon, children }: MobileNavItem) {
+function MobileNavigationItem({
+  label,
+  icon: Icon,
+  children,
+  onClick,
+}: MobileNavItem) {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasChildren = !!children?.length;
 
+  function handleClick() {
+    return hasChildren ? setIsExpanded.bind(EMPTY, (p) => !p) : onClick;
+  }
+
   return (
-    <div>
+    <div key={label}>
       <motion.button
         whileTap={{ scale: hasChildren ? 0.975 : 1, originX: 0 }}
-        key={label}
-        onClick={setIsExpanded.bind(EMPTY, (p) => !p)}
+        onClick={handleClick()}
         className="cursor-pointer flex items-center justify-between w-full font-semibold capitalize"
       >
         <span className="inline-flex items-center gap-2">

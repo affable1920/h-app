@@ -12,7 +12,6 @@ const CalendarDay: React.FC<{ date: DateTime<true> } & BadgeProps> = ({
   }
 
   const props: BadgeProps & { [key: string]: any } = {
-    rotate: true,
     as: "button",
     color: "slate",
     disabled,

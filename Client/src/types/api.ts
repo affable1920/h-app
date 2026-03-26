@@ -55,23 +55,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/me/appointments/{app_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Unbook */
-        delete: operations["unbook"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/doctors": {
         parameters: {
             query?: never;
@@ -106,7 +89,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/doctors/{doctor_id}/book": {
+    "/bookings": {
         parameters: {
             query?: never;
             header?: never;
@@ -115,43 +98,26 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Book Schedule */
-        post: operations["book_schedule"];
+        /** Book */
+        post: operations["book"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/clinics": {
+    "/bookings/{booking_id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get Clinics */
-        get: operations["get_clinics"];
+        get?: never;
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/clinics/{clinic_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Clinic */
-        get: operations["get_clinic"];
-        put?: never;
-        post?: never;
-        delete?: never;
+        /** Cancel Booking */
+        delete: operations["cancel_booking"];
         options?: never;
         head?: never;
         patch?: never;
@@ -248,12 +214,22 @@ export interface components {
         /** BookingRequestData */
         BookingRequestData: {
             /**
-             * Scheduled Date
+             * Date
              * Format: date-time
              */
-            scheduled_date: string;
-            /** Patient Id */
-            patient_id?: string | null;
+            date: string;
+            /**
+             * Doctorid
+             * Format: uuid
+             */
+            doctorId: string;
+            /**
+             * Slotid
+             * Format: uuid
+             */
+            slotId: string;
+            /** Patientid */
+            patientId?: string | null;
             /**
              * Name
              * @description the patient's name, originally None, a string specifically for a non-existing user.
@@ -261,11 +237,6 @@ export interface components {
             name?: string | null;
             /** Contact */
             contact?: string | null;
-            /**
-             * Slotid
-             * Format: uuid
-             */
-            slotId: string;
         } & {
             [key: string]: unknown;
         };
@@ -438,20 +409,6 @@ export interface components {
          * @enum {string}
          */
         Mode: "online" | "in person";
-        /** PaginatedResponse[Clinic] */
-        PaginatedResponse_Clinic_: {
-            /** Entities */
-            entities: components["schemas"]["Clinic"][];
-            /** Count */
-            count: number;
-            /** Has Next */
-            has_next?: boolean | null;
-            /**
-             * Has Prev
-             * @default false
-             */
-            has_prev: boolean;
-        };
         /** PaginatedResponse[DoctorSummary] */
         PaginatedResponse_DoctorSummary_: {
             /** Entities */
@@ -485,11 +442,7 @@ export interface components {
              * Format: email
              */
             email: string;
-            /**
-             * Appointments
-             * @default []
-             */
-            appointments: components["schemas"]["Appointment"][];
+            role: components["schemas"]["UserRole"];
         } & {
             [key: string]: unknown;
         };
@@ -572,6 +525,11 @@ export interface components {
          * @enum {string}
          */
         Status: "away" | "available" | "in_patient" | "unknown";
+        /**
+         * UserRole
+         * @enum {string}
+         */
+        UserRole: "admin" | "doctor" | "patient" | "clinic" | "guest";
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -676,37 +634,6 @@ export interface operations {
             };
         };
     };
-    unbook: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                app_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     get_doctors: {
         parameters: {
             query?: {
@@ -778,13 +705,11 @@ export interface operations {
             };
         };
     };
-    book_schedule: {
+    book: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                doctor_id: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
@@ -813,33 +738,13 @@ export interface operations {
             };
         };
     };
-    get_clinics: {
+    cancel_booking: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_Clinic_"];
-                };
+            path: {
+                booking_id: string;
             };
-        };
-    };
-    get_clinic: {
-        parameters: {
-            query: {
-                id: string;
-            };
-            header?: never;
-            path?: never;
             cookie?: never;
         };
         requestBody?: never;

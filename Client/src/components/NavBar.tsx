@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import Button from "@/components/ui/Button";
 import {
   ArrowRight,
+  Bot,
+  History,
   Home,
+  Hospital,
   LogOut,
   Mail,
   Menu,
@@ -13,6 +16,7 @@ import {
   Search,
   Settings,
   Stethoscope,
+  Syringe,
   User,
   VenetianMask,
 } from "lucide-react";
@@ -20,61 +24,107 @@ import useAuthStore, { logout } from "@/stores/authStore";
 import type { MobileNavItem } from "@/types/utils";
 import MobileNavigationItem from "./MobileNavigationItem";
 
-const navLinks: Array<MobileNavItem> = [
-  { label: "Home", icon: Home },
-  { label: "Find", icon: Search },
-  { label: "Ask", icon: VenetianMask },
-  {
-    label: "profile",
-    icon: User,
-    children: [
-      { label: "settings", icon: Settings },
-      { label: "messages", icon: Mail },
-      { label: "logout", icon: LogOut, onClick: logout },
-    ],
-  },
-];
-
 const NavBar = () => {
   const { pathname = "" } = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
+  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
 
-  useEffect(() => {
-    setShowMobileMenu(false);
-  }, [pathname]);
+  useEffect(
+    function () {
+      setShowMobileMenu(false);
+    },
+    [pathname],
+  );
 
   const ref = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const navbar = ref?.current as HTMLElement;
+  useEffect(
+    function () {
+      const navbar = ref?.current as HTMLElement;
 
-    const handleMouseDown = (e: MouseEvent) => {
-      if (showMobileMenu && !navbar?.contains(e.target as Node)) {
-        setShowMobileMenu(false);
-      }
-    };
+      const handleMouseDown = (e: MouseEvent) => {
+        if (showMobileMenu && !navbar?.contains(e.target as Node)) {
+          setShowMobileMenu(false);
+        }
+      };
 
-    const handleKeydown = (e: KeyboardEvent) => {
-      if (showMobileMenu && e.key == "Escape") {
-        setShowMobileMenu(false);
-      }
-    };
+      const handleKeydown = (e: KeyboardEvent) => {
+        if (showMobileMenu && e.key == "Escape") {
+          setShowMobileMenu(false);
+        }
+      };
 
-    document.addEventListener("keydown", handleKeydown);
-    document.addEventListener("mousedown", handleMouseDown);
+      document.addEventListener("keydown", handleKeydown);
+      document.addEventListener("mousedown", handleMouseDown);
 
-    return () => {
-      document.removeEventListener("keydown", handleKeydown);
-      document.removeEventListener("mousedown", handleMouseDown);
-    };
-  }, [showMobileMenu]);
+      return function () {
+        document.removeEventListener("keydown", handleKeydown);
+        document.removeEventListener("mousedown", handleMouseDown);
+      };
+    },
+    [showMobileMenu],
+  );
+
+  const navLinks: Array<MobileNavItem> = [
+    {
+      label: "Home",
+      icon: Home,
+      onClick() {
+        navigate("/");
+      },
+    },
+    {
+      label: "Find",
+      icon: Search,
+      children: [
+        {
+          label: "doctor",
+          icon: Stethoscope,
+          onClick() {
+            navigate("/dir/doctors");
+          },
+        },
+        {
+          label: "hospital",
+          icon: Hospital,
+          onClick() {
+            console.log("open a map later ..");
+          },
+        },
+        {
+          label: "pharmacy",
+          icon: Syringe,
+          onClick() {
+            navigate("/dir/clinics");
+          },
+        },
+        { label: "ask assistant (Pro)", icon: Bot },
+      ],
+    },
+    {
+      label: user?.username ?? "profile",
+      icon: User,
+      children: [
+        { label: "settings", icon: Settings },
+        { label: "messages", icon: Mail },
+        {
+          label: "history",
+          icon: History,
+          onClick() {
+            navigate("/auth/me");
+          },
+        },
+        { label: "logout", icon: LogOut, onClick: logout },
+      ],
+    },
+  ];
 
   return (
     <motion.header className="shadow-xl shadow-slate-300/20 border-b-2 z-10 border-b-slate-300/40 p-8 py-6 relative">
       <div className="container flex items-center justify-between">
-        <Button variant="ghost">
+        <Button onClick={() => navigate("/")} variant="ghost">
           <Stethoscope />
         </Button>
 
@@ -112,7 +162,7 @@ const NavBar = () => {
             <motion.nav
               ref={ref}
               className="md:hidden absolute top-full left-0 w-full bg-white 
-              flex flex-col gap-6 shadow-lg p-8"
+              flex flex-col gap-10 shadow-lg p-8"
               initial={{
                 y: -30,
                 opacity: 0,

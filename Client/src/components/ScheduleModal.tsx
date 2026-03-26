@@ -41,19 +41,20 @@ function ScheduleModal({
 
   const closeModal = useModalStore((s) => s.closeModal);
 
-  const { mutateAsync: book, isPending } = useBookingMutation(dr.id);
+  const { mutateAsync: book, isPending } = useBookingMutation();
   const { mutate: unBook } = useUnbookingMutation();
 
   async function confirmSlot(details: PatientDetails) {
     const validated = PatientSchema.parse(details);
 
-    if (!(slot && dtParams)) {
+    if (!slot || !dtParams) {
       return;
     }
 
     const baseDetails = {
       slotId: slot.id,
-      scheduled_date: dtParams.toISO()!,
+      date: dtParams.toISO()!,
+      doctorId: dr.id,
     };
 
     const appointment = user?.id
@@ -130,24 +131,14 @@ function ScheduleModal({
           {...form.register("name")}
           label="name"
           error={errors.name?.message}
-          className={`italic font-semibold text-sm`}
+          className="italic font-semibold text-sm"
         />
-
-        {user?.email && (
-          <Input
-            label="email"
-            type="email"
-            name="email"
-            className="italic font-semibold text-sm"
-          />
-        )}
 
         <Input
           {...form.register("contact")}
           label="contact"
-          aria-invalid={!!errors.contact}
-          className="italic font-semibold text-sm"
           error={errors.contact?.message}
+          className="italic font-semibold text-sm"
         />
 
         <div className="flex items-center justify-between">

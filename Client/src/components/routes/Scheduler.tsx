@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "motion/react";
 import { useLocation } from "react-router-dom";
 
 import Code from "../ui/Code";
@@ -7,10 +6,7 @@ import ClinicsView from "@components/ClinicsView";
 import Calendar from "@components/Calendar";
 import Spinner from "../Spinner";
 
-import { ArrowRight } from "lucide-react";
 import { useGetById } from "@/hooks/doctors";
-
-const EMPTY = Object.create(null);
 
 function Scheduler() {
   const id = useLocation().pathname.split("/").at(2);
@@ -31,15 +27,8 @@ function Scheduler() {
 
   return (
     <section className="space-y-8">
-      <header className="flex gap-4">
+      <header className="flex gap-4 justify-center">
         <h2 className="text-lg font-black">Dr. {doctor.name}</h2>
-        <motion.button
-          className="cursor-pointer"
-          onClick={setShowClinicsView.bind(EMPTY, (p) => !p)}
-          animate={{ rotate: showClinicsView ? 90 : 0 }}
-        >
-          <ArrowRight size={14} />
-        </motion.button>
       </header>
 
       <section

@@ -54,7 +54,7 @@ const Badge = memo(
           full && "w-full",
           current &&
             "border-b-2 border-b-accent/50 font-black shadow-inner shadow-accent-dark/60",
-          selected && "bg-amber-400 border-amber-600 font-black shadow-none",
+          selected && "selected",
           disabled &&
             "cursor-default opacity-70 pointer-events-none shadow-none font-semibold border-none",
           className,

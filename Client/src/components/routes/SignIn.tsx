@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type LoginUser, LoginSchema } from "@/schemas";
 import Text from "../ui/Label";
+import type { APIError } from "@/types/http";
 
 function SignIn() {
   const signin = useSignin();
@@ -32,7 +33,8 @@ function SignIn() {
       },
 
       onError(ex) {
-        toast.error(ex.name ?? "Sign in failed", { description: ex.message });
+        const err = ex as unknown as APIError;
+        toast.error(err.msg ?? "Sign in failed", { description: err.type });
       },
     });
   }

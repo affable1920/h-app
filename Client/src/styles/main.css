@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @import "./components.css";
 
-@source "../../src/";
-@source not "../../node_modules";
-
 @theme {
   --color-foreground: #ffffff;
 
@@ -29,6 +26,8 @@
   --text-lg: 1.2rem;
   --text-xl: 1.4rem;
 
+  --font-display: "PT Sans";
+
   --animate-spin: spin 1s linear infinite;
 }
 
@@ -52,6 +51,7 @@
   body {
     letter-spacing: 1.2px;
     font-size: var(--text-base);
+    font-family: var(--font-display);
   }
 
   #root {

@@ -21,10 +21,24 @@
       }
     }
 
-    &:is(.selected):hover {
+    &:is(.selected) {
       background: var(--color-amber-400);
-      box-shadow: none;
-      outline: 2px solid calc(var(--color-amber-800) / 20);
+      border: 2px solid
+        color-mix(in oklch, var(--color-amber-600) 30%, transparent);
+      font-weight: 800;
+      box-shadow: 0 4px 6px -2px
+        color-mix(in oklch, var(--color-amber-500) 50%, transparent);
+
+      &:hover {
+        background: color-mix(
+          in oklch,
+          var(--color-amber-500) 90%,
+          transparent
+        );
+        box-shadow: none;
+        outline: 2px solid
+          color-mix(in oklch, var(--color-amber-800) 20%, transparent);
+      }
     }
   }
 

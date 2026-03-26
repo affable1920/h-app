@@ -1,4 +1,4 @@
 cd server;
-source venv/scripts/activate;
+source venv/bin/activate;
 # USE_HTTPS=1
 python -m app.main

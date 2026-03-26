@@ -1,4 +1,3 @@
-import jwt
 import logging
 from fastapi import WebSocket, WebSocketDisconnect
 from pydantic import ValidationError
@@ -6,7 +5,7 @@ from pydantic import ValidationError
 from app.schemas.http import MsgType, WS_Message
 from app.database.entry import get_db
 from app.services.WS import WS_Service
-from app.helpers.authentication import decode_token
+from app.middleware.access import decode_access_token
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -21,19 +20,7 @@ async def ws_endpoint(ws: WebSocket):
         return
 
     await ws.accept(subprotocol=protocol)
-    try:
-        payload = decode_token(token=protocol)
-
-    except jwt.ExpiredSignatureError:
-        logging.info("Session expired")
-        await ws.close(code=4444, reason="session expired")
-        return
-
-    except (jwt.InvalidTokenError, jwt.PyJWTError) as e:
-        logging.info(e)
-        logging.info("Invalid token, pyjwt error")
-        await ws.close(code=4444, reason="invalid token")
-        return
+    payload = decode_access_token(token=protocol)
 
     user_id = payload.get("sub")
     if not user_id:
@@ -105,7 +92,8 @@ async def ws_endpoint(ws: WebSocket):
                     await WS_Service.handle_ice(ws=ws, msg=msg)
 
     except WebSocketDisconnect as e:
-        logger.warning("\nWebsocket Disconnect error occurred. Logging the error below")
+        logger.warning(
+            "\nWebsocket Disconnect error occurred. Logging the error below")
         logger.info(e)
 
         await WS_Service.broadcast(f"Client #{user_id} left the chat.")

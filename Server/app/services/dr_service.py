@@ -1,49 +1,31 @@
-from math import ceil
-from typing import Any, Sequence
 from uuid import UUID
-from datetime import datetime
-from certifi import where
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 
 from sqlalchemy import Select, func, select
-from sqlalchemy.orm import Session, Query
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.shared.enums import Mode, Status
-from app.database.models import Appointment, Doctor as DBDoctor, Schedule, Slot
+from app.database.models import Doctor as DBDoctor
 
-from app.schemas.http import PaginatedResponse
 from app.schemas.doctor import Doctor, DoctorSummary
-from app.schemas.query_params import ALLOWED_SORT_COLS, FilterParams, PaginationParams, SortOrder
-
-
-class InvalidPageException(Exception):
-    def __init__(self, msg: str, page_rqstd: int, max_page: int):
-        super().__init__(msg)
-        self.max_page = max_page
-        self.page_rqstd = page_rqstd
-
-
-class DoctorNotFoundException(Exception):
-    def __init__(self, msg: str):
-        super().__init__(status.HTTP_400_BAD_REQUEST, msg)
-
-
-#
+from app.schemas.query_params import FilterParams, PaginationParams, SortOrder
 
 
 class DoctorService:
-    def __init__(self, db: Session):
-        self.session = db
+    def __init__(self, session: Session):
+        self.session = session
 
     @staticmethod
-    def get_DR_summary_model(dr: DBDoctor) -> DoctorSummary:
+    def get_model_partial(dr: DBDoctor) -> DoctorSummary:
         return DoctorSummary.model_validate(dr)
 
+    #
+
     @staticmethod
-    def get_DR_model(dr: DBDoctor) -> Doctor:
+    def get_model(dr: DBDoctor) -> Doctor:
         return Doctor.model_validate(dr)
 
+    #
     @staticmethod
     def __filter(
         query: Select, filters: FilterParams = Depends()
@@ -84,110 +66,35 @@ class DoctorService:
     #
 
     def get_all(self, pagination: PaginationParams, filters: FilterParams):
-        try:
-            stmt = select(DBDoctor)
-            stmt = self.__filter(stmt, filters)
+        stmt = select(DBDoctor)
+        stmt = self.__filter(stmt, filters)
 
-            if pagination.sort_by:
-                sort_column = getattr(DBDoctor, pagination.sort_by)
+        if pagination.sort_by:
+            sort_column = getattr(DBDoctor, pagination.sort_by)
 
-                if pagination.sort_order == SortOrder.DESC:
-                    sort_column = sort_column.desc()
+            if pagination.sort_order == SortOrder.DESC:
+                sort_column = sort_column.desc()
 
-                stmt = stmt.order_by(sort_column)
+            stmt = stmt.order_by(sort_column)
+        stmt = stmt.offset(pagination.offset).limit(pagination.max)
 
-            stmt = stmt.offset(pagination.offset).limit(pagination.max)
-            result = self.session.execute(stmt).scalars().all()
+        result = self.session.scalars(stmt)
+        doctors = [self.get_model_partial(dr) for dr in result]
 
-            doctors = [self.get_DR_summary_model(dr) for dr in result]
+        count = self.session.execute(
+            select(func.count()).select_from(DBDoctor)).scalar()
 
-            count = self.session.execute(
-                select(func.count()).select_from(DBDoctor)).scalar()
-
-            last_page = (count or 0) // pagination.max
-
-            response = {
-                "entities": doctors, "count": count, "has_prev": pagination.page != 1,
-                "has_next": pagination.page < last_page
-            }
-            return response
-
-        except SQLAlchemyError as e:
-            raise HTTPException(
-                status_code=500,
-                detail={
-                    "detail": str(e),
-                    "type": "DATABASE ERROR",
-                    "msg": "Something went wrong, please try again later !",
-                },
-            )
-
-        except Exception as e:
-            print(e)
-            raise HTTPException(
-                status_code=500,
-                detail={
-                    "detail": str(e),
-                    "type": "internal server error",
-                    "msg": "an internal server error occurred.",
-                },
-            )
+        last_page = (count or 0) // pagination.max
+        response = {
+            "entities": doctors, "count": count, "has_prev": pagination.page >= 1,
+            "has_next": pagination.page < last_page
+        }
+        return response
 
     #
 
-    def get_by_id(self, id: UUID) -> Doctor | None:
+    def get_by_id(self, id: UUID) -> Doctor:
         stmt = select(DBDoctor).where(DBDoctor.id == id)
-        db_doctor = self.session.execute(stmt).scalar()
 
-        if not db_doctor:
-            raise ValueError("Doctor not found.")
-        return self.get_DR_model(db_doctor)
-
-    #
-
-    def book(
-        self,
-        doctor_id: UUID,
-        scheduled_date: datetime,
-        slot_id: UUID,
-        patient_id: UUID | None,
-        guest_name: str | None,
-        guest_contact: str | None,
-    ):
-        stmt = (select(Slot, Schedule)
-                .join(Schedule, Slot.schedule_id == Schedule.id)
-                .join(DBDoctor, Schedule.doctor_id == DBDoctor.id)
-                .where(Slot.id == slot_id)
-                .where(DBDoctor.id == doctor_id))
-
-        result = self.session.execute(stmt).one_or_none()
-
-        if result is None:
-            raise ValueError("Slot not found.")
-
-        slot, schedule = result.tuple()
-
-        if slot.booked:
-            raise ValueError("Slot already booked ..")
-
-        if not schedule.is_active:
-            raise ValueError("This scheduled is no longer active ..")
-
-        if scheduled_date.weekday() not in schedule.weekdays:
-            raise ValueError("Slot doesn't match schedule ..")
-
-        slot.booked = True
-        appointment = Appointment(
-            slot_id=slot.id, scheduled_date=scheduled_date)
-
-        if patient_id:
-            appointment.patient_id = patient_id
-
-        else:
-            appointment.guest_name = guest_name
-            appointment.guest_contact = guest_contact
-
-        self.session.add(appointment)
-        self.session.flush([appointment, slot, schedule])
-
-        return appointment
+        result = self.session.execute(stmt).scalar_one()
+        return self.get_model(result)

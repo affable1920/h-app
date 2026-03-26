@@ -8,8 +8,8 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.database.models import User
 from app.database.entry import get_db
-from app.database.models import Patient
 from app.core.config import JWT_SECRET, ALG
 from app.services.users_service import UserService
 
@@ -58,22 +58,13 @@ def create_access_token(data: dict, exp_dur: timedelta = timedelta(days=2)) -> s
         )
 
 
-def decode_http_token(token: str = Depends(bearer)) -> dict:
+def decode_access_token(token: str = Depends(bearer)) -> dict:
     """
     This function uses the bearer as a dependency.
 
     The auth scheme automatically extracts the bearer token and the function itself returns
     the decoded user to any function which uses this function as a dependency
     """
-
-    if not token:
-        raise HTTPException(
-            401,
-            {
-                "msg": "no token found in your request config.",
-                "type": "invalid request",
-            },
-        )
     try:
         return jwt.decode(jwt=token, key=JWT_SECRET, algorithms=[ALG])
 
@@ -84,29 +75,20 @@ def decode_http_token(token: str = Depends(bearer)) -> dict:
             {"x-session-expire": "true"},
         )
     except (jwt.InvalidTokenError, jwt.PyJWTError):
-        raise HTTPException(401, {"type": "generic jwt error", "msg": "invalid token"})
+        raise HTTPException(
+            401, {"type": "generic jwt error", "msg": "invalid token"})
 
 
-def get_user_http(
+#
+def get_user(
+    payload: dict = Depends(decode_access_token),
     session: Session = Depends(get_db),
-    payload: dict = Depends(decode_http_token),
-) -> Patient:
+) -> User | None:
     service = UserService(db=session)
-    user_id = payload.get("sub")
+    usr = service.get_by_id(id=payload.get("sub", ""))
 
-    if not user_id:
+    if not usr:
         raise HTTPException(
-            401, {"type": "invalid token", "msg": "no subject (id) found in token"}
-        )
+            404, {"msg": "User does not exist ..", "type": "Invalid credentials"})
 
-    user = service.get_by_id(id=user_id)
-    if not user:
-        raise HTTPException(
-            401, {"type": "invalid token", "msg": "No user found with hashed token"}
-        )
-
-    return user
-
-
-def decode_token(token: str) -> dict:
-    return jwt.decode(jwt=token, key=JWT_SECRET, algorithms=[ALG])
+    return usr

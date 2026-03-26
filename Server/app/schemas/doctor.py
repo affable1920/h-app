@@ -5,7 +5,7 @@ from datetime import datetime
 from app.schemas.base import FromORM, IDMixin
 
 from . import dr_extra as DrType
-from pydantic import ConfigDict, EmailStr, Field
+from pydantic import EmailStr, Field
 
 from app.shared.enums import Status
 

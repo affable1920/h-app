@@ -37,7 +37,7 @@ class User(TimeStampMixin, Base):
 
     __mapper_args__ = {
         "polymorphic_on": role,
-        "polymorphic_identity": None
+        "polymorphic_identity": None,
     }
 
 
@@ -49,7 +49,7 @@ class Patient(User):
 
     appointments: Mapped[list["Appointment"]] = relationship(
         back_populates="patient",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
     __mapper_args__ = {
         "polymorphic_identity": UserRole.PATIENT
@@ -105,7 +105,7 @@ class Doctor(User):
     )
 
     __mapper_args__ = {
-        "polymorphic_identity": UserRole.DOCTOR
+        "polymorphic_identity": UserRole.DOCTOR,
     }
     __table_args__ = (
         sa.CheckConstraint(

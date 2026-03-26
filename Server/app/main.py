@@ -13,7 +13,7 @@ from fastapi import (
 
 
 from app.routes import websocket
-from app.routes import auth, clinics, doctors
+from app.routes import auth, doctors, bookings
 
 from app.services.data_generator import seed_db
 from app.services.openapi_spec import generate_openapi_spec
@@ -72,7 +72,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(doctors.router)
-app.include_router(clinics.router)
+app.include_router(bookings.router)
 app.add_websocket_route("/ws", websocket.ws_endpoint)
 
 html = """

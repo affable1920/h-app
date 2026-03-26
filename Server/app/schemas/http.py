@@ -14,9 +14,8 @@ from pydantic import (
 )
 
 from app.schemas.base import FromORM, IDMixin
-from app.schemas.doctor import Doctor
 from app.schemas.dr_extra import Slot
-from app.shared.enums import AppointmentStatus
+from app.shared.enums import AppointmentStatus, UserRole
 
 
 T = TypeVar("T")
@@ -28,14 +27,6 @@ This module has all pydantic models to be used for http rqsts and responses.
 
 IDSerialized = Annotated[UUID, PlainSerializer(
     func=lambda x: str(x), return_type=str)]
-
-
-class UserRole(Enum):
-    ADMIN = "admin"
-    DOCTOR = "doctor"
-    PATIENT = "patient"
-    CLINIC_ADMIN = "clinic_admin"
-    GUEST = "guest"
 
 
 class Appointment(FromORM, IDMixin):
@@ -63,9 +54,12 @@ class LoginUser(BaseModel):
 
 
 class BookingRequestData(FromORM):
-    scheduled_date: datetime
+    scheduled_date: Annotated[datetime, Field(alias="date")]
 
-    patient_id: UUID | None = None
+    doctor_id: Annotated[UUID, Field(alias="doctorId")]
+    slot_id: Annotated[UUID, Field(alias="slotId")]
+
+    patient_id: Annotated[UUID | None, Field(default=None, alias="patientId")]
     guest_name: Annotated[
         str | None,
         Field(
@@ -79,8 +73,6 @@ class BookingRequestData(FromORM):
         str | None, Field(default=None, min_length=10,
                           max_length=10, alias="contact")
     ]
-
-    slot_id: Annotated[UUID, Field(alias="slotId")]
 
     @model_validator(mode="after")
     def check_patient(self):
@@ -113,7 +105,15 @@ class ResponseUser(FromORM, IDMixin):
     """
     username: str
     email: EmailStr
+    role: UserRole
+
+
+class ResponsePtnt(ResponseUser):
     appointments: list[Appointment] = []
+
+
+class ResponseDr(ResponseUser):
+    pass
 
 
 class Payload(BaseModel):

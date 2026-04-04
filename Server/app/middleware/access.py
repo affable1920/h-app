@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import jwt
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
@@ -6,12 +8,9 @@ from fastapi import (
     HTTPException,
     Depends,
 )
-from sqlalchemy.orm import Session
 
-from app.database.models import User
-from app.database.entry import get_db
+from app.shared.enums import UserRole
 from app.core.config import JWT_SECRET, ALG
-from app.services.users_service import UserService
 
 from app.schemas.http import Payload
 
@@ -28,17 +27,15 @@ OAuth2PwdBearer is a dependency that auomatically extracts the bearer "token" in
 bearer = OAuth2PasswordBearer(tokenUrl="auth")
 
 
-def create_access_token(data: dict, exp_dur: timedelta = timedelta(days=2)) -> str:
-    payload = data.copy()
-
-    if "password" in payload:
-        del payload["password"]
-
+def create_access_token(id: UUID, role: UserRole, exp_dur: timedelta = timedelta(days=2)) -> str:
+    # if "password" in payload:
+    # del payload["password"]
+    #
     iat = datetime.now()
     exp = iat + exp_dur
 
     payload = Payload(
-        **data,
+        id=id, role=role,
         iat=iat.timestamp(),
         exp=exp.timestamp(),
     )
@@ -82,13 +79,9 @@ def decode_access_token(token: str = Depends(bearer)) -> dict:
 #
 def get_user(
     payload: dict = Depends(decode_access_token),
-    session: Session = Depends(get_db),
-) -> User | None:
-    service = UserService(db=session)
-    usr = service.get_by_id(id=payload.get("sub", ""))
-
-    if not usr:
+):
+    if payload.get("id") is None:
         raise HTTPException(
-            404, {"msg": "User does not exist ..", "type": "Invalid credentials"})
+            401, {"msg": "Invalid token payload", "type": "Invalid credentials"})
 
-    return usr
+    return UUID(payload["id"])

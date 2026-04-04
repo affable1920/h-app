@@ -10,7 +10,7 @@ from app.database.entry import get_db, engine
 from app.constants import index as constants
 from datetime import date, datetime, time, timedelta
 
-from app.database.models import Clinic, Mode, Patient, Slot, Schedule, Doctor, Base, User
+from app.database.models import Clinic, Mode,  Slot, Schedule, Doctor, Base, User
 
 faker = Faker()
 

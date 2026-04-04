@@ -206,11 +206,8 @@ class Appointment(TimeStampMixin, Base):
 
     patient_id: Mapped[Optional[UUID]] = mapped_column(
         sa.ForeignKey("patient.id"), nullable=True)
-    patient: Mapped[Patient] = relationship(back_populates="appointments")
-
-    guest_name: Mapped[Optional[str]] = mapped_column(nullable=True)
-    guest_contact: Mapped[Optional[str]] = mapped_column(
-        sa.String(length=10),  nullable=True)
+    patient: Mapped[Patient] = relationship(
+        back_populates="appointments", foreign_keys=[patient_id])
 
     slot_id: Mapped[UUID] = mapped_column(
         sa.ForeignKey("slot.id"), nullable=False)

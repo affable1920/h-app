@@ -8,7 +8,6 @@ from app.services.WS import WS_Service
 from app.middleware.access import decode_access_token
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
 
 
 async def ws_endpoint(ws: WebSocket):
@@ -22,7 +21,7 @@ async def ws_endpoint(ws: WebSocket):
     await ws.accept(subprotocol=protocol)
     payload = decode_access_token(token=protocol)
 
-    user_id = payload.get("sub")
+    user_id = payload.get("id")
     if not user_id:
         logging.info("Invalid token. No subject found in token")
         await ws.close(code=4444, reason="invalid token")
@@ -94,8 +93,8 @@ async def ws_endpoint(ws: WebSocket):
     except WebSocketDisconnect as e:
         logger.warning(
             "\nWebsocket Disconnect error occurred. Logging the error below")
-        logger.info(e)
 
+        logger.info(e)
         await WS_Service.broadcast(f"Client #{user_id} left the chat.")
 
     except RuntimeError as e:

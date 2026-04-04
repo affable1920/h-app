@@ -1,13 +1,7 @@
 from enum import Enum
 from typing import Annotated, Literal
-from pydantic import BaseModel, Field, field_serializer
+from pydantic import BaseModel, Field, PlainSerializer, field_serializer
 
-from app.shared.enums import Mode
-
-
-# providing a default value -> field optional
-# providing a default value but also using field for certain constraints -> field optional
-# All three below are optional
 
 ALLOWED_SORT_COLS = Literal["rating", "reviews", "experience", "fee", "name"]
 
@@ -28,20 +22,31 @@ class PaginationParams(BaseModel):
     @property
     def offset(self):
         return (self.page - 1) * (self.max or 10)
+#
+#
 
 
-class FilterParams(BaseModel):
-    specialization: str | None = None
-    mode: Literal[Mode.ONLINE] | None = None
-    currently_available: bool = Field(
-        default=False, alias="currentlyAvailable")
+class BaseFilters(BaseModel):
+    search_query: Annotated[str | None, Field(
+        default=None, alias="searchQuery")]
+    min_rating: Annotated[float | None, Field(
+        default=None, alias="minRating", gt=0, le=5.0)]
+    max_distance: Annotated[int | None, Field(
+        default=None, alias="maxDistance", gt=0)]
 
-    search_query: str | None = Field(default=None, alias="searchQuery")
-    max_distance: int | None = Field(gt=0, default=None, alias="maxDistance")
-    min_rating: Annotated[
-        int | None, Field(gt=0, le=5, default=None, alias="minRating")
-    ]
+
+class DrRouteFilters(BaseFilters):
+    consults_online: Literal["1"] | None = None
+    currently_available: Literal["1"] | None = Field(
+        default=None, alias="currentlyAvailable")
+
+    specialization: Annotated[str | None, PlainSerializer(
+        func=lambda s: s.lower() if s else None, return_type=str), Field(default=None)]
 
     @field_serializer("specialization")
     def serialize(self, spec: str):
         return spec.lower() if spec else None
+
+
+class ClinicRouteFilters(BaseFilters):
+    facilities: Annotated[list[str] | None, Field(default=None)]

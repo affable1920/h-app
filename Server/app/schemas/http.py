@@ -1,4 +1,3 @@
-from enum import Enum
 import enum
 from uuid import UUID
 from datetime import datetime
@@ -9,8 +8,6 @@ from pydantic import (
     EmailStr,
     Field,
     PlainSerializer,
-    field_serializer,
-    model_validator,
 )
 
 from app.schemas.base import FromORM, IDMixin
@@ -30,12 +27,9 @@ IDSerialized = Annotated[UUID, PlainSerializer(
 
 
 class Appointment(FromORM, IDMixin):
-    patient_id: IDSerialized | None
+    patient_id: IDSerialized
     slot: Slot
     scheduled_date: datetime
-
-    guest_name: str | None
-    guest_contact: int | None
 
     created_at: datetime
     status: AppointmentStatus
@@ -59,34 +53,9 @@ class BookingRequestData(FromORM):
     doctor_id: Annotated[UUID, Field(alias="doctorId")]
     slot_id: Annotated[UUID, Field(alias="slotId")]
 
-    patient_id: Annotated[UUID | None, Field(default=None, alias="patientId")]
-    guest_name: Annotated[
-        str | None,
-        Field(
-            default=None,
-            alias="name",
-            description="the patient's name, originally None, a string specifically for a non-existing user.",
-        ),
-    ]
-
-    guest_contact: Annotated[
-        str | None, Field(default=None, min_length=10,
-                          max_length=10, alias="contact")
-    ]
-
-    @model_validator(mode="after")
-    def check_patient(self):
-        """
-        Either the patient_id or guest_details required
-        """
-        if not self.patient_id and not self.guest_name:
-            raise ValueError("either log in or mention your name and contact.")
-
-        return self
-
 
 # Outgoing
-class PaginatedResponse(BaseModel, Generic[T]):
+class PaginatedResponse[T](BaseModel):
     """same GET response for clinics and doctors"""
 
     entities: list[T]
@@ -116,19 +85,14 @@ class ResponseDr(ResponseUser):
     pass
 
 
-class Payload(BaseModel):
-    sub: UUID = Field(alias="id")
+class Payload(IDMixin):
+    id: IDSerialized
     exp: float
     iat: float
-
-    email: str | None = None
+    role: UserRole
     token_type: str = "access"
 
-    model_config = ConfigDict()
-
-    @field_serializer("sub", return_type=str, when_used="always")
-    def serialize_uuid(self, val: UUID):
-        return str(val) if str else None
+    model_config = ConfigDict(use_enum_values=True)
 
 
 # Websocket communication

@@ -12,6 +12,8 @@ from fastapi import (
 )
 
 
+from app.routes import chat
+from app.routes import clinics
 from app.routes import websocket
 from app.routes import auth, doctors, bookings
 
@@ -20,21 +22,23 @@ from app.services.openapi_spec import generate_openapi_spec
 
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(filename=Path(__file__), level=logging.INFO)
 
 
 @asynccontextmanager
 async def root(app: FastAPI):
-    print("Starting up")
+    logging.basicConfig(level=logging.DEBUG, force=True,
+                        format="%(name)s - %(levelname)s - %(message)s")
 
-    from app.database.entry import Base, engine
+    logger.info("Starting up")
+
+    # from app.database.entry import Base, engine
 
     # Base.metadata.create_all(engine)
     # await seed_db()
     app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
 
     yield
-    print("Shutting down")
+    logger.info("Shutting down")
 
 
 app = FastAPI(
@@ -73,6 +77,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(doctors.router)
 app.include_router(bookings.router)
+app.include_router(clinics.router)
+app.include_router(chat.router)
 app.add_websocket_route("/ws", websocket.ws_endpoint)
 
 html = """

@@ -1,35 +1,45 @@
-from uuid import UUID
-from fastapi import Depends
+from typing import Iterable, Tuple
+from groq.types.chat import ChatCompletionMessageParam
 
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, or_, select
 from sqlalchemy.orm import Session
 
-from app.shared.enums import Mode, Status
-from app.database.models import Doctor as DBDoctor
+from app.services.entities.main import EntityService
+from app.shared.enums import Status
+from app.database.models import Doctor
+from app.schemas.query_params import DrRouteFilters
 
-from app.schemas.doctor import Doctor, DoctorSummary
-from app.schemas.query_params import FilterParams, PaginationParams, SortOrder
+msgs: Iterable[ChatCompletionMessageParam] = [
+    {
+        "role": "system",
+        "content": ""
+    },
+    {
+        "role": "user",
+        "content": ""
+    }
+]
 
 
-class DoctorService:
+class DoctorService(EntityService[Doctor]):
     def __init__(self, session: Session):
-        self.session = session
-
-    @staticmethod
-    def get_model_partial(dr: DBDoctor) -> DoctorSummary:
-        return DoctorSummary.model_validate(dr)
+        super().__init__(session, Doctor)
 
     #
 
-    @staticmethod
-    def get_model(dr: DBDoctor) -> Doctor:
-        return Doctor.model_validate(dr)
+    def search(self, query: str) -> Select[Tuple[Doctor]] | None:
+        stmt = select(Doctor).where(or_(
+            Doctor.name.icontains(query),
+            Doctor.primary_specialization.icontains(query)
+        ))
+
+        return stmt
 
     #
-    @staticmethod
-    def __filter(
-        query: Select, filters: FilterParams = Depends()
-    ) -> Select:
+
+    def filter(
+        self, stmt: Select[Tuple[Doctor]], filters: DrRouteFilters
+    ) -> Select[Tuple[Doctor]]:
         """
         (args): all filters to be used for doctors
 
@@ -40,61 +50,23 @@ class DoctorService:
 
         So, this func has nothing to do with sorting and paginating.
         """
-        resultant_query = query
-
         if filters.specialization:
-            resultant_query = query.where(
-                DBDoctor.primary_specialization == filters.specialization
+            stmt = stmt.where(
+                Doctor.primary_specialization == filters.specialization
             )
 
         if filters.min_rating:
-            resultant_query = query.where(
-                DBDoctor.rating >= filters.min_rating)
+            stmt = stmt.where(
+                Doctor.rating >= filters.min_rating)
 
         if filters.currently_available:
-            resultant_query = query.filter(DBDoctor.status == Status.AVAILABLE)
+            stmt = stmt.where(Doctor.status == Status.AVAILABLE)
+
+        if filters.consults_online:
+            stmt = stmt.where(Doctor.consults_online)
 
         if filters.search_query:
-            resultant_query = query.where(
-                DBDoctor.name.icontains(filters.search_query))
+            search_stmt = self.search(filters.search_query)
+            stmt = search_stmt if search_stmt is not None else stmt
 
-        if filters.mode == Mode.ONLINE:
-            resultant_query = query.where(DBDoctor.consults_online)
-
-        return resultant_query
-
-    #
-
-    def get_all(self, pagination: PaginationParams, filters: FilterParams):
-        stmt = select(DBDoctor)
-        stmt = self.__filter(stmt, filters)
-
-        if pagination.sort_by:
-            sort_column = getattr(DBDoctor, pagination.sort_by)
-
-            if pagination.sort_order == SortOrder.DESC:
-                sort_column = sort_column.desc()
-
-            stmt = stmt.order_by(sort_column)
-        stmt = stmt.offset(pagination.offset).limit(pagination.max)
-
-        result = self.session.scalars(stmt)
-        doctors = [self.get_model_partial(dr) for dr in result]
-
-        count = self.session.execute(
-            select(func.count()).select_from(DBDoctor)).scalar()
-
-        last_page = (count or 0) // pagination.max
-        response = {
-            "entities": doctors, "count": count, "has_prev": pagination.page >= 1,
-            "has_next": pagination.page < last_page
-        }
-        return response
-
-    #
-
-    def get_by_id(self, id: UUID) -> Doctor:
-        stmt = select(DBDoctor).where(DBDoctor.id == id)
-
-        result = self.session.execute(stmt).scalar_one()
-        return self.get_model(result)
+        return stmt

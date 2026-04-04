@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ENV = os.getenv("ENV", "dev")
 JWT_SECRET = os.getenv("JWT_SECRET", "")
@@ -7,3 +10,4 @@ DATABASE_URL = os.getenv(
 )
 ALG = os.getenv("ALG", "HS256")
 USE_HTTPS = os.getenv("USE_HTTPS", 0)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")

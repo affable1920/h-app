@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 from pydantic import (
     BaseModel,
@@ -6,6 +6,9 @@ from pydantic import (
     Field,
     PlainSerializer,
 )
+
+
+ENTITIES = Literal["Doctor", "Clinic"]
 
 
 class FromORM(BaseModel):

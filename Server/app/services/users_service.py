@@ -1,8 +1,11 @@
+from uuid import UUID
+
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectin_polymorphic
 from passlib.context import CryptContext
 
-from app.database.models import User
+from app.database.models import Doctor, Patient, User
+from app.shared.enums import UserRole
 
 import logging
 
@@ -27,9 +30,18 @@ class UserService:
 
     #
 
-    def get_by_id(self, id: str) -> User | None:
+    def get_by_id(self, id: str | UUID) -> User | None:
         stmt = select(User).where(User.id == id)
 
+        result = self.session.scalar(stmt)
+        return result
+
+    #
+
+    def get_with_type(self, id: str | UUID):
+        loader_opts = selectin_polymorphic(User, [Patient, Doctor])
+
+        stmt = select(User).where(User.id == id).options(loader_opts)
         result = self.session.scalar(stmt)
         return result
 
@@ -45,14 +57,14 @@ class UserService:
 
     #
 
-    def save(self, email: str, password: str, username: str):
-        created_user = User(
+    def save(self, email: str, password: str, username: str, role: UserRole = UserRole.PATIENT) -> User:
+        created_user = Patient(
             email=email,
             username=username,
             password=self.hash_pwd(pwd=password),
+            role=role
         )
 
         self.session.add(created_user)
         self.session.flush([created_user])
-
         return created_user

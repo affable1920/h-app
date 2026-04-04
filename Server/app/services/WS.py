@@ -9,7 +9,8 @@ from app.schemas.http import MsgType, WS_Message
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-offline_msg = WS_Message(type=MsgType.OFFLINE, payload="Target socket is offline")
+offline_msg = WS_Message(type=MsgType.OFFLINE,
+                         payload="Target socket is offline")
 
 
 class WS_Service:
@@ -47,6 +48,7 @@ class WS_Service:
             await cls.disconnect(
                 id=id, code=1000, reason="New connection for same client"
             )
+            cls.remove_ws(id=id)
 
         cls.active_conns[id] = ws
         logger.info(
@@ -88,6 +90,7 @@ class WS_Service:
             logger.info(
                 f"\nClient #${id} not in currently active connections. Aborting close on it"
             )
+
             return
 
         logger.info("\nTarget ws is present in active connections")
@@ -103,12 +106,14 @@ class WS_Service:
 
             if target_ws.client_state == WebSocketState.CONNECTED:
                 await target_ws.close(code=code, reason=reason)
-                logger.info(f"\nClient #{id} found active. Was uccessfully closed.")
+                logger.info(
+                    f"\nClient #{id} found active. Was uccessfully closed.")
 
             else:
                 logger.info(
                     f"\nClient #{id} already in DISCONNECTED state. Skipping close call ..."
                 )
+                cls.remove_ws(id=id)
 
         except RuntimeError as e:
             logger.warning(
@@ -116,24 +121,21 @@ class WS_Service:
             )
             logger.info(e)
 
-        finally:
-            cls.remove_ws(id)
-            logger.info(
-                f"\nRemoved client #{id} from active connections list\nCurrent active count -> {cls.count()}"
-            )
-
     #
 
     @classmethod
     async def broadcast(cls, payload: Any, type_: MsgType = MsgType.BROADCAST):
         logger.info(
-            f"\nBroadcasting to active connections ... \nCurrently active ->({cls.count()}) -> \n{cls.active_conns}"
+            f"\nBroadcasting to active connections... \tCurrently active -> ({cls.count()})"
         )
         msg = WS_Message(type=type_, payload=payload)
         for id, socket in cls.active_conns.items():
             try:
-                if socket.application_state == WebSocketState.CONNECTED:
+                if socket.client_state == WebSocketState.CONNECTED:
                     await socket.send_json(msg.model_dump_json())
+
+                else:
+                    continue
 
             except RuntimeError as e:
                 logger.info(

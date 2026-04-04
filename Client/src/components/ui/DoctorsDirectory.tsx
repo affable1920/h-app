@@ -19,13 +19,17 @@ function DrCardBack({ doctor }: { doctor: DoctorSummary }) {
 }
 
 function DoctorsDirectory() {
-  const { data: { entities } = { entities: [] }, isFetching } = useGetAll();
+  const result = useGetAll();
 
-  if (isFetching) {
+  if (result.isFetching) {
     return <Spinner />;
   }
 
-  return entities?.map((doctor) => (
+  if (result.isError) {
+    return null;
+  }
+
+  return (result.data?.entities || [])?.map((doctor) => (
     <Card
       key={doctor.id}
       entity={doctor}

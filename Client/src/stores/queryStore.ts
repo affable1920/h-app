@@ -24,9 +24,11 @@ function useQueryStore(): StoreState & StoreActions {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get("page") ?? 1);
-  const searchQuery = searchParams.get("searchQuery") ?? null;
+  const searchQuery = searchParams.get("searchQuery");
 
-  const sortBy: AllowedSortCol = searchParams.get("sortBy") ?? "rating";
+  const sortProp = searchParams.get("sortBy");
+  const sortBy: AllowedSortCol = (sortProp as AllowedSortCol) ?? "rating";
+
   const sortOrderParam = searchParams.get("sortOrder");
   const sortOrder: SortOrder =
     sortOrderParam === "asc" || sortOrderParam === "desc"
@@ -44,7 +46,7 @@ function useQueryStore(): StoreState & StoreActions {
   }
 
   function clearSearchQuery() {
-    setSearchParams((p) => {
+    setSearchParams(function (p) {
       p.delete("searchQuery");
       return p;
     });

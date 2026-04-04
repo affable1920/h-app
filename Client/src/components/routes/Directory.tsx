@@ -1,7 +1,5 @@
-import { useState, Suspense, useCallback } from "react";
+import { useState, Suspense } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-
-import { motion } from "motion/react";
 
 import Spinner from "../Spinner";
 import Input from "@/components/ui/Input";
@@ -19,15 +17,8 @@ import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
 
 const Directory = () => {
   const navigate = useNavigate();
-  const [localSQ, setLocalSQ] = useState("");
+  const [localSearch, setLocalSearch] = useState("");
 
-  /*
-  Using functions from the filter store anywhere will resolve in an error when not used as instances 
-  of the store object (destructured.) because they lose their "this" binding.
-
-  Use arrow methods inside the class.
-  use as instanc methods on the object itself -> store.functionName
-  */
   const {
     searchQuery,
     setSearchQuery,
@@ -37,32 +28,38 @@ const Directory = () => {
     setSort,
   } = useQueryStore();
 
-  // const setQueryCached = useCallback(debounce((sq) => setSearchQuery(sq)), []);
-  const setQueryCached = useCallback(debounce(setSearchQuery), []);
+  const location = useLocation().pathname.split("/").at(-1) ?? "doctors";
+  const openModal = useModalStore((s) => s.openModal);
 
-  const location = useLocation().pathname.split("/").at(1) ?? "doctors";
+  const setQueryCached = debounce(setSearchQuery);
 
   function handleDirectorySwitch() {
     const nextDir = location === "doctors" ? "clinics" : "doctors";
-    navigate(`/${nextDir}`);
+    navigate(`${nextDir}`);
   }
 
-  function openDirectoryFilter() {
-    useModalStore.getState().openModal("directoryFilter", {
-      viewOverlay: true,
-      position: "bottom",
-    });
-  }
+  const openDirectoryFilter = openModal.bind(null, "directoryFilter", {
+    viewOverlay: true,
+    position: "bottom",
+  });
 
-  function handleSearch(query: string) {
-    setLocalSQ(query);
-    setQueryCached(query);
+  function handleSearch(ev: React.ChangeEvent<HTMLInputElement>) {
+    const val = ev.target.value;
+
+    setLocalSearch(val);
+    setQueryCached(val);
   }
 
   function removeSearchQuery() {
-    setLocalSQ("");
+    setLocalSearch("");
     clearSearchQuery();
   }
+
+  const handleSort = setSort.bind(
+    null,
+    sortBy ?? "rating",
+    sortOrder === "asc" ? "desc" : "asc",
+  );
 
   return (
     <section className="flex flex-col gap-4 mx-auto">
@@ -72,13 +69,7 @@ const Directory = () => {
             <SlidersHorizontal />
           </Button>
 
-          <Button
-            variant="ghost"
-            onClick={() =>
-              setSort(sortBy ?? "rating", sortOrder === "asc" ? "desc" : "asc")
-            }
-            data-tooltip={sortOrder}
-          >
+          <Button variant="ghost" onClick={handleSort} data-tooltip={sortOrder}>
             {sortOrder === "asc" ? (
               <ArrowDown01 />
             ) : (
@@ -89,28 +80,29 @@ const Directory = () => {
 
         <div className="flex items-center gap-2">
           {/* search bar */}
-          <Input
-            id="searchQuery"
-            value={localSQ}
-            placeholder="Search"
-            className="italic placeholder:text-sm py-2"
-            onChange={function (ev) {
-              handleSearch(ev.target.value);
-            }}
-          />
-          {searchQuery && (
-            <Button variant="ghost" size="sm">
-              <X onClick={removeSearchQuery} />
-            </Button>
-          )}
+          <div className="relative flex items-center">
+            <Input
+              id="searchQuery"
+              value={localSearch}
+              placeholder="Search"
+              size="sm"
+              className="italic placeholder:text-sm py-2"
+              onChange={handleSearch}
+            />
+            {!!searchQuery && (
+              <Button className="absolute right-2" variant="ghost" size="sm">
+                <X onClick={removeSearchQuery} />
+              </Button>
+            )}
+          </div>
 
           <Button variant="ghost" onClick={handleDirectorySwitch}>
             <ArrowLeftRight />
           </Button>
         </div>
       </section>
+
       <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(400px,1fr))]">
-        {/* outlet renders either the Doctor or clinic directory */}
         <Suspense fallback={<Spinner />}>
           <Outlet />
         </Suspense>

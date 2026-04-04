@@ -30,12 +30,15 @@ function DirectoryFilter() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(function () {
+    const available = searchParams.get("currentlyAvailable");
+    const mode = searchParams.get("mode");
+
     setFilters({
       minRating: Number(searchParams.get("minRating")),
       specialization: searchParams.get("specialization"),
       maxDistance: Number(searchParams.get("maxDistance")),
-      mode: searchParams.get("mode") === "online" ? "online" : null,
-      currentlyAvailable: searchParams.get("currentlyAvailable") === "true",
+      consults_online: mode === "1" ? mode : null,
+      currentlyAvailable: available === "1" ? available : null,
     });
   }, []);
 
@@ -66,7 +69,10 @@ function DirectoryFilter() {
     const newParams = new URLSearchParams();
 
     for (const [key, val] of Object.entries(filters)) {
-      console.info("adding filters: ", key, val);
+      if (!val) {
+        continue;
+      }
+
       newParams.set(key, String(val));
     }
 
@@ -144,17 +150,17 @@ function DirectoryFilter() {
           <Badge
             size="md"
             className="italic max-w-fit ml-auto"
-            selected={filters.currentlyAvailable}
-            onClick={handleFilterUpdate.bind(null, "currentlyAvailable", true)}
+            selected={filters.currentlyAvailable === "1"}
+            onClick={handleFilterUpdate.bind(null, "currentlyAvailable", "1")}
           >
             Available right now !
           </Badge>
 
           <Badge
             size="md"
-            selected={filters.mode === "online"}
+            selected={filters.currentlyAvailable === "1"}
             className="italic max-w-fit ml-auto"
-            onClick={handleFilterUpdate.bind(null, "mode", "online")}
+            onClick={handleFilterUpdate.bind(null, "currentlyAvailable", "1")}
           >
             Online
           </Badge>
@@ -164,6 +170,7 @@ function DirectoryFilter() {
       <div className="flex items-center gap-4 justify-end">
         <Button
           size="md"
+          color="secondary"
           onClick={function () {
             reset();
             closeModal();

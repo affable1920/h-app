@@ -1,46 +1,31 @@
 import Button from "../ui/Button";
 import { Check, X } from "lucide-react";
-import useModalStore from "@/stores/modalStore";
 
 interface ConfirmationProps {
   resolve: () => void;
   reject: () => void;
-  text: string;
+  tagline: string;
 }
 
-const Confirmation = ({ resolve, reject, text = "" }: ConfirmationProps) => {
-  const closeModal = useModalStore((s) => s.closeModal);
-
-  function onConfirmation(accept: boolean) {
-    console.log("Offer accepted -> ", accept);
-
-    if (accept) {
-      resolve();
-    } else {
-      reject();
-    }
-
-    closeModal();
-  }
-
+function Confirmation({ resolve, reject, tagline = "" }: ConfirmationProps) {
   return (
     <div className="space-y-8 py-4 font-semibold">
       <div
         style={{ lineHeight: 1.2 }}
-        className="text-center text-md first-letter:capitalize"
+        className="text-center first-letter:capitalize"
       >
-        {text}
+        {tagline}
       </div>
       <div className="flex items-center justify-between px-4">
-        <Button variant="outlined" onClick={onConfirmation.bind(null, false)}>
+        <Button variant="outlined" onClick={reject}>
           Decline <X strokeWidth={4} />
         </Button>
-        <Button color="secondary" onClick={onConfirmation.bind(null, true)}>
+        <Button color="secondary" onClick={resolve}>
           Accept <Check strokeWidth={4} />
         </Button>
       </div>
     </div>
   );
-};
+}
 
 export default Confirmation;

@@ -43,18 +43,20 @@ function MobileNavigationItem({
   const hasChildren = !!children?.length;
 
   function handleClick() {
-    return hasChildren ? setIsExpanded.bind(EMPTY, (p) => !p) : onClick;
+    return hasChildren ? setIsExpanded.call(EMPTY, (p) => !p) : onClick;
   }
 
   return (
     <div key={label}>
       <motion.button
         whileTap={{ scale: hasChildren ? 0.975 : 1, originX: 0 }}
-        onClick={handleClick()}
+        onClick={handleClick}
         className="cursor-pointer flex items-center justify-between w-full font-semibold capitalize"
       >
         <span className="inline-flex items-center gap-2">
-          <Icon size={14} />
+          <span className="md:hidden">
+            <Icon size={14} />
+          </span>
           {label}
         </span>
         {hasChildren && (
@@ -66,7 +68,7 @@ function MobileNavigationItem({
             }}
           >
             <ChevronRight
-              className={`${isExpanded ? "rotate-90" : "rotate-0"}`}
+              className={`${isExpanded ? "rotate-90" : "rotate-0"} md:hidden`}
               size={14}
               strokeWidth={4}
             />

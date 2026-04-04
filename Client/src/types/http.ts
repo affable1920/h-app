@@ -1,8 +1,7 @@
-import { type components, type paths } from "./api";
+import { type components, type operations, type paths } from "./api";
 
 export type UserLogin = components["schemas"]["LoginUser"];
 export type UserCreate = components["schemas"]["CreateUser"];
-export type UserDB = components["schemas"]["ResponseUser"];
 
 export type BookingRequestData = components["schemas"]["BookingRequestData"];
 export type Appointment = components["schemas"]["Appointment"];
@@ -10,6 +9,9 @@ export type Appointment = components["schemas"]["Appointment"];
 export type GetAllDrResponse =
   paths["/doctors"]["get"]["responses"]["200"]["content"]["application/json"];
 export type GetByIdResponse = components["schemas"]["Doctor"];
+
+export type GetAllClinicsResponse =
+  paths["/clinics"]["get"]["responses"]["200"]["content"]["application/json"];
 
 export type ValidationError = components["schemas"]["HTTPValidationError"];
 export type PydanticValidationError = ValidationError["detail"];
@@ -21,6 +23,11 @@ export type DoctorSummary = components["schemas"]["DoctorSummary"];
 export type Slot = components["schemas"]["Slot"];
 export type Clinic = components["schemas"]["Clinic"];
 export type Schedule = components["schemas"]["Schedule"];
+
+export type ChatRequest =
+  operations["stream_chat"]["requestBody"]["content"]["application/json"];
+export type ChatResponse =
+  operations["stream_chat"]["responses"]["200"]["content"]["application/json"];
 
 export type APIError = {
   msg: string;

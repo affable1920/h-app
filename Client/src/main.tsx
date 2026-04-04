@@ -24,7 +24,7 @@ const client = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={client}>
-      <Toaster closeButton duration={1500} richColors position="top-center" />
+      <Toaster closeButton duration={1500} />
       <RouterProvider router={router} />
       {import.meta.env.DEV && (
         <ReactQueryDevtools buttonPosition="bottom-left" />

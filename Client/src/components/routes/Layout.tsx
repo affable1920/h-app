@@ -8,15 +8,17 @@ import signalingClient from "@/services/SignalingClient";
 const Layout = () => {
   const jwt = useAuthStore((s) => s.token);
 
-  useEffect(() => {
-    if (!jwt) {
-      return;
-    }
+  useEffect(
+    function () {
+      if (!jwt) {
+        return;
+      }
 
-    signalingClient.connect(jwt);
-
-    return () => signalingClient.close(1000, "Unmounting!");
-  }, [jwt]);
+      signalingClient.connect(jwt);
+      return () => signalingClient.close(1000, "Unmounting!");
+    },
+    [jwt],
+  );
 
   return (
     <>

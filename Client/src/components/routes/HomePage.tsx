@@ -5,7 +5,11 @@ const HomePage = () => {
   return (
     <section className="flex flex-col h-1/2 text-center items-center gap-2 max-h-full py-12 pb-2">
       <h1>
-        In <Code>Production</Code>, Hold on tight
+        In{" "}
+        <Code size="sm" color="secondary">
+          Production
+        </Code>
+        , Hold on tight
       </h1>
 
       <Link

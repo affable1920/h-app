@@ -4,13 +4,15 @@ import { FlipVertical } from "lucide-react";
 
 interface CardProps<T> {
   entity: T;
-  CardBack: ReactElement;
+  CardBack?: ReactElement;
   CardFront: ReactElement;
 }
 
 const Card = <T,>({ CardFront, CardBack }: CardProps<T>) => {
   const [isFlipped, setIsFlipped] = useState(false);
-  const handleFlip = useCallback(() => setIsFlipped((p) => !p), []);
+  const handleFlip = useCallback(function () {
+    setIsFlipped((p) => !p);
+  }, []);
 
   return (
     <motion.article

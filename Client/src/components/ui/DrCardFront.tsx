@@ -45,12 +45,10 @@ function DrCardFront({ doctor }: { doctor: DoctorSummary }) {
                   Dr. {doctor.name}
                 </h2>
               </Link>
-              {
-                <ShieldCheck
-                  size={12}
-                  color={doctor.verified ? "green" : "red"}
-                />
-              }
+              <ShieldCheck
+                size={12}
+                color={doctor.verified ? "green" : "red"}
+              />
             </div>
             <div className="flex gap-2 text-sm">
               <h2>{doctor.primary_specialization}</h2>
@@ -63,8 +61,6 @@ function DrCardFront({ doctor }: { doctor: DoctorSummary }) {
           </div>
         </div>
       </section>
-
-      {/* Rest */}
 
       <div className="flex items-center italic gap-1 self-end justify-self-end mt-2">
         {(actions || []).map((action) => {

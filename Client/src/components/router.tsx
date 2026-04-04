@@ -41,6 +41,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, Component: HomePage },
 
+      { path: "chat", Component: Chat },
+
       {
         path: "dir",
         Component: Directory,

@@ -64,16 +64,18 @@ export async function exponentialBackoff(
   console.log("All attempts failed !");
 }
 
-export function debounce(func: (...args: string[]) => void, ms?: number) {
+export function debounce(fn: Function, ms: number = 200) {
   let timeoutId: ReturnType<typeof setTimeout>;
-  const delay = ms ?? 330;
 
-  return function (...args: string[]) {
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      func(...args);
-    }, delay);
-  };
+  function memoized(query: string) {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    timeoutId = setTimeout(fn.bind(fn, query), ms);
+  }
+
+  return memoized;
 }
 
 function getDaysPerMonth(monthIndex: number): number {

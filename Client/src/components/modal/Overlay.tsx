@@ -1,10 +1,10 @@
-const Overlay = ({
+function Overlay({
   children,
   viewOverlay = false,
 }: {
   viewOverlay: boolean;
   children: React.ReactNode;
-}) => {
+}) {
   return (
     <div
       style={{
@@ -14,13 +14,11 @@ const Overlay = ({
         transition: "none",
         background: "rgba(0, 0, 0, 0.25)",
       }}
-      className={`overlay ${
-        viewOverlay ? "flex items-center justify-center" : "bg-transparent"
-      }`}
+      className={`${viewOverlay ? "" : "bg-transparent"}`}
     >
       {children}
     </div>
   );
-};
+}
 
 export default Overlay;

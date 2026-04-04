@@ -8,14 +8,19 @@ import { useProfile } from "@/hooks/auth";
 import useModalStore from "@/stores/modalStore";
 
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, ArrowRightIcon } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Code from "../ui/Code";
+import type { Appointment } from "@/types/http";
+import { useUnbookingMutation } from "@/hooks/bookings";
 
-const UserProfile = () => {
+function UserProfile() {
   const [view, setView] = useState(false);
+
+  const { mutate: unBook } = useUnbookingMutation();
   const { data: profile, isError, isPending } = useProfile();
 
   const openModal = useModalStore((s) => s.openModal);
+  const closeModal = useModalStore((s) => s.closeModal);
 
   if (isError) {
     return (
@@ -27,20 +32,36 @@ const UserProfile = () => {
     );
   }
 
-  const hasBookings = !!profile?.appointments?.length;
+  const hasBookings =
+    profile?.role === "patient" && !!profile?.appointments?.length;
 
-  console.log(profile);
+  function cancel(appointmentId: string) {
+    openModal("confirmation", {
+      tagline: "Confirm cancellation of this appointment ?",
+      resolve: unBook.bind(
+        null,
+        {
+          appointmentId,
+        },
+        {
+          onSuccess: closeModal,
+        },
+      ),
+      reject: closeModal,
+    });
+  }
 
   return (
     <div>
       <Code className="capitalize font-bold text-lg">{profile?.username}</Code>
 
       {hasBookings && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-4">
           <h2 className="card-h2 first-letter:capitalize">
             view your appointments
           </h2>
           <motion.button
+            className="cursor-pointer"
             animate={{ rotate: view ? 90 : 0 }}
             onClick={setView.bind(null, (p) => !p)}
           >
@@ -69,7 +90,7 @@ const UserProfile = () => {
               <Spinner />
             ) : (
               <div className="flex flex-col gap-4 mt-2">
-                {profile.appointments?.map((booking) => (
+                {profile.appointments?.map((booking: Appointment) => (
                   <div
                     key={booking.id}
                     className="flex flex-col gap-4 bg-slate-100/25 border-2
@@ -81,28 +102,18 @@ const UserProfile = () => {
                           "dd LLL yyyy",
                         )}
                       </h2>
-                      <Button size="sm" variant="ghost">
-                        <ArrowRightIcon />
-                      </Button>
                     </header>
 
                     <AnimatePresence>
-                      <motion.div className="self-end flex flex-col gap-1 items-end">
+                      <motion.div className="self-end space-y-1 text-right">
                         <p className="font-semibold">{booking.slot.begin}</p>
                         {booking.slot.booked && (
                           <Button
-                            onClick={openModal.bind(null, "confirmation", {
-                              context: booking,
-                              tagline: "confirm appointment cancellation ?",
-                            })}
+                            color="secondary"
+                            onClick={cancel.bind(null, booking.id)}
                           >
                             cancel appointment
                           </Button>
-                        )}
-                        {booking.status === "cancelled" && (
-                          <p className="capitalize font-black">
-                            appointment cancelled
-                          </p>
                         )}
                       </motion.div>
                     </AnimatePresence>
@@ -115,6 +126,6 @@ const UserProfile = () => {
       </AnimatePresence>
     </div>
   );
-};
+}
 
 export default UserProfile;

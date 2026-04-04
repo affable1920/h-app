@@ -106,7 +106,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/bookings/{booking_id}": {
+    "/bookings/cancel/{booking_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -118,6 +118,40 @@ export interface paths {
         post?: never;
         /** Cancel Booking */
         delete: operations["cancel_booking"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clinics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get */
+        get: operations["get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stream Chat */
+        post: operations["stream_chat"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -186,17 +220,13 @@ export interface components {
              */
             id: string;
             /** Patient Id */
-            patient_id: string | null;
+            patient_id: string;
             slot: components["schemas"]["Slot"];
             /**
              * Scheduled Date
              * Format: date-time
              */
             scheduled_date: string;
-            /** Guest Name */
-            guest_name: string | null;
-            /** Guest Contact */
-            guest_contact: number | null;
             /**
              * Created At
              * Format: date-time
@@ -228,15 +258,6 @@ export interface components {
              * Format: uuid
              */
             slotId: string;
-            /** Patientid */
-            patientId?: string | null;
-            /**
-             * Name
-             * @description the patient's name, originally None, a string specifically for a non-existing user.
-             */
-            name?: string | null;
-            /** Contact */
-            contact?: string | null;
         } & {
             [key: string]: unknown;
         };
@@ -404,11 +425,42 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** MessageRequest */
+        MessageRequest: {
+            /** @default user */
+            role: components["schemas"]["Role"];
+            /** Message */
+            message: string;
+        } & {
+            [key: string]: unknown;
+        };
+        /** MessageResponse */
+        MessageResponse: {
+            role: components["schemas"]["Role"];
+            /** Message */
+            message: string;
+        } & {
+            [key: string]: unknown;
+        };
         /**
          * Mode
          * @enum {string}
          */
         Mode: "online" | "in person";
+        /** PaginatedResponse[Clinic] */
+        PaginatedResponse_Clinic_: {
+            /** Entities */
+            entities: components["schemas"]["Clinic"][];
+            /** Count */
+            count: number;
+            /** Has Next */
+            has_next?: boolean | null;
+            /**
+             * Has Prev
+             * @default false
+             */
+            has_prev: boolean;
+        };
         /** PaginatedResponse[DoctorSummary] */
         PaginatedResponse_DoctorSummary_: {
             /** Entities */
@@ -424,28 +476,10 @@ export interface components {
             has_prev: boolean;
         };
         /**
-         * ResponseUser
-         * @description this class is purely for http responses so when creating a model using this class,
-         *     it's safe to exclude the password even before creating this model as this model as nothing to
-         *     do with our database
+         * Role
+         * @enum {string}
          */
-        ResponseUser: {
-            /**
-             * Id
-             * @description the unique identifier of the record
-             */
-            id: string;
-            /** Username */
-            username: string;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            role: components["schemas"]["UserRole"];
-        } & {
-            [key: string]: unknown;
-        };
+        Role: "user" | "system" | "assistant";
         /**
          * Schedule
          * @description use datetime as main schedule date getter if doctors
@@ -525,11 +559,6 @@ export interface components {
          * @enum {string}
          */
         Status: "away" | "available" | "in_patient" | "unknown";
-        /**
-         * UserRole
-         * @enum {string}
-         */
-        UserRole: "admin" | "doctor" | "patient" | "clinic" | "guest";
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -567,7 +596,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResponseUser"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -600,7 +629,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResponseUser"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -629,7 +658,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResponseUser"];
+                    "application/json": unknown;
                 };
             };
         };
@@ -637,12 +666,12 @@ export interface operations {
     get_doctors: {
         parameters: {
             query?: {
-                specialization?: string | null;
-                mode?: "online" | null;
-                currentlyAvailable?: boolean;
                 searchQuery?: string | null;
-                maxDistance?: number | null;
                 minRating?: number | null;
+                maxDistance?: number | null;
+                consults_online?: "1" | null;
+                currentlyAvailable?: "1" | null;
+                specialization?: string | null;
                 page?: number;
                 max?: number;
                 sortBy?: ("rating" | "reviews" | "experience" | "fee" | "name") | null;
@@ -756,6 +785,80 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get: {
+        parameters: {
+            query?: {
+                page?: number;
+                max?: number;
+                sortBy?: ("rating" | "reviews" | "experience" | "fee" | "name") | null;
+                sortOrder?: components["schemas"]["SortOrder"] | null;
+                searchQuery?: string | null;
+                minRating?: number | null;
+                maxDistance?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": string[] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_Clinic_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stream_chat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
                 };
             };
             /** @description Validation Error */

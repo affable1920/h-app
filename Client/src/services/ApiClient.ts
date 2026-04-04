@@ -76,8 +76,6 @@ class APIClient {
         errors here in a structured, regular and predictable order for the components|hooks to handle
         */
 
-        console.log("api client response interceptor error\n", error);
-
         if (error.request && !error.response) {
           return Promise.reject(serverDownError);
         }
@@ -94,8 +92,6 @@ class APIClient {
           toast.info(msg);
 
           logout();
-          window.location.href = "/";
-
           return;
         }
 

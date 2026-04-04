@@ -1,6 +1,5 @@
 import { toast } from "sonner";
 import { config } from "@/config";
-import { logout } from "@/stores/authStore";
 
 type MsgType =
   | "offer"
@@ -48,23 +47,30 @@ class SignalingClient extends EventTarget {
     this.evs.add({ type, handler });
   }
 
-  off = (type: MsgType, handler: EventHandler) => {
+  off(type: MsgType, handler: EventHandler) {
     console.log(
       `\nRemoving ev listener on signaling client\n Type -> (${type})`,
     );
     this.removeEventListener(type, handler as EventListener);
     this.evs.delete({ type, handler });
-  };
+  }
 
-  connect = (token: string) => {
-    if (this.ws) {
+  connect(token: string) {
+    console.log("\nRequest recieved for a new Websocket connection creation.");
+
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      console.log(
+        "\nWebsocket connection already in OPEN state. Aborting creation of a new connection.",
+      );
       return;
     }
 
-    this.ws = new WebSocket(`${this.url}`, token);
+    this.ws = new WebSocket(this.url, token);
 
     this.ws.onopen = () => {
       this.dispatchEvent(new CustomEvent("join"));
+
+      console.log("\nWebsocket connection established successfully !");
       this.send("join", { payload: "Hey server .." });
 
       this.shouldReconnect = true;
@@ -77,7 +83,8 @@ class SignalingClient extends EventTarget {
         "\nRecieved a broadcast message from the server. The msg is logged below ->\n",
         ev,
       );
-      toast("BROADCAST");
+
+      toast("BROADCAST from server");
     });
 
     this.ws.onmessage = (ev) => {
@@ -95,17 +102,11 @@ class SignalingClient extends EventTarget {
     };
 
     this.ws.onclose = (ev) => {
-      console.log("\nWebsocket close event raised. ev ->\n", ev);
+      console.log("\nWebsocket conn close event raised. ev ->\n", ev);
 
       if (ev.code === 4444) {
-        const msg = "\nLogging out. Relogin to continue.";
-
         this.close();
         this.shouldReconnect = false;
-
-        toast("4444", { description: msg });
-        console.log(4444, msg);
-        logout();
         return;
       }
 
@@ -113,19 +114,20 @@ class SignalingClient extends EventTarget {
         this.reconnect(token);
       }
     };
-  };
+  }
 
   get isConnected() {
     if (!this.ws) {
       return false;
     }
 
+    // Return true even if the websocket is in CONNECTING state.
     return this.ws.readyState <= WebSocket.OPEN;
   }
 
   private reconnect(token: string) {
     console.error(
-      `\n WS connection closed with CODE #1006 -> (Abnormal Closure)\nWill try to reconnect.`,
+      `\n WS connection closed with CODE #1006 (Abnormal Closure) ->\nWill try to reconnect.`,
     );
 
     if (!this.shouldReconnect) {
@@ -146,12 +148,10 @@ class SignalingClient extends EventTarget {
     }
 
     console.info(
-      `\nAttempting to reconnect.\nAttempt number -> ${this.attempt}\nTrying after ${this.delay} seconds.`,
+      `\nAttempting to reconnect.\nAttempt number ${this.attempt}\nTrying after ${this.delay} ms.`,
     );
 
-    setTimeout(() => {
-      this.connect(token);
-    }, this.delay);
+    setTimeout(this.connect.bind(this, token), this.delay);
 
     this.attempt += 1;
     this.delay =

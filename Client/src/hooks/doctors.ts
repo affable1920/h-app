@@ -6,7 +6,7 @@ import {
 
 import APIClient from "@/services/ApiClient";
 import type { operations } from "@/types/api";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import type { GetByIdResponse, GetAllDrResponse } from "@/types/http";
 
 const api = new APIClient("/doctors");
@@ -17,6 +17,8 @@ export function useGetAll() {
   const queryParams: GetAllDrParams = Object.fromEntries(
     searchParams.entries(),
   );
+
+  const route = useLocation().pathname.split("/").at(-1) ?? "doctors";
 
   return useQuery({
     queryKey: ["doctors", { ...queryParams }],
@@ -30,6 +32,7 @@ export function useGetAll() {
     },
 
     placeholderData: keepPreviousData,
+    enabled: route === "doctors",
   });
 }
 

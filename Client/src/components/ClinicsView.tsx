@@ -185,27 +185,29 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                       exit="initial"
                     >
                       <div className="flex items-center gap-2">
-                        {[...new Set(weekdays)].map((wkday) => {
-                          return (
-                            <motion.button
-                              key={wkday}
-                              variants={ClinicViewVariants.badgeVariants}
-                            >
-                              <Badge
-                                rounded={false}
-                                as={"span"}
-                                full={false}
-                                className="px-4"
-                                onClick={function () {
-                                  updater("weekday", wkday);
-                                }}
-                                selected={isWkdaySelected(wkday)}
+                        {[...new Set(weekdays)]
+                          .sort((a, b) => a - b)
+                          .map((wkday) => {
+                            return (
+                              <motion.button
+                                key={wkday}
+                                variants={ClinicViewVariants.badgeVariants}
                               >
-                                {getWeekday(wkday).slice(0, 3)}
-                              </Badge>
-                            </motion.button>
-                          );
-                        })}
+                                <Badge
+                                  rounded={false}
+                                  as={"span"}
+                                  full={false}
+                                  className="px-4"
+                                  onClick={function () {
+                                    updater("weekday", wkday);
+                                  }}
+                                  selected={isWkdaySelected(wkday)}
+                                >
+                                  {getWeekday(wkday).slice(0, 3)}
+                                </Badge>
+                              </motion.button>
+                            );
+                          })}
                       </div>
 
                       <div className="flex flex-col gap-4">

@@ -1,16 +1,13 @@
-import type { components } from "@/types/api";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import { jwtDecode } from "jwt-decode";
 
-type User = components["schemas"]["ResponseUser"];
-
 interface AuthStore {
   token: string | null;
-  user: User | null;
+  user: any | null;
   setUser: (jwt: string) => void;
-  getUser: () => User | null;
+  getUser: () => any | null;
 }
 
 const useAuthStore = create<AuthStore>()(
@@ -30,7 +27,7 @@ const useAuthStore = create<AuthStore>()(
       },
 
       setUser(jwt) {
-        const decoded = jwtDecode<User>(jwt);
+        const decoded = jwtDecode(jwt);
         set({ user: decoded, token: jwt });
       },
     }),

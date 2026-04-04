@@ -18,7 +18,6 @@ import {
   Stethoscope,
   Syringe,
   User,
-  VenetianMask,
 } from "lucide-react";
 import useAuthStore, { logout } from "@/stores/authStore";
 import type { MobileNavItem } from "@/types/utils";
@@ -100,7 +99,13 @@ const NavBar = () => {
             navigate("/dir/clinics");
           },
         },
-        { label: "ask assistant (Pro)", icon: Bot },
+        {
+          label: "ask assistant (Pro Plan)",
+          icon: Bot,
+          onClick() {
+            navigate("/assistant");
+          },
+        },
       ],
     },
     {
@@ -131,7 +136,7 @@ const NavBar = () => {
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center font-semibold text-sm gap-12">
           {navLinks.map((navItem) => (
-            <NavLink key={navItem.label} to={`/${navItem.label}`}>
+            <NavLink key={navItem.label} to={`/`}>
               <h1 className="capitalize">{navItem.label}</h1>
             </NavLink>
           ))}
@@ -151,7 +156,10 @@ const NavBar = () => {
             <Search />
           </Button>
 
-          <Button variant="ghost" onClick={() => setShowMobileMenu((p) => !p)}>
+          <Button
+            variant="ghost"
+            onClick={setShowMobileMenu.bind(null, (p) => !p)}
+          >
             {showMobileMenu ? <Minimize2 /> : <Menu />}
           </Button>
         </div>
@@ -178,7 +186,7 @@ const NavBar = () => {
               }}
             >
               {navLinks.map((navItem) => (
-                <MobileNavigationItem {...navItem} />
+                <MobileNavigationItem key={navItem.label} {...navItem} />
               ))}
 
               <Button

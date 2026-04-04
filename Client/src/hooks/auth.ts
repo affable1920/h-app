@@ -13,7 +13,6 @@ export function useProfile() {
       return response.data;
     },
 
-    staleTime: 7200,
     retry: false,
   });
 }
@@ -21,14 +20,12 @@ export function useProfile() {
 export function useSignin() {
   return useMutation({
     mutationFn: async (user: UserLogin) => {
-      const response = await api.post<UserDB, UserLogin>("login", user);
-
+      const response = await api.post<undefined, UserLogin>("login", user);
       const jwt = response.headers["x-auth-token"];
 
       if (!jwt) {
         throw new Error("no access token recieved on login...");
       }
-
       useAuthStore.getState().setUser(jwt);
     },
   });
@@ -37,8 +34,7 @@ export function useSignin() {
 export function useSignup() {
   return useMutation({
     mutationFn: async (user: UserCreate) => {
-      const response = await api.post<UserDB, UserCreate>("register", user);
-
+      const response = await api.post<undefined, UserCreate>("register", user);
       const jwt = response.headers["x-auth-token"];
 
       if (!jwt) {

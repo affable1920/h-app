@@ -34,22 +34,16 @@ export function useBookingMutation() {
 
 export function useUnbookingMutation() {
   const queryClient = useQueryClient();
-  const api = new APIClient("/auth");
 
   return useMutation({
-    mutationFn: ({
-      appointmentId,
-    }: {
-      appointmentId: string;
-      doctorId: string;
-    }) => {
-      return api.delete(`me/appointments/${appointmentId}`);
+    mutationFn({ appointmentId }: { appointmentId: string; doctorId: string }) {
+      return api.delete(`cancel/${appointmentId}`);
     },
 
     onSuccess(_, { doctorId }) {
       return Promise.all([
         queryClient.invalidateQueries({
-          queryKey: ["doctors", doctorId],
+          queryKey: ["doctor", doctorId],
         }),
         queryClient.invalidateQueries({
           queryKey: ["auth", "me"],

@@ -198,9 +198,11 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                                   as={"span"}
                                   full={false}
                                   className="px-4"
-                                  onClick={function () {
-                                    updater("weekday", wkday);
-                                  }}
+                                  onClick={updater.bind(
+                                    updater,
+                                    "weekday",
+                                    wkday,
+                                  )}
                                   selected={isWkdaySelected(wkday)}
                                 >
                                   {getWeekday(wkday).slice(0, 3)}

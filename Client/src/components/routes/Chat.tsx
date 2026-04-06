@@ -1,30 +1,27 @@
-import APIClient from "@/services/ApiClient";
-import { useEffect, useRef, useState } from "react";
-import { ArrowUp, SendHorizonal } from "lucide-react";
-import Code from "../ui/Code";
+import { useEffect, useRef } from "react";
+import { ArrowUp, SendHorizonal, SquareStop } from "lucide-react";
 import { motion } from "motion/react";
-import type { ChatResponse, APIError, ChatRequest } from "@/types/http";
+import type { APIError } from "@/types/http";
 import { toast } from "sonner";
-import useAuthStore from "@/stores/authStore";
 import Button from "../ui/Button";
-
-const api = new APIClient("/chat");
+import useChat from "@/hooks/chat";
+import AssistantMessage from "../AssistantMessage";
 
 function Chat() {
-  const usr = useAuthStore((s) => s.user);
-
   const ref = useRef<HTMLInputElement>(null);
-  const anchor = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { conversation, send, ongoing, stop } = useChat();
 
-  const [conversation, setConversation] = useState<
-    Array<ChatRequest | ChatResponse>
-  >([]);
+  useEffect(function () {
+    if (ref.current) {
+      ref.current?.focus();
+    }
+  }, []);
 
   useEffect(
     function () {
-      const wrapper = containerRef.current;
+      const wrapper = wrapperRef.current;
 
       if (wrapper) {
         wrapper.scrollTo({
@@ -42,18 +39,7 @@ function Chat() {
     }
   }
 
-  function updateConversation(role: ChatRequest["role"], message: string) {
-    setConversation(function (prev) {
-      return [...prev, { role, message }];
-    });
-  }
-
   async function sendMsg() {
-    if (!usr) {
-      toast.warning("Please login to access and chat with the assistant !");
-      return;
-    }
-
     if (!ref.current) {
       return;
     }
@@ -61,29 +47,17 @@ function Chat() {
     let prompt = ref.current.value;
 
     if (!prompt.trim()) {
-      toast.warning("Invalid Prompt!", {
-        description: "Please enter a valid prompt",
-      });
-
+      toast.warning("Invalid Prompt!");
       return;
     }
 
-    const reference = conversation;
-    updateConversation("user", prompt);
+    clearPrompt();
 
     try {
-      const response = await api.post<ChatResponse, ChatRequest>(undefined, {
-        role: "user",
-        message: prompt,
-      });
-
-      clearPrompt();
-
-      updateConversation(response.data.role, response.data.message);
-      anchor.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      await send(prompt);
     } catch (ex) {
+      console.log(ex);
       ref.current.value = prompt;
-      setConversation(reference);
 
       const { type, msg } = ex as APIError;
       toast.error(type, { description: msg });
@@ -93,41 +67,38 @@ function Chat() {
   return (
     <section className="h-full max-h-[calc(100vh-12rem)] flex flex-col gap-10 p-4">
       <motion.section
-        layout
-        ref={containerRef}
-        className="flex flex-col gap-12 grow overflow-y-scroll relative md:text-md"
+        ref={wrapperRef}
+        className="flex flex-col gap-12 grow overflow-y-scroll relative"
         style={{ scrollbarWidth: "none", scrollBehavior: "smooth" }}
       >
         {conversation.map((response) => {
           const isUser = response.role === "user";
+
           return (
             <motion.article
-              layout
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className={`gap-2 flex flex-col ${isUser ? "items-end" : "items-start"}`}
+              className={`flex flex-col gap-2 ${isUser ? "items-end" : "items-start"}`}
             >
-              <Code
-                size="sm"
-                className="capitalize font-semibold w-fit text-sm opacity-80"
-              >
+              <h1 className="capitalize font-semibold w-fit opacity-80">
                 {response.role}
-              </Code>
-              <Code
-                size="md"
-                className={`first-letter:capitalize py-4 px-4 font-semibold rounded-lg`}
-              >
-                {response.message}
-              </Code>
+              </h1>
+              {isUser ? (
+                <p
+                  className={`first-letter:capitalize max-w-9/12 md:max-w-1/2`}
+                >
+                  {response.message}
+                </p>
+              ) : (
+                <AssistantMessage content={response.message} />
+              )}
             </motion.article>
           );
         })}
 
-        {(containerRef.current?.scrollHeight ?? 0) >
+        {(wrapperRef.current?.scrollHeight ?? 0) >
           window.document.documentElement.scrollHeight - 75 && (
           <Button
             onClick={function () {
-              containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+              wrapperRef.current?.scrollTo({ top: 0, behavior: "smooth" });
             }}
             variant="ghost"
             className="sticky self-end p-2 bottom-0 flex justify-center items-center rounded-full bg-black"
@@ -164,18 +135,29 @@ function Chat() {
           }}
           name="prompt"
           placeholder="Ask Anything .."
-          className="size-full outline-none placeholder:italic first-letter:capitalize"
+          onClick={sendMsg}
+          className="size-full outline-none placeholder:italic placeholder:text-sm first-letter:capitalize"
         />
-        <Button
-          className="bg-slate-200 rounded-sm flex items-center justify-center p-2 absolute right-3"
-          variant="ghost"
-        >
-          <SendHorizonal
-            onClick={sendMsg}
-            className="-rotate-90 cursor-pointer"
-            size={16}
-          />
-        </Button>
+        <div className="absolute right-3 flex items-center justify-center">
+          {ongoing ? (
+            <Button
+              className="bg-secondary border-2 border-secondary-dark text-gray-300 rounded-sm p-1.5"
+              variant="ghost"
+              onClick={stop}
+            >
+              <SquareStop size={14} />
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              disabled={ongoing}
+              onClick={sendMsg}
+              className="bg-accent border-2 border-accent-dark text-white rounded-sm p-1.5"
+            >
+              <SendHorizonal size={14} />
+            </Button>
+          )}
+        </div>
       </motion.div>
     </section>
   );

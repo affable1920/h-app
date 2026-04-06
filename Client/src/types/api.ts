@@ -261,6 +261,23 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        /** ChatMessageRequest */
+        ChatMessageRequest: {
+            /** @default user */
+            role: components["schemas"]["Role"];
+            /** Message */
+            message: string;
+        } & {
+            [key: string]: unknown;
+        };
+        /** ChatMessageResponse */
+        ChatMessageResponse: {
+            role: components["schemas"]["Role"];
+            /** Message */
+            message: string;
+        } & {
+            [key: string]: unknown;
+        };
         /** Clinic */
         Clinic: {
             /**
@@ -424,23 +441,6 @@ export interface components {
             email: string;
             /** Password */
             password: string;
-        };
-        /** MessageRequest */
-        MessageRequest: {
-            /** @default user */
-            role: components["schemas"]["Role"];
-            /** Message */
-            message: string;
-        } & {
-            [key: string]: unknown;
-        };
-        /** MessageResponse */
-        MessageResponse: {
-            role: components["schemas"]["Role"];
-            /** Message */
-            message: string;
-        } & {
-            [key: string]: unknown;
         };
         /**
          * Mode
@@ -848,7 +848,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MessageRequest"];
+                "application/json": components["schemas"]["ChatMessageRequest"];
             };
         };
         responses: {
@@ -858,7 +858,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MessageResponse"];
+                    "application/json": components["schemas"]["ChatMessageResponse"];
                 };
             };
             /** @description Validation Error */

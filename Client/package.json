@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@tailwindcss/typography": "^0.5.19",
     "@vitejs/plugin-basic-ssl": "^2.1.4",
     "axios": "^1.13.2",
     "jwt-decode": "^4.0.0",
@@ -46,6 +47,9 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "lucide-react": "^0.555.0",
+    "react-markdown": "^10.1.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
     "tailwindcss": "^4.0.7",
     "typescript": "^5.9.3",

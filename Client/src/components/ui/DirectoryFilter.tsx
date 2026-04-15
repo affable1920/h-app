@@ -1,5 +1,3 @@
-import { useCallback, useEffect, useState } from "react";
-
 import useModalStore from "@/stores/modalStore";
 import Badge from "@/components/ui/Badge";
 import { AnimatePresence } from "motion/react";
@@ -11,59 +9,23 @@ import SelectFilter from "./SelectFilter";
 
 import * as constants from "@/utils/dataConstants";
 import { useSearchParams } from "react-router-dom";
-import type { paths } from "@/types/api";
+import useFilterStore from "@/stores/filterStore";
 
 const RATINGFILTER = {
   label: "rating",
   options: [2, 3, 4],
 };
 
-type FilterState = Omit<
-  NonNullable<paths["/doctors"]["get"]["parameters"]["query"]>,
-  "max" | "page" | "sortBy" | "sortOrder" | "searchQuery"
->;
-
-type FilterKey = keyof FilterState;
-
 function DirectoryFilter() {
-  const [filters, setFilters] = useState<Partial<FilterState>>({});
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { filters, handleFilterUpdate, activeFiltersCount, reset } =
+    useFilterStore();
+  const [, setSearchParams] = useSearchParams();
 
-  useEffect(function () {
-    const available = searchParams.get("currentlyAvailable");
-    const mode = searchParams.get("mode");
+  const handleSpecUpdate = handleFilterUpdate.bind(filters, "specialization");
 
-    setFilters({
-      minRating: Number(searchParams.get("minRating")),
-      specialization: searchParams.get("specialization"),
-      maxDistance: Number(searchParams.get("maxDistance")),
-      consults_online: mode === "1" ? mode : null,
-      currentlyAvailable: available === "1" ? available : null,
-    });
-  }, []);
-
-  const handleSpecUpdate = useCallback(
-    handleFilterUpdate.bind(null, "specialization"),
-    [],
-  );
   const closeModal = useModalStore((s) => s.closeModal);
 
-  function reset() {
-    setFilters({});
-  }
-
-  function handleFilterUpdate<K extends FilterKey>(
-    key: K,
-    val: FilterState[K],
-  ) {
-    setFilters(function (prev) {
-      return { ...prev, [key]: filters[key] === val ? undefined : val };
-    });
-  }
-
   const selectedSpecialization = filters.specialization ?? null;
-
-  const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   async function applyFiltersHTTP() {
     const newParams = new URLSearchParams();
@@ -87,9 +49,9 @@ function DirectoryFilter() {
   return (
     <section className="flex flex-col h-full gap-8 p-4 px-6 relative text-xs">
       <div className="flex items-center justify-between">
-        {!!activeFilterCount && (
+        {!!activeFiltersCount && (
           <div className="ml-auto flex items-center gap-2">
-            <p>{activeFilterCount}</p>
+            <p>{activeFiltersCount}</p>
             <Button
               className="p-2"
               variant="ghost"
@@ -109,9 +71,7 @@ function DirectoryFilter() {
                 as="button"
                 className="max-w-fit capitalize"
                 selected={!!selectedSpecialization}
-                onClick={function () {
-                  handleSpecUpdate(null);
-                }}
+                onClick={() => handleSpecUpdate(null)}
               >
                 {selectedSpecialization}
               </Badge>
@@ -147,14 +107,6 @@ function DirectoryFilter() {
             selectedOption={filters["minRating"] ?? undefined}
             onOptionSelect={handleFilterUpdate.bind(null, "minRating")}
           />
-          <Badge
-            size="md"
-            className="italic max-w-fit ml-auto"
-            selected={filters.currentlyAvailable === "1"}
-            onClick={handleFilterUpdate.bind(null, "currentlyAvailable", "1")}
-          >
-            Available right now !
-          </Badge>
 
           <Badge
             size="md"
@@ -162,7 +114,7 @@ function DirectoryFilter() {
             className="italic max-w-fit ml-auto"
             onClick={handleFilterUpdate.bind(null, "currentlyAvailable", "1")}
           >
-            Online
+            Online Now
           </Badge>
         </div>
       </section>

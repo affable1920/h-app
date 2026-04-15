@@ -8,21 +8,18 @@ import { Link, useNavigate } from "react-router-dom";
 import useModalStore from "@/stores/modalStore";
 import useAuthStore from "@/stores/authStore";
 import Confirmation from "./Confirmation";
+import Search from "../Search";
+import Sorter from "../ui/Sorter";
 
 const MODALS: Record<string, React.ElementType> = {
-  aiGenerateModal: function AIGenerateModal() {
-    return (
-      <div>
-        <h2>Hello there !</h2>
-      </div>
-    );
-  },
-
   schedule: ScheduleModal,
+  search: Search,
+
+  sorter: Sorter,
 
   directoryFilter: DirectoryFilter,
 
-  call: function Call(dr: DoctorSummary) {
+  call(dr: DoctorSummary) {
     return (
       <article>
         <h2 className="card-h2">{dr?.name}</h2>

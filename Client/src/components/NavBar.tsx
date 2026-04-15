@@ -1,6 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  useLocation,
+  useNavigate,
+  type NavigateOptions,
+} from "react-router-dom";
 
 import Button from "@/components/ui/Button";
 import {
@@ -29,6 +35,13 @@ const NavBar = () => {
 
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
+
+  const moveTo = useCallback(
+    function (href: string, options?: NavigateOptions) {
+      navigate(href, { ...options });
+    },
+    [navigate],
+  );
 
   useEffect(
     function () {
@@ -71,7 +84,7 @@ const NavBar = () => {
       label: "Home",
       icon: Home,
       onClick() {
-        navigate("/");
+        moveTo("/");
       },
     },
     {
@@ -82,7 +95,7 @@ const NavBar = () => {
           label: "doctor",
           icon: Stethoscope,
           onClick() {
-            navigate("/dir/doctors");
+            moveTo("/dir/doctors");
           },
         },
         {
@@ -96,20 +109,20 @@ const NavBar = () => {
           label: "pharmacy",
           icon: Syringe,
           onClick() {
-            navigate("/dir/clinics");
+            moveTo("/dir/clinics");
           },
         },
         {
           label: "ask assistant (Pro Plan)",
           icon: Bot,
           onClick() {
-            navigate("/assistant");
+            moveTo("/chat");
           },
         },
       ],
     },
     {
-      label: user?.username ?? "profile",
+      label: "profile",
       icon: User,
       children: [
         { label: "settings", icon: Settings },
@@ -118,7 +131,7 @@ const NavBar = () => {
           label: "history",
           icon: History,
           onClick() {
-            navigate("/auth/me");
+            moveTo("/auth/me");
           },
         },
         { label: "logout", icon: LogOut, onClick: logout },
@@ -129,12 +142,12 @@ const NavBar = () => {
   return (
     <motion.header className="shadow-xl shadow-slate-300/20 border-b-2 z-10 border-b-slate-300/40 p-8 py-6 relative">
       <div className="container flex items-center justify-between">
-        <Button onClick={() => navigate("/")} variant="ghost">
+        <Button onClick={() => moveTo("/")} variant="ghost">
           <Stethoscope />
         </Button>
 
         {/* Desktop navigation */}
-        <nav className="hidden md:flex items-center font-semibold text-sm gap-12">
+        <nav className="hidden md:flex items-center font-semibold gap-12">
           {navLinks.map((navItem) => (
             <NavLink key={navItem.label} to={`/`}>
               <h1 className="capitalize">{navItem.label}</h1>
@@ -151,7 +164,10 @@ const NavBar = () => {
         </nav>
 
         <div className="flex md:hidden items-center gap-4 font-bold cursor-pointer">
-          <Button className="italic gap-2 text-sm" variant="ghost">
+          <Button
+            className="italic gap-2 text-sm tracking-wider"
+            variant="ghost"
+          >
             Ctrl K
             <Search />
           </Button>

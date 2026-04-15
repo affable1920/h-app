@@ -168,8 +168,8 @@ class RTCManager {
 
   async createOffer() {
     const offer = await this.rtc.createOffer();
-
     await this.rtc.setLocalDescription(offer);
+
     signalingClient.send("offer", {
       payload: offer,
       metadata: { to: "8f1351d8-9e3d-495d-a481-fe71107ee3af" },
@@ -224,7 +224,7 @@ class RTCManager {
     await this.createOffer();
   }
 
-  private baseSetAll = () => {
+  private resetAll = () => {
     this._rtc = null;
     this.localStream = null;
     this.remoteStream = null;
@@ -247,7 +247,7 @@ class RTCManager {
     this.rtc.close();
 
     this.unsetWsListeners();
-    this.baseSetAll();
+    this.resetAll();
   }
 }
 

@@ -24,11 +24,11 @@ const client = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={client}>
-      <Toaster closeButton duration={1500} />
+      <Toaster position="top-left" closeButton duration={1500} />
       <RouterProvider router={router} />
-      {import.meta.env.DEV && (
+      {/* {import.meta.env.DEV && (
         <ReactQueryDevtools buttonPosition="bottom-left" />
-      )}
+      )} */}
     </QueryClientProvider>
   </StrictMode>,
 );

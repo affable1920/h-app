@@ -49,7 +49,6 @@ function MobileNavigationItem({
   return (
     <div key={label}>
       <motion.button
-        whileTap={{ scale: hasChildren ? 0.975 : 1, originX: 0 }}
         onClick={handleClick}
         className="cursor-pointer flex items-center justify-between w-full font-semibold capitalize"
       >
@@ -61,17 +60,10 @@ function MobileNavigationItem({
         </span>
         {hasChildren && (
           <motion.span
-            transition={{ type: "spring", stiffness: 300, damping: 24 }}
-            style={{
-              color: "#3a4050",
-              display: "inline-block",
-            }}
+            animate={{ rotate: isExpanded ? 90 : 0 }}
+            className="md:hidden"
           >
-            <ChevronRight
-              className={`${isExpanded ? "rotate-90" : "rotate-0"} md:hidden`}
-              size={14}
-              strokeWidth={4}
-            />
+            <ChevronRight size={14} strokeWidth={4} />
           </motion.span>
         )}
       </motion.button>

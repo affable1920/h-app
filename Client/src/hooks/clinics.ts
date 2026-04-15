@@ -35,3 +35,16 @@ export function getById(id: string) {
     },
   });
 }
+
+export function useGet(params: { [k: string]: unknown }) {
+  return useQuery({
+    queryKey: ["clinics", { ...params }],
+    async queryFn() {
+      const response = await api.get<GetAllClinicsResponse>(undefined, {
+        params: { ...params },
+      });
+
+      return response.data;
+    },
+  });
+}

@@ -22,7 +22,7 @@ type InputProps = BaseProps & {
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, id, className, error, size = "md", ...props }, ref) => {
     const base = `border-2 border-slate-200 rounded-md outline-none w-full font-semibold placeholder:italic
-            hover:border-secondary/40 hover:ring-2 transition-colors hover:ring-accent/20 focus:ring-2 focus:ring-accent/20 px-3 text-xs`;
+            hover:border-secondary/40 placeholder:capitalize hover:ring-2 transition-colors hover:ring-accent/20 focus:ring-2 focus:ring-accent/20 px-3 text-xs`;
 
     const sz = sizes[size];
 

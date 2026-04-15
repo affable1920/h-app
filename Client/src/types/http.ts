@@ -29,6 +29,10 @@ export type ChatRequest =
 export type ChatResponse =
   operations["stream_chat"]["responses"]["200"]["content"]["application/json"];
 
+export type ServerParams = NonNullable<
+  operations["get_doctors"]["parameters"]["query"]
+>;
+
 export type APIError = {
   msg: string;
   type: string;

@@ -21,11 +21,19 @@ async def get_doctors(
     session: Session = Depends(get_db),
 ):
     srvc = DoctorService(session)
+
+    # Call get_all and create_paginated_res methods defined on the super class
+
     objects = srvc.get_all(
-        pagination=pagination_params, filters=filters)
+        pagination=pagination_params,
+        filters=filters
+    )
 
     response = srvc.create_pg_response(
-        objs=objects, pagination=pagination_params)
+        objs=objects,
+        pagination=pagination_params
+    )
+
     return response
 
 
@@ -37,7 +45,9 @@ async def get_doctor(id: UUID, session: Session = Depends(get_db)):
         return service.get_by_id(id=id)
 
     except NoResultFound as e:
-        raise (HTTPException
-               (status_code=404,
-                detail={"msg": "No result found for the requested doctor ..",
-                        "type": "Doctor does not exist", "detail": str(e)}))
+        raise HTTPException(
+            404, {
+                "msg": "The requested doctor does not exist ..",
+                "detail": str(e)
+            }
+        )

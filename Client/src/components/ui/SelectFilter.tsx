@@ -18,7 +18,7 @@ function Chevron({ isOpen }: { isOpen: boolean }) {
         transition: { duration: 0.15 },
       }}
     >
-      <ChevronRight size={12} />
+      <ChevronRight size={12} strokeWidth={3} />
     </motion.svg>
   );
 }

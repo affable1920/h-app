@@ -51,14 +51,25 @@ class EntityService(Generic[T]):
     #
 
     def create_pg_response(self, objs: Sequence, pagination: PaginationParams):
+        logger.info(
+            f"\nSequence length for which create paginate response is called -> {len(objs)}")
+
         count = self.session.scalar(
             select(func.count()).select_from(self.entity)) or 0
+
         last_page = count // pagination.max
 
-        return ({
-            "entities": objs, "count": count,
-            "has_next": pagination.page < last_page, "has_prev": pagination.page > 1
-        })
+        has_next = (
+            pagination.page < last_page and
+            len(objs) >= pagination.max
+        )
+
+        return {
+            "entities": objs,
+            "count": count,
+            "has_next": has_next,
+            "has_prev": pagination.page > 1
+        }
 
     #
 

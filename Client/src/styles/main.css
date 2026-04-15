@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "./components.css";
 
+@plugin "@tailwindcss/typography";
+
 @theme {
   --color-foreground: #ffffff;
 
@@ -44,7 +46,6 @@
   *::before {
     margin: 0;
     padding: 0;
-    user-select: none;
     box-sizing: border-box;
   }
 
@@ -86,7 +87,7 @@
   [data-tooltip]::after {
     opacity: 0;
     color: white;
-    padding: 8px 4px;
+    padding: 4px;
     position: absolute;
     bottom: 100%; /* Position above the element */
     visibility: hidden;
@@ -95,6 +96,7 @@
     font-size: var(--text-xs);
     border-radius: var(--radius-md);
     transition: opacity 0.2s ease-in-out;
+    width: max-content;
   }
 
   [data-tooltip]:hover::after {

@@ -1,11 +1,12 @@
 import logging
 from fastapi import WebSocket, WebSocketDisconnect
+import jwt
 from pydantic import ValidationError
 
 from app.schemas.http import MsgType, WS_Message
 from app.database.entry import get_db
 from app.services.WS import WS_Service
-from app.middleware.access import decode_access_token
+from app.middleware.access import decode_access_token, get_usr, decode
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,17 @@ async def ws_endpoint(ws: WebSocket):
         return
 
     await ws.accept(subprotocol=protocol)
-    payload = decode_access_token(token=protocol)
+
+    try:
+        payload = decode(token=protocol)
+
+    except jwt.ExpiredSignatureError:
+        await ws.close(4444, "Session expired. Please login again ...")
+        return
+
+    except (jwt.InvalidTokenError, jwt.PyJWTError):
+        await ws.close(4444, "Invalid token recieved. Please login again.")
+        return
 
     user_id = payload.get("id")
     if not user_id:

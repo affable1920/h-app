@@ -107,7 +107,7 @@ class SignalingClient extends EventTarget {
       if (ev.code === 4444) {
         this.close();
         this.shouldReconnect = false;
-        return;
+        this.dispatchEvent(new CustomEvent("session-expired"));
       }
 
       if (ev.code === 1006 && !ev.wasClean) {

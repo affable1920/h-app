@@ -8,7 +8,11 @@ from fastapi import (
     HTTPException,
     Depends,
 )
+import sqlalchemy
+import sqlalchemy.orm
 
+from app.database.entry import get_db
+from app.services.users_service import UserService
 from app.shared.enums import UserRole
 from app.core.config import JWT_SECRET, ALG
 
@@ -71,12 +75,14 @@ def decode_access_token(token: str = Depends(bearer)) -> dict:
             {"msg": "Token expired. please login again", "type": "Session expiry"},
             {"x-session-expire": "true"},
         )
+
     except (jwt.InvalidTokenError, jwt.PyJWTError):
         raise HTTPException(
             401, {"type": "generic jwt error", "msg": "invalid token"})
 
-
 #
+
+
 def get_user(
     payload: dict = Depends(decode_access_token),
 ):
@@ -85,3 +91,27 @@ def get_user(
             401, {"msg": "Invalid token payload", "type": "Invalid credentials"})
 
     return UUID(payload["id"])
+
+
+def decode(token: str):
+    try:
+        return jwt.decode(token, JWT_SECRET, [ALG])
+
+    except jwt.ExpiredSignatureError:
+        raise
+
+    except (jwt.InvalidTokenError, jwt.PyJWTError):
+        raise
+
+
+#
+
+def get_usr(payload: dict = Depends(decode), session: sqlalchemy.orm.Session = Depends(get_db)):
+    usr_id = payload.get("id")
+
+    if usr_id is None:
+        raise HTTPException(
+            404, "The requested user could not be found."
+        )
+
+    return UserService(db=session).get_by_id(id=usr_id)

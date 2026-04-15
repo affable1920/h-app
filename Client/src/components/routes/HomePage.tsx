@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Code from "../ui/Code";
+import { ArrowRight } from "lucide-react";
 
 const HomePage = () => {
   return (
@@ -12,13 +13,22 @@ const HomePage = () => {
         , Hold on tight
       </h1>
 
-      <Link
-        to="dir/doctors"
-        className="underline underline-offset-4 flex items-center gap-2 text-sm hover:bg-accent p-2 
-        rounded-lg hover:text-foreground transition-colors"
-      >
-        <h1>Check directories for now</h1>
-      </Link>
+      <div className="flex items-center flex-col mt-4 gap-2">
+        <Link
+          className="flex items-center gap-1 hover:[&>svg]:translate-x-2 transition-transform duration-200"
+          to="/chat"
+        >
+          Check out our AI Assistant
+          <ArrowRight size={12} />
+        </Link>
+
+        <Link
+          to="dir/doctors"
+          className="flex items-center gap-1 hover:[&>svg]:translate-x-2 transition-transform duration-200"
+        >
+          Check directories for now <ArrowRight size={12} />
+        </Link>
+      </div>
     </section>
   );
 };

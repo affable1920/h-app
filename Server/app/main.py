@@ -1,48 +1,38 @@
-from pathlib import Path
 import logging
-from contextlib import asynccontextmanager
-
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exceptions import RequestValidationError
+from app.routes import auth, doctors, bookings
+from app.routes import websocket
+from app.routes import clinics
+from app.routes import chat
 from fastapi import (
     FastAPI,
     Request,
     status,
 )
 
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
+from contextlib import asynccontextmanager
+from pathlib import Path
 
-from app.routes import chat
-from app.routes import clinics
-from app.routes import websocket
-from app.routes import auth, doctors, bookings
-
-from app.services.data_generator import seed_db
-from app.services.openapi_spec import generate_openapi_spec
-
-
+#
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def root(app: FastAPI):
-    logging.basicConfig(level=logging.DEBUG, force=True,
-                        format="%(name)s - %(levelname)s - %(message)s")
-
     logger.info("Starting up")
-
-    # from app.database.entry import Base, engine
-
-    # Base.metadata.create_all(engine)
-    # await seed_db()
-    app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
+    # app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
 
     yield
     logger.info("Shutting down")
 
 
 app = FastAPI(
-    lifespan=root, openapi_url="/openapi.json", docs_url="/docs", redoc_url="/redoc"
+    lifespan=root,
+    openapi_url="/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
 
@@ -137,15 +127,9 @@ async def health_check():
     return status
 
 
-@app.get("/generate")
-async def generate_data():
-    await seed_db()
-    return {"message": "Data generated successfully"}
-
-
 if __name__ == "__main__":
     import uvicorn
-    from .core.config import USE_HTTPS
+    from app.core.config import USE_HTTPS
 
     """
     Hardcoding the base directory path to the root of the app for now

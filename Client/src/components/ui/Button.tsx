@@ -1,10 +1,10 @@
-import { memo, useMemo } from "react";
+import { useMemo } from "react";
 
 import Spinner from "../Spinner";
 import { getClassConfig } from "../../utils/buttonStyleUtil";
 import type { ButtonProps } from "@/types/button";
 
-const Button = memo((props: ButtonProps) => {
+const Button = (props: ButtonProps) => {
   const classConfig = useMemo(() => getClassConfig(props), [{ ...props }]);
 
   const {
@@ -29,7 +29,7 @@ const Button = memo((props: ButtonProps) => {
       {loading && <Spinner />}
     </button>
   );
-});
+};
 
 export default Button;
 Button.displayName = "Button";

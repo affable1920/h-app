@@ -30,18 +30,6 @@ const dropDownVariants: Record<string, Variant> = {
   },
 };
 
-const optionVariants: Record<string, Variant> = {
-  hidden: {
-    filter: "blur(4px)",
-  },
-  visible: {
-    filter: "blur(0)",
-  },
-  exit: {
-    filter: "blur(4px)",
-  },
-};
-
 const Dropdown = ({
   show = false,
   options = [],
@@ -64,7 +52,6 @@ const Dropdown = ({
           {options.map((opt) => (
             <motion.li
               key={opt}
-              variants={optionVariants}
               className={`hover:bg-zinc-50 p-2 py-2.5 transition-colors capitalize 
                 cursor-pointer font-semibold italic tracking-wide`}
               onClick={() => onOptionSelect?.(opt)}

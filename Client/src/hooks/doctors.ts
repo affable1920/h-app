@@ -1,12 +1,7 @@
-import {
-  keepPreviousData,
-  useQuery,
-  type UseQueryResult,
-} from "@tanstack/react-query";
-
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useLocation, useSearchParams } from "react-router-dom";
 import APIClient from "@/services/ApiClient";
 import type { operations } from "@/types/api";
-import { useLocation, useSearchParams } from "react-router-dom";
 import type { GetByIdResponse, GetAllDrResponse } from "@/types/http";
 
 const api = new APIClient("/doctors");
@@ -31,12 +26,12 @@ export function useGetAll() {
       return response.data;
     },
 
-    placeholderData: keepPreviousData,
     enabled: route === "doctors",
+    placeholderData: keepPreviousData,
   });
 }
 
-export function useGetById(id: string): UseQueryResult<GetByIdResponse> {
+export function useGetById(id: string) {
   return useQuery({
     queryKey: ["doctor", id],
     async queryFn() {

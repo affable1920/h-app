@@ -1,14 +1,19 @@
-import type { paths } from "@/types/api";
+import type { ServerParams } from "@/types/http";
 import { useSearchParams } from "react-router-dom";
 
-type ServerQuery = NonNullable<paths["/doctors"]["get"]["parameters"]["query"]>;
+/*
+We pick only those parameters in our query store changes
+to which we want to reflect asap, not on the click of a button like we do for actual filter properties
+like specialization -> letting the user choose the value first, then confirm
+* */
+
 type StoreState = Pick<
-  ServerQuery,
+  ServerParams,
   "max" | "page" | "searchQuery" | "sortBy" | "sortOrder"
 >;
 
 type AllowedSortCol = StoreState["sortBy"];
-type SortOrder = StoreState["sortOrder"];
+export type SortOrder = StoreState["sortOrder"];
 
 type StoreActions = {
   setPage: (cp: number) => void;
@@ -23,6 +28,7 @@ function useQueryStore(): StoreState & StoreActions {
   const max = 8;
 
   const [searchParams, setSearchParams] = useSearchParams();
+
   const page = Number(searchParams.get("page") ?? 1);
   const searchQuery = searchParams.get("searchQuery");
 
@@ -53,7 +59,7 @@ function useQueryStore(): StoreState & StoreActions {
   }
 
   function setPage(pg: number) {
-    setSearchParams((p) => {
+    setSearchParams(function (p) {
       p.set("page", pg.toString());
       return p;
     });
@@ -64,7 +70,7 @@ function useQueryStore(): StoreState & StoreActions {
   }
 
   function setSort(field: string | null, order: SortOrder) {
-    setSearchParams((p) => {
+    setSearchParams(function (p) {
       if (field) {
         p.set("sortBy", field);
       }
@@ -74,21 +80,25 @@ function useQueryStore(): StoreState & StoreActions {
     });
   }
 
-  const store = {
+  const storeApi = {
     max,
     page,
     reset,
-    setPage,
     sortBy,
     sortOrder,
-    setSort,
-
     searchQuery,
+
+    setPage,
+    setSort,
     setSearchQuery,
     clearSearchQuery,
   };
 
-  return store;
+  // function api(key: keyof StoreState) {
+  //   return storeApi[key]
+  // }
+
+  return storeApi;
 }
 
 export default useQueryStore;

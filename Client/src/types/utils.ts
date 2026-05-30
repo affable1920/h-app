@@ -9,5 +9,6 @@ export type MobileNavItem = {
   label: string;
   icon: ElementType;
   onClick?: () => void;
+  route?: string;
   children?: Array<MobileNavItem>;
 };

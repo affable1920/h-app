@@ -18,7 +18,7 @@ export default defineConfig({
           cert: fs.readFileSync(path.resolve(__dirname, "../cert.pem")),
         }
       : undefined,
-    host: "0.0.0.0",
+    host: useHttps ? "0.0.0.0" : "localhost",
   },
 
   resolve: {

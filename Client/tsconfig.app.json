@@ -1,15 +1,19 @@
+// yaml-language-server: $schema=
+// tsconfig.app.json -> for browser/react
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2022",
+    "target": "ES2022", // js version to emit
     "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"], // type definitions available - DOM = browser API's
+    "module": "ESNext", // Module system
     "skipLibCheck": true,
     "types": [],
     "experimentalDecorators": true,
+    "ignoreDeprecations": "6.0",
 
     "baseUrl": "./src",
+
     "paths": {
       "@/*": ["./*"],
       "@hooks/*": ["./hooks/*"],
@@ -20,19 +24,25 @@
     },
 
     /* Bundler mode */
-    "moduleResolution": "bundler",
+    "moduleResolution": "bundler", // how imports are resolved -> use bundler for vite
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "noEmit": true,
+
     "jsx": "react-jsx",
 
+    // output
+    "noEmit": true, // don't output files, let vite handle it
+
     /* Linting */
+    // strict option - keeps strict type checking on, enables strictNullChecks, noImplicitAny
     "strict": true,
+    "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "vite.config.ts"]
+
+  "include": ["src"] // where to link/check files
 }

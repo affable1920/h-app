@@ -1,20 +1,36 @@
-import type { ChatRequest, ChatResponse } from "@/types/http";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { makeRequest } from "@/features/chat/fetch";
 import { createBuffer } from "@/features/chat/buffer";
 import { stream } from "@/features/chat/stream";
 import useAuthStore from "@/stores/authStore";
+import APIClient from "@/services/ApiClient";
+import type { ChatRequest } from "@/types/http";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const DRAIN_INTERVAL_MS = 16; // 60fps
+const api = new APIClient("/chat");
+
+type Conversation = Array<ChatRequest>;
 
 function useChat() {
   const token = useAuthStore((s) => s.token);
 
-  const [conversation, setConversation] = useState<
-    Array<ChatRequest | ChatResponse>
-  >([]);
+  const [conversation, setConversation] = useState<Conversation>([]);
   const [streaming, setStreaming] = useState(false);
+
+  useEffect(function () {
+    async function getHistory() {
+      const response = await api.get<Conversation>();
+
+      console.log("Initial conversation state ", response.data);
+
+      if (!!response.data) {
+        setConversation(response.data);
+      }
+    }
+
+    getHistory();
+  }, []);
 
   const streamDoneRef = useRef(false);
   const controllerRef = useRef<AbortController>(null);
@@ -51,12 +67,12 @@ function useChat() {
       if (last.role === "assistant") {
         next[next.length - 1] = {
           ...last,
-          message: last.message + chars,
+          content: last.content + chars,
         };
       } else {
         next.push({
           role: "assistant",
-          message: chars,
+          content: chars,
         });
       }
 
@@ -76,7 +92,7 @@ function useChat() {
 
     const input = {
       role: "user" as const,
-      message: prompt,
+      content: prompt,
     };
 
     setConversation(function (prev) {
@@ -87,9 +103,11 @@ function useChat() {
 
     buffer.start(DRAIN_INTERVAL_MS, {
       onChunk,
+
       onDone() {
         streamDoneRef.current = true;
       },
+
       isDone() {
         return streamDoneRef.current;
       },
@@ -118,8 +136,8 @@ function useChat() {
       }
 
       if (response.body) {
-        for await (const chunk of stream(response.body)) {
-          buffer.push(chunk);
+        for await (const chunkContent of stream(response.body)) {
+          buffer.push(chunkContent);
         }
       }
     } catch (ex) {

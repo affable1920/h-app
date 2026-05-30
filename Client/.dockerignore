@@ -1,0 +1,12 @@
+node_modules
+env
+.env
+.git
+dist
+build
+*.log
+*.tmp
+*.cache
+*.bak
+*.swp
+.DS_Store

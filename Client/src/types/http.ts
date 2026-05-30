@@ -1,10 +1,7 @@
 import { type components, type operations, type paths } from "./api";
 
-export type UserLogin = components["schemas"]["LoginUser"];
-export type UserCreate = components["schemas"]["CreateUser"];
-
 export type BookingRequestData = components["schemas"]["BookingRequestData"];
-export type Appointment = components["schemas"]["Appointment"];
+export type Appointment = components["schemas"]["AppointmentResponse"];
 
 export type GetAllDrResponse =
   paths["/doctors"]["get"]["responses"]["200"]["content"]["application/json"];
@@ -18,7 +15,6 @@ export type PydanticValidationError = ValidationError["detail"];
 
 export type Doctor = components["schemas"]["Doctor"];
 export type Status = components["schemas"]["Status"];
-export type DoctorSummary = components["schemas"]["DoctorSummary"];
 
 export type Slot = components["schemas"]["Slot"];
 export type Clinic = components["schemas"]["Clinic"];
@@ -26,12 +22,17 @@ export type Schedule = components["schemas"]["Schedule"];
 
 export type ChatRequest =
   operations["stream_chat"]["requestBody"]["content"]["application/json"];
-export type ChatResponse =
-  operations["stream_chat"]["responses"]["200"]["content"]["application/json"];
-
 export type ServerParams = NonNullable<
   operations["get_doctors"]["parameters"]["query"]
 >;
+
+export type PatientCreate =
+  operations["register_pt"]["requestBody"]["content"]["application/json"];
+export type PatientLogin = components["schemas"]["PatientLogin"];
+export type DoctorLogin = components["schemas"]["DoctorLogin"];
+export type DoctorCreate =
+  components["schemas"]["Body_create_doctors_onboard_post"];
+export type UserResponse = components["schemas"]["UserResponse"];
 
 export type APIError = {
   msg: string;

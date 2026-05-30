@@ -26,8 +26,8 @@ export function useGetAll() {
       return response.data;
     },
 
-    enabled: route === "doctors",
     placeholderData: keepPreviousData,
+    enabled: route === "doctors",
   });
 }
 

@@ -1,58 +1,38 @@
+import type { UserResponse } from "@/types/http";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { jwtDecode } from "jwt-decode";
-
 interface AuthStore {
   token: string | null;
-  user: any | null;
-  setUser: (jwt: string) => void;
-  getUser: () => any | null;
+  user: UserResponse | null;
+  setUser: (usr: UserResponse) => void;
+  saveToken: (jwt: string) => void;
 }
 
 const useAuthStore = create<AuthStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       token: null,
       user: null,
 
-      getUser() {
-        const jwt = get().token;
-
-        if (jwt) {
-          return jwtDecode(jwt);
-        } else {
-          return null;
-        }
+      setUser(usr) {
+        set({ user: usr });
       },
 
-      setUser(jwt) {
-        const decoded = jwtDecode(jwt);
-        set({ user: decoded, token: jwt });
+      saveToken(jwt) {
+        set({ token: jwt });
       },
     }),
 
     {
       name: "auth-storage",
-
-      partialize(state) {
-        return { token: state.token };
-      },
-
-      onRehydrateStorage() {
-        return (store) => {
-          if (store?.token) {
-            store.setUser(store.token);
-          }
-        };
-      },
     },
   ),
 );
 
-export const logout = () => {
+export function logout() {
   useAuthStore.persist.clearStorage();
-  window.location.href = "/";
-};
+  window.location.href = "/auth";
+}
 
 export default useAuthStore;

@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import type React from "react";
+import type { HTMLMotionProps } from "motion/react";
+import type { ReactNode } from "react";
 import type { ButtonHTMLAttributes } from "react";
 
-export const COLORS = ["primary", "secondary", "accent"] as const;
+export const COLORS = ["brand", "primary", "indicator", "white"] as const;
+
 export const SIZES = ["sm", "md", "lg"] as const;
-export const VARIANTS = ["ghost", "outlined", "contained"] as const;
+export const VARIANTS = ["ghost", "contained", "icon"] as const;
 
 export type Size = (typeof SIZES)[number];
 
@@ -14,11 +16,14 @@ export type Variant = (typeof VARIANTS)[number];
 type ButtonBase = {
   size?: Size;
   loading?: boolean;
-  startIcon?: React.ReactNode;
-  endIcon?: React.ReactNode;
-} & ButtonHTMLAttributes<HTMLButtonElement>;
-
-export type ButtonProps = ButtonBase & {
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
   color?: Color;
   variant?: Variant;
-};
+  background?: boolean;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
+
+export type ButtonProps<NeedsMotion extends true = true> =
+  NeedsMotion extends true
+    ? HTMLMotionProps<"button"> & ButtonBase & { needsMotion?: true }
+    : ButtonBase;

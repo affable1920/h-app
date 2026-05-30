@@ -3,23 +3,42 @@
 
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --color-foreground: #ffffff;
+  /* backgrounds */
 
-  /* Primary: Black-Gray */
-  --color-primary: #202020;
-  --color-primary-dark: #141414;
-  --color-primary-light: #343434;
+  /* the page itself  */
+  --color-background: #131316;
 
-  /* Secondary - Gray */
-  --color-secondary: oklch(44.6% 0.03 256.802);
-  --color-secondary-dark: oklch(37.3% 0.034 259.733);
-  --color-secondary-light: oklch(55.1% 0.027 264.364);
+  --color-border: #262629;
+  --color-border-strong: #313136;
+  --color-border-vivid: #393940;
 
-  /* Accent - blue */
-  --color-accent: oklch(62.3% 0.214 259.815);
-  --color-accent-dark: oklch(54.6% 0.245 262.881);
-  --color-accent-light: oklch(70.7% 0.165 254.624);
+  --color-text-normal: #eeeef0;
+
+  /* color to layout on the background for main components */
+  --color-layout: #212126;
+  --color-layout-raised: #29292e;
+
+  --color-inter: #2e2e34;
+
+  /* Text - headings, starters, important clues */
+  --color-text: #ffffff;
+
+  /* less important text - subtitles, badges */
+  --color-text-secondary: #c9c9c9;
+
+  /* paragraphs, long text, textarea text, bio */
+  --color-text-teritiary: #747686;
+
+  --color-indicator: #5de3ff;
+
+  /* brand - actions */
+  --color-brand: #6c47ff;
+  --color-brand-hover: #6c50ff;
+
+  --color-drk: #000000;
 
   --text-xs: 0.6rem;
   --text-sm: 0.7rem;
@@ -28,9 +47,12 @@
   --text-lg: 1.2rem;
   --text-xl: 1.4rem;
 
+  --color-window: hsl(220 30% 98%);
+
   --font-display: "PT Sans";
 
   --animate-spin: spin 1s linear infinite;
+  --animate-blob: blob 4s linear infinite;
 }
 
 @keyframes spin {
@@ -51,10 +73,24 @@
 
   body {
     letter-spacing: 1.2px;
-    font-size: var(--text-base);
     font-family: var(--font-display);
-  }
+    font-size: var(--text-base);
 
+    &:is(.dark) {
+      background: var(--color-background);
+      color: var(--color-text-secondary);
+    }
+
+    &:is(.dark) :is(h1, h2, h3, h4, h5, h6) {
+      color: var(--color-text);
+    }
+
+    &:is(.dark) a {
+      &:hover {
+        color: var(--color-text);
+      }
+    }
+  }
   #root {
     all: inherit;
   }
@@ -77,6 +113,14 @@
   input[type="number"]::-webkit-outer-spin-button {
     margin: 0;
     -webkit-appearance: none;
+  }
+
+  input[type="number"] {
+    appearance: textfield;
+  }
+
+  body:has(#modal) {
+    overflow: hidden;
   }
 
   [data-tooltip] {
@@ -112,4 +156,19 @@
   width: 100%;
   margin-inline: auto;
   max-width: var(--breakpoint-xl);
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
 }

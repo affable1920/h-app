@@ -1,5 +1,5 @@
 import APIClient from "@/services/ApiClient";
-import type { GetAllClinicsResponse } from "@/types/http";
+import type { Clinic, GetAllClinicsResponse } from "@/types/http";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useLocation, useSearchParams } from "react-router-dom";
 
@@ -15,7 +15,7 @@ export function useGetAll() {
     queryKey: ["clinics", { ...queryParams }],
     async queryFn() {
       const response = await api.get<GetAllClinicsResponse>(undefined, {
-        params: queryParams,
+        params: { ...queryParams },
       });
 
       return response.data;
@@ -30,20 +30,7 @@ export function getById(id: string) {
   return useQuery({
     queryKey: ["clinic", id],
     async queryFn() {
-      const response = await api.get(id);
-      return response.data;
-    },
-  });
-}
-
-export function useGet(params: { [k: string]: unknown }) {
-  return useQuery({
-    queryKey: ["clinics", { ...params }],
-    async queryFn() {
-      const response = await api.get<GetAllClinicsResponse>(undefined, {
-        params: { ...params },
-      });
-
+      const response = await api.get<Clinic>(id);
       return response.data;
     },
   });

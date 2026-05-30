@@ -28,31 +28,20 @@ class SignalingClient extends EventTarget {
   private attempt = 1;
   private readonly maxAttempts = 3;
 
-  private evs: Set<{ type: MsgType; handler: EventHandler }> = new Set();
-
-  private detachAll() {
-    for (const { type, handler } of this.evs) {
-      this.removeEventListener(type, handler as EventListener);
-    }
-
-    this.evs.clear();
-  }
-
   on(type: MsgType, handler: EventHandler) {
     console.log(
       `\nAttaching ev listener to signaling client\n Type -> (${type})`,
     );
 
     this.addEventListener(type, handler as EventListener);
-    this.evs.add({ type, handler });
   }
 
   off(type: MsgType, handler: EventHandler) {
     console.log(
       `\nRemoving ev listener on signaling client\n Type -> (${type})`,
     );
+
     this.removeEventListener(type, handler as EventListener);
-    this.evs.delete({ type, handler });
   }
 
   connect(token: string) {
@@ -78,13 +67,11 @@ class SignalingClient extends EventTarget {
       this.delay = 1000;
     };
 
-    this.addEventListener("broadcast", (ev) => {
+    this.addEventListener("broadcast", function (ev) {
       console.log(
         "\nRecieved a broadcast message from the server. The msg is logged below ->\n",
         ev,
       );
-
-      toast("BROADCAST from server");
     });
 
     this.ws.onmessage = (ev) => {
@@ -158,7 +145,7 @@ class SignalingClient extends EventTarget {
       this.delay + this.attempt * 1000 + this.attempt * Math.random();
   }
 
-  send = (type: MsgType, data: any) => {
+  send(type: MsgType, data: any) {
     console.info("\nWEBSOCKET SEND CALLED\nWebsocket ->\n", this.ws);
 
     if (!this.ws) {
@@ -172,22 +159,16 @@ class SignalingClient extends EventTarget {
         ...data,
       }),
     );
-  };
+  }
 
-  close = (code: number = 1000, reason: string = "") => {
+  close(code: number = 1000, reason: string = "") {
     console.log(`"\nClosing ws connection ...\nReason -> ${reason}"`);
     this.ws?.close(code, reason);
+  }
 
-    this.detachAll();
-  };
-
-  private onMessage = (msg: any) => {
+  private onMessage(msg: any) {
     const message: Message = JSON.parse(msg);
     switch (message.type) {
-      case "text":
-        toast("Websocket text message", { description: message.payload });
-        break;
-
       case "offline":
         this.dispatchEvent(
           new CustomEvent("offline", { detail: message.payload }),
@@ -223,7 +204,7 @@ class SignalingClient extends EventTarget {
           new CustomEvent(message.type, { detail: message.payload }),
         );
     }
-  };
+  }
 }
 
 const signalingClient = new SignalingClient();

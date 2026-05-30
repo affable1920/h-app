@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/auth/register": {
+    "/auth/register/patient": {
         parameters: {
             query?: never;
             header?: never;
@@ -13,15 +13,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register */
-        post: operations["register"];
+        /** Register Pt */
+        post: operations["register_pt"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/auth/login": {
+    "/auth/login/patient": {
         parameters: {
             query?: never;
             header?: never;
@@ -30,8 +30,42 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Login */
-        post: operations["login"];
+        /** Login Pt */
+        post: operations["login_pt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/register/doctor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register Dr */
+        post: operations["register_dr"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login/doctor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login Dr */
+        post: operations["login_dr"];
         delete?: never;
         options?: never;
         head?: never;
@@ -83,6 +117,23 @@ export interface paths {
         get: operations["get_doctor"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctors/onboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create */
+        post: operations["create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -147,10 +198,28 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Get Initial */
+        get: operations["get_initial"];
         put?: never;
         /** Stream Chat */
         post: operations["stream_chat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/from_template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Chat */
+        post: operations["chat"];
         delete?: never;
         options?: never;
         head?: never;
@@ -174,32 +243,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/health": {
+    "/ping": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Health Check */
-        get: operations["health_check"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/generate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Generate Data */
-        get: operations["generate_data"];
+        /** Ping */
+        get: operations["ping"];
         put?: never;
         post?: never;
         delete?: never;
@@ -212,8 +264,8 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** Appointment */
-        Appointment: {
+        /** AppointmentResponse */
+        AppointmentResponse: {
             /**
              * Id
              * @description the unique identifier of the record
@@ -223,16 +275,26 @@ export interface components {
             patient_id: string;
             slot: components["schemas"]["Slot"];
             /**
-             * Scheduled Date
-             * Format: date-time
+             * Doctor Id
+             * Format: uuid
              */
-            scheduled_date: string;
+            doctor_id: string;
             /**
              * Created At
              * Format: date-time
              */
             created_at: string;
+            /**
+             * Scheduled Date
+             * Format: date-time
+             */
+            scheduled_date: string;
             status: components["schemas"]["AppointmentStatus"];
+            /**
+             * Clinic Id
+             * Format: uuid
+             */
+            clinic_id: string;
         } & {
             [key: string]: unknown;
         };
@@ -240,7 +302,92 @@ export interface components {
          * AppointmentStatus
          * @enum {string}
          */
-        AppointmentStatus: "active" | "completed" | "cancelled";
+        AppointmentStatus: "active" | "completed" | "cancelled" | "missed";
+        /** Body_create_doctors_onboard_post */
+        Body_create_doctors_onboard_post: {
+            /** Name */
+            name: string;
+            /**
+             * Gender
+             * @enum {string}
+             */
+            gender: "male" | "female";
+            /** Degree */
+            degree: string;
+            /** Medical College */
+            medical_college: string;
+            /** Graduation Year */
+            graduation_year: number;
+            /** License Number */
+            license_number: string;
+            /** Primary Specialization */
+            primary_specialization: string;
+            /** Experience */
+            experience: number;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+            /**
+             * Secondary Focus Areas
+             * @default []
+             */
+            secondary_focus_areas: string[] | string;
+            /** Bio */
+            bio?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Profile */
+            profile?: string | null;
+        };
+        /** Body_get_clinics_get */
+        Body_get_clinics_get: {
+            pagination_params: components["schemas"]["PaginationParams"];
+            filter_params: components["schemas"]["ClinicRouteFilters"];
+        };
+        /** Body_register_dr_auth_register_doctor_post */
+        Body_register_dr_auth_register_doctor_post: {
+            /** Name */
+            name: string;
+            /**
+             * Gender
+             * @enum {string}
+             */
+            gender: "male" | "female";
+            /** Degree */
+            degree: string;
+            /** Medical College */
+            medical_college: string;
+            /** Graduation Year */
+            graduation_year: number;
+            /** License Number */
+            license_number: string;
+            /** Primary Specialization */
+            primary_specialization: string;
+            /** Experience */
+            experience: number;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+            /**
+             * Secondary Focus Areas
+             * @default []
+             */
+            secondary_focus_areas: string[] | string;
+            /** Bio */
+            bio?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Profile */
+            profile?: string | null;
+        };
         /** BookingRequestData */
         BookingRequestData: {
             /**
@@ -248,6 +395,11 @@ export interface components {
              * Format: date-time
              */
             date: string;
+            /**
+             * Clinicid
+             * Format: uuid
+             */
+            clinicId: string;
             /**
              * Doctorid
              * Format: uuid
@@ -261,23 +413,6 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
-        /** ChatMessageRequest */
-        ChatMessageRequest: {
-            /** @default user */
-            role: components["schemas"]["Role"];
-            /** Message */
-            message: string;
-        } & {
-            [key: string]: unknown;
-        };
-        /** ChatMessageResponse */
-        ChatMessageResponse: {
-            role: components["schemas"]["Role"];
-            /** Message */
-            message: string;
-        } & {
-            [key: string]: unknown;
-        };
         /** Clinic */
         Clinic: {
             /**
@@ -287,23 +422,26 @@ export interface components {
             id: string;
             /** Name */
             name: string;
-            /**
-             * Owner
-             * Format: uuid
-             */
-            owner: string;
+            /** Owner */
+            owner?: string | null;
             /** Location */
-            location: string;
-            /** Facilities */
+            location?: string | null;
+            /**
+             * Facilities
+             * @default []
+             */
             facilities: string[];
             /** Pincode */
-            pincode: number;
+            pincode?: number | null;
             /**
              * Reviews
              * @default 0
              */
             reviews: number;
-            /** Rating */
+            /**
+             * Rating
+             * @default 0
+             */
             rating: number;
             /**
              * Contacts
@@ -313,17 +451,16 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
-        /** CreateUser */
-        CreateUser: {
-            /** Username */
-            username: string;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** Password */
-            password: string;
+        /** ClinicRouteFilters */
+        ClinicRouteFilters: {
+            /** Searchquery */
+            searchQuery?: string | null;
+            /** Minrating */
+            minRating?: number | null;
+            /** Maxdistance */
+            maxDistance?: number | null;
+            /** Facilities */
+            facilities?: string[] | null;
         };
         /** Doctor */
         Doctor: {
@@ -332,31 +469,26 @@ export interface components {
              * @description the unique identifier of the record
              */
             id: string;
-            /** Fee */
-            fee: number;
             /** Name */
             name: string;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** Rating */
-            rating: number;
-            /** Reviews */
-            reviews: number;
-            status: components["schemas"]["Status"];
+            /** Primary Specialization */
+            primary_specialization: string;
             /** Experience */
             experience: number;
-            /** Credentials */
-            credentials: string;
+            /**
+             * Reviews
+             * @default []
+             */
+            reviews: components["schemas"]["Review"][];
             /**
              * Verified
              * @default false
              */
             verified: boolean;
-            /** Primary Specialization */
-            primary_specialization: string;
+            /** License Number */
+            license_number: string;
+            /** @default unknown */
+            status: components["schemas"]["Status"] | null;
             /**
              * Consults Online
              * @default false
@@ -375,72 +507,139 @@ export interface components {
              */
             currently_available: boolean;
             /**
-             * Secondary Specializations
+             * Secondary Focus Areas
              * @default []
              */
-            secondary_specializations: string[];
+            secondary_focus_areas: string[];
             /** Last Updated */
             last_updated?: string | null;
             /** Next Available */
             next_available?: string | null;
-            office?: components["schemas"]["Clinic"] | null;
             /**
              * Schedules
              * @default []
              */
             schedules: components["schemas"]["Schedule"][];
+            /** Image */
+            image?: string | null;
+            /** Rating */
+            readonly rating: number;
+            /** Image Url */
+            readonly image_url: string | null;
         } & {
             [key: string]: unknown;
         };
-        /** DoctorSummary */
-        DoctorSummary: {
+        /** DoctorLogin */
+        DoctorLogin: {
+            /** Email */
+            email?: string | null;
+            /** Password */
+            password: string;
+            /** Id */
+            id?: string | null;
+        };
+        /** DrProfileResponse */
+        DrProfileResponse: {
             /**
              * Id
              * @description the unique identifier of the record
              */
             id: string;
-            /** Fee */
-            fee: number;
             /** Name */
             name: string;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** Rating */
-            rating: number;
-            /** Reviews */
-            reviews: number;
-            status: components["schemas"]["Status"];
+            /** Primary Specialization */
+            primary_specialization: string;
             /** Experience */
             experience: number;
-            /** Credentials */
-            credentials: string;
+            /**
+             * Reviews
+             * @default []
+             */
+            reviews: components["schemas"]["Review"][];
             /**
              * Verified
              * @default false
              */
             verified: boolean;
-            /** Primary Specialization */
-            primary_specialization: string;
+            /** License Number */
+            license_number: string;
+            /** @default unknown */
+            status: components["schemas"]["Status"] | null;
+            /**
+             * Consults Online
+             * @default false
+             */
+            consults_online: boolean;
+            /**
+             * Booking Enabled
+             * @default false
+             */
+            booking_enabled: boolean;
+            /** Base Consult Time */
+            base_consult_time?: number | null;
+            /**
+             * Currently Available
+             * @default false
+             */
+            currently_available: boolean;
+            /**
+             * Secondary Focus Areas
+             * @default []
+             */
+            secondary_focus_areas: string[];
+            /** Last Updated */
+            last_updated?: string | null;
+            /** Next Available */
+            next_available?: string | null;
+            /**
+             * Schedules
+             * @default []
+             */
+            schedules: components["schemas"]["Schedule"][];
+            /** Image */
+            image?: string | null;
+            gender: components["schemas"]["Gender"];
+            /** College Studied */
+            college_studied?: string | null;
+            /** Graduation Year */
+            graduation_year?: number | null;
+            /**
+             * Bio
+             * @default
+             */
+            bio: string | null;
+            /** Credentials */
+            credentials: string;
+            /**
+             * Secondary Specializations
+             * @default []
+             */
+            secondary_specializations: string[];
+            /** Rating */
+            readonly rating: number;
+            /** Image Url */
+            readonly image_url: string | null;
         } & {
             [key: string]: unknown;
         };
+        /**
+         * Gender
+         * @enum {string}
+         */
+        Gender: "male" | "female";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
-        /** LoginUser */
-        LoginUser: {
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** Password */
-            password: string;
+        /** MessageRequest */
+        MessageRequest: {
+            /** @default user */
+            role: components["schemas"]["Role"];
+            /** Content */
+            content: string;
+        } & {
+            [key: string]: unknown;
         };
         /**
          * Mode
@@ -461,10 +660,10 @@ export interface components {
              */
             has_prev: boolean;
         };
-        /** PaginatedResponse[DoctorSummary] */
-        PaginatedResponse_DoctorSummary_: {
+        /** PaginatedResponse[Doctor] */
+        PaginatedResponse_Doctor_: {
             /** Entities */
-            entities: components["schemas"]["DoctorSummary"][];
+            entities: components["schemas"]["Doctor"][];
             /** Count */
             count: number;
             /** Has Next */
@@ -475,23 +674,108 @@ export interface components {
              */
             has_prev: boolean;
         };
+        /** PaginationParams */
+        PaginationParams: {
+            /**
+             * Page
+             * @default 1
+             */
+            page: number;
+            /**
+             * Max
+             * @default 10
+             */
+            max: number;
+            /**
+             * Sortby
+             * @default name
+             */
+            sortBy: ("rating" | "reviews" | "experience" | "fee" | "name") | null;
+            /** @default asc */
+            sortOrder: components["schemas"]["SortOrder"] | null;
+        };
+        /** PatientCreate */
+        PatientCreate: {
+            /** Username */
+            username: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+        };
+        /** PatientLogin */
+        PatientLogin: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+        };
+        /** PatientProfileResponse */
+        PatientProfileResponse: {
+            /**
+             * Id
+             * @description the unique identifier of the record
+             */
+            id: string;
+            /** Name */
+            name?: string | null;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Username */
+            username?: string | null;
+            /**
+             * Appointments
+             * @default []
+             */
+            appointments: components["schemas"]["AppointmentResponse"][];
+        } & {
+            [key: string]: unknown;
+        };
+        /** Review */
+        Review: {
+            /**
+             * Id
+             * @description the unique identifier of the record
+             */
+            id: string;
+            /** Rating */
+            rating: number;
+            /** Comment */
+            comment?: string | null;
+            doctor?: components["schemas"]["Doctor"] | null;
+            clinic?: components["schemas"]["Clinic"] | null;
+            /** Appointment Id */
+            appointment_id: string;
+            /** Patient Id */
+            patient_id: string;
+        } & {
+            [key: string]: unknown;
+        };
         /**
          * Role
          * @enum {string}
          */
-        Role: "user" | "system" | "assistant";
-        /**
-         * Schedule
-         * @description use datetime as main schedule date getter if doctors
-         *     don't seem to have a fixed schedule, else better off with weekdays
-         */
+        Role: "user" | "system" | "assistant" | "developer";
+        /** Schedule */
         Schedule: {
             /**
              * Id
              * @description the unique identifier of the record
              */
             id: string;
-            /** Weekdays */
+            /**
+             * Weekdays
+             * @default []
+             */
             weekdays: number[];
             /** Is Active */
             is_active: boolean;
@@ -508,7 +792,10 @@ export interface components {
              */
             doctor_id: string;
             clinic?: components["schemas"]["Clinic"] | null;
-            /** Slots */
+            /**
+             * Slots
+             * @default []
+             */
             slots: components["schemas"]["Slot"][];
             /**
              * Start Time
@@ -546,6 +833,11 @@ export interface components {
              * @description The slot start time
              */
             begin: string;
+            /**
+             * Schedule Id
+             * Format: uuid
+             */
+            schedule_id: string;
         } & {
             [key: string]: unknown;
         };
@@ -559,6 +851,25 @@ export interface components {
          * @enum {string}
          */
         Status: "away" | "available" | "in_patient" | "unknown";
+        /** UserResponse */
+        UserResponse: {
+            /**
+             * Id
+             * @description the unique identifier of the record
+             */
+            id: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Name */
+            name?: string | null;
+            /** Username */
+            username?: string | null;
+        } & {
+            [key: string]: unknown;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -577,7 +888,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    register: {
+    register_pt: {
         parameters: {
             query?: never;
             header?: never;
@@ -586,7 +897,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateUser"];
+                "application/json": components["schemas"]["PatientCreate"];
             };
         };
         responses: {
@@ -596,7 +907,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["PatientProfileResponse"];
                 };
             };
             /** @description Validation Error */
@@ -610,7 +921,7 @@ export interface operations {
             };
         };
     };
-    login: {
+    login_pt: {
         parameters: {
             query?: never;
             header?: never;
@@ -619,7 +930,73 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["LoginUser"];
+                "application/json": components["schemas"]["PatientLogin"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_dr: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_register_dr_auth_register_doctor_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    login_dr: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DoctorLogin"];
             };
         };
         responses: {
@@ -658,7 +1035,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["DrProfileResponse"] | components["schemas"]["PatientProfileResponse"];
                 };
             };
         };
@@ -669,9 +1046,10 @@ export interface operations {
                 searchQuery?: string | null;
                 minRating?: number | null;
                 maxDistance?: number | null;
-                consults_online?: "1" | null;
+                consultsOnline?: "1" | null;
                 currentlyAvailable?: "1" | null;
                 specialization?: string | null;
+                experience?: number | null;
                 page?: number;
                 max?: number;
                 sortBy?: ("rating" | "reviews" | "experience" | "fee" | "name") | null;
@@ -689,7 +1067,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_DoctorSummary_"];
+                    "application/json": components["schemas"]["PaginatedResponse_Doctor_"];
                 };
             };
             /** @description Validation Error */
@@ -713,6 +1091,39 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Doctor"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_create_doctors_onboard_post"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -753,7 +1164,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Appointment"];
+                    "application/json": components["schemas"]["AppointmentResponse"];
                 };
             };
             /** @description Validation Error */
@@ -800,22 +1211,14 @@ export interface operations {
     };
     get: {
         parameters: {
-            query?: {
-                page?: number;
-                max?: number;
-                sortBy?: ("rating" | "reviews" | "experience" | "fee" | "name") | null;
-                sortOrder?: components["schemas"]["SortOrder"] | null;
-                searchQuery?: string | null;
-                minRating?: number | null;
-                maxDistance?: number | null;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
-                "application/json": string[] | null;
+                "application/json": components["schemas"]["Body_get_clinics_get"];
             };
         };
         responses: {
@@ -839,6 +1242,26 @@ export interface operations {
             };
         };
     };
+    get_initial: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
     stream_chat: {
         parameters: {
             query?: never;
@@ -848,7 +1271,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ChatMessageRequest"];
+                "application/json": components["schemas"]["MessageRequest"];
             };
         };
         responses: {
@@ -858,7 +1281,40 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ChatMessageResponse"];
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    chat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -892,27 +1348,7 @@ export interface operations {
             };
         };
     };
-    health_check: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-        };
-    };
-    generate_data: {
+    ping: {
         parameters: {
             query?: never;
             header?: never;

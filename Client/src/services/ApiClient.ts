@@ -22,7 +22,7 @@ const CONFIG: Record<number, string> = {
   404: "Resource Not Found",
   422: "Invalid data",
   500: "Internal Server Error",
-};
+} as const;
 
 const serverDownError: APIError = {
   status: 500,
@@ -46,18 +46,12 @@ class APIClient {
     this.endpoint = endpoint;
 
     this.instance.interceptors.request.use(
-      (config) => {
+      function (config) {
         const token = useAuthStore.getState().token;
 
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
-        } else {
-          delete config.headers.Authorization;
-          console.log(
-            "Config headers deleted in api client. Not authenticated ...",
-          );
         }
-
         return config;
       },
       function (error) {
@@ -101,9 +95,9 @@ class APIClient {
   }
 
   private formatValidationMsg(error: PydanticValidationError) {
-    if (error!.length > 0) {
-      const field = error?.[0].loc.slice(1).join(".");
-      return `${field}: ${field} ${error?.[0].msg
+    if (Array.isArray(error) && !!error.length) {
+      const field = error[0]?.loc.slice(1).join(".");
+      return `${field}: ${field} ${error[0]?.msg
         .split(" ")
         .slice(1)
         .join(" ")
@@ -131,7 +125,7 @@ class APIClient {
         msg: this.formatValidationMsg((response?.data as any).detail) as string,
         status,
         detail: response,
-        type: CONFIG[status],
+        type: CONFIG[status] as string,
       };
     }
 
@@ -139,7 +133,7 @@ class APIClient {
       detail: response,
       status: status as number,
       msg: (response?.data as any).detail?.["msg"],
-      type: CONFIG[status as number] ?? response?.statusText,
+      type: CONFIG[status as number] ?? (response?.statusText as string),
     };
   }
 

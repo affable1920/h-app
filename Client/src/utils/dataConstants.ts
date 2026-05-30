@@ -13,28 +13,40 @@ export const MONTHS = [
   "December",
 ] as const;
 
-// data specific
 export const SPECIALIZATIONS = [
-  "Cardiology",
-  "Dermatology",
-  "Endocrinology",
-  "Family Medicine",
-  "Gastroenterology",
-  "Hematology",
-  "Internal Medicine",
-  "Neurology",
-  "Obstetrics & Gynecology",
-  "Oncology",
-  "Ophthalmology",
-  "Orthopedics",
-  "Pediatrics",
-  "Psychiatry",
-  "Pulmonology",
-  "Radiology",
-  "Rheumatology",
-  "Surgery",
-  "Urology",
+  "🫀 Cardiology",
+  "🧠 Neurology",
+  "🦴 Orthopedics",
+  "👁️ Ophthalmology",
+  "🧒 Pediatrics",
+  "🦷 Dentistry",
+  "🫁 Pulmonology",
+  "🩻 Radiology",
+  "💊 Psychiatry",
 ] as const;
+
+// data specific
+// export const SPECIALIZATIONS = [
+//   "Cardiology",
+//   "Dermatology",
+//   "Endocrinology",
+//   "Family Medicine",
+//   "Gastroenterology",
+//   "Hematology",
+//   "Internal Medicine",
+//   "Neurology",
+//   "Obstetrics & Gynecology",
+//   "Oncology",
+//   "Ophthalmology",
+//   "Orthopedics",
+//   "Pediatrics",
+//   "Psychiatry",
+//   "Pulmonology",
+//   "Radiology",
+//   "Rheumatology",
+//   "Surgery",
+//   "Urology",
+// ] as const;
 
 export const TIME_SLOTS = [
   "09:00 AM",
@@ -138,7 +150,7 @@ export const WEEKDAYS = [
 
 export const WEEKDAY_MAP: Record<number, string> = WEEKDAYS.reduce(
   (acc, currDay, index) => ({ ...acc, [index]: currDay }),
-  {}
+  {},
 );
 
 export const DAYS_OF_WEEK = [...Array.from({ length: 7 })] as const;

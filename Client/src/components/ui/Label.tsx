@@ -41,7 +41,7 @@ const Text = <T extends ElementType = "p">({
       capitalize && "capitalize",
       bold ? "font-bold" : "font-semibold",
       italic && "italic",
-      color === "dark" ? "text-secondary" : "text-foreground",
+      color === "dark" ? "text-secondary" : "text-background",
       sizes[size],
       className,
     ]

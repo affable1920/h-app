@@ -82,7 +82,7 @@ const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
         <h2
           key={i}
           className={`opacity-80 font-black underline-offset-4 capitalize  ${
-            isWkdayToday(day) ? "text-accent-dark underline" : ""
+            isWkdayToday(day) ? "text-accent underline" : ""
           }`}
         >
           {day.slice(0, 3)}

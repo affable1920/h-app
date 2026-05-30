@@ -46,7 +46,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
 
   const openModal = useModalStore((s) => s.openModal);
 
-  function updateDetails<K extends keyof State>(
+  function updateDetails<K extends keyof Pick<State, "slot" | "weekday">>(
     this: { schedule: Schedule },
     key: K,
     val: State[K],
@@ -55,6 +55,7 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
       return {
         ...prev,
         schedule: this.schedule,
+        clinic: this.schedule.clinic as Clinic,
         [key]: prev[key] !== val && val,
       };
     }
@@ -198,11 +199,9 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                                   as={"span"}
                                   full={false}
                                   className="px-4"
-                                  onClick={updater.bind(
-                                    updater,
-                                    "weekday",
-                                    wkday,
-                                  )}
+                                  onClick={function () {
+                                    updater("weekday", wkday);
+                                  }}
                                   selected={isWkdaySelected(wkday)}
                                 >
                                   {getWeekday(wkday).slice(0, 3)}
@@ -232,7 +231,6 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                                     content={slot.begin}
                                     onClick={function () {
                                       updater("slot", slot);
-                                      updater("clinic", clinic);
                                     }}
                                     disabled={slot.booked}
                                     selected={
@@ -252,11 +250,13 @@ const ClinicsView: React.FC<ClinicsViewProps> = memo(function ({ ...props }) {
                           <Button
                             color="secondary"
                             className="self-end"
-                            onClick={openModal.bind(EMPTY, "schedule", {
-                              dr: doctor,
-                              viewOverlay: true,
-                              ...scheduleDetails,
-                            })}
+                            onClick={function () {
+                              openModal("schedule", {
+                                dr: doctor,
+                                viewOverlay: true,
+                                ...scheduleDetails,
+                              });
+                            }}
                           >
                             book slot
                             <ClockArrowDown />

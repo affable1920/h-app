@@ -7,6 +7,7 @@ import Button from "../ui/Button";
 import { useChat } from "@/hooks/chat";
 import ChatResponse from "../ChatResponse";
 import Badge from "../ui/Badge";
+import { Stack } from "../ui/Stack";
 
 function Chat() {
   const ref = useRef<HTMLInputElement>(null);
@@ -43,16 +44,22 @@ function Chat() {
     },
 
     {
-      label: "Find a cardiologist for me",
+      label: "Find a doctor for me",
       onClick() {
+        // if (ref.current) {
+        //   ref.current.value = this.label;
+        // }
+
         sendMsg(this.label);
       },
     },
 
-    { label: "ask about medication" },
-    { label: "get a quick diagnosis" },
-
-    { label: "locate a service" },
+    {
+      label: "locate a service",
+      onClick() {
+        sendMsg(this.label);
+      },
+    },
   ];
 
   function clearPrompt() {
@@ -87,31 +94,32 @@ function Chat() {
       >
         {!!conversation.length ? (
           <>
-            {conversation.map((response) => {
+            {conversation.map((response, i) => {
               const isUser = response.role === "user";
 
               return (
-                <motion.article
-                  key={response.role + response.message}
-                  className={`flex flex-col gap-2 ${isUser ? "items-end" : "items-start"}`}
+                <Stack
+                  orientation="V"
+                  key={response.role + response.content + i}
+                  justify={isUser ? "end" : "start"}
                 >
-                  <h1 className="capitalize font-semibold w-fit opacity-80">
+                  <h1 className="capitalize w-fit text-text-secondary text-[14px]">
                     {response.role}
                   </h1>
                   {isUser ? (
                     <p className={`first-letter:capitalize`}>
-                      {response.message}
+                      {response.content as string}
                     </p>
                   ) : (
                     <ChatResponse
-                      content={response.message}
+                      content={response.content as string}
                       isStreaming={
                         streaming &&
                         response === conversation[conversation.length - 1]
                       }
                     />
                   )}
-                </motion.article>
+                </Stack>
               );
             })}
 
@@ -121,9 +129,9 @@ function Chat() {
                   wrapperRef.current?.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 variant="ghost"
-                className="sticky self-end p-2 bottom-0 flex justify-center items-center rounded-full bg-black"
+                className="sticky self-end p-2 bottom-0 flex justify-center items-center rounded-full"
               >
-                <ArrowUp size={18} color="var(--color-foreground)" />
+                <ArrowUp size={18} />
               </Button>
             )}
           </>
@@ -144,10 +152,9 @@ function Chat() {
       </motion.section>
 
       <motion.div
-        className="relative flex items-center border-2 border-slate-200 hover:border-secondary/40 
-          hover:ring-2 transition-colors hover:ring-accent/20 focus:ring-2 focus:ring-accent/20 
-          h-16 px-4 rounded-lg shadow-sm shrink-0
-          focus-within:ring-3 focus-within:ring-accent/20 font-bold text-zinc-600 focus-within:border-secondary/40"
+        className="relative flex items-center h-16 px-4 rounded-lg shadow-lg shrink-0 
+        border-2 border-border-vivid shadow-black/40 hover:ring-4 hover:ring-brand/20 
+        transition-colors focus:ring-4 focus:ring-brand/20 focus-within:ring-4 focus-within:ring-brand/20"
       >
         <input
           ref={ref}
@@ -167,21 +174,16 @@ function Chat() {
           placeholder="Ask Anything .."
           className="size-full outline-none placeholder:italic placeholder:text-sm first-letter:capitalize"
         />
-        <div className="absolute right-3 flex items-center justify-center">
+        <div
+          className="absolute right-6 flex items-center justify-center text-normal 
+        hover:text-white w-fit"
+        >
           {streaming ? (
-            <Button
-              className="bg-secondary border-2 border-secondary-dark text-gray-300 rounded-sm p-1.5"
-              variant="ghost"
-              onClick={stop}
-            >
+            <Button variant="icon" onClick={stop}>
               <SquareStop size={14} />
             </Button>
           ) : (
-            <Button
-              variant="ghost"
-              onClick={sendMsg.bind(null, undefined)}
-              className="bg-accent text-white rounded-sm p-2"
-            >
+            <Button variant="icon" onClick={sendMsg.bind(null, undefined)}>
               <SendHorizonal size={14} />
             </Button>
           )}

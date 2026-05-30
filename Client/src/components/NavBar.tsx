@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Link,
-  NavLink,
   useLocation,
   useNavigate,
   type NavigateOptions,
@@ -28,8 +27,9 @@ import {
 import useAuthStore, { logout } from "@/stores/authStore";
 import type { MobileNavItem } from "@/types/utils";
 import MobileNavigationItem from "./MobileNavigationItem";
+import Divider from "./ui/Divider";
 
-const NavBar = () => {
+function NavBar() {
   const { pathname = "" } = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
@@ -83,9 +83,7 @@ const NavBar = () => {
     {
       label: "Home",
       icon: Home,
-      onClick() {
-        moveTo("/");
-      },
+      route: "",
     },
     {
       label: "Find",
@@ -94,136 +92,156 @@ const NavBar = () => {
         {
           label: "doctor",
           icon: Stethoscope,
-          onClick() {
-            moveTo("/dir/doctors");
-          },
+          route: "idx/doctors",
         },
         {
           label: "hospital",
           icon: Hospital,
-          onClick() {
-            console.log("open a map later ..");
-          },
         },
         {
           label: "pharmacy",
           icon: Syringe,
-          onClick() {
-            moveTo("/dir/clinics");
-          },
+          route: "idx/clinics",
         },
         {
           label: "ask assistant (Pro Plan)",
           icon: Bot,
-          onClick() {
-            moveTo("/chat");
-          },
+          route: "chat",
         },
       ],
     },
-    {
-      label: "profile",
-      icon: User,
-      children: [
-        { label: "settings", icon: Settings },
-        { label: "messages", icon: Mail },
-        {
-          label: "history",
-          icon: History,
-          onClick() {
-            moveTo("/auth/me");
+    ...(user
+      ? [
+          {
+            label: "Account",
+            icon: Settings,
+            children: [
+              { label: "profile", icon: User, route: "/view/auth/me" },
+              { label: "messages", icon: Mail },
+              {
+                label: "history",
+                icon: History,
+              },
+              { label: "logout", icon: LogOut, onClick: logout },
+            ],
           },
-        },
-        { label: "logout", icon: LogOut, onClick: logout },
-      ],
-    },
+        ]
+      : []),
   ];
 
+  function handleLinkClick(this: MobileNavItem) {
+    this.onClick ? this.onClick() : navigate(this.route ?? "");
+  }
+
   return (
-    <motion.header className="shadow-xl shadow-slate-300/20 border-b-2 z-10 border-b-slate-300/40 p-8 py-6 relative">
-      <div className="container flex items-center justify-between">
-        <Button onClick={() => moveTo("/")} variant="ghost">
+    <motion.header
+      className="fixed top-0 left-0 right-0 z-50 p-4 px-8 rounded-none border-b
+      border-border"
+    >
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        <Button
+          variant="icon"
+          onClick={function () {
+            moveTo("/");
+          }}
+        >
           <Stethoscope />
         </Button>
 
-        {/* Desktop navigation */}
-        <nav className="hidden md:flex items-center font-semibold gap-12">
-          {navLinks.map((navItem) => (
-            <NavLink key={navItem.label} to={`/`}>
-              <h1 className="capitalize">{navItem.label}</h1>
-            </NavLink>
-          ))}
+        <div className="hidden md:flex items-center gap-12">
+          <nav className="space-x-8 font-semibold [&>a]:hover:text-accent [&>a]:transition-colors md:flex md:items-center">
+            {navLinks.map((navItem) => (
+              <Button
+                variant="icon"
+                key={navItem.label}
+                className="hover:text-blue-800 transition-colors"
+                onClick={handleLinkClick.bind(navItem)}
+              >
+                {navItem.label}
+              </Button>
+            ))}
+          </nav>
 
-          <Button endIcon={<ArrowRight />} className="w-full" color="secondary">
+          <Button endIcon={<ArrowRight />} className="w-full" color="brand">
             {user ? (
               <Link to="/">Get started</Link>
             ) : (
               <Link to="/auth">sign in</Link>
             )}
           </Button>
-        </nav>
+        </div>
 
-        <div className="flex md:hidden items-center gap-4 font-bold cursor-pointer">
-          <Button
-            className="italic gap-2 text-sm tracking-wider"
-            variant="ghost"
-          >
-            Ctrl K
-            <Search />
-          </Button>
+        <div className="flex items-center gap-4 md:hidden">
+          <div className="flex md:hidden items-center gap-4 font-bold cursor-pointer">
+            <Button
+              onClick={function () {
+                const ev = new KeyboardEvent("keydown", {
+                  ctrlKey: true,
+                  key: "k",
+                });
+
+                window.dispatchEvent(ev);
+              }}
+              className="italic gap-2 text-sm tracking-wider"
+            >
+              Ctrl K
+              <Search />
+            </Button>
+          </div>
 
           <Button
-            variant="ghost"
+            variant="icon"
+            className="md:hidden"
             onClick={setShowMobileMenu.bind(null, (p) => !p)}
           >
             {showMobileMenu ? <Minimize2 /> : <Menu />}
           </Button>
         </div>
-
-        {/* Mobile Navigation */}
-        <AnimatePresence>
-          {showMobileMenu && (
-            <motion.nav
-              ref={ref}
-              className="md:hidden absolute top-full left-0 w-full bg-white 
-              flex flex-col gap-10 shadow-lg p-8"
-              initial={{
-                y: -30,
-                opacity: 0,
-              }}
-              animate={{
-                y: 0,
-                opacity: 1,
-              }}
-              exit={{
-                y: -20,
-                opacity: 0,
-                transition: { type: "tween", ease: "backOut" },
-              }}
-            >
-              {navLinks.map((navItem) => (
-                <MobileNavigationItem key={navItem.label} {...navItem} />
-              ))}
-
-              <Button
-                endIcon={<ArrowRight />}
-                className="w-full"
-                color="secondary"
-                size="lg"
-              >
-                {user ? (
-                  <Link to="/">Get started</Link>
-                ) : (
-                  <Link to="/auth">sign in</Link>
-                )}
-              </Button>
-            </motion.nav>
-          )}
-        </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {showMobileMenu && (
+          <motion.nav
+            ref={ref}
+            className="md:hidden absolute top-full left-0 w-full flex flex-col gap-10 shadow-md 
+            shadow-black/50 p-8 bg-background border-b border-border-strong"
+            initial={{
+              y: -30,
+              opacity: 0,
+            }}
+            animate={{
+              y: 0,
+              opacity: 1,
+            }}
+            exit={{
+              y: -20,
+              opacity: 0,
+            }}
+          >
+            {navLinks.map((navItem) => (
+              <MobileNavigationItem key={navItem.label} {...navItem} />
+            ))}
+
+            {!user && (
+              <Link to="/auth" className="px-4">
+                <Button
+                  endIcon={<ArrowRight />}
+                  className="w-full"
+                  color="brand"
+                  size="md"
+                >
+                  sign in
+                </Button>
+              </Link>
+            )}
+
+            <Divider />
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
-};
+}
 
 NavBar.displayName = "NavBar";
 export default NavBar;

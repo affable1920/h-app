@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { AnimatePresence, motion, stagger, type Variant } from "motion/react";
 import type { MobileNavItem } from "@/types/utils";
+import { useNavigate } from "react-router-dom";
 
 const tabVariants: Record<string, Variant> = {
   hidden: {},
@@ -22,7 +23,11 @@ const tabChildrenVariants: Record<string, Variant> = {
   visible: {
     x: 0,
     opacity: 1,
-    transition: { type: "spring", stiffness: 300, damping: 24 },
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 24,
+    },
   },
   exit: {
     x: -20,
@@ -43,14 +48,21 @@ function MobileNavigationItem({
   const hasChildren = !!children?.length;
 
   function handleClick() {
-    return hasChildren ? setIsExpanded.call(EMPTY, (p) => !p) : onClick;
+    hasChildren ? setIsExpanded.call(EMPTY, (p) => !p) : onClick?.();
+  }
+
+  const navigate = useNavigate();
+
+  function handleClickInside(this: MobileNavItem) {
+    this.onClick ? this.onClick() : navigate(this.route ?? "");
   }
 
   return (
     <div key={label}>
       <motion.button
         onClick={handleClick}
-        className="cursor-pointer flex items-center justify-between w-full font-semibold capitalize"
+        className={`cursor-pointer flex items-center justify-between w-full font-semibold 
+          capitalize hover:text-text-normal ${isExpanded ? "text-text" : ""}`}
       >
         <span className="inline-flex items-center gap-2">
           <span className="md:hidden">
@@ -92,15 +104,16 @@ function MobileNavigationItem({
               style={{ overflow: "hidden" }}
             >
               <div className="mt-6 space-y-6">
-                {children?.map(({ icon: Icon, label, onClick }) => (
+                {children?.map((child) => (
                   <motion.button
-                    onClick={onClick}
+                    onClick={handleClickInside.bind(child)}
                     variants={tabChildrenVariants}
-                    className="capitalize cursor-pointer flex items-center gap-2 px-6"
-                    key={label}
+                    className="capitalize cursor-pointer flex items-center gap-2 px-6 hover:bg-layout p-2 rounded-md 
+                    hover:text-text w-full transition-colors duration-200"
+                    key={child.label}
                   >
-                    <Icon size={10} />
-                    {label}
+                    <child.icon size={10} />
+                    {child.label}
                   </motion.button>
                 ))}
               </div>

@@ -4,7 +4,7 @@ type TickArgs = {
   onDone: () => void;
 };
 
-const CHARS_PER_CHUNK = 4;
+const CHARS_PER_CHUNK = 2;
 
 function createBuffer() {
   // Stores all characters, used to update the conversation state in intervals

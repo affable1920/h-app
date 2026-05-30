@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import NavBar from "../NavBar";
-import Modal from "../modal/Modal";
 import useAuthStore, { logout } from "@/stores/authStore";
-import signalingClient from "@/services/SignalingClient";
 import useModalStore from "@/stores/modalStore";
 import { toast } from "sonner";
+import Button from "../ui/Button";
+import { ArrowBigDown } from "lucide-react";
 
 function handleLogout() {
   toast.message("Session expired. logging out");
@@ -16,19 +16,19 @@ const Layout = () => {
   const jwt = useAuthStore((s) => s.token);
   const openModal = useModalStore((s) => s.openModal);
 
-  useEffect(
-    function () {
-      if (!jwt) {
-        return;
-      }
+  // useEffect(
+  //   function () {
+  //     if (!jwt) {
+  //       return;
+  //     }
 
-      signalingClient.connect(jwt);
-      signalingClient.addEventListener("session-expired", handleLogout);
+  //     signalingClient.connect(jwt);
+  //     signalingClient.addEventListener("session-expired", handleLogout);
 
-      return () => signalingClient.close(1000, "Unmounting!");
-    },
-    [jwt],
-  );
+  //     return () => signalingClient.close(1000, "Unmounting!");
+  //   },
+  //   [jwt],
+  // );
 
   useEffect(function () {
     function keydown(ev: KeyboardEvent) {
@@ -47,10 +47,9 @@ const Layout = () => {
 
   return (
     <>
-      <Modal />
       <NavBar />
-      <main className="p-8 py-6">
-        <div className="container">
+      <main className="pt-24 md:pt-32 py-16 px-8">
+        <div className="max-w-7xl mx-auto">
           <Outlet />
         </div>
       </main>

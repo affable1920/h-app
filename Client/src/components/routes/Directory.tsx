@@ -1,4 +1,4 @@
-import { useState, Suspense, useMemo } from "react";
+import { useState, Suspense, useMemo, useCallback } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Spinner from "../Spinner";
@@ -15,9 +15,18 @@ import useQueryStore from "@/stores/queryStore";
 import { ArrowDown01, ArrowDown10 } from "lucide-react";
 import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
 import useFilterStore from "@/stores/filterStore";
-import Badge from "../ui/Badge";
+import SearchBar from "../ui/SearchBar";
 
-const Directory = () => {
+const SORT_COLS: Array<string> = [
+  "rating",
+  "distance",
+  "reviews",
+  "experience",
+  "fee",
+  "name",
+] as const;
+
+function Directory() {
   const navigate = useNavigate();
   const [localSearch, setLocalSearch] = useState("");
 
@@ -27,7 +36,6 @@ const Directory = () => {
     clearSearchQuery,
     sortOrder = "desc",
     sortBy,
-    setSort,
   } = useQueryStore();
 
   const location = useLocation().pathname.split("/").at(-1) ?? "doctors";
@@ -42,39 +50,32 @@ const Directory = () => {
     navigate(`${nextDir}`);
   }
 
-  const openDirectoryFilter = function (name: string) {
-    return openModal.bind(null, name, {
+  const handleSearch = useCallback(function (val: string) {
+    setLocalSearch(val);
+    memoized(val);
+  }, []);
+
+  const clearSearch = useCallback(function () {
+    setLocalSearch("");
+    clearSearchQuery();
+  }, []);
+
+  const open = function (modalName: string, options?: {}) {
+    return openModal.bind(null, modalName, {
+      ...options,
       viewOverlay: true,
       position: "bottom",
     });
   };
 
-  function handleSearch(ev: React.ChangeEvent<HTMLInputElement>) {
-    const val = ev.target.value;
-
-    setLocalSearch(val);
-    memoized(val);
-  }
-
-  function removeSearchQuery() {
-    setLocalSearch("");
-    clearSearchQuery();
-  }
-
-  const handleSort = setSort.bind(
-    null,
-    sortBy ?? "rating",
-    sortOrder === "asc" ? "desc" : "asc",
-  );
-
   return (
     <section className="flex flex-col gap-4 mx-auto">
-      <section className="w-full rounded-md flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+      <section className="w-full rounded-md flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <Button
-            variant="ghost"
+            variant="icon"
             className="relative"
-            onClick={openDirectoryFilter("directoryFilter")}
+            onClick={open("directoryFilter")}
           >
             <SlidersHorizontal />
             {!!activeFiltersCount && (
@@ -85,8 +86,8 @@ const Directory = () => {
           </Button>
 
           <Button
-            variant="ghost"
-            onClick={openDirectoryFilter("sorter")}
+            variant="icon"
+            onClick={open("sorter", { fields: SORT_COLS })}
             data-tooltip={`sorted by ${sortBy} - ${sortOrder}`}
           >
             {sortOrder === "asc" ? (
@@ -97,25 +98,14 @@ const Directory = () => {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* search bar */}
-          <div className="relative flex items-center">
-            <Input
-              id="searchQuery"
-              value={localSearch}
-              placeholder="Search"
-              size="sm"
-              className="italic placeholder:text-sm py-2"
-              onChange={handleSearch}
-            />
-            {!!searchQuery && (
-              <Button className="absolute right-2" variant="ghost" size="sm">
-                <X onClick={removeSearchQuery} />
-              </Button>
-            )}
-          </div>
+        <div className="flex gap-2 items-center">
+          <SearchBar
+            onChange={handleSearch}
+            val={localSearch}
+            onClear={clearSearch}
+          />
 
-          <Button variant="ghost" onClick={handleDirectorySwitch}>
+          <Button variant="icon" onClick={handleDirectorySwitch}>
             <ArrowLeftRight />
           </Button>
         </div>
@@ -130,6 +120,6 @@ const Directory = () => {
       <Pagination />
     </section>
   );
-};
+}
 
 export default Directory;

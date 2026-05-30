@@ -39,12 +39,11 @@ function SelectFilter({
       />
       <Button
         size="md"
-        variant="outlined"
-        className="italic"
+        color="white"
         endIcon={<Chevron isOpen={isOpen} />}
         onClick={setIsOpen.bind(Object.create(null), (p) => !p)}
       >
-        Filter by {label}
+        {label}
       </Button>
     </div>
   );

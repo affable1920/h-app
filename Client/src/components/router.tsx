@@ -1,30 +1,25 @@
-import { lazy } from "react";
-import { createBrowserRouter, Outlet, Navigate } from "react-router-dom";
+import { lazy, Suspense, type ReactNode } from "react";
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  useLocation,
+} from "react-router-dom";
 
 //
 import Layout from "@routes/Layout";
 import HomePage from "@routes/HomePage";
 import Directory from "@routes/Directory";
 
-import ErrorBoundary from "@components/ErrorBoundary";
-
 import SignIn from "@/components/routes/SignIn";
 import Register from "@/components/routes/Register";
-import UserProfile from "./routes/UserProfile";
+import UserProfile from "@components/routes/UserProfile";
+import Consultation from "@components/modal/Consultation";
+import LandingPage from "@components/LandingPage/LandingPage";
+import App from "@components/routes/App";
+import { useGetById } from "@/hooks/doctors";
+import Spinner from "./Spinner";
 import useAuthStore from "@/stores/authStore";
-import Consultation from "./modal/Consultation";
-
-/*
-API Routes Structure:
-/                          # Home
-/doctors                   # List all doctors
-/doctors/:id               # Doctor profile
-/doctors/:id/schedule      # Schedule with doctor
-/doctors/:id/chat          # Chat with doctor
-/appointments              # User's appointments
-/appointments/:id          # Specific appointment
-/chat 
-*/
 
 const Chat = lazy(() => import("@routes/Chat"));
 const Scheduler = lazy(() => import("@routes/Scheduler"));
@@ -32,90 +27,118 @@ const Scheduler = lazy(() => import("@routes/Scheduler"));
 const ClinicsDirectory = lazy(() => import("@components/ClinicsDirectory"));
 const DoctorsDirectory = lazy(() => import("@/components/ui/DoctorsDirectory"));
 
+function Fallback({ children, key }: { children: ReactNode; key?: string }) {
+  return (
+    <Suspense key={key} fallback={<Spinner loading />}>
+      {children}
+    </Suspense>
+  );
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
-    Component: Layout,
-    ErrorBoundary: ErrorBoundary,
-
+    Component: App,
     children: [
-      { index: true, Component: HomePage },
-
-      { path: "chat", Component: Chat },
+      {
+        index: true,
+        Component: LandingPage,
+      },
 
       {
-        path: "dir",
-        Component: Directory,
+        path: "/view",
+        Component: Layout,
+
         children: [
+          { Component: HomePage, index: true },
+
           {
-            path: "doctors",
-            Component: DoctorsDirectory,
+            path: "chat",
+            element: (
+              <Fallback key="chat-route">
+                <Chat />
+              </Fallback>
+            ),
           },
 
           {
-            path: "clinics",
+            path: "idx",
+            Component: Directory,
             children: [
               {
-                index: true,
-                Component: ClinicsDirectory,
+                path: "doctors",
+                element: (
+                  <Suspense
+                    key="doctor-directory"
+                    fallback={<Spinner loading />}
+                  >
+                    <DoctorsDirectory />
+                  </Suspense>
+                ),
+              },
+
+              {
+                path: "clinics",
+                children: [
+                  {
+                    index: true,
+                    Component: ClinicsDirectory,
+                  },
+                ],
               },
             ],
+          },
+
+          {
+            path: "doctor/:id/consult",
+            Component: Consultation,
+          },
+
+          {
+            path: "doctor/:id",
+            Component: () => {
+              const id = useLocation().pathname.split("/").at(-1);
+              const { data: doctor, isLoading } = useGetById(id as string);
+
+              if (isLoading) {
+                return <Spinner loading={isLoading} />;
+              }
+
+              return <div>Dr {doctor?.name}'s Profile</div>;
+            },
+          },
+
+          {
+            path: "doctor/:id/schedule",
+            Component: Scheduler,
+          },
+
+          {
+            path: "chat",
+            Component: Chat,
+          },
+
+          {
+            path: "auth/me",
+            Component: UserProfile,
           },
         ],
       },
 
       {
-        path: "doctor/:id/consult",
-        Component: Consultation,
-      },
-
-      {
-        path: "doctor/:id",
-        Component: () => {
-          return <div>Doctor's Profile</div>;
+        path: "auth",
+        Component() {
+          const token = useAuthStore((s) => s.token);
+          return token ? <Navigate to="/" /> : <Outlet />;
         },
+
+        children: [
+          { index: true, Component: SignIn },
+          { path: "register", Component: Register },
+        ],
       },
-
-      {
-        path: "doctor/:id/schedule",
-        Component: Scheduler,
-      },
-
-      {
-        path: "chat",
-        Component: Chat,
-      },
-
-      {
-        path: "auth/me",
-        Component: UserProfile,
-      },
-    ],
-  },
-
-  {
-    path: "auth",
-    Component: AuthLayout,
-
-    children: [
-      { index: true, Component: SignIn },
-      { path: "register", Component: Register },
     ],
   },
 ]);
 
 export default router;
-
-function AuthLayout() {
-  const user = useAuthStore((s) => s.user);
-
-  if (user) {
-    return <Navigate to="/dir/doctors" />;
-  }
-
-  return (
-    <main className="container py-24">
-      <Outlet />
-    </main>
-  );
-}

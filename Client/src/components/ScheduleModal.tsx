@@ -1,7 +1,7 @@
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
-import type { Clinic, Doctor, Slot } from "@/types/http";
+import type { Clinic, Doctor, PatientCreate, Slot } from "@/types/http";
 import { useBookingMutation, useUnbookingMutation } from "@/hooks/bookings";
 import { toast } from "sonner";
 import useModalStore from "@stores/modalStore";
@@ -11,10 +11,10 @@ import { Pencil, MapPinCheckInside } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { PatientSchema, UserSchema, type CreateUser } from "@/schemas";
 import { useSearchParams } from "react-router-dom";
 import { DateTime } from "luxon";
 import { useSignup } from "@/hooks/auth";
+import { PatientCreateSchema } from "@/schemas";
 
 function ScheduleModal({
   dr,
@@ -32,8 +32,8 @@ function ScheduleModal({
 
   const dateString = dtParams.toFormat("dd LLL yyyy");
 
-  const form = useForm<CreateUser>({
-    resolver: zodResolver(UserSchema),
+  const form = useForm<PatientCreate>({
+    resolver: zodResolver(PatientCreateSchema),
   });
 
   const {
@@ -52,17 +52,12 @@ function ScheduleModal({
       return;
     }
 
-    const ptnt = user
-      ? Object.create(null)
-      : { ...PatientSchema.parse(form.getValues()) };
-
-    const baseDetails = {
+    const appointment = {
       slotId: slot.id,
       date: dtParams.toISO()!,
       doctorId: dr.id,
+      clinicId: clinic.id,
     };
-
-    const appointment = { ...ptnt, ...baseDetails };
 
     const createdAppointment = await book(appointment, {
       onSuccess() {
@@ -94,8 +89,8 @@ function ScheduleModal({
     });
   }
 
-  async function confirmOnboarding(data: CreateUser) {
-    await signup(data);
+  async function confirmOnboarding(data: PatientCreate) {
+    await signup({ data, route: "patient" });
   }
 
   return (
@@ -109,6 +104,7 @@ function ScheduleModal({
       </div>
 
       <div className="flex flex-col gap-2 text-sm">
+        w" loa
         {clinic && (
           <div className="flex items-center gap-2">
             <h2 className="line-clamp-1">{clinic.name}</h2>
@@ -118,7 +114,6 @@ function ScheduleModal({
             </Button>
           </div>
         )}
-
         {slot && (
           <div className="flex items-center gap-2">
             <h2>{slot.begin}</h2>
@@ -129,20 +124,20 @@ function ScheduleModal({
         )}
       </div>
 
-      {user?.id ? (
+      {user ? (
         <form
           onSubmit={form.handleSubmit(confirmSlot)}
           className="flex flex-col gap-6"
         >
           <div className="flex items-center justify-between">
-            <Button type="button" color="secondary" onClick={closeModal}>
+            <Button type="button" onClick={closeModal}>
               cancel
             </Button>
 
             <Button
               onClick={confirmSlot}
               type="submit"
-              color="accent"
+              color="white"
               loading={isPending}
             >
               Confirm Slot
@@ -154,34 +149,34 @@ function ScheduleModal({
           onSubmit={form.handleSubmit(confirmOnboarding)}
           className="flex flex-col gap-6 shadow-lg p-4 rounded-md"
         >
-          <h1 className="text-lg text-center text-accent-dark font-black leading-tight">
+          <h1 className="text-lg text-center text-accentdark font-black leading-tight">
             Get Onboard now to confirm your slot!
           </h1>
           <Input
             autoFocus
             {...form.register("username")}
             label="name"
-            error={errors.username?.message}
+            error={errors["username"]}
             className="italic font-semibold text-sm"
           />
 
           <Input
             {...form.register("email")}
             label="email"
-            error={errors.email?.message}
+            error={errors.email}
             className="italic font-semibold text-sm"
           />
           <Input
             {...form.register("password")}
             label="set a password"
-            error={errors.password?.message}
+            error={errors.password}
             className="font-bold italic text-sm"
           />
           <div className="flex items-center justify-between">
-            <Button type="button" color="secondary" onClick={closeModal}>
+            <Button type="button" onClick={closeModal}>
               Cancel
             </Button>
-            <Button type="submit" color="accent" loading={signupIsPending}>
+            <Button type="submit" color="white" loading={signupIsPending}>
               Sign up
             </Button>
           </div>

@@ -1,6 +1,6 @@
 import Ratings from "../Ratings";
-import Badge from "./Badge";
 import type { ButtonProps } from "@/types/button";
+import { Stack } from "./Stack";
 
 interface CategoryFilterProps {
   label: string;
@@ -17,25 +17,21 @@ const CategoryFilter = ({
   onOptionSelect,
 }: CategoryFilterProps) => {
   return (
-    <div className="filter-div">
-      <label>{label}</label>
-      <div className="flex gap-2 items-center ml-auto">
+    <Stack orientation="V">
+      <label className="text-text-normal">{label}</label>
+
+      <Stack gap="md">
         {options.map((option) => (
-          <Badge
-            size="sm"
-            key={option}
-            selected={option == selectedOption}
-            onClick={onOptionSelect.bind(null, option)}
-          >
+          <span key={option} onClick={onOptionSelect.bind(null, option)}>
             {label.toLowerCase().includes("rating") ? (
               <Ratings rating={option as number} />
             ) : (
               option
             )}
-          </Badge>
+          </span>
         ))}
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 };
 

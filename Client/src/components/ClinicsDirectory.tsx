@@ -46,7 +46,7 @@ function ClinicsDirectory() {
             </header>
 
             <section className="flex items-center italic gap-1 self-end justify-self-end mt-2">
-              <Button variant="outlined" endIcon={<MapPin />}>
+              <Button variant="ghost" endIcon={<MapPin />}>
                 location
               </Button>
               <Button color="secondary" endIcon={<Phone />}>

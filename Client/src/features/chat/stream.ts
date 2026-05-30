@@ -19,24 +19,18 @@ async function* stream(content: ReadableStream<Uint8Array<ArrayBuffer>>) {
       .filter(Boolean);
 
     for (const line of lines) {
-      console.log("Unparsed chunk -> ", line);
-
       try {
         var chunk = JSON.parse(line) || {};
       } catch {}
 
-      if (chunk.type === "error") {
-        throw new Error(chunk.error);
-      }
+      console.log(chunk);
 
-      if (chunk.data) {
-        if (chunk.data.type === "done") {
-          console.log("chunks finished streaming successfully ...");
+      switch (chunk.type) {
+        case "error":
+          throw new Error(chunk.error);
 
-          return;
-        }
-
-        yield chunk.data.content;
+        case "delta":
+          yield chunk.data.content;
       }
     }
   }

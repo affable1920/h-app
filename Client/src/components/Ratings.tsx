@@ -1,7 +1,7 @@
 import { StarIcon } from "lucide-react";
 
 const attrs = {
-  size: 12,
+  size: 16,
   strokeWidth: 0,
 };
 
@@ -9,7 +9,7 @@ const Ratings = ({ rating }: { rating: number }) => {
   return (
     <div className="flex relative">
       {Array.from({ length: 5 }, (_, i) => (
-        <StarIcon key={i + 1} fill="#111" {...attrs} />
+        <StarIcon key={i + 1} fill="var(--color-drk)" {...attrs} />
       ))}
 
       <div className="absolute flex">

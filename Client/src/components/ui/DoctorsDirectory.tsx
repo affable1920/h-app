@@ -4,9 +4,9 @@ import Spinner from "@components/Spinner";
 import { useGetAll } from "@/hooks/doctors";
 
 import DrCardFront from "./DrCardFront";
-import type { DoctorSummary } from "@/types/http";
+import type { Doctor } from "@/types/http";
 
-function DrCardBack({ doctor }: { doctor: DoctorSummary }) {
+function DrCardBack({ doctor }: { doctor: Doctor }) {
   return (
     <div className="flex flex-col h-1/2">
       <h2 className="card-h2 grow">{doctor.name}</h2>

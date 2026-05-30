@@ -1,0 +1,139 @@
+import type { COLORS } from "@/types/button";
+import { memo, type CSSProperties, type ElementType } from "react";
+
+type Labelposition = "start" | "center" | "end";
+
+type DividerColor = (typeof COLORS)[number] | "secondary";
+
+type LabelProps = {
+  as?: ElementType;
+  text: string;
+  position: Labelposition;
+  styles?: CSSProperties;
+  className?: string;
+  color?: DividerColor;
+};
+
+interface DividerProps {
+  orientation?: "horizontal" | "vertical";
+  label?: LabelProps;
+  size?: "sm" | "md" | "lg";
+  color?: DividerColor;
+  styles?: CSSProperties;
+  className?: string;
+}
+
+const sizes: Record<"sm" | "md" | "lg", string> = {
+  sm: "h-0.5",
+  md: "h-1",
+  lg: "h-2",
+};
+
+const colors: Record<DividerColor, string> = {
+  primary: "bg-layout",
+  brand: "bg-brand",
+  white: "bg-text-normal",
+  indicator: "bg-indicator",
+  secondary: "bg-border-vivid",
+};
+
+const Divider = memo(function ({
+  label,
+  size = "sm",
+  orientation = "horizontal",
+  color = "primary",
+}: DividerProps) {
+  const lineStyles = ["inline-flex w-full", sizes[size], colors[color]]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  const lblStyles = [
+    "shrink-0 capitalize inline-flex",
+    label?.position === "end" ? "order-1" : "order-0",
+    "text" + colors[label?.color ?? "primary"].slice(2),
+    label?.className,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  if (orientation === "horizontal") {
+    return (
+      <article className={`flex items-center gap-4`}>
+        {label &&
+          (label.position === "start" || label.position === "end") &&
+          (function () {
+            const Label = label.as || "p";
+
+            return (
+              <>
+                <Label className={lblStyles} {...label}>
+                  {label.text}
+                </Label>
+                <span className={lineStyles} />
+              </>
+            );
+          })()}
+
+        {label &&
+          label.position === "center" &&
+          (function () {
+            const Label = label.as || "p";
+
+            return (
+              <>
+                <span className={lineStyles} />
+                <Label className={lblStyles}>{label.text}</Label>
+                <span className={lineStyles} />
+              </>
+            );
+          })()}
+
+        {!label && <span className={lineStyles} />}
+      </article>
+    );
+  }
+
+  return (
+    <article className={`flex flex-col gap-4`}>
+      {label &&
+        (label.position === "start" || label.position === "end") &&
+        (function () {
+          const Label = label.as || "p";
+
+          return (
+            <>
+              <Label
+                style={{
+                  order: label.position === "start" ? 0 : 1,
+                }}
+                className={lblStyles}
+              >
+                {label.text}
+              </Label>
+              <span className={lineStyles} />
+            </>
+          );
+        })()}
+
+      {label &&
+        label.position === "center" &&
+        (function () {
+          const Label = label.as || "p";
+
+          return (
+            <>
+              <span className={lineStyles} />
+              <Label className={lblStyles}>{label.text}</Label>
+              <span className={lineStyles} />
+            </>
+          );
+        })()}
+
+      {!label && <span className={lineStyles} />}
+    </article>
+  );
+});
+
+export default Divider;

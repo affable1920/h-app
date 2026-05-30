@@ -1,10 +1,11 @@
+import type { JSX } from "react";
 import Button from "../ui/Button";
 import { Check, X } from "lucide-react";
 
 interface ConfirmationProps {
   resolve: () => void;
   reject: () => void;
-  tagline: string;
+  tagline: string | JSX.Element;
 }
 
 function Confirmation({ resolve, reject, tagline = "" }: ConfirmationProps) {
@@ -17,7 +18,7 @@ function Confirmation({ resolve, reject, tagline = "" }: ConfirmationProps) {
         {tagline}
       </div>
       <div className="flex items-center justify-between px-4">
-        <Button variant="outlined" onClick={reject}>
+        <Button variant="ghost" onClick={reject}>
           Decline <X strokeWidth={4} />
         </Button>
         <Button color="secondary" onClick={resolve}>

@@ -9,7 +9,9 @@ import Spinner from "../Spinner";
 import { useGetById } from "@/hooks/doctors";
 
 function Scheduler() {
-  const id = useLocation().pathname.split("/").at(2);
+  const loc = useLocation();
+  const id = loc.pathname.split("/").filter(Boolean).at(-2);
+
   const [showClinicsView, setShowClinicsView] = useState(false);
   const { data: doctor, isPending, isError } = useGetById(id as string);
 

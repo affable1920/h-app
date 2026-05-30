@@ -16,7 +16,7 @@ const Spinner = ({
 
   return (
     <div
-      className={`border-4 rounded-full border-black border-b-secondary-light rotate-360 animate-spin 
+      className={`border-4 rounded-full border-black border-b-input rotate-360 animate-spin 
     duration-[infinity] ${sizes[size]}`}
     />
   );

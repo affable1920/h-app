@@ -33,6 +33,9 @@ function Modal() {
       {!!ModalElement && (
         <Overlay viewOverlay={modalProps.viewOverlay ?? false}>
           <motion.div
+            style={{
+              overscrollBehavior: "contain",
+            }}
             id="modal"
             key={currModal}
             variants={variants}

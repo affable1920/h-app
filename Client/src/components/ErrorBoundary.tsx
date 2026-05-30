@@ -15,7 +15,7 @@ const ErrorBoundary = () => {
       <h1 className="label text-error-dark">{msg}</h1>
 
       <Link
-        className="underline underline-offset-4 text-sm rounded-md p-2 hover:bg-secondary 
+        className="underline underline-offset-4 text-sm rounded-md p-2 hover:bg-input 
         hover:text-white transition-colors duration-200"
         to="/"
       >

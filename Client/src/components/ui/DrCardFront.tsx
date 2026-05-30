@@ -2,25 +2,29 @@ import { ShieldCheck } from "lucide-react";
 import docImg from "@/assets/doctor.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import Ratings from "../Ratings";
-import type { DoctorSummary } from "@/types/http";
+import type { Doctor } from "@/types/http";
 import getActions from "@/utils/doctorActionsConfig";
 import { useMemo } from "react";
 import Button from "./Button";
+import { Stack } from "./Stack";
 
-function DrCardFront({ doctor }: { doctor: DoctorSummary }) {
+function DrCardFront({ doctor }: { doctor: Doctor }) {
   const navigate = useNavigate();
 
   const actions = useMemo(
     function () {
-      return getActions(doctor.status, {
-        consult: (doctor: DoctorSummary) =>
-          navigate(`/doctor/${doctor.id}/consult`),
+      return getActions(doctor.status ?? "unknown", {
+        consult: function (doctor: Doctor) {
+          navigate(`/doctor/${doctor.id}/consult`);
+        },
 
-        schedule: (doctor: DoctorSummary) =>
-          navigate(`/doctor/${doctor.id}/schedule`),
+        schedule: function (doctor: Doctor) {
+          navigate(`/doctor/${doctor.id}/schedule`);
+        },
 
-        message: (doctor: DoctorSummary) =>
-          navigate(`/doctor/${doctor.id}/message`),
+        message: function (doctor: Doctor) {
+          navigate(`/doctor/${doctor.id}/message`);
+        },
       });
     },
     [doctor.status, navigate],
@@ -28,41 +32,46 @@ function DrCardFront({ doctor }: { doctor: DoctorSummary }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="flex gap-2">
-        <div className="h-full w-full aspect-square bg-slate-100/30 rounded-md max-w-20">
+      <Stack>
+        <div className="aspect-square rounded-md overflow-hidden max-w-20">
           <img
-            className="h-full hover:scale-95 cursor-pointer w-full object-cover 
-          mix-blend-multiply transition-transform duration-150"
+            className="h-full hover:scale-95 rounded-md cursor-pointer w-full object-cover 
+           transition-transform duration-150 mix-blend-difference"
             src={docImg}
             alt="doc_img"
           />
         </div>
         <div className="flex flex-col justify-between max-w-40">
-          <div className="flex flex-col gap-0.5">
-            <div className="flex gap-1 items-center">
-              <Link to={`/doctor/${doctor.id}`}>
-                <h2 className="card-h2 line-clamp-1 truncate hover:text-slate-800">
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-2 items-center">
+              <Link to={`/view/doctor/${doctor.id}`}>
+                <h2 className="card-h2 line-clamp-1 truncate capitalize text-text-normal">
                   Dr. {doctor.name}
                 </h2>
               </Link>
               <ShieldCheck
                 size={12}
+                data-tooltip={doctor.verified ? "verified" : "not verified"}
                 color={doctor.verified ? "green" : "red"}
               />
             </div>
             <div className="flex gap-2 text-sm">
-              <h2>{doctor.primary_specialization}</h2>
-              <p>({doctor.experience}y)</p>
+              <h2 className="text-text-normal">
+                {doctor.primary_specialization}
+              </h2>
+              {doctor.experience && <p>({doctor.experience}y)</p>}
             </div>
           </div>
           <div className="flex gap-2 items-center font-semibold">
-            <Ratings rating={doctor?.rating || 0} />
-            <h3 className="underline">({doctor.reviews})</h3>
+            {!!doctor.rating && <Ratings rating={doctor.rating} />}
+            {!!doctor.reviews.length && (
+              <h3 className="underline">({doctor.reviews})</h3>
+            )}
           </div>
         </div>
-      </section>
+      </Stack>
 
-      <div className="flex items-center italic gap-1 self-end justify-self-end mt-2">
+      <div className="italic self-end flex gap-2 justify-end">
         {(actions || []).map((action) => {
           const { name, label = "", icon: Icon } = action;
 
@@ -70,10 +79,9 @@ function DrCardFront({ doctor }: { doctor: DoctorSummary }) {
             <Button
               name={name}
               key={action.label || name}
-              {...(action.isPrimary
-                ? { variant: "contained", color: "secondary" }
-                : { variant: "outlined" })}
-              onClick={() => action.handler(doctor)}
+              variant="contained"
+              color={action.isPrimary ? "brand" : "white"}
+              onClick={action.handler.bind(doctor, doctor)}
               style={{ order: action.isPrimary ? 1 : -1 }}
             >
               {label}

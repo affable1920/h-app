@@ -10,6 +10,7 @@ import SelectFilter from "./SelectFilter";
 import * as constants from "@/utils/dataConstants";
 import { useSearchParams } from "react-router-dom";
 import useFilterStore from "@/stores/filterStore";
+import { Stack } from "./Stack";
 
 const RATINGFILTER = {
   label: "rating",
@@ -47,24 +48,19 @@ function DirectoryFilter() {
   }
 
   return (
-    <section className="flex flex-col h-full gap-8 p-4 px-6 relative text-xs">
+    <section className="flex flex-col h-full gap-8 p-4 px-6 relative">
       <div className="flex items-center justify-between">
         {!!activeFiltersCount && (
           <div className="ml-auto flex items-center gap-2">
             <p>{activeFiltersCount}</p>
-            <Button
-              className="p-2"
-              variant="ghost"
-              color="secondary"
-              onClick={reset}
-            >
+            <Button className="p-2" variant="icon" onClick={reset}>
               <X />
             </Button>
           </div>
         )}
       </div>
-      <section className="flex flex-col gap-8 w-full grow">
-        <div className="filter-div">
+      <Stack className="grow" gap="lg" orientation="V">
+        <div className="space-y-2">
           <AnimatePresence mode="wait">
             {selectedSpecialization && (
               <Badge
@@ -84,8 +80,8 @@ function DirectoryFilter() {
           />
         </div>
 
-        <div className="filter-div">
-          <label>Filter by distance</label>
+        <div>
+          <label className="text-text-normal">Filter by distance</label>
           <Input
             type="range"
             name="distance"
@@ -93,13 +89,13 @@ function DirectoryFilter() {
               handleFilterUpdate("maxDistance", parseInt(ev.target.value));
             }}
           />
-          <div className="flex justify-between items-center italic font-bold">
+          <Stack justify="between">
             <span>1 km</span>
             <span>40 km</span>
-          </div>
+          </Stack>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <Stack orientation="V">
           <CategoryFilter
             size="md"
             options={RATINGFILTER.options}
@@ -116,13 +112,13 @@ function DirectoryFilter() {
           >
             Online Now
           </Badge>
-        </div>
-      </section>
+        </Stack>
+      </Stack>
 
       <div className="flex items-center gap-4 justify-end">
         <Button
-          size="md"
-          color="secondary"
+          variant="ghost"
+          className="shadow-md shadow-black/20 border-border-vivid border-2"
           onClick={function () {
             reset();
             closeModal();
@@ -130,7 +126,7 @@ function DirectoryFilter() {
         >
           Cancel
         </Button>
-        <Button size="md" color="accent" onClick={applyFiltersHTTP}>
+        <Button color="brand" onClick={applyFiltersHTTP}>
           Apply
         </Button>
       </div>

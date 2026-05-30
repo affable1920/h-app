@@ -46,14 +46,14 @@ const Dropdown = ({
           animate="visible"
           exit="exit"
           style={{ scrollbarWidth: "none", overflowX: "hidden" }}
-          className={`max-h-32 overflow-y-scroll ring-2 rounded-lg divide-y
-            ring-zinc-400/25 divide-zinc-400/25 shadow-lg shadow-slate-300/20`}
+          className={`max-h-32 overflow-y-scroll rounded-lg divide-y
+            border-2 border-border-vivid divide-border-vivid shadow-lg shadow-layout-raised`}
         >
           {options.map((opt) => (
             <motion.li
               key={opt}
-              className={`hover:bg-zinc-50 p-2 py-2.5 transition-colors capitalize 
-                cursor-pointer font-semibold italic tracking-wide`}
+              className={`hover:bg-layout-raised p-2 py-2.5 transition-colors capitalize 
+                cursor-pointer font-semibold italic tracking-wide text-base`}
               onClick={() => onOptionSelect?.(opt)}
             >
               {opt as string}

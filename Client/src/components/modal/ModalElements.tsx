@@ -1,98 +1,19 @@
-import type { DoctorSummary } from "@/types/http";
 import DirectoryFilter from "@/components/ui/DirectoryFilter";
 import ScheduleModal from "../ScheduleModal";
-import { motion } from "motion/react";
-import { Heart, LogOut, Bell, User } from "lucide-react";
-import Button from "../ui/Button";
-import { Link, useNavigate } from "react-router-dom";
-import useModalStore from "@/stores/modalStore";
-import useAuthStore from "@/stores/authStore";
 import Confirmation from "./Confirmation";
 import Search from "../Search";
 import Sorter from "../ui/Sorter";
+import DrProfileSetup from "../../features/onboarding-doctor/DrProfileSetup";
 
 const MODALS: Record<string, React.ElementType> = {
   schedule: ScheduleModal,
   search: Search,
 
   sorter: Sorter,
-
-  directoryFilter: DirectoryFilter,
-
-  call(dr: DoctorSummary) {
-    return (
-      <article>
-        <h2 className="card-h2">{dr?.name}</h2>
-      </article>
-    );
-  },
-
-  memberModal() {
-    const tagline = "Get onboard to keep track of all your appointments!";
-
-    return (
-      <div>
-        <h2 className="card-h2">{tagline}</h2>
-      </div>
-    );
-  },
-
   confirmation: Confirmation,
 
-  authOptions() {
-    const navigate = useNavigate();
-    const options = ["history", "settings", "view booked appointments"];
-
-    const user = useAuthStore((s) => s.user);
-
-    const icons = [
-      {
-        icon: Heart,
-        onClick() {},
-        text: "saved for later",
-      },
-      { icon: Bell, onClick() {}, text: "notifications" },
-      {
-        icon: User,
-        onClick() {
-          navigate("/auth/me");
-          useModalStore.getState().closeModal();
-        },
-        text: "profile",
-      },
-      { icon: LogOut, onClick() {}, text: "logout" },
-    ];
-
-    return (
-      <section className="h-full flex flex-col justify-between items-center-safe p-4">
-        <motion.ul className="flex flex-col gap-8 [&>li]:first-letter:capitalize items-center">
-          {options.map((option) => (
-            <motion.li className="font-semibold" key={option}>
-              <Link to={`/${option}`}>{option}</Link>
-            </motion.li>
-          ))}
-        </motion.ul>
-        {user ? (
-          <ul className="flex items-center gap-4">
-            {icons.map(({ icon: Icon, onClick, text = "" }) => (
-              <Button
-                key={text || Icon.name}
-                variant="ghost"
-                onClick={onClick}
-                data-tooltip={text}
-              >
-                <Icon />
-              </Button>
-            ))}
-          </ul>
-        ) : (
-          <div className="flex items-center gap-4">
-            <Button>Sign in</Button>
-          </div>
-        )}
-      </section>
-    );
-  },
+  directoryFilter: DirectoryFilter,
+  "doc-profile-setup": DrProfileSetup,
 };
 
 export default MODALS;

@@ -1,6 +1,7 @@
 import Input from "./ui/Input";
 import Button from "./ui/Button";
 import { X } from "lucide-react";
+import useModalStore from "@/stores/modalStore";
 
 export default function Search() {
   return (
@@ -15,14 +16,12 @@ export default function Search() {
         />
         <Button
           style={{ position: "absolute", right: "8px" }}
-          variant="ghost"
-          size="sm"
+          variant="icon"
+          onClick={useModalStore.getState().closeModal}
         >
           <X />
         </Button>
       </div>
-
-      <section></section>
     </section>
   );
 }

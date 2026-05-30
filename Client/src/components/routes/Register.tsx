@@ -1,92 +1,56 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
-import { toast } from "sonner";
-import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
-import { useSignup } from "@/hooks/auth";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { type CreateUser, UserSchema } from "@/schemas";
+import { useState } from "react";
+import { Stack } from "../ui/Stack";
+import DrProfileSetup from "@/features/onboarding-doctor/DrProfileSetup";
+import Divider from "../ui/Divider";
+import { PatientRegister } from "./PatientRegister";
 
 function Register() {
-  const register = useSignup();
-  const navigate = useNavigate();
-
-  const form = useForm<CreateUser>({ resolver: zodResolver(UserSchema) });
-  const {
-    formState: { errors },
-  } = form;
-
-  async function submit(user: CreateUser) {
-    const validation = UserSchema.parse(user);
-
-    await register.mutateAsync(validation, {
-      onSuccess() {
-        navigate("/");
-        toast.info("Successfully registered!");
-      },
-
-      onError(ex) {
-        console.log(ex);
-
-        toast.error(ex.name, {
-          description: ex.message,
-        });
-      },
-    });
-  }
+  const { state = {} } = useLocation();
+  const [role, setRole] = useState<"doctor" | "patient">(
+    state?.role ?? "patient",
+  );
 
   return (
-    <section className="max-w-sm mx-auto bg-transparent border-2 border-slate-200/75 p-8 rounded-xl shadow-xl shadow-secondary/20">
-      <h1 className="text-center uppercase mb-8 font-extrabold text-xl">
-        sign up
-      </h1>
-      <form
-        className="flex flex-col gap-8"
-        onSubmit={form.handleSubmit(submit)}
-      >
-        <article className="flex flex-col gap-8">
-          <Input
-            id="email"
-            autoFocus
-            label="email"
-            type="email"
-            {...form.register("email")}
-            error={errors?.email?.message}
-          />
+    <section
+      className={`form-box mx-auto ${role === "doctor" ? "max-w-md md:max-w-xl" : "max-w-sm"}`}
+    >
+      <section className="p-8 px-12">
+        {role === "doctor" ? <DrProfileSetup /> : <PatientRegister />}
+      </section>
 
-          <Input
-            id="password"
-            type="password"
-            label="password"
-            {...form.register("password")}
-            error={errors.password?.message}
-          />
-
-          <Input
-            id="username"
-            label="username"
-            {...form.register("username")}
-            error={errors.username?.message}
-          />
-        </article>
-
-        <article className="flex flex-col gap-4">
-          <Button
-            type="submit"
-            size="md"
-            color="accent"
-            loading={register.isPending}
+      <Stack className="p-4 bg-layout-raised" orientation="V">
+        <Stack justify="center">
+          <span>Already have an account</span>
+          <Link
+            to="/auth"
+            state={{ role }}
+            className="ml-2 text-text-normal hover:underline underline-offset-2 capitalize"
           >
-            Register
-          </Button>
-
-          <Button size="md" onClick={() => navigate("/auth")}>
             sign in
-          </Button>
-        </article>
-      </form>
+          </Link>
+        </Stack>
+
+        <Divider
+          label={{
+            text: "OR",
+            position: "center",
+          }}
+          color="secondary"
+        />
+
+        <Button
+          onClick={function () {
+            setRole((p) => (p === "doctor" ? "patient" : "doctor"));
+          }}
+          className="capitalize text-text-normal w-fit self-center"
+        >
+          Sign up as a {role === "doctor" ? "patient" : "doctor"}
+        </Button>
+      </Stack>
     </section>
   );
 }

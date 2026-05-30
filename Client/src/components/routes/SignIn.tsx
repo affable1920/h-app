@@ -1,91 +1,58 @@
-import { Link, useNavigate } from "react-router-dom";
-
-import Input from "@/components/ui/Input";
+import { Link, useLocation } from "react-router-dom";
 import Button from "@/components/ui/Button";
-
-import { toast } from "sonner";
-
-import { useSignin } from "@/hooks/auth";
-import { useForm } from "react-hook-form";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { type LoginUser, LoginSchema } from "@/schemas";
-import Text from "../ui/Label";
-import type { APIError } from "@/types/http";
+import { useState } from "react";
+import { Stack } from "../ui/Stack";
+import Divider from "../ui/Divider";
+import { PatientSignin } from "./PatientSignin";
+import { DrSignin } from "./DoctorSignin";
 
 function SignIn() {
-  const signin = useSignin();
-  const navigate = useNavigate();
-
-  const form = useForm<LoginUser>({ resolver: zodResolver(LoginSchema) });
-
-  const {
-    formState: { errors },
-  } = form;
-
-  async function submit(user: LoginUser) {
-    const validation = LoginSchema.parse(user);
-
-    await signin.mutateAsync(validation, {
-      onSuccess() {
-        navigate("/");
-        toast.info("Signed in successfully!");
-      },
-
-      onError(ex) {
-        const err = ex as unknown as APIError;
-        toast.error(err.msg ?? "Sign in failed", { description: err.type });
-      },
-    });
-  }
+  const { state = {} } = useLocation();
+  const [role, setRole] = useState<"doctor" | "patient">(
+    state?.role ?? "patient",
+  );
 
   return (
-    <div className="max-w-sm mx-auto bg-transparent border-2 border-slate-200/75 p-8 px-12 rounded-xl shadow-xl shadow-secondary/20">
-      <h2 className="text-xl text-center uppercase font-extrabold mb-8">
-        Sign In
-      </h2>
-      <form
-        className="flex flex-col gap-8"
-        onSubmit={form.handleSubmit(submit)}
-      >
-        <article className="flex flex-col gap-8">
-          <Input
-            autoFocus
-            label="email"
-            type="email"
-            id="email"
-            {...form.register("email")}
-            error={errors?.email?.message}
-          />
+    <section className="form-box max-w-sm">
+      <section className="px-12 p-8">
+        <header>
+          <h2 className="text-xl text-center uppercase mb-8">Sign In</h2>
+        </header>
 
-          <Input
-            id="password"
-            label="password"
-            type="password"
-            error={errors?.password?.message}
-            {...form.register("password")}
-          />
-        </article>
+        {role === "doctor" ? <DrSignin /> : <PatientSignin />}
+      </section>
 
-        <article className="flex flex-col gap-2">
-          <Button
-            size="md"
-            color="accent"
-            type="submit"
-            loading={signin.isPending}
+      <Stack orientation="V" className="p-4 bg-layout-raised">
+        <Stack justify="center">
+          <span>Don't have an account</span>
+          <Link
+            to="register"
+            state={{ role }}
+            className="capitalize text-text-normal underline-offset-2 focus:underline hover:underline 
+            hover:text-text transition-colors"
           >
-            sign in
-          </Button>
+            Sign up
+          </Link>
+        </Stack>
 
-          <article className="flex items-center text-xs justify-between capitalize font-semibold">
-            <Text>New here ?</Text>
-            <Link className="underline underline-offset-2" to="/auth/register">
-              sign up instead
-            </Link>
-          </article>
-        </article>
-      </form>
-    </div>
+        <Divider
+          label={{
+            text: "OR",
+            position: "center",
+          }}
+          color="secondary"
+        />
+
+        <Button
+          onClick={function () {
+            setRole((p) => (p === "doctor" ? "patient" : "doctor"));
+          }}
+          className="w-fit self-center"
+        >
+          {role === "doctor" ? "patient sign in" : "Doctor sign in"}
+        </Button>
+      </Stack>
+    </section>
   );
 }
 

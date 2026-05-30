@@ -53,7 +53,7 @@ const Badge = memo(
           sizes[size],
           full && "w-full",
           current &&
-            "border-b-2 border-b-accent/50 font-black shadow-inner shadow-accent-dark/60",
+            "border-b-2 border-b-accent/50 font-black shadow-inner shadow-accentdark/60",
           selected && "selected",
           disabled &&
             "cursor-default opacity-70 pointer-events-none shadow-none font-semibold border-none",
@@ -65,8 +65,11 @@ const Badge = memo(
       [rounded, size, full, current, selected, className, disabled],
     );
 
+    const props =
+      Component === "button" ? { ...rest, type: "button" } : { ...rest };
+
     return (
-      <Component className={classConfig} {...rest}>
+      <Component className={classConfig} {...props}>
         {content || children}
       </Component>
     );

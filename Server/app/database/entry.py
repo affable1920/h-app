@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
@@ -18,11 +19,14 @@ or otherwise the url would break
 @ - after encoding is mapped to %40
 """
 
+load_dotenv()
+
 
 class Base(DeclarativeBase):
     pass
 
 
+assert DATABASE_URL is not None, "db url env variable not set"
 engine = create_engine(url=DATABASE_URL)
 
 

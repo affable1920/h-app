@@ -1,47 +1,96 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import APIClient from "@/services/ApiClient";
-import type { UserDB, UserLogin, UserCreate } from "@/types/http";
+import type {
+  PatientCreate,
+  DoctorCreate,
+  DoctorLogin,
+  PatientLogin,
+  UserResponse,
+} from "@/types/http";
 import useAuthStore from "@/stores/authStore";
+import type { AxiosRequestConfig } from "axios";
+
+type SignupContext =
+  | { route: "doctor"; data: FormData }
+  | { route: "patient"; data: PatientCreate };
+
+type SigninContext =
+  | { route: "doctor"; data: DoctorLogin }
+  | { route: "patient"; data: PatientLogin };
 
 const api = new APIClient("/auth");
 
-export function useProfile() {
-  return useQuery({
-    queryKey: ["auth", "me"],
-    queryFn: async () => {
-      const response = await api.get<UserDB>("me");
-      return response.data;
-    },
-
-    retry: false,
-  });
-}
-
-export function useSignin() {
-  return useMutation({
-    mutationFn: async (user: UserLogin) => {
-      const response = await api.post<undefined, UserLogin>("login", user);
-      const jwt = response.headers["x-auth-token"];
-
-      if (!jwt) {
-        throw new Error("no access token recieved on login...");
-      }
-      useAuthStore.getState().setUser(jwt);
-    },
-  });
-}
-
 export function useSignup() {
-  return useMutation({
-    mutationFn: async (user: UserCreate) => {
-      const response = await api.post<undefined, UserCreate>("register", user);
-      const jwt = response.headers["x-auth-token"];
+  const saveToken = useAuthStore((s) => s.saveToken);
+  const setUser = useAuthStore((s) => s.setUser);
 
+  return useMutation<
+    UserResponse,
+    Error,
+    SignupContext & { params?: AxiosRequestConfig }
+  >({
+    async mutationFn(context) {
+      const ep = "register/" + context.route;
+      const response = await api.post<UserResponse, SignupContext["data"]>(
+        ep,
+        context.data,
+        {
+          ...(context.params || {}),
+        },
+      );
+
+      const jwt = response.headers["x-auth-token"];
       if (!jwt) {
         throw new Error("no access token recieved on register...");
       }
 
-      useAuthStore.getState().setUser(jwt);
+      saveToken(jwt);
+      setUser(response.data);
+      return response.data;
     },
+  });
+}
+
+export function useSignin() {
+  const saveToken = useAuthStore((s) => s.saveToken);
+  const setUser = useAuthStore((s) => s.setUser);
+
+  return useMutation<
+    UserResponse,
+    Error,
+    SigninContext & { params?: AxiosRequestConfig }
+  >({
+    async mutationFn(context) {
+      const ep = "login/" + context.route;
+      const response = await api.post<UserResponse, SigninContext["data"]>(
+        ep,
+        context.data,
+        {
+          ...(context.params || {}),
+        },
+      );
+
+      const jwt = response.headers["x-auth-token"];
+      if (!jwt) {
+        throw new Error("Login failed.");
+      }
+
+      saveToken(jwt);
+      setUser(response.data);
+      return response.data;
+    },
+  });
+}
+
+export function useFetchProfile() {
+  return useQuery({
+    queryKey: ["auth", "me"],
+
+    async queryFn() {
+      const response = await api.get("me");
+      return response.data;
+    },
+
+    retry: false,
   });
 }

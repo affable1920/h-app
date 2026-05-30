@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+.git
+.venv
+venv
+env.py
+*.py.mako
+*.ini

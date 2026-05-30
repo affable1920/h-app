@@ -56,3 +56,4 @@ env.py
 
 data/
 alembic/env.py
+.env.db

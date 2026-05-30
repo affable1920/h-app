@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Annotated, Literal
-from pydantic import BaseModel, Field, PlainSerializer, field_serializer
+from pydantic import BaseModel, Field, PlainSerializer
 
 
 ALLOWED_SORT_COLS = Literal["rating", "reviews", "experience", "fee", "name"]
@@ -17,7 +17,9 @@ class PaginationParams(BaseModel):
 
     sort_by: ALLOWED_SORT_COLS | None = Field(default="name", alias="sortBy")
     sort_order: SortOrder | None = Field(
-        default=SortOrder.ASC, alias="sortOrder")
+        default=SortOrder.ASC,
+        alias="sortOrder"
+    )
 
     @property
     def offset(self):
@@ -27,26 +29,22 @@ class PaginationParams(BaseModel):
 
 
 class BaseFilters(BaseModel):
-    search_query: Annotated[str | None, Field(
-        default=None, alias="searchQuery")]
+    search_query: Annotated[str | None, Field(alias="searchQuery")] = None
     min_rating: Annotated[float | None, Field(
-        default=None, alias="minRating", gt=0, le=5.0)]
+        alias="minRating", gt=0, le=5.0)] = None
     max_distance: Annotated[int | None, Field(
-        default=None, alias="maxDistance", gt=0)]
+        alias="maxDistance", gt=0)] = None
 
 
 class DrRouteFilters(BaseFilters):
-    consults_online: Literal["1"] | None = None
-    currently_available: Literal["1"] | None = Field(
-        default=None, alias="currentlyAvailable")
-
+    consults_online: Annotated[Literal["1"] |
+                               None, Field(alias="consultsOnline")] = None
+    currently_available: Annotated[Literal["1"] |
+                                   None, Field(alias="currentlyAvailable")] = None
     specialization: Annotated[str | None, PlainSerializer(
-        func=lambda s: s.lower() if s else None, return_type=str), Field(default=None)]
-
-    @field_serializer("specialization")
-    def serialize(self, spec: str):
-        return spec.lower() if spec else None
+        func=lambda s: s.lower() if s else None, return_type=str)] = None
+    experience: int | None = None
 
 
 class ClinicRouteFilters(BaseFilters):
-    facilities: Annotated[list[str] | None, Field(default=None)]
+    facilities: list[str] | None = None

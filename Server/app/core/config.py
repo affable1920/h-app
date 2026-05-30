@@ -1,17 +1,16 @@
 import logging
 import os
 from dotenv import load_dotenv
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv()
 
-ENV = os.getenv("ENV", "dev")
+ENV = os.getenv("ENV", "DEV")
 JWT_SECRET = os.getenv("JWT_SECRET", "")
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql://postgres:Ss%402332253@localhost:5432/soporefix"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
 ALG = os.getenv("ALG", "HS256")
-USE_HTTPS = os.getenv("USE_HTTPS", 0)
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+USE_HTTPS = int(os.getenv("USE_HTTPS", "0"))
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 
 #
@@ -32,3 +31,14 @@ def setup_logging():
 
 
 setup_logging()
+
+
+class Settings(BaseSettings):
+    ENV: str = "DEV"
+    JWT_SECRET: str = ""
+    DATABASE_URL: str
+    ALG: str
+    USE_HTTPS: int = 0
+    GROQ_API_KEY: str
+
+    model_config = SettingsConfigDict(env_file=".env")

@@ -1,39 +1,64 @@
 from uuid import UUID
 
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, APIRouter, Depends, HTTPException
+from fastapi import BackgroundTasks, HTTPException, APIRouter, Depends, HTTPException
 
-from app.services.users_service import UserService
-from app.schemas.http import Appointment, BookingRequestData
-from app.services.booking_service import BookingService
+from app.services import MailService
+from app.schemas.outputs import AppointmentResponse
+from app.schemas.inputs import BookingRequestData
+from app.services.BookingService import BookingService
 from app.database.entry import get_db
-from app.middleware.access import get_user
+from app.middleware.auth_middleware import get_user
 
 
 router = APIRouter(prefix="/bookings")
-
-
+booker = BookingService()
 # add create later as the endpoint
-@router.post("", response_model=Appointment)
-async def book(rqst_data: BookingRequestData, session: Session = Depends(get_db), ptnt_id: UUID = Depends(get_user)):
+
+
+@router.post("", response_model=AppointmentResponse)
+async def book(
+    data: BookingRequestData, background_tasks: BackgroundTasks,
+    session: Session = Depends(get_db),
+    user_id: str = Depends(get_user)
+):
     try:
         with session.begin():
-            srvc = BookingService(session=session)
-            usr_srvc = UserService(db=session)
-            res = usr_srvc.get_with_type(id=ptnt_id)
+            user = {}
+            if not user:
+                raise ValueError("Patient does not exist")
 
-            if not res:
-                print("\n\nPatient does not exist ..")
-                raise ValueError("Patient does not exist ..")
-
-            booking_data = rqst_data.model_dump()
-
-            created_appointment = srvc.create_bkng(
-                **booking_data, patient_id=res.id)
-            return created_appointment
+            created = booker.create_bkng(
+                session,
+                data=data,
+                user=user
+            )
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail={"msg": e.__str__()})
+        print(e)
+        raise HTTPException(
+            400,
+            detail={
+                "msg": str(e)
+            }
+        )
+
+    mail = (
+        f"""
+        Subject: Appointment Confirmation!
+               
+                
+        Hi {""},
+        Your appointment with is scheduled on
+        {created.scheduled_date.isoformat(sep="-")}"""
+    )
+    background_tasks.add_task(
+        lambda: MailService.send_mail(
+            "affableshamik12@gmail.com",
+            msg=mail
+        )
+    )
+    return created
 
 
 #
@@ -41,9 +66,11 @@ async def book(rqst_data: BookingRequestData, session: Session = Depends(get_db)
 async def cancel_booking(booking_id: UUID, ptnt_id: UUID = Depends(get_user), session: Session = Depends(get_db)):
     try:
         with session.begin():
-            srvc = BookingService(session=session)
-            srvc.del_bkng(appointment_id=booking_id, patient_id=ptnt_id)
-
+            booker.del_bkng(
+                session,
+                appointment_id=booking_id,
+                patient_id=ptnt_id
+            )
         return {"msg": "Booking cancelled successfully."}
     except ValueError as e:
         raise HTTPException(status_code=400, detail={"msg": str(e)})

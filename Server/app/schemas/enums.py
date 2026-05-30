@@ -2,6 +2,9 @@ import enum
 
 
 class UserRole(enum.Enum):
+    """
+    This enum is deprecated. User UserRoleV2 instead
+    """
     ADMIN = "admin"
     DOCTOR = "doctor"
     PATIENT = "patient"
@@ -18,7 +21,6 @@ class UserRoleV2(enum.Enum):
     CLINIC_ADMIN = "clinic_admin"
     DOCTOR = "doctor"
     PATIENT = "patient"
-    NA = "na"
 
 
 class Status(enum.Enum):
@@ -32,3 +34,9 @@ class AppointmentStatus(enum.Enum):
     ACTIVE = "active"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
+    MISSED = "missed"
+
+
+class Gender(str, enum.Enum):
+    MALE = "male"
+    FEMALE = "female"

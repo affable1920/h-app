@@ -1,14 +1,10 @@
-from abc import abstractmethod
 import logging
-from typing import Generic, Sequence, Type, TypeVar
-from uuid import UUID
-
+from abc import ABC, abstractmethod
+from typing import Generic, Sequence, Tuple, Type, TypeVar
 from sqlalchemy import Select, func, select
-
-from sqlalchemy.orm import Session, DeclarativeBase, selectin_polymorphic
-
-from app.database.models import User
-from app.schemas.query_params import BaseFilters, PaginationParams, SortOrder
+from sqlalchemy.orm import Session, DeclarativeBase
+from app.schemas.outputs import PaginatedResponse
+from app.schemas.internals import BaseFilters, PaginationParams, SortOrder
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -17,9 +13,8 @@ logging.basicConfig(level=logging.DEBUG)
 T = TypeVar("T", bound=DeclarativeBase)
 
 
-class EntityService(Generic[T]):
-    def __init__(self, session: Session, entity: Type[T]) -> None:
-        self.session = session
+class EntityService(Generic[T], ABC):
+    def __init__(self, entity: Type[T]) -> None:
         self.entity = entity
 
     #
@@ -50,47 +45,69 @@ class EntityService(Generic[T]):
 
     #
 
-    def create_pg_response(self, objs: Sequence, pagination: PaginationParams):
+    def create_pg_response(self, objs: list[T], count: int, pagination: PaginationParams):
         logger.info(
             f"\nSequence length for which create paginate response is called -> {len(objs)}")
-
-        count = self.session.scalar(
-            select(func.count()).select_from(self.entity)) or 0
-
         last_page = count // pagination.max
-
         has_next = (
             pagination.page < last_page and
             len(objs) >= pagination.max
         )
-
-        return {
-            "entities": objs,
-            "count": count,
-            "has_next": has_next,
-            "has_prev": pagination.page > 1
-        }
+        return PaginatedResponse(
+            entities=objs,
+            count=count,
+            has_next=has_next,
+            has_prev=pagination.page > 1
+        )
 
     #
 
-    def get_all(self, pagination: PaginationParams, filters: BaseFilters | None = None) -> Sequence[T]:
+    def get_all(self, session: Session, pagination: PaginationParams | None = None, filters: BaseFilters | None = None) -> Tuple[int, Sequence[T]]:
         """ Public API - combines abstract methods' implementations """
-        logger.info(
-            f"\nget all request for {self.entity}")
-        loader_opt = selectin_polymorphic(User, [self.entity])
-        stmt = select(self.entity).options(loader_opt)
+        stmt = select(self.entity)
 
         if filters:
+            logger.info(f"Filtering params -> {filters}\n")
             stmt = self.filter(stmt, filters)
 
-        stmt = self.paginate(stmt, pagination)
+        if pagination:
+            logger.info(f"pagination params -> {pagination}")
+            stmt = self.paginate(stmt, pagination)
 
-        result = self.session.scalars(stmt).all()
+        result = session.scalars(stmt).all()
+        count = session.scalar(
+            select(func.count()).select_from(self.entity)) or 0
+
+        return count, result
+
+    #
+
+    def get_by_id(self, session: Session, id: str) -> T | None:
+        stmt = (
+            select(self.entity)
+            .where(getattr(self.entity, 'id') == id)
+        )
+
+        result = session.execute(stmt).scalar()
         return result
 
     #
 
-    def get_by_id(self, id: UUID) -> T | None:
-        stmt = select(self.entity).where(getattr(self.entity, 'id') == id)
-        result = self.session.scalar(stmt)
-        return result
+    def get_by_email(self, session: Session, email: str) -> T | None:
+        return session.scalar(
+            select(self.entity).where(getattr(self.entity, "email") == email)
+        )
+
+    #
+
+    def get(self, session: Session, identKey: str = "id", identVal: str = "") -> T | None:
+        return session.scalar(
+            select(self.entity).where(
+                getattr(self.entity, identKey) == identVal)
+        )
+
+    #
+
+    @abstractmethod
+    async def create(self, session: Session, data) -> T:
+        pass

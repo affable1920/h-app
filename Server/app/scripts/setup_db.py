@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 
 from app.database.entry import engine
-from app.shared.enums import AppointmentStatus, Status, UserRole, Mode
+from app.schemas.enums import AppointmentStatus, Status, UserRoleV2, Mode
 
 
 def vals(x):
@@ -9,7 +9,7 @@ def vals(x):
 
 
 enums = [
-    sa.Enum(UserRole, name="userrole"),
+    sa.Enum(UserRoleV2, name="userrole"),
     sa.Enum(Mode, name="consultationmode"),
     sa.Enum(AppointmentStatus, name="appointmentstatus"),
     sa.Enum(Status, name="status"),

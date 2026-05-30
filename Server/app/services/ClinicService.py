@@ -1,9 +1,9 @@
 from typing import Tuple
 
-from sqlalchemy import Select, any_, or_
+from sqlalchemy import Select
 from sqlalchemy.orm import Session
 
-from app.schemas.query_params import ClinicRouteFilters
+from app.schemas.internals import ClinicRouteFilters
 from app.services.entities.main import EntityService
 from app.database.models import Clinic
 
@@ -11,8 +11,8 @@ from app.database.models import Clinic
 #
 
 class ClinicService(EntityService[Clinic]):
-    def __init__(self, session: Session):
-        super().__init__(session, Clinic)
+    def __init__(self):
+        super().__init__(Clinic)
 
     #
     def filter(
@@ -29,3 +29,11 @@ class ClinicService(EntityService[Clinic]):
             stmt = stmt.where(Clinic.facilities.op("&&")(filters.facilities))
 
         return stmt
+
+    #
+
+    async def create(self, session: Session, ident, data) -> Clinic:
+        return Clinic()
+
+
+clinic_srvc = ClinicService()

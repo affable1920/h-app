@@ -3,7 +3,7 @@ from typing import Any, Self
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 
-from app.schemas.http import MsgType, WS_Message
+from .schema import MsgType, WS_Message
 
 
 logger = logging.getLogger(__name__)

@@ -3,10 +3,10 @@ from fastapi import WebSocket, WebSocketDisconnect
 import jwt
 from pydantic import ValidationError
 
-from app.schemas.http import MsgType, WS_Message
+from .schema import MsgType, WS_Message
 from app.database.entry import get_db
-from app.services.WS import WS_Service
-from app.middleware.access import decode_access_token, get_usr, decode
+from app.features.calling.WSService import WS_Service
+from .dependencies import decode
 
 logger = logging.getLogger(__name__)
 
@@ -38,11 +38,10 @@ async def ws_endpoint(ws: WebSocket):
         await ws.close(code=4444, reason="invalid token")
         return
 
-    db = next(get_db())
-    from app.services.users_service import UserService
+    session = next(get_db())
+    from app.services.DrService import dr_srvc as usr_srvc
 
-    service = UserService(db=db)
-    db_user = service.get_by_id(id=user_id)
+    db_user = usr_srvc.get_by_id(session=session, id=user_id)
 
     if not db_user:
         logging.info("No db user found with id inside token sub")

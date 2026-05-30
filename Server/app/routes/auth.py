@@ -1,88 +1,191 @@
-from uuid import UUID
-
+import logging
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, Response
-
-from app.shared.enums import UserRole
+from app.schemas.enums import UserRoleV2
+from app.database.models import Doctor, Patient
 from app.database.entry import get_db
-from app.services.users_service import UserService
-from app.schemas.http import (
-    CreateUser,
-    LoginUser,
-    ResponseDr,
-    ResponsePtnt,
-    ResponseUser,
+from app.schemas.inputs import DoctorLogin, DrCreate, PatientLogin, PatientCreate, get_dr_onboarding
+from app.schemas.outputs import (
+    DrProfileResponse,
+    PatientProfileResponse,
+    UserResponse
 )
-from app.middleware.access import (
+from app.services.PatientService import pt_srvc
+from app.services.DrService import dr_srvc
+from app.middleware.auth_middleware import (
+    authenticate_pwd,
     create_access_token,
-    get_user,
+    get_curr_user,
 )
 
 router = APIRouter(prefix="/auth")
+logger = logging.getLogger(__name__)
 
 
-@router.post("/register")
-async def register(user: CreateUser, response: Response, session: Session = Depends(get_db)):
-    with session.begin():
-        service = UserService(session)
+@router.post("/register/patient", response_model=PatientProfileResponse)
+async def register_pt(user: PatientCreate, response: Response, session: Session = Depends(get_db)):
+    try:
+        with session.begin():
+            created = pt_srvc.create(session, user)
 
-        if service.get_by_email(user.email):
-            raise HTTPException(
-                400, detail={"msg": "Email already exists!", "type": "Invalid Email"})
+    except ValueError as e:
+        logger.info(e)
+        raise HTTPException(
+            400,
+            detail={
+                "msg": str(e)
+            }
+        )
 
-        created_user = service.save(**user.model_dump())
-        token = create_access_token(id=created_user.id, role=created_user.role)
-
-        response.status_code = 201
-        response.headers["x-auth-token"] = token
-
-
-@router.post("/login")
-async def login(user_cred: LoginUser, response: Response, session: Session = Depends(get_db)):
-    service = UserService(session)
+    logger.info("Patient sucessfully created and committed to database.")
 
     try:
-        trgt = service.get_by_email(user_cred.email)
+        token = create_access_token(
+            id=str(created.id),
+            role=UserRoleV2.PATIENT
+        )
 
-        if not trgt:
+    except Exception:
+        raise HTTPException(
+            500,
+            detail={
+                "msg": "Your account was successfully created but we couldn't log you in. Please login manually."
+            }
+        )
+
+    response.headers["x-auth-token"] = token
+    return UserResponse.model_validate(created)
+
+#
+
+
+@router.post("/login/patient", response_model=UserResponse)
+async def login_pt(user_cred: PatientLogin, response: Response, session: Session = Depends(get_db)):
+    try:
+        row = pt_srvc.get_by_email(session, user_cred.email)
+
+        if row is None:
             raise ValueError("Invalid email !")
-        is_authenticated = service.verify_pwd(
-            user_cred.password, trgt.password)
+
+        is_authenticated = authenticate_pwd(
+            user_cred.password,
+            row.hash
+        )
 
         if not is_authenticated:
             raise ValueError("Invalid password !")
 
-        token = create_access_token(id=trgt.id, role=trgt.role)
+        token = create_access_token(id=str(row.id), role=UserRoleV2.PATIENT)
         response.headers["x-auth-token"] = token
+
+        return UserResponse.model_validate(row)
+
+    except ValueError as e:
+        logger.debug(e)
+        raise HTTPException(
+            401,
+            detail={"msg": str(e), "type": "Invalid credentials"},
+        )
+
+    except Exception as e:
+        logger.debug(e)
+        raise HTTPException(
+            500
+        )
+
+#
+
+
+@router.post("/register/doctor", response_model=UserResponse)
+async def register_dr(
+    response: Response,
+    data: DrCreate = Depends(get_dr_onboarding),
+    session: Session = Depends(get_db)
+):
+    try:
+        with session.begin():
+            created = await dr_srvc.create(session=session, data=data)
 
     except ValueError as e:
         raise HTTPException(
-            401,
-            detail={"msg": str(e), "type": "authentication error"},
+            400,
+            detail={
+                "msg": str(e)
+            }
+        )
+
+    try:
+        token = create_access_token(id=str(created.id), role=UserRoleV2.DOCTOR)
+        response.headers["x-auth-token"] = token
+        return UserResponse.model_validate(created)
+
+    except Exception as e:
+        raise HTTPException(
+            500,
+            detail={
+                "msg": "Your account was successfully created but we couldn't log you in. "
+                "Please login manually."
+            }
         )
 
 
-@router.get("/me", status_code=200)
-async def profile(id: UUID = Depends(get_user), session: Session = Depends(get_db)):
-    srvc = UserService(session)
-    usr = srvc.get_with_type(id=id)
+#
 
-    if usr is None:
-        raise (HTTPException
-               (404,
-                detail={
-                    "msg": "NO valid record found for your given query.",
-                    "type": "NoResultFound"
-                }))
 
-    model_map = {
-        UserRole.PATIENT: ResponsePtnt,
-        UserRole.DOCTOR: ResponseDr
-    }
+@router.post("/login/doctor")
+async def login_dr(credentials: DoctorLogin, response: Response, session: Session = Depends(get_db)):
+    method_used = "id" if credentials.id else 'email'
+    cred = credentials.model_dump()
 
-    Model = model_map.get(usr.role)
+    assert cred[method_used] is not None, "Id or email can not be None"
 
-    if Model is None:
-        return ResponseUser.model_validate(usr)
+    row = dr_srvc.get(
+        session=session,
+        identKey=method_used,
+        identVal=cred[method_used]
+    )
 
-    return Model.model_validate(usr)
+    if not row:
+        raise HTTPException(
+            401,
+            detail={
+                "msg": f"Invalid {method_used}"
+            }
+        )
+
+    if not authenticate_pwd(credentials.password, row.hash):
+        raise HTTPException(
+            401,
+            detail={
+                "msg": "Invalid password."
+            }
+        )
+
+    token = create_access_token(
+        id=str(row.id),
+        role=UserRoleV2.DOCTOR
+    )
+
+    response.headers["x-auth-token"] = token
+    return UserResponse.model_validate(row)
+
+#
+
+
+@router.get("/me", response_model=DrProfileResponse | PatientProfileResponse)
+async def profile(
+    model: Doctor | Patient = Depends(get_curr_user),
+):
+    if model is None:
+        raise HTTPException(
+            404,
+            detail={
+                "msg": "No result found",
+            }
+        )
+
+    if isinstance(model, Doctor):
+        return DrProfileResponse.model_validate(model)
+
+    elif isinstance(model, Patient):
+        return PatientProfileResponse.model_validate(model)

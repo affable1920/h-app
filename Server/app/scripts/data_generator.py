@@ -4,18 +4,18 @@ from uuid import UUID
 from faker import Faker
 
 from passlib.context import CryptContext
-
-from app.shared.enums import Status
-from app.database.entry import get_db, engine
-from app.constants import index as constants
 from datetime import date, datetime, time, timedelta
 
-from app.database.models import Clinic, Mode,  Slot, Schedule, Doctor, Base, User
+from app.schemas.enums import Status
+from app.database.entry import get_db, engine
+from app.constants import index as constants
+
+from app.database.models import Clinic, Mode, Review,  Slot, Schedule, Doctor, Base, UUID
 
 faker = Faker()
 
 
-def get_bool(threshold: float = .5):
+def get_chance(threshold: float = .5):
     return random.random() > threshold
 
 
@@ -23,7 +23,7 @@ class DataGenerator:
     context = CryptContext(schemes=["argon2"], deprecated="auto")
 
     def __init__(self):
-        self.db = get_db()
+        self.db = next(get_db())
 
     @staticmethod
     def get_date_from_weekday(weekday: int):
@@ -71,9 +71,6 @@ class DataGenerator:
             if not schedule.is_active:
                 continue
 
-            if not schedule.is_recurring:
-                continue
-
             available_days.update(schedule.weekdays)
 
         today = date.today()
@@ -86,38 +83,37 @@ class DataGenerator:
 
         return None
 
-    def create_clinic_admin(self):
-        name = faker.name()
-        pwd = self.context.hash(faker.password())
-        return User(**{"username": name, "email": faker.email(), "password": pwd})
-
-    def create_clinic(self, owner: User) -> Clinic:
+    def create_clinic(self) -> Clinic:
         """Generate a single clinic record."""
-        name = random.choice(constants.HOSPITALS)
         contact = faker.phone_number()[:10]
 
         return Clinic(
-            owner=owner.id,
+            name=faker.company(),
+            owner=faker.name(),
+            pincode=random.choice([193201, 193202, 190001, 190002, 190010]),
+            reviews=random.randint(1, 100),
+            location=faker.street_address(),
             contact_numbers=[contact, faker.phone_number()[:10]],
             whatsapp=contact,
-            name=f"{name} City Hospital",
-            reviews=random.randint(1, 100),
-            rating=round(random.uniform(1.0, 5.0), 2),
             facilities=[],
             specializations=[],
-            pincode=random.choice([193201, 193202, 190001, 190002, 190010]),
-            location=faker.street_address(),
         )
 
     #
+
+    def create_review(self) -> Review:
+        return Review(
+            rating=random.randint(1, 5),
+            comment=faker.english_text(max_nb_chars=random.randint(15, 100))
+        )
 
     def create_schedule(
         self, doctor: Doctor, clinic: Clinic, base_duration: int = 20
     ) -> Schedule:
         """Generate realistic schedules with multiple clinics possible on same weekday."""
         all_days = [0, 1, 2, 3, 4, 5, 6]
-        wkdays = random.sample(all_days, k=random.randint(1, 4))
-        is_morning = get_bool()
+        wkdays = random.sample(all_days, k=random.randint(1, 2))
+        is_morning = get_chance()
 
         if is_morning:
             start = time(7, 30)
@@ -148,13 +144,8 @@ class DataGenerator:
     def create_doctor(self) -> Doctor:
         """Generate secondary doctor information."""
 
-        dr_name = faker.name()
-
         return Doctor(
-            name=dr_name,
-            username=dr_name,
-            password=faker.password(),
-            email=faker.email(),
+            name=faker.name(),
             reviews=random.randint(0, 100),
             credentials=random.choice(constants.CREDENTIALS),
             primary_specialization=random.choice(constants.SPECIALIZATIONS),
@@ -162,8 +153,8 @@ class DataGenerator:
             secondary_specializations=random.sample(
                 constants.SPECIALIZATIONS, k=random.randint(0, 3)
             ),
-            verified=get_bool(),
-            consults_online=get_bool(.3),
+            verified=get_chance(),
+            consults_online=get_chance(.3),
             experience=random.randint(1, 35),
             status=random.choice(list(Status)),
             rating=round(random.uniform(1.5, 5.0), 2),
@@ -172,7 +163,7 @@ class DataGenerator:
     #
 
     def create_slots(
-        self, start: time, end: time, schedule_id: UUID, duration: int = 20
+        self, schedule: Schedule, duration: int = 20
     ) -> list[Slot]:
         """
         Generate time slots that fall within a schedule's start and end time.
@@ -189,8 +180,9 @@ class DataGenerator:
         """
 
         slots = []
-        schedule_start = datetime.combine(datetime.today(), start)
-        schedule_end = datetime.combine(datetime.today(), end)
+        schedule_start = datetime.combine(
+            datetime.today(), schedule.start_time)
+        schedule_end = datetime.combine(datetime.today(), schedule.end_time)
 
         slot_window = schedule_start
 
@@ -199,8 +191,8 @@ class DataGenerator:
                 Slot(
                     duration=duration,
                     begin=slot_window.time(),
-                    booked=get_bool(.6),
-                    schedule_id=schedule_id,
+                    booked=get_chance(.75),
+                    schedule_id=schedule.id,
                     mode=random.choice(list(Mode)),
                 )
             )
@@ -210,25 +202,22 @@ class DataGenerator:
 
     #
 
-    # Example usage
     def generate_doctors(self, count: int = 40) -> list[Doctor]:
         return [self.create_doctor() for _ in range(count)]
 
 #
 
-    def generate_schedules(self, doctor: Doctor, count: int = 40):
-        num_clinics = random.sample(
-            doctor.clinics, min(3, len(doctor.clinics)))
-
+    def generate_schedules(self, doctor: Doctor):
         schedules = [self.create_schedule(doctor, clinic)
-                     for clinic in num_clinics]
+                     for clinic in doctor.clinics]
 
         for schedule in schedules:
-            slots = self.create_slots(
-                schedule.start_time, schedule.end_time, schedule.id)
+            slots = self.create_slots(schedule=schedule)
             schedule.slots.extend(slots)
 
         doctor.schedules.extend(schedules)
+
+    #
 
     def assign_clinics_to_drs(self, doctors: list[Doctor], clinics: list[Clinic]):
         """
@@ -242,61 +231,42 @@ class DataGenerator:
 
             doctor.clinics.extend(assigned_clinics)
 
-    def assign_schedules_to_drs(self, doctors: list[Doctor], schedules: list[Schedule]):
-        """
-        Create schedules for each doctor's clinic.
-        Each schedule is assigned to a doctor and a clinic.
-        """
-
-        for doctor in doctors:
-            num_schedules = random.randint(2, 4)
-            assigned_schedules = random.sample(schedules, num_schedules)
-
-            doctor.schedules.extend(assigned_schedules)
+#
 
 
 async def seed_db():
     try:
         Base.metadata.drop_all(bind=engine)
-
-        db = next(get_db())
-        generator = DataGenerator()
-
         Base.metadata.create_all(bind=engine)
-        print("Preparing database seed ...")
 
-        print("Generating doctors ...")
-        doctors = generator.generate_doctors()
+        generator = DataGenerator()
+        print("Preparing database seed ...")
+        print("Creatinmg users ...")
+
+        doctors = [generator.create_doctor() for _ in range(40)]
 
         print(f"\n\nGenerated {len(doctors)} doctors successfully!")
 
-        db.add_all(doctors)
-        db.commit()
+        generator.db.add_all(doctors)
+        generator.db.commit()
 
-        print(f"\n\n{len(doctors)} added to db doctors successfully!")
+        print(f"\n\n{len(doctors)} doctors added to db successfully!")
 
         print("Generating clinics ...")
 
-        clinics: list[Clinic] = []
-
-        for _ in range(40):
-            cl_admin = generator.create_clinic_admin()
-            db.add(cl_admin)
-
-            db.flush([cl_admin])
-            clinics.append(generator.create_clinic(cl_admin))
+        clinics = [generator.create_clinic() for _ in range(40)]
 
         print(f"\n\nGenerated {len(clinics)} clinics successfully!")
 
-        db.add_all(clinics)
-        db.commit()
+        generator.db.add_all(clinics)
+        generator.db.commit()
 
         print(f"\n\n{len(clinics)} clinics added to db successfully!")
 
         print("Assigning clinics to doctors ...")
         generator.assign_clinics_to_drs(doctors, clinics)
 
-        db.commit()
+        generator.db.commit()
         print("Successfully assigned clinics to drs!")
 
         print("Generating and assigning schedules with slots ...")
@@ -306,7 +276,7 @@ async def seed_db():
         print("Successfully generated schedules!")
         print("Successfully assigned schedules to doctors!")
 
-        db.commit()
+        generator.db.commit()
 
     except Exception as e:
         print(e)

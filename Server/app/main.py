@@ -1,12 +1,8 @@
 import logging
-from app.routes import auth, doctors, bookings
-from app.routes import websocket
-from app.routes import clinics
-from app.routes import chat
+
 from fastapi import (
     FastAPI,
     Request,
-    status,
 )
 
 from fastapi.exceptions import RequestValidationError
@@ -15,6 +11,12 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from app.scripts.openapi_spec import generate_openapi_spec
+from app.routes import auth, doctors, bookings, clinics
+from app.features.calling import ws_route
+from app.features.chatbot import chat_route
+
+
 #
 logger = logging.getLogger(__name__)
 
@@ -22,7 +24,8 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def root(app: FastAPI):
     logger.info("Starting up")
-    # app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
+
+    app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
 
     yield
     logger.info("Shutting down")
@@ -38,20 +41,12 @@ app = FastAPI(
 
 @app.exception_handler(RequestValidationError)
 async def validation_err_handler(req: Request, e: RequestValidationError):
-    body = await req.body()
-
-    print(f"Request Body: {body.decode()}")
-    print(f"Errors: {e.errors()}")
-
-    print(f"route: {req.url}")
-
+    logger.debug("Errors: ", e.errors())
     return JSONResponse(
+        status_code=422,
         content={
-            "detail": e.errors(),
-            "msg": "invalid data",
-            "type": "request validation error",
+            "detail": str(e.errors()),
         },
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
     )
 
 
@@ -68,8 +63,9 @@ app.include_router(auth.router)
 app.include_router(doctors.router)
 app.include_router(bookings.router)
 app.include_router(clinics.router)
-app.include_router(chat.router)
-app.add_websocket_route("/ws", websocket.ws_endpoint)
+app.include_router(chat_route.router)
+app.add_websocket_route("/ws", ws_route.ws_endpoint)
+
 
 html = """
 <!DOCTYPE html>
@@ -79,37 +75,14 @@ html = """
     </head>
     <body>
         <h1>WebSocket Chat</h1>
-        <form action="" onsubmit="sendMessage(event)">
-            <label>Item ID: <input type="text" id="itemId" autocomplete="off" value="foo"/></label>
-            <label>Token: <input type="text" id="token" autocomplete="off" value="some-key-token"/></label>
-            <button onclick="connect(event)">Connect</button>
-            <hr>
+        <form onsubmit="sendMessage(event)">
             <label>Message: <input type="text" id="messageText" autocomplete="off"/></label>
-            <button>Send</button>
+            <button type="submit">Send</button>
         </form>
         <ul id='messages'>
         </ul>
         <script>
-        var ws = null;
-            function connect(event) {
-                var itemId = document.getElementById("itemId")
-                var token = document.getElementById("token")
-                ws = new WebSocket("ws://localhost:8000/items/" + itemId.value + "/ws?token=" + token.value);
-                ws.onmessage = function(event) {
-                    var messages = document.getElementById('messages')
-                    var message = document.createElement('li')
-                    var content = document.createTextNode(event.data)
-                    message.appendChild(content)
-                    messages.appendChild(message)
-                };
-                event.preventDefault()
-            }
-            function sendMessage(event) {
-                var input = document.getElementById("messageText")
-                ws.send(input.value)
-                input.value = ''
-                event.preventDefault()
-            }
+            
         </script>
     </body>
 </html>
@@ -121,10 +94,11 @@ async def root_path():
     return HTMLResponse(html)
 
 
-@app.get("/health")
-async def health_check():
-    status = {"status": "ok"}
-    return status
+@app.get("/ping")
+async def ping():
+    return {
+        "message": "pong"
+    }
 
 
 if __name__ == "__main__":

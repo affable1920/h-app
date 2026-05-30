@@ -1,20 +1,19 @@
 import enum
-from typing import Literal
 
-from pydantic import ConfigDict, Field
-
-from app.schemas.base import FromORM, IDMixin
+from pydantic import ConfigDict
+from app.schemas.Base import FromORM
 
 
 class Role(enum.Enum):
     USER = "user"
     SYSTEM = "system"
     ASSISTANT = "assistant"
+    DEVELOPER = "developer"
 
 
 class BaseChatMessage(FromORM):
     role: Role
-    message: str
+    content: str
 
     model_config = ConfigDict(use_enum_values=True)
 

@@ -2,21 +2,32 @@ from sqlite3 import Time
 from statistics import mean
 from uuid import UUID
 from typing import Annotated
-from pydantic import EmailStr, Field, computed_field
+from pydantic import ConfigDict, EmailStr, Field, PlainSerializer, computed_field
 
 from datetime import datetime
 
-from app.schemas.enums import Mode, Status, UserRoleV2
+from app.schemas.enums import Gender, Mode, ReviewableEntity, Status, UserRoleV2
 from app.schemas.Base import FromORM, IDMixin
 
+IDSerialized = Annotated[
+    UUID, PlainSerializer(
+        func=lambda x: str(x), return_type=str
+    )
+]
 
-class Review(FromORM, IDMixin):
-    rating: int = Field(le=5)
+
+class Review(IDMixin):
+    rating: float = Field(le=5)
     comment: str | None = None
-    doctor: "Doctor | None" = None
-    clinic: "Clinic | None" = None
-    appointment_id: str
-    patient_id: str
+    entity: ReviewableEntity
+    entity_id: UUID
+    appointment_id: str | None = None
+    patient_id: IDSerialized
+
+    model_config = ConfigDict(
+        use_enum_values=True,
+        from_attributes=True
+    )
 
 
 class Clinic(FromORM, IDMixin):
@@ -25,30 +36,34 @@ class Clinic(FromORM, IDMixin):
     location: str | None = None
     facilities: list[str] = []
     pincode: int | None = None
-    reviews: int = 0
-    rating: float = 0.0
+    reviews: list[Review] = []
     contacts: list[int] = []
+
+    @computed_field
+    @property
+    def rating(self) -> float:
+        all_ratings = [review.rating for review in self.reviews]
+        return round(mean(all_ratings if all_ratings else [0.0]), 2)
 
 
 class Slot(FromORM, IDMixin):
     duration: int
-    booked: bool = False
+    is_booked: bool = False
     mode: Mode | None = None
-    begin: Annotated[Time, Field(..., description="The slot start time")]
+    slot_datetime: datetime
     schedule_id: UUID
 
 
 class Schedule(FromORM, IDMixin):
-    weekdays: list[int] = []
+    start_time: Time
+    end_time: Time
     is_active: bool
-    is_recurring: bool
+    weekdays: list[int] = []
+    base_slot_duration: int | None = 20
     clinic_id: UUID
     doctor_id: UUID
     clinic: Clinic | None = None
     slots: list[Slot] = []
-    start_time: Time
-    hours_available: int | None = None
-    end_time: Time
 
 
 class User(FromORM, IDMixin):
@@ -64,23 +79,21 @@ class Doctor(FromORM, IDMixin):
     experience: int
     reviews: list[Review] = []
     verified: bool = False
-    license_number: str
     status: Annotated[Status | None, Field(...)] = Status.UNKNOWN
     consults_online: bool = False
     booking_enabled: bool = False
-    base_consult_time: int | None = None
-    currently_available: bool = False
     secondary_focus_areas: list[str] = []
     last_updated: Annotated[datetime | None, Field(...)] = None
-    next_available: Annotated[datetime | None, Field(...)] = None
     schedules: list[Schedule] = []
     image: str | None = None
+    gender: Gender
+    credentials: str
 
     @computed_field
     @property
-    def rating(self) -> int:
+    def rating(self) -> float:
         all_ratings = [rev.rating for rev in self.reviews]
-        return round(mean(all_ratings) if len(all_ratings) else 0)
+        return round(mean(all_ratings if all_ratings else [0.0]), 2)
 
     @computed_field
     @property

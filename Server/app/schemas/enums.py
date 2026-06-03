@@ -1,6 +1,11 @@
 import enum
 
 
+class ReviewableEntity(enum.Enum):
+    DOCTOR = "DOCTOR"
+    CLINIC = "CLINIC"
+
+
 class UserRole(enum.Enum):
     """
     This enum is deprecated. User UserRoleV2 instead

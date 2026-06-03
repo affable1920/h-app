@@ -27,7 +27,8 @@ class DoctorLogin(BaseModel):
     def validate_user(self) -> Self:
         if self.email is None and self.id is None:
             raise ValueError(
-                "An email id or your app-specific id is required.")
+                "An email id or your app-specific id is required."
+            )
         return self
 
 

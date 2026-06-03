@@ -4,7 +4,7 @@ from datetime import datetime, time
 from typing import Annotated, Optional
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from app.database.entry import Base
-from app.schemas.enums import AppointmentStatus, Gender, Mode, Status
+from app.schemas.enums import AppointmentStatus, Gender, Mode, ReviewableEntity, Status
 
 PrimaryKey = Annotated[UUID, mapped_column(
     primary_key=True, server_default=sa.text("gen_random_uuid()")
@@ -51,8 +51,6 @@ class Doctor(TimeStampMixin, Base):
     hash: Mapped[str] = mapped_column(nullable=False)
 
     phone: Mapped[Optional[str]] = mapped_column(sa.String(length=10))
-    reviews: Mapped[list["Review"]] = relationship(
-        cascade="all, delete-orphan", back_populates="doctor")
     image: Mapped[Optional[str]] = mapped_column(sa.Text)
 
     experience: Mapped[Optional[int]] = mapped_column()
@@ -95,6 +93,11 @@ class Doctor(TimeStampMixin, Base):
         back_populates="doctor", cascade="all, delete-orphan"
     )
 
+    reviews: Mapped[list["Review"]] = relationship(
+        primaryjoin="and_(Review.entity=='DOCTOR', foreign(Review.entity_id)==Doctor.id)",
+        viewonly=True
+    )
+
 
 class Clinic(Base):
     __tablename__ = "clinic"
@@ -102,9 +105,6 @@ class Clinic(Base):
     id: Mapped[PrimaryKey]
     name: Mapped[str] = mapped_column(nullable=False, unique=True, index=True)
     owner: Mapped[Optional[str]] = mapped_column()
-
-    reviews: Mapped[list["Review"]] = relationship(
-        cascade="all, delete-orphan", back_populates="clinic")
     pincode: Mapped[Optional[str]] = mapped_column()
     location: Mapped[str] = mapped_column(sa.VARCHAR, nullable=False)
 
@@ -119,6 +119,11 @@ class Clinic(Base):
     )
     doctors: Mapped[list["Doctor"]] = relationship(
         back_populates="clinics", secondary=junction
+    )
+
+    reviews: Mapped[list["Review"]] = relationship(
+        primaryjoin="and_(Review.entity=='CLINIC', foreign(Review.entity_id)==Clinic.id)",
+        viewonly=True
     )
 
 
@@ -210,19 +215,13 @@ class Review(TimeStampMixin, Base):
     id: Mapped[PrimaryKey] = mapped_column()
     rating: Mapped[int] = mapped_column()
     comment: Mapped[Optional[str]] = mapped_column(sa.Text)
-
-    doctor_id: Mapped[Optional[UUID]] = mapped_column(
-        sa.ForeignKey("doctor.id"))
-    doctor: Mapped["Doctor"] = relationship(back_populates="reviews")
-    clinic_id: Mapped[Optional[UUID]] = mapped_column(
-        sa.ForeignKey("clinic.id"))
-    clinic: Mapped["Clinic"] = relationship(back_populates="reviews")
+    entity: Mapped[ReviewableEntity] = mapped_column(sa.Enum(
+        ReviewableEntity, name="reviewable_entity"), nullable=False)
+    entity_id: Mapped[UUID] = mapped_column(nullable=False)
 
     patient_id: Mapped[UUID] = mapped_column(sa.ForeignKey("patient.id"))
-    appointment_id: Mapped[UUID] = mapped_column(nullable=False, unique=True)
+    appointment_id: Mapped[UUID] = mapped_column(nullable=True)
 
     __table_args__ = (
         sa.CheckConstraint("rating >= 0 AND rating <= 5", "chk_review_rating"),
-        sa.CheckConstraint(
-            "(doctor_id IS NOT NULL) OR (clinic_id IS NOT NULL)", "chk_review_entity_presence")
     )

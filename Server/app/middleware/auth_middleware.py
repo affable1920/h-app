@@ -103,6 +103,14 @@ def get_curr_user(
     if not payload or payload.get("role") is None:
         return None
 
+    """
+    Type Callable is used to define a type for a function,
+
+    It takes an array of arguments as the first (type) argument 
+    and the return type as the second argument -> i,e the type returned by the function
+    in this case the function takes no arguments and returns an optional doctor or patient
+    """
+
     model_map: dict[str, Callable[[], Optional[Doctor | Patient]]] = {
         "doctor": lambda: session.execute(
             select(Doctor).where(Doctor.id == payload["id"])

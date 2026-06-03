@@ -1,18 +1,16 @@
 from uuid import UUID
 from datetime import datetime
-from typing import Annotated, Generic, Self, Sequence,  TypeVar
+from typing import Annotated, Generic, Self, TypeVar
 from pydantic import (
     BaseModel,
     ConfigDict,
     EmailStr,
-    Field,
     PlainSerializer,
-    computed_field,
     model_validator,
 )
 from app.schemas.Base import FromORM, IDMixin
-from app.schemas.internals_ import Doctor, Review, Schedule, Slot
-from app.schemas.enums import AppointmentStatus, Gender, Status, UserRoleV2
+from app.schemas.internals_ import Doctor, Slot
+from app.schemas.enums import AppointmentStatus, UserRoleV2
 
 
 IDSerialized = Annotated[
@@ -58,22 +56,10 @@ class PatientProfileResponse(FromORM, IDMixin):
 
 
 class DrProfileResponse(Doctor):
-    gender: Gender
     college_studied: str | None = None
     graduation_year: int | None = None
-    license_number: str
     bio: str | None = ""
-    primary_specialization: str
-    verified: bool = False
-    consults_online: bool = False
-    credentials: str
-    booking_enabled: bool = False
-    base_consult_time: int | None = None
-    currently_available: bool = False
-    secondary_specializations: list[str] = []
-    last_updated: Annotated[datetime | None, Field(...)] = None
-    next_available: Annotated[datetime | None, Field(...)] = None
-    schedules: list[Schedule] = []
+    license_number: str
 
 
 class AuthHdrPayload(BaseModel):

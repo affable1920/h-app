@@ -3,8 +3,8 @@ import Button from "@/components/ui/Button";
 import { useState } from "react";
 import { Stack } from "../ui/Stack";
 import Divider from "../ui/Divider";
-import { PatientSignin } from "./PatientSignin";
-import { DrSignin } from "./DoctorSignin";
+import { PatientSignin } from "../PatientSignin";
+import { DrSignin } from "../DoctorSignin";
 
 function SignIn() {
   const { state = {} } = useLocation();

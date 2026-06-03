@@ -34,6 +34,14 @@ export type DoctorCreate =
   components["schemas"]["Body_create_doctors_onboard_post"];
 export type UserResponse = components["schemas"]["UserResponse"];
 
+export type Role = "doctor" | "patient";
+
+export type ProfileResponse<R extends Role> = R extends "doctor"
+  ? components["schemas"]["DrProfileResponse"]
+  : R extends "patient"
+    ? components["schemas"]["PatientProfileResponse"]
+    : never;
+
 export type APIError = {
   msg: string;
   type: string;

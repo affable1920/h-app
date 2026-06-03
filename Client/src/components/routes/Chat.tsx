@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import type { APIError } from "@/types/http";
 import { toast } from "sonner";
 import Button from "../ui/Button";
-import { useChat } from "@/hooks/chat";
+import { useChat } from "@/hooks/use-chat";
 import ChatResponse from "../ChatResponse";
 import Badge from "../ui/Badge";
 import { Stack } from "../ui/Stack";

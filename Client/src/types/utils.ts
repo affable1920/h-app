@@ -1,4 +1,4 @@
-import type { WEEKDAYS } from "@/utils/dataConstants";
+import type { WEEKDAYS } from "@/utils/constants";
 import type { ElementType } from "react";
 
 export type Position = { x: number; y: number };

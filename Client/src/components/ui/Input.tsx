@@ -1,4 +1,4 @@
-import type { Color } from "@/types/button";
+import type { Color } from "@/types/ui";
 import React, {
   useMemo,
   type ComponentPropsWithoutRef,

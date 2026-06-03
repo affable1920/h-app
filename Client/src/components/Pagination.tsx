@@ -1,4 +1,4 @@
-import { useGetAll } from "@/hooks/doctors";
+import { useGetAll } from "@/hooks/use-doctors";
 import ButtonElement from "./ui/Button";
 import useQueryStore from "@/stores/queryStore";
 import { ArrowBigRightDash, ArrowBigLeftDash } from "lucide-react";

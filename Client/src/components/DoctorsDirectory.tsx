@@ -1,0 +1,42 @@
+import Card from "@components/Card";
+import Spinner from "@/components/ui/Spinner";
+
+import { useGetAll } from "@/hooks/use-doctors";
+
+import DrCardFront from "./DrCardFront";
+import type { Doctor } from "@/types/http";
+
+function DrCardBack({ doctor }: { doctor: Doctor }) {
+  return (
+    <div className="flex flex-col h-1/2">
+      <h2 className="card-h2 grow">{doctor.name}</h2>
+
+      <section className="">
+        <div className="italic font-semibold text-sm flex flex-wrap justify-end gap-4 overflow-hidden relative"></div>
+      </section>
+    </div>
+  );
+}
+
+function DoctorsDirectory() {
+  const result = useGetAll();
+
+  if (result.isFetching) {
+    return <Spinner />;
+  }
+
+  if (result.isError) {
+    return null;
+  }
+
+  return (result.data?.entities || [])?.map((doctor) => (
+    <Card
+      key={doctor.id}
+      entity={doctor}
+      CardBack={<DrCardBack doctor={doctor} />}
+      CardFront={<DrCardFront doctor={doctor} />}
+    />
+  ));
+}
+
+export default DoctorsDirectory;

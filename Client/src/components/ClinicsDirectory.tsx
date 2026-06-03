@@ -1,7 +1,7 @@
-import { useGetAll } from "@/hooks/clinics";
+import { useGetAll } from "@/hooks/use-clinics";
 
 import Card from "./Card";
-import Spinner from "./Spinner";
+import Spinner from "./ui/Spinner";
 import Ratings from "./Ratings";
 import { MapPin, Phone } from "lucide-react";
 import Button from "./ui/Button";

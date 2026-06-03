@@ -435,19 +435,16 @@ export interface components {
             pincode?: number | null;
             /**
              * Reviews
-             * @default 0
+             * @default []
              */
-            reviews: number;
-            /**
-             * Rating
-             * @default 0
-             */
-            rating: number;
+            reviews: components["schemas"]["Review"][];
             /**
              * Contacts
              * @default []
              */
             contacts: number[];
+            /** Rating */
+            readonly rating: number;
         } & {
             [key: string]: unknown;
         };
@@ -485,8 +482,6 @@ export interface components {
              * @default false
              */
             verified: boolean;
-            /** License Number */
-            license_number: string;
             /** @default unknown */
             status: components["schemas"]["Status"] | null;
             /**
@@ -499,13 +494,6 @@ export interface components {
              * @default false
              */
             booking_enabled: boolean;
-            /** Base Consult Time */
-            base_consult_time?: number | null;
-            /**
-             * Currently Available
-             * @default false
-             */
-            currently_available: boolean;
             /**
              * Secondary Focus Areas
              * @default []
@@ -513,8 +501,6 @@ export interface components {
             secondary_focus_areas: string[];
             /** Last Updated */
             last_updated?: string | null;
-            /** Next Available */
-            next_available?: string | null;
             /**
              * Schedules
              * @default []
@@ -522,6 +508,9 @@ export interface components {
             schedules: components["schemas"]["Schedule"][];
             /** Image */
             image?: string | null;
+            gender: components["schemas"]["Gender"];
+            /** Credentials */
+            credentials: string;
             /** Rating */
             readonly rating: number;
             /** Image Url */
@@ -561,8 +550,6 @@ export interface components {
              * @default false
              */
             verified: boolean;
-            /** License Number */
-            license_number: string;
             /** @default unknown */
             status: components["schemas"]["Status"] | null;
             /**
@@ -575,13 +562,6 @@ export interface components {
              * @default false
              */
             booking_enabled: boolean;
-            /** Base Consult Time */
-            base_consult_time?: number | null;
-            /**
-             * Currently Available
-             * @default false
-             */
-            currently_available: boolean;
             /**
              * Secondary Focus Areas
              * @default []
@@ -589,8 +569,6 @@ export interface components {
             secondary_focus_areas: string[];
             /** Last Updated */
             last_updated?: string | null;
-            /** Next Available */
-            next_available?: string | null;
             /**
              * Schedules
              * @default []
@@ -599,6 +577,8 @@ export interface components {
             /** Image */
             image?: string | null;
             gender: components["schemas"]["Gender"];
+            /** Credentials */
+            credentials: string;
             /** College Studied */
             college_studied?: string | null;
             /** Graduation Year */
@@ -608,13 +588,8 @@ export interface components {
              * @default
              */
             bio: string | null;
-            /** Credentials */
-            credentials: string;
-            /**
-             * Secondary Specializations
-             * @default []
-             */
-            secondary_specializations: string[];
+            /** License Number */
+            license_number: string;
             /** Rating */
             readonly rating: number;
             /** Image Url */
@@ -751,15 +726,22 @@ export interface components {
             rating: number;
             /** Comment */
             comment?: string | null;
-            doctor?: components["schemas"]["Doctor"] | null;
-            clinic?: components["schemas"]["Clinic"] | null;
+            entity: components["schemas"]["ReviewableEntity"];
+            /**
+             * Entity Id
+             * Format: uuid
+             */
+            entity_id: string;
             /** Appointment Id */
-            appointment_id: string;
+            appointment_id?: string | null;
             /** Patient Id */
             patient_id: string;
-        } & {
-            [key: string]: unknown;
         };
+        /**
+         * ReviewableEntity
+         * @enum {string}
+         */
+        ReviewableEntity: "DOCTOR" | "CLINIC";
         /**
          * Role
          * @enum {string}
@@ -773,14 +755,27 @@ export interface components {
              */
             id: string;
             /**
+             * Start Time
+             * Format: time
+             */
+            start_time: string;
+            /**
+             * End Time
+             * Format: time
+             */
+            end_time: string;
+            /** Is Active */
+            is_active: boolean;
+            /**
              * Weekdays
              * @default []
              */
             weekdays: number[];
-            /** Is Active */
-            is_active: boolean;
-            /** Is Recurring */
-            is_recurring: boolean;
+            /**
+             * Base Slot Duration
+             * @default 20
+             */
+            base_slot_duration: number | null;
             /**
              * Clinic Id
              * Format: uuid
@@ -797,18 +792,6 @@ export interface components {
              * @default []
              */
             slots: components["schemas"]["Slot"][];
-            /**
-             * Start Time
-             * Format: time
-             */
-            start_time: string;
-            /** Hours Available */
-            hours_available?: number | null;
-            /**
-             * End Time
-             * Format: time
-             */
-            end_time: string;
         } & {
             [key: string]: unknown;
         };
@@ -822,17 +805,16 @@ export interface components {
             /** Duration */
             duration: number;
             /**
-             * Booked
+             * Is Booked
              * @default false
              */
-            booked: boolean;
+            is_booked: boolean;
             mode?: components["schemas"]["Mode"] | null;
             /**
-             * Begin
-             * Format: time
-             * @description The slot start time
+             * Slot Datetime
+             * Format: date-time
              */
-            begin: string;
+            slot_datetime: string;
             /**
              * Schedule Id
              * Format: uuid

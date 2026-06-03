@@ -14,18 +14,18 @@ import Directory from "@routes/Directory";
 import SignIn from "@/components/routes/SignIn";
 import Register from "@/components/routes/Register";
 import UserProfile from "@components/routes/UserProfile";
-import Consultation from "@components/modal/Consultation";
-import LandingPage from "@components/LandingPage/LandingPage";
-import App from "@components/routes/App";
-import { useGetById } from "@/hooks/doctors";
-import Spinner from "./Spinner";
+import Consultation from "@/components/modals/Consultation";
+import LandingPageBody from "@/components/routes/LandingPage";
+import App from "@/components/App";
+import { useGetById } from "@/hooks/use-doctors";
+import Spinner from "./ui/Spinner";
 import useAuthStore from "@/stores/authStore";
 
 const Chat = lazy(() => import("@routes/Chat"));
-const Scheduler = lazy(() => import("@routes/Scheduler"));
+const Scheduler = lazy(() => import("@/features/booking/components/Scheduler"));
 
 const ClinicsDirectory = lazy(() => import("@components/ClinicsDirectory"));
-const DoctorsDirectory = lazy(() => import("@/components/ui/DoctorsDirectory"));
+const DoctorsDirectory = lazy(() => import("@/components/DoctorsDirectory"));
 
 function Fallback({ children, key }: { children: ReactNode; key?: string }) {
   return (
@@ -42,7 +42,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: LandingPage,
+        Component: LandingPageBody,
       },
 
       {

@@ -1,12 +1,11 @@
 import { useMemo } from "react";
 
 import { DateTime } from "luxon";
-import CalendarDay from "./CalendarDay";
-
-import { WEEKDAYS } from "@/utils/dataConstants";
+import { WEEKDAYS } from "@/utils/constants";
 import type { Schedule } from "@/types/http";
-import { createCalendarData } from "@/utils/calendarUtils";
+import { createCalendarData } from "@/utils/utils";
 import { useSearchParams } from "react-router-dom";
+import Badge from "./ui/Badge";
 
 interface CalendarBodyProps {
   monthInView: DateTime;
@@ -73,34 +72,42 @@ const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
     );
   }
 
-  const rows = calendar.length < 42 ? 5 : 6;
-  const classConfig = `grid gap-4 justify-items-center grid-cols-7 grid-rows-${rows} min-h-96`;
-
   return (
-    <div className={classConfig}>
-      {WEEKDAYS.map((day, i) => (
-        <h2
-          key={i}
-          className={`opacity-80 font-black underline-offset-4 capitalize  ${
-            isWkdayToday(day) ? "text-accent underline" : ""
-          }`}
-        >
-          {day.slice(0, 3)}
-        </h2>
-      ))}
+    <div className={`flex flex-col gap-6`}>
+      <div className="grid gap-4 justify-items-center grid-cols-7">
+        {WEEKDAYS.map((day, i) => (
+          <h2
+            key={i}
+            className={`font-black underline-offset-4 capitalize  ${
+              isWkdayToday(day)
+                ? "text-text-secondary underline"
+                : "text-text-secondary/80"
+            }`}
+          >
+            {day.slice(0, 3)}
+          </h2>
+        ))}
+      </div>
 
-      {calendar.map((date) => {
-        return (
-          <CalendarDay
-            date={date}
-            onClick={updateDate.bind(null, date)}
-            current={isDateToday(date)}
-            key={date.toISO()}
-            selected={areDatesEqual(date, dtParam)}
-            disabled={isInPast(date) || !allScheduleDays.includes(date.weekday)}
-          />
-        );
-      })}
+      <div className="grid gap-4 grid-cols-7 gap-y-6 justify-items-center">
+        {calendar.map((date) => {
+          return (
+            <Badge
+              className="size-10 max-w-12 max-h-12"
+              content={date.day.toString()}
+              onClick={function () {
+                updateDate(date);
+              }}
+              current={isDateToday(date)}
+              key={date.toISO()}
+              selected={areDatesEqual(date, dtParam)}
+              disabled={
+                isInPast(date) || !allScheduleDays.includes(date.weekday)
+              }
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };

@@ -1,31 +1,21 @@
 import { memo, useMemo } from "react";
-import type { ElementType, ReactNode, ComponentPropsWithoutRef } from "react";
+import type { ElementType } from "react";
 
-import type { Size, COLORS } from "@/types/button";
-
-interface BaseBadgeProps {
-  full?: boolean;
-  color?: (typeof COLORS)[number] | "slate";
-  content?: ReactNode;
-  current?: boolean;
-  disabled?: boolean;
-  selected?: boolean;
-  size?: Size;
-  rounded?: boolean;
-}
-
-// element type in react represents any valid renderable element
-// can be a string like "div", "a" etc or custom react component such as a
-// function or class component
-
-export type BadgeProps<T extends ElementType = "button"> = BaseBadgeProps & {
-  as?: T;
-} & ComponentPropsWithoutRef<T>;
+import type { Size, COLORS, BadgeProps } from "@/types/ui";
+type Color = (typeof COLORS)[number] | "secondary";
 
 const sizes: Record<Size, string> = {
-  sm: "text-[0.6rem]",
-  md: "text-[0.75rem]",
-  lg: "text-[0.9rem]",
+  sm: "text-xs",
+  md: "text-sm",
+  lg: "text-md",
+};
+
+const colors: Record<Color, string> = {
+  brand: "bg-brand hover:bg-brand-hover text-white",
+  white: "bg-white text-drk",
+  indicator: "bg-indicator text-drk",
+  primary: `bg-layout hover:bg-layout-raised text-text-secondary hover:text-text`,
+  secondary: `bg-layout-raised hover:bg-text-teritiary/20`,
 };
 
 const Badge = memo(
@@ -36,27 +26,31 @@ const Badge = memo(
     className,
     size = "sm",
     full = true,
-    color = "slate",
+    color = "secondary",
     current = false,
     disabled = false,
     selected = false,
-    rounded = true,
+    rounded = "sm",
     ...rest
   }: BadgeProps<T>) => {
     const Component = as || "button";
 
     const classConfig = useMemo(
       function () {
+        const BASE = `inline-flex items-center justify-center transition-colors duration-150 border-2 
+        border-border-strong text-center cursor-pointer p-2`;
+
         return [
-          "badge",
-          rounded && "rounded-md",
+          BASE,
           sizes[size],
-          full && "w-full",
-          current &&
-            "border-b-2 border-b-accent/50 font-black shadow-inner shadow-accentdark/60",
-          selected && "selected",
+          !!rounded && "rounded-" + rounded,
+          full ? "w-full" : "w-fit",
+          colors[color],
+          selected &&
+            "bg-text hover:bg-text-normal! text-drk font-semibold border-text",
           disabled &&
-            "cursor-default opacity-70 pointer-events-none shadow-none font-semibold border-none",
+            "shadow-none pointer-events-none border-transparent opacity-80 bg-layout-raised/50",
+          current && "border-b-2 border-b-brand",
           className,
         ]
           .filter(Boolean)

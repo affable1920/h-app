@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
 
-import Spinner from "../Spinner";
-import { getClassConfig } from "../../utils/buttonStyleUtil";
-import type { ButtonProps } from "@/types/button";
+import Spinner from "./Spinner";
+import { getClassConfig } from "../../utils/button-styles";
+import type { ButtonProps } from "@/types/ui";
 
 function Button<NeedsMotion extends true>(props: ButtonProps<NeedsMotion>) {
   const classConfig = useMemo(() => getClassConfig(props), [{ ...props }]);

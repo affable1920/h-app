@@ -1,4 +1,4 @@
-import type { COLORS } from "@/types/button";
+import type { COLORS } from "@/types/ui";
 import { memo, type CSSProperties, type ElementType } from "react";
 
 type Labelposition = "start" | "center" | "end";
@@ -34,7 +34,7 @@ const colors: Record<DividerColor, string> = {
   brand: "bg-brand",
   white: "bg-text-normal",
   indicator: "bg-indicator",
-  secondary: "bg-border-vivid",
+  secondary: "bg-layout-raised",
 };
 
 const Divider = memo(function ({

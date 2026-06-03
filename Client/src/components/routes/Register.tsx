@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Stack } from "../ui/Stack";
 import DrProfileSetup from "@/features/onboarding-doctor/DrProfileSetup";
 import Divider from "../ui/Divider";
-import { PatientRegister } from "./PatientRegister";
+import { PatientRegister } from "../PatientRegister";
 
 function Register() {
   const { state = {} } = useLocation();

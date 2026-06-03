@@ -1,25 +1,12 @@
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
-import { AnimatePresence, motion, stagger, type Variant } from "motion/react";
+import { AnimatePresence, motion, type Variant } from "motion/react";
 import type { MobileNavItem } from "@/types/utils";
 import { useNavigate } from "react-router-dom";
-
-const tabVariants: Record<string, Variant> = {
-  hidden: {},
-  visible: {
-    transition: {
-      delayChildren: stagger(0.1, { startDelay: 0.05 }),
-    },
-  },
-  exit: {
-    transition: {
-      delayChildren: stagger(0.075),
-    },
-  },
-};
+import { MobileNavVariants } from "@/utils/motion-variants";
 
 const tabChildrenVariants: Record<string, Variant> = {
-  hidden: { x: -25, opacity: 0 },
+  hidden: { x: -20, opacity: 0 },
   visible: {
     x: 0,
     opacity: 1,
@@ -32,7 +19,6 @@ const tabChildrenVariants: Record<string, Variant> = {
   exit: {
     x: -20,
     opacity: 0,
-    transition: { duration: 0.15, ease: "easeIn" },
   },
 };
 
@@ -87,7 +73,7 @@ function MobileNavigationItem({
             initial="hidden"
             animate="visible"
             exit="exit"
-            variants={tabVariants}
+            variants={MobileNavVariants}
             style={{ overflow: "hidden" }}
           >
             <motion.div

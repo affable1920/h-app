@@ -1,7 +1,7 @@
 import Input from "@/components/ui/Input";
 import { useFormContext } from "react-hook-form";
 import { type DoctorCreate } from "@/types/http";
-import { SPECIALIZATIONS } from "@/utils/dataConstants";
+import { SPECIALIZATIONS } from "@/utils/constants";
 import { useEffect, useMemo } from "react";
 import { Stack } from "@/components/ui/Stack";
 import type z from "zod";

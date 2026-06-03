@@ -9,12 +9,7 @@ import { motion } from "motion/react";
 const currDate = DateTime.local();
 type Direction = "left" | "right";
 
-const Calendar = ({
-  schedules,
-}: {
-  schedules: Schedule[];
-  shouldMove: boolean;
-}) => {
+const Calendar = ({ schedules }: { schedules: Schedule[] }) => {
   const [monthInView, setMonthInView] = useState<DateTime>(DateTime.local());
 
   const handleMonthChange = useCallback(
@@ -37,36 +32,33 @@ const Calendar = ({
   return (
     <motion.section
       layout
-      className="relative shadow-lg shadow-slate-300/40 rounded-xl border-2 border-slate-300/20 w-full md:max-w-110"
+      className="relative rounded-xl border-2 bg-layout border-border w-full md:max-w-110 
+      shadow-lg shadow-black/30 p-6"
     >
-      <div className="flex flex-col gap-8 p-4 py-6">
-        <header className="flex items-center justify-between px-2">
-          <h2 className="text-lg uppercase font-black">
-            {monthInView.monthLong}
-          </h2>
+      <header className="flex items-center justify-between px-2 mb-8">
+        <h2 className="text-lg uppercase font-black">
+          {monthInView.monthLong}
+        </h2>
 
-          <div className="flex flex-col gap-0.5">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleMonthChange.bind(null, "right")}
-            >
-              <ArrowRight />
-            </Button>
+        <div className="flex flex-col gap-1">
+          <Button
+            variant="icon"
+            onClick={handleMonthChange.bind(null, "right")}
+          >
+            <ArrowRight />
+          </Button>
 
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={monthInView.month <= currDate.month}
-              onClick={handleMonthChange.bind(null, "left")}
-            >
-              <ArrowLeft />
-            </Button>
-          </div>
-        </header>
+          <Button
+            variant="icon"
+            disabled={monthInView.month <= currDate.month}
+            onClick={handleMonthChange.bind(null, "left")}
+          >
+            <ArrowLeft />
+          </Button>
+        </div>
+      </header>
 
-        <CalendarBody schedules={schedules} monthInView={monthInView} />
-      </div>
+      <CalendarBody schedules={schedules} monthInView={monthInView} />
     </motion.section>
   );
 };

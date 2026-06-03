@@ -1,13 +1,12 @@
 import { useState, Suspense, useMemo, useCallback } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import Spinner from "../Spinner";
-import Input from "@/components/ui/Input";
+import Spinner from "../ui/Spinner";
 
 import Pagination from "@components/Pagination";
 import Button from "@/components/ui/Button";
 
-import { debounce } from "@/utils/appUtils";
+import { debounce } from "@/utils/utils";
 
 import useModalStore from "@/stores/modalStore";
 import useQueryStore from "@/stores/queryStore";
@@ -31,7 +30,6 @@ function Directory() {
   const [localSearch, setLocalSearch] = useState("");
 
   const {
-    searchQuery,
     setSearchQuery,
     clearSearchQuery,
     sortOrder = "desc",
@@ -111,7 +109,7 @@ function Directory() {
         </div>
       </section>
 
-      <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(400px,1fr))]">
+      <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(360px,1fr))]">
         <Suspense fallback={<Spinner />}>
           <Outlet />
         </Suspense>

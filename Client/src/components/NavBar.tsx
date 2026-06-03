@@ -135,7 +135,7 @@ function NavBar() {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 p-4 px-8 rounded-none border-b
+      className="absolute top-0 left-0 right-0 z-50 p-4 px-8 rounded-none border-b
       border-border"
     >
       <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -206,7 +206,7 @@ function NavBar() {
             className="md:hidden absolute top-full left-0 w-full flex flex-col gap-10 shadow-md 
             shadow-black/50 p-8 bg-background border-b border-border-strong"
             initial={{
-              y: -30,
+              y: -20,
               opacity: 0,
             }}
             animate={{
@@ -214,8 +214,9 @@ function NavBar() {
               opacity: 1,
             }}
             exit={{
-              y: -20,
+              y: -10,
               opacity: 0,
+              transition: { ease: "backOut" },
             }}
           >
             {navLinks.map((navItem) => (

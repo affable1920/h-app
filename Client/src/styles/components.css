@@ -1,50 +1,11 @@
 @layer components {
-  .badge {
-    color: var(--color-secondary-dark);
-    font-weight: bold;
-    text-align: center;
-    text-transform: capitalize;
-    cursor: pointer;
-    padding: calc(var(--spacing) * 2);
-    font-size: var(--text-base);
-
-    &:not(:disabled) {
-      box-shadow:
-        0 4px 6px -1px rgb(0 0 0 / 0.1),
-        0 2px 4px -2px rgb(0 0 0 / 0.1);
-      border: 2px solid
-        color-mix(in oklch, var(--color-gray-300) 30%, transparent);
-
-      &:hover {
-        outline: 2px solid
-          color-mix(in oklch, var(--color-secondary) 25%, transparent);
-      }
-    }
-
-    &:is(.selected) {
-      background: var(--color-amber-400);
-      border: 2px solid
-        color-mix(in oklch, var(--color-amber-600) 30%, transparent);
-      font-weight: 800;
-      box-shadow: 0 4px 6px -2px
-        color-mix(in oklch, var(--color-amber-500) 50%, transparent);
-
-      &:hover {
-        background: color-mix(
-          in oklch,
-          var(--color-amber-500) 90%,
-          transparent
-        );
-        box-shadow: none;
-        outline: 2px solid
-          color-mix(in oklch, var(--color-amber-800) 20%, transparent);
-      }
-    }
-  }
-
   .form-box {
     @apply mx-auto bg-layout my-24 rounded-xl shadow-lg shadow-black/30 
     border border-border-strong overflow-hidden;
+  }
+
+  .profile-section {
+    margin-block: calc(var(--spacing) * 8);
   }
 }
 

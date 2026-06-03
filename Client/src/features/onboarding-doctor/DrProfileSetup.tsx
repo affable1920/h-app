@@ -8,7 +8,7 @@ import { STEPS } from "./steps";
 import { Navigation } from "@/components/ui/Navigation";
 import { type DoctorCreate } from "@/types/http";
 import { DrCreateSchema } from "@/schemas";
-import { useSignup } from "@/hooks/auth";
+import { useSignup } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 
 const FIELDS: Array<Array<keyof DoctorCreate>> = [

@@ -153,7 +153,10 @@ class DataGenerator:
     #
 
     def create_slots(
-        self, schedule: Schedule, duration: int = 20, max_slot_count: int | None = None
+        self, schedule: Schedule,
+        duration: int = 20,
+        max_slot_count: int | None = None,
+        weeks: int = 4
     ):
         """
         Generate time slots that fall within a schedule's start and end time.
@@ -175,30 +178,37 @@ class DataGenerator:
         all_slots: list[Slot] = []
         wkdays = schedule.weekdays.copy()
 
-        for wkday in wkdays:
-            slots = []
-            dt = self.get_datetime_from_wkday(wkday)
+        for i in range(weeks):
+            chance = .7 if i == 0 else .2
 
-            schedule_start = datetime.combine(dt.date(), schedule.start_time)
-            schedule_end = datetime.combine(dt.date(), schedule.end_time)
+            for wkday in wkdays:
+                slots = []
+                dt = self.get_datetime_from_wkday(wkday)
 
-            window_start = schedule_start
+                if i != 0:
+                    dt += timedelta(days=i*7)
 
-            while window_start.time() < schedule_end.time():
-                if max_slot_count is not None and len(slots) >= max_slot_count:
-                    break
+                schedule_start = datetime.combine(
+                    dt.date(), schedule.start_time)
+                schedule_end = datetime.combine(dt.date(), schedule.end_time)
 
-                created = Slot(
-                    duration=duration,
-                    is_booked=dice(.25),
-                    mode=random.choice(list(Mode)),
-                    schedule_id=schedule.id,
-                    slot_datetime=window_start
-                )
-                slots.append(created)
-                window_start += timedelta(minutes=duration)
+                window_start = schedule_start
 
-            all_slots.extend(slots)
+                while window_start.time() < schedule_end.time():
+                    if max_slot_count is not None and len(slots) >= max_slot_count:
+                        break
+
+                    created = Slot(
+                        duration=duration,
+                        is_booked=dice(chance),
+                        mode=random.choice(list(Mode)),
+                        schedule_id=schedule.id,
+                        slot_datetime=window_start
+                    )
+                    slots.append(created)
+                    window_start += timedelta(minutes=duration)
+
+                all_slots.extend(slots)
 
         return all_slots
 

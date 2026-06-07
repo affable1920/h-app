@@ -14,7 +14,7 @@ from sqlalchemy import select
 from app.database.models import Doctor, Patient
 from app.database.entry import get_db
 from app.schemas.enums import UserRoleV2
-from app.core.config import JWT_SECRET, ALG
+from app.core.config import settings
 from app.schemas.outputs import AuthHdrPayload
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -51,7 +51,7 @@ def create_access_token(id: str, role: UserRoleV2, exp_dur: timedelta = timedelt
         exp=exp.timestamp(),
     )
 
-    return jwt.encode(payload.model_dump(), key=JWT_SECRET, algorithm=ALG)
+    return jwt.encode(payload.model_dump(), key=settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
 def decode_access_token(token: str = Depends(bearer)) -> dict:
@@ -62,7 +62,10 @@ def decode_access_token(token: str = Depends(bearer)) -> dict:
     the decoded user to any function which uses this function as a dependency
     """
     try:
-        return jwt.decode(jwt=token, key=JWT_SECRET, algorithms=[ALG])
+        return jwt.decode(
+            jwt=token,
+            key=settings.jwt_secret, algorithms=[settings.jwt_algorithm]
+        )
 
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -79,21 +82,6 @@ def decode_access_token(token: str = Depends(bearer)) -> dict:
             401, {"type": "generic jwt error", "msg": "invalid token"})
 
 #
-
-
-def get_user(
-    payload: dict = Depends(decode_access_token),
-):
-    if payload.get("id") is None:
-        raise HTTPException(
-            401,
-            {
-                "msg": "Invalid token payload",
-                "type": "Invalid credentials"
-            }
-        )
-
-    return payload["id"]
 
 
 def get_curr_user(
@@ -121,6 +109,14 @@ def get_curr_user(
     }
 
     getter = model_map.get(payload["role"])
-
     if getter:
         return getter()
+
+
+def get_pt_user(user=Depends(get_curr_user)):
+    if user is None or not isinstance(user, Patient):
+        raise ValueError(
+            "Invalid user credentials provided ."
+        )
+
+    return user

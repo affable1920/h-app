@@ -1,19 +1,8 @@
 import logging
-import os
-from dotenv import load_dotenv
+from typing import Literal
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-load_dotenv()
-
-ENV = os.getenv("ENV", "DEV")
-JWT_SECRET = os.getenv("JWT_SECRET", "")
-DATABASE_URL = os.getenv("DATABASE_URL")
-ALG = os.getenv("ALG", "HS256")
-USE_HTTPS = int(os.getenv("USE_HTTPS", "0"))
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
-
-#
 
 def setup_logging():
     logging.basicConfig(
@@ -34,11 +23,33 @@ setup_logging()
 
 
 class Settings(BaseSettings):
-    ENV: str = "DEV"
-    JWT_SECRET: str = ""
-    DATABASE_URL: str
-    ALG: str
-    USE_HTTPS: int = 0
-    GROQ_API_KEY: str
+    # env-specific
+    env: str = "DEV"
+    use_https: Literal["0", "1"] = "0"
+    is_using_container: Literal["0", "1"] = "0"
 
-    model_config = SettingsConfigDict(env_file=".env")
+    # database
+    database_url: str
+
+    # jwt
+    jwt_secret: str = ""
+    jwt_algorithm: str = "HS256"
+
+    # Third-party api's
+    groq_api_key: str
+    gmail_password: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False
+    )
+
+    @model_validator(mode="after")
+    def adjust_db_host(self) -> "Settings":
+        if self.is_using_container and self.database_url:
+            self.database_url = self.database_url.replace("localhost", "db")
+        return self
+
+
+settings = Settings()  # type: ignore

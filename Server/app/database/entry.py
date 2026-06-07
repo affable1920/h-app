@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-from app.core.config import DATABASE_URL
+from app.core.config import settings
 
 
 """
@@ -26,17 +26,45 @@ class Base(DeclarativeBase):
     pass
 
 
-assert DATABASE_URL is not None, "db url env variable not set"
-engine = create_engine(url=DATABASE_URL)
+engine = create_engine(url=settings.database_url)
 
 
 def get_db():
-    # Dependency to get DB session
+    """
+    Dependency to get DB session 
+    Routes our other consumers must manually rollback and commit
+    """
+
     Session = sessionmaker(autoflush=False, autocommit=False, bind=engine)
     session = Session()
 
     try:
         yield session
+
+    finally:
+        session.close()
+
+
+#
+
+def get_db_with_rollback():
+    """
+    Dependency to get DB session 
+    Routes our other consumers simply use this dependency with a context_manager - (with)
+
+    for example - with session.begin() -> begins a transaction 
+    """
+
+    Session = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+    session = Session()
+
+    try:
+        yield session
+        session.commit()
+
+    except Exception:
+        session.rollback()
+        raise
 
     finally:
         session.close()

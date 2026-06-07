@@ -58,7 +58,6 @@ class DrCreate(BaseModel):
 
 class BookingRequestData(FromORM):
     scheduled_date: Annotated[datetime, Field(alias="date")]
-    clinic_id: Annotated[UUID, Field(alias="clinicId")]
     doctor_id: Annotated[UUID, Field(alias="doctorId")]
     slot_id: Annotated[UUID, Field(alias="slotId")]
 

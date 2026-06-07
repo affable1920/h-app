@@ -1,6 +1,6 @@
 from uuid import UUID
 from datetime import datetime
-from typing import Annotated, Generic, Self, TypeVar
+from typing import Annotated, Generic, Self, Sequence, TypeVar
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -35,7 +35,7 @@ T = TypeVar("T")
 
 class PaginatedResponse(BaseModel, Generic[T]):
     """same GET response for clinics and doctors"""
-    entities: list[T]
+    entities: list[T] | Sequence[T]
     count: int
     has_next: bool | None = None
     has_prev: bool = False

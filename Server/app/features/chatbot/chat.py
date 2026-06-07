@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
 
-from app.middleware.auth_middleware import get_user
+from app.middleware.auth_middleware import get_curr_user
 from app.features.chatbot.ChatService import Assistant
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("")
-async def get_initial(id: UUID = Depends(get_user)):
+async def get_initial(id: UUID = Depends(get_curr_user)):
     assistant = Assistant(user_id=str(id))
     return assistant.get_user_history()
 
 
 @router.post("")
 async def stream_chat(
-    request: MessageRequest, id: UUID = Depends(get_user)
+    request: MessageRequest, id: UUID = Depends(get_curr_user)
 ):
     assistant = Assistant(user_id=str(id))
 
@@ -35,7 +35,7 @@ async def stream_chat(
 
 
 @router.post("/from_template")
-async def chat(request: MessageRequest, id: UUID = Depends(get_user)):
+async def chat(request: MessageRequest, id: UUID = Depends(get_curr_user)):
     assistant = Assistant(str(id))
     model_response = await assistant.create(msg=request.content)
 

@@ -45,7 +45,7 @@ class EntityService(Generic[T], ABC):
 
     #
 
-    def create_pg_response(self, objs: list[T], count: int, pagination: PaginationParams):
+    def create_pg_response(self, objs: Sequence[T], count: int, pagination: PaginationParams):
         logger.info(
             f"\nSequence length for which create paginate response is called -> {len(objs)}")
         last_page = count // pagination.max

@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from groq import AsyncGroq, RateLimitError
 from app.adapters.doctor_tool_adapter import DoctorToolAdapter
 from app.database.entry import get_db
-from app.core.config import GROQ_API_KEY
+from app.core.config import settings
 from app.features.chatbot.chat_constants import SYSTEM_PROMPT, tools
 
 from groq.types.chat import (ChatCompletionSystemMessageParam,
@@ -18,7 +18,10 @@ system_msg: ChatCompletionSystemMessageParam = {
     "content": SYSTEM_PROMPT
 }
 
-groq = AsyncGroq(api_key=GROQ_API_KEY, max_retries=0)
+groq = AsyncGroq(
+    api_key=settings.groq_api_key,
+    max_retries=0
+)
 logger = logging.getLogger(__name__)
 
 

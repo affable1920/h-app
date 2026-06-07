@@ -3,12 +3,12 @@ import jwt
 import sqlalchemy.orm
 
 from app.database.entry import get_db
-from app.core.config import ALG, JWT_SECRET
+from app.core.config import settings
 
 
 def decode(token: str):
     try:
-        return jwt.decode(token, JWT_SECRET, [ALG])
+        return jwt.decode(token, settings.jwt_secret, [settings.jwt_algorithm])
 
     except jwt.ExpiredSignatureError:
         raise

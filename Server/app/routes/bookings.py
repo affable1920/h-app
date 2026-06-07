@@ -1,41 +1,42 @@
+import logging
 from uuid import UUID
 
 from sqlalchemy.orm import Session
 from fastapi import BackgroundTasks, HTTPException, APIRouter, Depends, HTTPException
 
+from app.database.models import Patient
 from app.services import MailService
 from app.schemas.outputs import AppointmentResponse
 from app.schemas.inputs import BookingRequestData
 from app.services.BookingService import BookingService
 from app.database.entry import get_db
-from app.middleware.auth_middleware import get_user
+from app.middleware.auth_middleware import get_curr_user
 
 
 router = APIRouter(prefix="/bookings")
 booker = BookingService()
-# add create later as the endpoint
+
+logger = logging.getLogger(__name__)
 
 
 @router.post("", response_model=AppointmentResponse)
 async def book(
     data: BookingRequestData, background_tasks: BackgroundTasks,
     session: Session = Depends(get_db),
-    user_id: str = Depends(get_user)
+    user: Patient = Depends(get_curr_user)
 ):
-    try:
-        with session.begin():
-            user = {}
-            if not user:
-                raise ValueError("Patient does not exist")
+    if user is None or not isinstance(user, Patient):
+        raise ValueError(
+            "Invalid user details. "
+        )
 
-            created = booker.create_bkng(
-                session,
-                data=data,
-                user=user
-            )
+    try:
+        created = await booker.create_booking(
+            session, user, data
+        )
 
     except ValueError as e:
-        print(e)
+        logger.error("Error booking slot for patient \n", user)
         raise HTTPException(
             400,
             detail={
@@ -43,38 +44,63 @@ async def book(
             }
         )
 
-    mail = (
-        f"""
+    except Exception as e:
+        logger.debug(e)
+        raise HTTPException(
+            500,
+            detail={
+                "msg": "An unexpected error occurred"
+            }
+        )
+
+    session.add(created)
+    session.commit()
+
+    session.refresh(created)
+
+    mail = f"""
         Subject: Appointment Confirmation!
-               
-                
-        Hi {""},
-        Your appointment with is scheduled on
-        {created.scheduled_date.isoformat(sep="-")}"""
-    )
+
+
+        Hi {user.username},
+
+        Your appointment with Dr {created.doctor.name} is succesffuly scheduled at {created.clinic.name}
+        for {created.scheduled_date.isoformat(sep="-")} at {data.scheduled_date.time().isoformat()}
+"""
+
     background_tasks.add_task(
         lambda: MailService.send_mail(
-            "affableshamik12@gmail.com",
+            recipient="affableshamik12@gmail.com",
             msg=mail
         )
     )
+
     return created
 
 
 #
 @router.delete("/cancel/{booking_id}")
-async def cancel_booking(booking_id: UUID, ptnt_id: UUID = Depends(get_user), session: Session = Depends(get_db)):
+async def cancel_booking(booking_id: UUID, user: Patient = Depends(get_curr_user), session: Session = Depends(get_db)):
     try:
-        with session.begin():
-            booker.del_bkng(
-                session,
-                appointment_id=booking_id,
-                patient_id=ptnt_id
-            )
-        return {"msg": "Booking cancelled successfully."}
+        booker.cancel_booking(
+            session=session,
+            booking_id=booking_id,
+            patient=user
+        )
+
+        session.commit()
+        return {"msg": "Slot cancelled successfully."}
+
     except ValueError as e:
+        session.rollback()
+        logger.debug(e)
         raise HTTPException(status_code=400, detail={"msg": str(e)})
     except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail={
-                            "msg": "An error occurred while cancelling the booking."})
+        logger.debug(e)
+        raise HTTPException(
+            500,
+            detail={
+                "type": "Unexpected Error",
+                "msg": "An unexpected error occurred and your slot could not be cancelled"
+            }
+        )

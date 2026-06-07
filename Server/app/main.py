@@ -59,6 +59,8 @@ app.add_middleware(
     expose_headers=["x-session-expire", "x-auth-token"],
 )
 
+
+# Routes
 app.include_router(auth.router)
 app.include_router(doctors.router)
 app.include_router(bookings.router)
@@ -103,7 +105,7 @@ async def ping():
 
 if __name__ == "__main__":
     import uvicorn
-    from app.core.config import USE_HTTPS
+    from app.core.config import settings
 
     """
     Hardcoding the base directory path to the root of the app for now
@@ -111,7 +113,7 @@ if __name__ == "__main__":
     """
 
     BASE_DIR = Path(__file__).parent.parent.parent
-    is_https = int(USE_HTTPS) == 1
+    is_https = int(settings.use_https) == 1
 
     logging.info(
         f"running server in {'https' if is_https else 'http'} mode".capitalize()

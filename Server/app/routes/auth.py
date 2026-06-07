@@ -23,7 +23,11 @@ logger = logging.getLogger(__name__)
 
 
 @router.post("/register/patient", response_model=PatientProfileResponse)
-async def register_pt(user: PatientCreate, response: Response, session: Session = Depends(get_db)):
+async def register_pt(
+    user: PatientCreate,
+    response: Response,
+    session: Session = Depends(get_db)
+):
     try:
         with session.begin():
             created = pt_srvc.create(session, user)
@@ -45,7 +49,8 @@ async def register_pt(user: PatientCreate, response: Response, session: Session 
             role=UserRoleV2.PATIENT
         )
 
-    except Exception:
+    except Exception as e:
+        logger.debug(e)
         raise HTTPException(
             500,
             detail={
@@ -115,7 +120,11 @@ async def register_dr(
         )
 
     try:
-        token = create_access_token(id=str(created.id), role=UserRoleV2.DOCTOR)
+        token = create_access_token(
+            id=created.id.__str__(),
+            role=UserRoleV2.DOCTOR
+        )
+
         response.headers["x-auth-token"] = token
         return UserResponse.model_validate(created)
 
@@ -162,7 +171,7 @@ async def login_dr(credentials: DoctorLogin, response: Response, session: Sessio
         )
 
     token = create_access_token(
-        id=str(row.id),
+        id=row.id.__str__(),
         role=UserRoleV2.DOCTOR
     )
 

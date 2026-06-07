@@ -3,7 +3,6 @@ from typing import Optional
 from fastapi import Depends, APIRouter, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from app.middleware.auth_middleware import get_user
 from app.database.entry import get_db
 from app.database.models import Doctor as DoctorDB
 from app.services.DrService import dr_srvc

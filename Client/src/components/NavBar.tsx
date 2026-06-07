@@ -122,7 +122,11 @@ function NavBar() {
                 label: "history",
                 icon: History,
               },
-              { label: "logout", icon: LogOut, onClick: logout },
+              {
+                label: "logout",
+                icon: LogOut,
+                onClick: () => logout(window.location.href),
+              },
             ],
           },
         ]

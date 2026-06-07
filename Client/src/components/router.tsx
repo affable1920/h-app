@@ -22,7 +22,9 @@ import Spinner from "./ui/Spinner";
 import useAuthStore from "@/stores/authStore";
 
 const Chat = lazy(() => import("@routes/Chat"));
-const Scheduler = lazy(() => import("@/features/booking/components/Scheduler"));
+const SchedulesView = lazy(
+  () => import("@/features/booking/components/SchedulesView"),
+);
 
 const ClinicsDirectory = lazy(() => import("@components/ClinicsDirectory"));
 const DoctorsDirectory = lazy(() => import("@/components/DoctorsDirectory"));
@@ -110,7 +112,7 @@ const router = createBrowserRouter([
 
           {
             path: "doctor/:id/schedule",
-            Component: Scheduler,
+            Component: SchedulesView,
           },
 
           {

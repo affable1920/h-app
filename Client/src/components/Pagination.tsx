@@ -34,7 +34,7 @@ function Pagination() {
       {!isFirstPage && (
         <ButtonElement
           size="md"
-          variant="ghost"
+          variant="icon"
           onClick={handlePageChange.bind(EMPTY, "prev")}
         >
           <ArrowBigLeftDash />
@@ -44,7 +44,7 @@ function Pagination() {
       {has_next && (
         <ButtonElement
           size="md"
-          variant="ghost"
+          variant="icon"
           onClick={handlePageChange.bind(EMPTY, "next")}
         >
           <ArrowBigRightDash />

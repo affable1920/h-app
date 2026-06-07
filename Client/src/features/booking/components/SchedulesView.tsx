@@ -6,13 +6,18 @@ import { useGetById } from "@/hooks/use-doctors";
 import { ClinicViewVariants } from "@/utils/motion-variants";
 import { motion } from "motion/react";
 import { ScheduleItem } from "./ScheduleItem";
-import Divider from "../../../components/ui/Divider";
+import Button from "@/components/ui/Button";
 
-function Scheduler() {
+function SchedulesView() {
   const path = useLocation().pathname;
   const id = path.split("/").filter(Boolean).at(-2);
 
-  const { data: doctor, isPending, isError } = useGetById(id as string);
+  const {
+    data: doctor,
+    isPending,
+    isError,
+    refetch,
+  } = useGetById(id as string);
 
   if (isPending) {
     return <Spinner />;
@@ -20,8 +25,15 @@ function Scheduler() {
 
   if (isError) {
     return (
-      <div className="card-h2">
-        Hold your breathe. <Code>Doctor</Code> onboarding in process ...
+      <div>
+        An <Code>UNEXPECTED ERROR</Code> occurred.
+        <br />
+        Please try after sometime.{" "}
+        <Button
+          onClick={function () {
+            refetch();
+          }}
+        />
       </div>
     );
   }
@@ -35,14 +47,20 @@ function Scheduler() {
       <section className="flex flex-col md:flex-row gap-12">
         <motion.section
           key={`${doctor.id}-schedule-view`}
+          viewport={{ once: true }}
           variants={ClinicViewVariants.containerVariants}
           initial="initial"
           animate="animate"
           exit="exit"
-          className="flex flex-1 flex-col gap-10 shadow-md rounded-xl border-2 border-border p-6 bg-layout"
+          className="flex flex-1 flex-col gap-10 shadow-md rounded-xl border-2 border-border p-6 bg-layout
+           shadow-black/20"
         >
           {doctor.schedules.map((schedule) => (
-            <ScheduleItem schedule={schedule} />
+            <ScheduleItem
+              doctor={doctor}
+              key={schedule.id}
+              schedule={schedule}
+            />
           ))}
         </motion.section>
 
@@ -52,4 +70,4 @@ function Scheduler() {
   );
 }
 
-export default Scheduler;
+export default SchedulesView;

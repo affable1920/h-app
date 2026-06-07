@@ -45,7 +45,6 @@ export const MobileNavVariants: Record<string, Variant> = {
   exit: {
     transition: {
       delayChildren: stagger(0.05, { from: "last" }),
-      duration: 0.15,
     },
   },
 };
@@ -55,3 +54,37 @@ export const MobileNavItemVariants: Record<string, Variant> = {
   visible: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -20 },
 };
+
+type StaggerArgs = {
+  exitDelay?: boolean;
+};
+
+export function createStagger({ exitDelay = true }: StaggerArgs = {}): Record<
+  "parent" | "children",
+  Record<string, Variant>
+> {
+  const VARIANT_1 = {
+    parent: {
+      initial: {},
+      animate: {
+        transition: {
+          delayChildren: stagger(0.1, { startDelay: 0.05 }),
+        },
+      },
+      exit: {
+        transition: exitDelay
+          ? {
+              delayChildren: stagger(0.05, { from: "last" }),
+            }
+          : {},
+      },
+    },
+    children: {
+      initial: { opacity: 0, x: -20 },
+      animate: { opacity: 1, x: 0 },
+      exit: { opacity: 0, x: -20 },
+    },
+  };
+
+  return VARIANT_1;
+}

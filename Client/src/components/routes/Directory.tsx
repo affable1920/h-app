@@ -27,14 +27,15 @@ const SORT_COLS: Array<string> = [
 
 function Directory() {
   const navigate = useNavigate();
-  const [localSearch, setLocalSearch] = useState("");
 
   const {
+    searchQuery,
     setSearchQuery,
     clearSearchQuery,
     sortOrder = "desc",
     sortBy,
   } = useQueryStore();
+  const [localSearch, setLocalSearch] = useState(searchQuery);
 
   const location = useLocation().pathname.split("/").at(-1) ?? "doctors";
   const openModal = useModalStore((s) => s.openModal);
@@ -67,7 +68,7 @@ function Directory() {
   };
 
   return (
-    <section className="flex flex-col gap-4 mx-auto">
+    <section className="flex flex-col gap-8 mx-auto">
       <section className="w-full rounded-md flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button
@@ -99,8 +100,9 @@ function Directory() {
         <div className="flex gap-2 items-center">
           <SearchBar
             onChange={handleSearch}
-            val={localSearch}
+            val={localSearch ?? ""}
             onClear={clearSearch}
+            clearable
           />
 
           <Button variant="icon" onClick={handleDirectorySwitch}>

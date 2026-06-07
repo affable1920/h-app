@@ -396,11 +396,6 @@ export interface components {
              */
             date: string;
             /**
-             * Clinicid
-             * Format: uuid
-             */
-            clinicId: string;
-            /**
              * Doctorid
              * Format: uuid
              */

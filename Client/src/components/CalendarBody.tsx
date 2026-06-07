@@ -3,26 +3,20 @@ import { useMemo } from "react";
 import { DateTime } from "luxon";
 import { WEEKDAYS } from "@/utils/constants";
 import type { Schedule } from "@/types/http";
-import { createCalendarData } from "@/utils/utils";
+import {
+  createCalendarData,
+  datesAreEqual,
+  isDateInPast,
+  isDateToday,
+} from "@/utils/utils";
 import { useSearchParams } from "react-router-dom";
 import Badge from "./ui/Badge";
+import { motion } from "motion/react";
 
 interface CalendarBodyProps {
   monthInView: DateTime;
   schedules: Schedule[];
   direction?: "right" | "left";
-}
-
-function isDateToday(date: DateTime) {
-  return date.startOf("day").equals(DateTime.local().startOf("day"));
-}
-
-function isInPast(dt: DateTime) {
-  return dt.toLocal().startOf("day") < DateTime.local().startOf("day");
-}
-
-function areDatesEqual(dtA: DateTime, dtB: DateTime) {
-  return dtA.hasSame(dtB, "day");
 }
 
 const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
@@ -33,12 +27,12 @@ const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
     setSearchParams(function (prev) {
       const next = new URLSearchParams(prev);
 
-      if (areDatesEqual(dtParam, dt)) {
+      if (datesAreEqual(dt, dtParam)) {
         next.delete("date");
         return next;
+      } else {
+        next.set("date", dt.toISO());
       }
-
-      next.set("date", dt.toISO());
       return next;
     });
   }
@@ -50,34 +44,31 @@ const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
     [monthInView],
   );
 
-  const allScheduleDays = useMemo(
-    function () {
-      const days = [];
+  const allScheduleDays = useMemo(function () {
+    const days = [];
 
-      for (let schedule of schedules) {
-        days.push(schedule.weekdays);
-      }
+    for (let schedule of schedules) {
+      days.push(schedule.weekdays);
+    }
 
-      return [...new Set(days.flat())].sort((a, b) => a - b);
-    },
-    [schedules],
-  );
+    return [...new Set(days.flat())].sort((a, b) => a - b);
+  }, []);
 
   function isWkdayToday(day: (typeof WEEKDAYS)[number]) {
-    const currDt = DateTime.local();
+    const now = DateTime.local();
 
     return (
-      monthInView.month === currDt.month &&
-      day.toLowerCase().trim() === currDt.weekdayLong.toLowerCase().trim()
+      monthInView.month === now.month &&
+      day.toLowerCase().trim() === now.weekdayLong.toLowerCase().trim()
     );
   }
 
   return (
-    <div className={`flex flex-col gap-6`}>
+    <motion.div className={`flex flex-col gap-6`}>
       <div className="grid gap-4 justify-items-center grid-cols-7">
-        {WEEKDAYS.map((day, i) => (
+        {WEEKDAYS.map((day) => (
           <h2
-            key={i}
+            key={day}
             className={`font-black underline-offset-4 capitalize  ${
               isWkdayToday(day)
                 ? "text-text-secondary underline"
@@ -90,25 +81,25 @@ const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
       </div>
 
       <div className="grid gap-4 grid-cols-7 gap-y-6 justify-items-center">
-        {calendar.map((date) => {
+        {calendar.map((dt) => {
           return (
             <Badge
               className="size-10 max-w-12 max-h-12"
-              content={date.day.toString()}
+              content={dt.day.toString()}
               onClick={function () {
-                updateDate(date);
+                updateDate(dt);
               }}
-              current={isDateToday(date)}
-              key={date.toISO()}
-              selected={areDatesEqual(date, dtParam)}
+              current={isDateToday(dt)}
+              key={dt.toISO()}
+              selected={datesAreEqual(dt, dtParam)}
               disabled={
-                isInPast(date) || !allScheduleDays.includes(date.weekday)
+                !allScheduleDays.includes(dt.weekday) || isDateInPast(dt)
               }
             />
           );
         })}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

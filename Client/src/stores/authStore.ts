@@ -37,9 +37,9 @@ const useAuthStore = create<AuthStore>()(
   ),
 );
 
-export function logout() {
+export function logout(to?: string) {
   useAuthStore.persist.clearStorage();
-  window.location.href = "/auth";
+  window.location.href = to ?? "/auth";
 }
 
 export default useAuthStore;

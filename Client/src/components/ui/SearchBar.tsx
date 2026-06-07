@@ -28,15 +28,12 @@ const SearchBar = memo(function ({
           onChange(ev.target.value);
         }}
       />
-      {clearable && (
-        <Button
-          className="absolute right-3 active:scale-95 transition-transform"
-          variant="icon"
-          size="sm"
+      {clearable && val && (
+        <X
+          size={12}
           onClick={onClear}
-        >
-          <X />
-        </Button>
+          className="absolute right-3 active:scale-98 cursor-pointer hover:scale-103"
+        />
       )}
     </div>
   );

@@ -47,7 +47,7 @@ const Badge = memo(
           full ? "w-full" : "w-fit",
           colors[color],
           selected &&
-            "bg-text hover:bg-text-normal! text-drk font-semibold border-text",
+            "bg-text hover:bg-text-normal! text-drk font-extrabold border-text",
           disabled &&
             "shadow-none pointer-events-none border-transparent opacity-80 bg-layout-raised/50",
           current && "border-b-2 border-b-brand",

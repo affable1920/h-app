@@ -8,6 +8,9 @@ export function PatientProfile() {
     isLoading,
     refetch,
   } = useFetchProfile("patient");
+
+  console.log(profile);
+
   return (
     <ProfileShell isError={isError} isPending={isLoading} refetch={refetch}>
       <div>{profile?.name}</div>

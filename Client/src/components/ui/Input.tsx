@@ -40,7 +40,7 @@ type Rest = {
   label?: Rest;
 };
 
-type InputProps = BaseProps & {
+export type InputProps = BaseProps & {
   size?: Size;
   rest?: Rest;
 } & Omit<ComponentPropsWithoutRef<"input">, "size">;

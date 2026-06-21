@@ -1,23 +1,18 @@
-import { config } from "@/config";
-
-async function makeRequest(
+async function request(
+  url: string,
   token: string,
-  input: unknown,
+  requestBody: unknown,
   signal?: AbortSignal,
 ) {
-  const response = await fetch(config.api_url + "/chat", {
+  return await fetch(url, {
     method: "POST",
-
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-
-    signal: signal,
-    body: JSON.stringify(input),
+    signal,
+    body: JSON.stringify(requestBody),
   });
-
-  return response;
 }
 
-export { makeRequest };
+export { request };

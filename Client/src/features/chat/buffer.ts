@@ -1,78 +1,70 @@
 type TickArgs = {
-  isDone: () => boolean;
-  onChunk: (chunk: string) => void;
+  isDone: boolean;
   onDone: () => void;
+  onChunk: (chunk: string) => void;
 };
 
-const CHARS_PER_CHUNK = 2;
+const CHARS_PER_CHUNK = 4;
 
-function createBuffer() {
-  // Stores all characters, used to update the conversation state in intervals
-  const bufferRef = { current: "" };
+export class Buffer {
+  private buffer: { current: string };
+  private drained: { current: number };
+  private timer: { current: null | ReturnType<typeof setTimeout> };
 
-  // Stores length of characters buffered correctly till now
-  const drainedRef = { current: 0 };
-
-  // Holds onto the timeout ref. Ideal for cleanups
-  const timerRef = { current: null as ReturnType<typeof setTimeout> | null };
-
-  function start(
-    DRAIN_INTERVAL_MS: number,
-    { onChunk, onDone, isDone }: TickArgs,
+  constructor(
+    public readonly charsPerChunk: number = CHARS_PER_CHUNK,
+    public readonly drainIntervalMS: number = 32,
   ) {
-    function tick() {
-      const buffer = bufferRef.current;
-      const drained = drainedRef.current;
+    this.buffer = { current: "" };
+    this.drained = { current: 0 };
+    this.timer = { current: null };
+  }
 
-      const remaining = buffer.length - drained;
+  start(callbacks: TickArgs) {
+    this.timer.current = setTimeout(tick.bind(this), this.drainIntervalMS);
+
+    function tick(this: Buffer) {
+      const bfr = this.buffer.current;
+      const drained = this.drained.current;
+
+      const remaining = bfr.length - drained;
 
       if (remaining === 0) {
-        if (isDone()) {
-          onDone();
-          stop();
+        if (callbacks.isDone) {
+          callbacks.onDone();
+
+          this.stop();
           return;
         }
 
-        timerRef.current = setTimeout(tick, DRAIN_INTERVAL_MS);
+        this.timer.current = setTimeout(tick.bind(this));
         return;
       }
 
-      const chars = bufferRef.current.slice(drained, drained + CHARS_PER_CHUNK);
+      const characters = bfr.slice(drained, drained + this.charsPerChunk);
 
-      onChunk(chars);
-      drainedRef.current += chars.length;
+      callbacks.onChunk(characters);
+      this.drained.current += characters.length;
 
-      timerRef.current = setTimeout(tick, DRAIN_INTERVAL_MS);
-    }
-
-    timerRef.current = setTimeout(tick, DRAIN_INTERVAL_MS);
-  }
-
-  function push(chars: string) {
-    bufferRef.current += chars;
-  }
-
-  function stop() {
-    // This method cleans up the timer
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
+      this.timer.current = setTimeout(tick.bind(this), this.drainIntervalMS);
     }
   }
 
-  function reset() {
-    bufferRef.current = "";
-    drainedRef.current = 0;
-    timerRef.current = null;
+  stop() {
+    if (this.timer.current) {
+      clearTimeout(this.timer.current);
+    }
   }
 
-  const publicApi = {
-    start,
-    push,
-    stop,
-    reset,
-  };
+  reset() {
+    this.stop();
+    this.timer.current = null;
 
-  return publicApi;
+    this.buffer.current = "";
+    this.drained.current = 0;
+  }
+
+  append(characters: string) {
+    this.buffer.current += characters;
+  }
 }
-
-export { createBuffer };

@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import APIClient from "@/services/ApiClient";
 import type { operations } from "@/types/api";
 import type { GetByIdResponse, GetAllDrResponse } from "@/types/http";
@@ -13,8 +13,6 @@ export function useGetAll() {
     searchParams.entries(),
   );
 
-  const route = useLocation().pathname.split("/").at(-1) ?? "doctors";
-
   return useQuery({
     queryKey: ["doctors", { ...queryParams }],
 
@@ -27,7 +25,6 @@ export function useGetAll() {
     },
 
     placeholderData: keepPreviousData,
-    enabled: route === "doctors",
   });
 }
 

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "./components.css";
 
+@source "../../node_modules/streamdown/dist/*.js";
+
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -33,10 +35,13 @@
   --color-text-teritiary: #747686;
 
   --color-indicator: #5de3ff;
+  --color-indicator-drk: #49d5f2;
+  --color-indicator-hover: #73e3fa;
 
   /* brand - actions */
   --color-brand: #6c47ff;
   --color-brand-hover: #6c50ff;
+  --color-brand-drk: #5d36f7;
 
   --color-drk: #000000;
 
@@ -171,4 +176,31 @@
   100% {
     transform: translate(0px, 0px) scale(1);
   }
+}
+
+.streaming-cursor > *:last-child::after {
+  content: " |";
+  display: "inline-block";
+  margin-left: 2px;
+  animation: blink 1s infinite step-end;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.editor {
+  position: relative;
+}
+
+.editor.is-empty::before {
+  content: "Ask anything ...";
+  font-style: italic;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
 }

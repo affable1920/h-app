@@ -63,7 +63,7 @@ export function createStagger({ exitDelay = true }: StaggerArgs = {}): Record<
   "parent" | "children",
   Record<string, Variant>
 > {
-  const VARIANT_1 = {
+  const VARIANT_1: Record<"parent" | "children", Record<string, Variant>> = {
     parent: {
       initial: {},
       animate: {
@@ -75,6 +75,8 @@ export function createStagger({ exitDelay = true }: StaggerArgs = {}): Record<
         transition: exitDelay
           ? {
               delayChildren: stagger(0.05, { from: "last" }),
+              when: "afterChildren",
+              ease: "backOut",
             }
           : {},
       },

@@ -6,8 +6,8 @@ import {
   MobileNavItemVariants,
   MobileNavVariants,
 } from "@/utils/motion-variants";
-import { ArrowRight, ClockArrowDown, MapPinCheckInside } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { ArrowRight, ChevronRight, MapPinCheckInside } from "lucide-react";
+import { AnimatePresence, motion, stagger } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import Badge from "@components/ui/Badge";
 import useModalStore from "@stores/modalStore";
@@ -36,6 +36,15 @@ export const ScheduleItem = memo(function ({
   const dtParam = fromISO(params.get("date") ?? "");
   const [clearDtParam, setClearDtParam] = useState(false);
 
+  const [scheduleState, setScheduleState] = useState<ScheduleState>({
+    schedule,
+    slot: null,
+    weekday: null,
+  });
+
+  const [isExpanded, setIsExpanded] = useState(false);
+  const openModal = useModalStore((s) => s.openModal);
+
   useEffect(
     function () {
       if (clearDtParam) {
@@ -50,14 +59,6 @@ export const ScheduleItem = memo(function ({
     [clearDtParam],
   );
 
-  const [scheduleState, setScheduleState] = useState<ScheduleState>({
-    schedule,
-    slot: null,
-    weekday: null,
-  });
-
-  const [isExpanded, setIsExpanded] = useState(false);
-
   useEffect(
     function () {
       if (schedule.weekdays.includes(dtParam?.weekday)) {
@@ -66,8 +67,6 @@ export const ScheduleItem = memo(function ({
     },
     [dtParam],
   );
-
-  const openModal = useModalStore((s) => s.openModal);
 
   const slotsFiltered = useMemo(
     function () {
@@ -250,23 +249,48 @@ export const ScheduleItem = memo(function ({
             <motion.div
               key="button-confirm"
               initial={{ height: 0 }}
-              animate={{ height: "auto" }}
-              exit={{ height: 0 }}
-              className="flex self-end justify-end"
+              animate={{
+                height: "auto",
+              }}
+              exit={{ height: 0, transition: { when: "afterChildren" } }}
+              className="flex self-end justify-end overflow-hidden"
             >
-              <Button
-                color="white"
-                onClick={function () {
-                  openModal("schedule", {
-                    doctor,
-                    clinic,
-                    ...scheduleState,
-                  });
+              <motion.span
+                style={{ zIndex: 0 }}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                  transition: { ease: "easeOut", duration: 0.2 },
+                }}
+                exit={{
+                  opacity: 0,
+                  x: 20,
+                  transition: { ease: "linear", duration: 0.1 },
                 }}
               >
-                book slot
-                <ClockArrowDown />
-              </Button>
+                <Button
+                  color="white"
+                  onClick={function () {
+                    openModal("schedule", {
+                      doctor,
+                      clinic,
+                      onSuccess() {
+                        setClearDtParam(true);
+                        setScheduleState((p) => ({
+                          ...p,
+                          weekday: null,
+                          slot: null,
+                        }));
+                      },
+                      ...scheduleState,
+                    });
+                  }}
+                >
+                  book slot
+                  <ChevronRight />
+                </Button>
+              </motion.span>
             </motion.div>
           )}
       </AnimatePresence>

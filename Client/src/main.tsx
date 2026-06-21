@@ -14,14 +14,7 @@ import "@fontsource/pt-sans/400-italic";
 
 import router from "./components/router.tsx";
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-    },
-  },
-});
+const client = new QueryClient();
 
 // container
 createRoot(document.getElementById("root")!).render(

@@ -7,47 +7,79 @@ const sizes: Record<Size, string> = {
 };
 
 const iconSizes: Record<Size, string> = {
-  sm: "p-0 [&>svg]:size-4",
-  md: "p-0 [&>svg]:size-5",
-  lg: "p-0 [&>svg]:size-6",
+  sm: "[&>svg]:size-3",
+  md: "[&>svg]:size-4",
+  lg: "[&>svg]:size-5",
+};
+
+const borderStyles: Record<Color, string> = {
+  primary: `border-2 border-border hover:border-border-strong`,
+  brand: `border-2 border-brand-drk`,
+  white: `border-2 border-text-normal hover:border-text-secondary`,
+  secondary: `border-2 border-border-strong hover:border-border-vivid`,
+  indicator: `border-2 border-indicator-drk`,
+  danger: `border-2 border-red-700 hover:border-red-600`,
+  success: `border-2 border-green-600`,
+  warning: `border-2 border-yellow-500 hover:border-yellow-400`,
 };
 
 const colors: Record<Color, string> = {
   brand: "bg-brand hover:bg-brand-hover text-white shadow-md",
-  white: "bg-white text-drk",
-  indicator: "bg-indicator text-drk",
-  primary: `bg-layout hover:bg-layout-raised border border-border-strong hover:border-border-vivid 
-  text-text-secondary hover:text-text`,
+  white: "bg-text hover:bg-text-normal text-drk",
+  indicator: "bg-indicator text-drk hover:bg-indicator-hover",
+  primary: `bg-layout hover:bg-layout-raised hover:text-text`,
+  secondary: "bg-[#31313e] hover:bg-[#363639] hover:text-text",
+  danger: `bg-red-600 hover:bg-red-500 text-drk`,
+  success: `bg-green-500 text-drk hover:bg-green-400`,
+  warning: `bg-yellow-400 text-drk hover:bg-yellow-300`,
 };
 
 const variantStyles: Record<Variant, string> = {
   contained: "",
-  ghost: `bg-transparent border border-border-strong hover:bg-layout hover:border-border-vivid 
+  ghost: `bg-transparent border-2 border-border-strong hover:bg-layout hover:border-border-vivid 
   text-text-secondary hover:shadow-inner hover:shadow-background`,
-  icon: ``,
+  icon: `p-0`,
 };
 
 export function getClassConfig({ ...props }: ButtonProps): string {
-  const base = `font-semibold select-none cursor-pointer transition-colors 
-  capitalize inline-flex items-center justify-center rounded-md 
-  disabled:opacity-60 disabled:pointer-events-none gap-2 focus:outline-none`;
+  const base = `font-semibold select-none cursor-pointer transition-colors duration-200 capitalize inline-flex 
+  items-center justify-center rounded-md disabled:opacity-60 disabled:pointer-events-none gap-2 
+  focus:outline-none`;
 
-  const { variant = "contained", size = "sm", className = "" } = props;
+  const {
+    border = true,
+    variant = "contained",
+    size,
+    className = "",
+    color = "primary",
+  } = props;
   const variantStyle = variantStyles[variant];
 
-  let sizeStyle = variant === "icon" ? iconSizes[size] : sizes[size];
+  let sizeStyle =
+    variant === "icon" ? iconSizes[size ?? "md"] : sizes[size ?? "sm"];
 
-  let colorStyle: string = "";
-
-  if (variant === "contained") {
-    colorStyle = colors[(props.color as Color) ?? "primary"];
-  }
+  let colorStyle = "";
+  let borderStyle = "";
 
   if (variant === "icon") {
-    colorStyle = `text-text-secondary ${props.disabled ? "text-text-teritiary" : ""}`;
+    colorStyle = props.bg
+      ? `p-2 rounded-md shadow-sm shadow-black/20 ${colors[color]}`
+      : `text-text-secondary ${props.disabled ? "text-text-teritiary" : ""}`;
   }
 
-  return [base, colorStyle, variantStyle, sizeStyle, className]
+  if (variant === "contained") {
+    colorStyle = colors[color as Color];
+    borderStyle = borderStyles[color];
+  }
+
+  return [
+    base,
+    variantStyle,
+    colorStyle,
+    sizeStyle,
+    border && borderStyle,
+    className,
+  ]
     .filter(Boolean)
     .join(" ")
     .trim();

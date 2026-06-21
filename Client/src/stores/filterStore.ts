@@ -1,5 +1,5 @@
 import type { ServerParams } from "@/types/http";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 type FilterState = Omit<
@@ -26,14 +26,13 @@ function useFilterStore() {
     });
   }, []);
 
-  function handleFilterUpdate<K extends FilterKey>(
-    key: K,
-    val: FilterState[K],
-  ) {
+  const handleFilterUpdate = useCallback(function handleFilterUpdate<
+    K extends FilterKey,
+  >(key: K, val: FilterState[K]) {
     setFilters(function (p) {
       return { ...p, [key]: p[key] === val ? null : val };
     });
-  }
+  }, []);
 
   function reset() {
     setFilters({});

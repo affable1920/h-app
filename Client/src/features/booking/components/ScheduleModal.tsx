@@ -30,9 +30,15 @@ type ScheduleModalProps = {
   doctor: Doctor;
   slot: Slot;
   clinic: Clinic;
+  onSuccess?: () => void;
 };
 
-function ScheduleModal({ doctor, slot, clinic }: ScheduleModalProps) {
+function ScheduleModal({
+  doctor,
+  slot,
+  clinic,
+  onSuccess,
+}: ScheduleModalProps) {
   const user = useAuthStore((s) => s.user);
 
   const form = useForm<PatientCreate>({
@@ -74,16 +80,27 @@ function ScheduleModal({ doctor, slot, clinic }: ScheduleModalProps) {
           action: {
             label: "Undo",
             onClick() {
-              unBook({
-                appointmentId: createdAppointment.id,
-                doctorId: doctor.id,
-              });
+              unBook(
+                {
+                  appointmentId: createdAppointment.id,
+                  doctorId: doctor.id,
+                },
+                {
+                  onSuccess() {
+                    toast("Appointment successfully cancelled.");
+                  },
+                },
+              );
             },
           },
 
-          duration: 5000,
+          duration: 4000,
           closeButton: true,
         });
+
+        if (onSuccess) {
+          onSuccess();
+        }
 
         closeModal();
       },
@@ -95,6 +112,7 @@ function ScheduleModal({ doctor, slot, clinic }: ScheduleModalProps) {
           description() {
             return resolved.msg;
           },
+          duration: 4000,
         });
       },
     });

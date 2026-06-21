@@ -181,8 +181,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get */
-        get: operations["get"];
+        /** Get All */
+        get: operations["get_all"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clinics/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get One */
+        get: operations["get_one"];
         put?: never;
         post?: never;
         delete?: never;
@@ -226,23 +243,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Root Path */
-        get: operations["root_path"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/ping": {
         parameters: {
             query?: never;
@@ -264,6 +264,29 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AppointmentConfirmation */
+        AppointmentConfirmation: {
+            /**
+             * Id
+             * @description the unique identifier of the record
+             */
+            id: string;
+            /** Patient Id */
+            patient_id: string;
+            /**
+             * Scheduled Date
+             * Format: date-time
+             */
+            scheduled_date: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            status: components["schemas"]["AppointmentStatus"];
+        } & {
+            [key: string]: unknown;
+        };
         /** AppointmentResponse */
         AppointmentResponse: {
             /**
@@ -273,28 +296,26 @@ export interface components {
             id: string;
             /** Patient Id */
             patient_id: string;
-            slot: components["schemas"]["Slot"];
-            /**
-             * Doctor Id
-             * Format: uuid
-             */
-            doctor_id: string;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
             /**
              * Scheduled Date
              * Format: date-time
              */
             scheduled_date: string;
-            status: components["schemas"]["AppointmentStatus"];
             /**
-             * Clinic Id
-             * Format: uuid
+             * Created At
+             * Format: date-time
              */
+            created_at: string;
+            status: components["schemas"]["AppointmentStatus"];
+            /** Clinic Id */
             clinic_id: string;
+            /** Doctor Id */
+            doctor_id: string;
+            /** Slot Id */
+            slot_id: string;
+            slot: components["schemas"]["Slot"];
+            doctor: components["schemas"]["DrMinimal"];
+            clinic: components["schemas"]["ClinicHttpMinimal"];
         } & {
             [key: string]: unknown;
         };
@@ -303,6 +324,14 @@ export interface components {
          * @enum {string}
          */
         AppointmentStatus: "active" | "completed" | "cancelled" | "missed";
+        /** BaseChatMessage */
+        BaseChatMessage: {
+            role: components["schemas"]["Role"];
+            /** Content */
+            content: string;
+        } & {
+            [key: string]: unknown;
+        };
         /** Body_create_doctors_onboard_post */
         Body_create_doctors_onboard_post: {
             /** Name */
@@ -342,11 +371,6 @@ export interface components {
             phone?: string | null;
             /** Profile */
             profile?: string | null;
-        };
-        /** Body_get_clinics_get */
-        Body_get_clinics_get: {
-            pagination_params: components["schemas"]["PaginationParams"];
-            filter_params: components["schemas"]["ClinicRouteFilters"];
         };
         /** Body_register_dr_auth_register_doctor_post */
         Body_register_dr_auth_register_doctor_post: {
@@ -408,8 +432,8 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
-        /** Clinic */
-        Clinic: {
+        /** ClinicHttpFull */
+        ClinicHttpFull: {
             /**
              * Id
              * @description the unique identifier of the record
@@ -417,8 +441,6 @@ export interface components {
             id: string;
             /** Name */
             name: string;
-            /** Owner */
-            owner?: string | null;
             /** Location */
             location?: string | null;
             /**
@@ -426,6 +448,8 @@ export interface components {
              * @default []
              */
             facilities: string[];
+            /** Owner */
+            owner?: string | null;
             /** Pincode */
             pincode?: number | null;
             /**
@@ -443,19 +467,27 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
-        /** ClinicRouteFilters */
-        ClinicRouteFilters: {
-            /** Searchquery */
-            searchQuery?: string | null;
-            /** Minrating */
-            minRating?: number | null;
-            /** Maxdistance */
-            maxDistance?: number | null;
-            /** Facilities */
-            facilities?: string[] | null;
+        /** ClinicHttpMinimal */
+        ClinicHttpMinimal: {
+            /**
+             * Id
+             * @description the unique identifier of the record
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Location */
+            location?: string | null;
+            /**
+             * Facilities
+             * @default []
+             */
+            facilities: string[];
+        } & {
+            [key: string]: unknown;
         };
-        /** Doctor */
-        Doctor: {
+        /** DoctorHttpFull */
+        DoctorHttpFull: {
             /**
              * Id
              * @description the unique identifier of the record
@@ -479,6 +511,11 @@ export interface components {
             verified: boolean;
             /** @default unknown */
             status: components["schemas"]["Status"] | null;
+            /** Image */
+            image?: string | null;
+            /** Credentials */
+            credentials: string;
+            gender: components["schemas"]["Gender"];
             /**
              * Consults Online
              * @default false
@@ -501,11 +538,40 @@ export interface components {
              * @default []
              */
             schedules: components["schemas"]["Schedule"][];
+            /** Rating */
+            readonly rating: number;
+            /** Image Url */
+            readonly image_url: string | null;
+        } & {
+            [key: string]: unknown;
+        };
+        /** DoctorHttpMinimal */
+        DoctorHttpMinimal: {
+            /**
+             * Id
+             * @description the unique identifier of the record
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Primary Specialization */
+            primary_specialization: string;
+            /** Experience */
+            experience: number;
+            /**
+             * Reviews
+             * @default []
+             */
+            reviews: components["schemas"]["Review"][];
+            /**
+             * Verified
+             * @default false
+             */
+            verified: boolean;
+            /** @default unknown */
+            status: components["schemas"]["Status"] | null;
             /** Image */
             image?: string | null;
-            gender: components["schemas"]["Gender"];
-            /** Credentials */
-            credentials: string;
             /** Rating */
             readonly rating: number;
             /** Image Url */
@@ -521,6 +587,26 @@ export interface components {
             password: string;
             /** Id */
             id?: string | null;
+        };
+        /**
+         * DrMinimal
+         * @description A minimal dr object model to be sent to the client in the model's response
+         */
+        DrMinimal: {
+            /**
+             * Id
+             * @description the unique identifier of the record
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Primary Specialization */
+            primary_specialization: string;
+            gender: components["schemas"]["Gender"];
+            /** Experience */
+            experience: number;
+        } & {
+            [key: string]: unknown;
         };
         /** DrProfileResponse */
         DrProfileResponse: {
@@ -547,6 +633,11 @@ export interface components {
             verified: boolean;
             /** @default unknown */
             status: components["schemas"]["Status"] | null;
+            /** Image */
+            image?: string | null;
+            /** Credentials */
+            credentials: string;
+            gender: components["schemas"]["Gender"];
             /**
              * Consults Online
              * @default false
@@ -569,11 +660,6 @@ export interface components {
              * @default []
              */
             schedules: components["schemas"]["Schedule"][];
-            /** Image */
-            image?: string | null;
-            gender: components["schemas"]["Gender"];
-            /** Credentials */
-            credentials: string;
             /** College Studied */
             college_studied?: string | null;
             /** Graduation Year */
@@ -602,67 +688,28 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
-        /** MessageRequest */
-        MessageRequest: {
-            /** @default user */
-            role: components["schemas"]["Role"];
-            /** Content */
-            content: string;
-        } & {
-            [key: string]: unknown;
-        };
         /**
          * Mode
          * @enum {string}
          */
         Mode: "online" | "in person";
-        /** PaginatedResponse[Clinic] */
-        PaginatedResponse_Clinic_: {
+        /** PaginatedResponse[ClinicHttpMinimal] */
+        PaginatedResponse_ClinicHttpMinimal_: {
             /** Entities */
-            entities: components["schemas"]["Clinic"][];
+            entities: components["schemas"]["ClinicHttpMinimal"][];
             /** Count */
             count: number;
             /** Has Next */
             has_next?: boolean | null;
-            /**
-             * Has Prev
-             * @default false
-             */
-            has_prev: boolean;
         };
-        /** PaginatedResponse[Doctor] */
-        PaginatedResponse_Doctor_: {
+        /** PaginatedResponse[DoctorHttpMinimal] */
+        PaginatedResponse_DoctorHttpMinimal_: {
             /** Entities */
-            entities: components["schemas"]["Doctor"][];
+            entities: components["schemas"]["DoctorHttpMinimal"][];
             /** Count */
             count: number;
             /** Has Next */
             has_next?: boolean | null;
-            /**
-             * Has Prev
-             * @default false
-             */
-            has_prev: boolean;
-        };
-        /** PaginationParams */
-        PaginationParams: {
-            /**
-             * Page
-             * @default 1
-             */
-            page: number;
-            /**
-             * Max
-             * @default 10
-             */
-            max: number;
-            /**
-             * Sortby
-             * @default name
-             */
-            sortBy: ("rating" | "reviews" | "experience" | "fee" | "name") | null;
-            /** @default asc */
-            sortOrder: components["schemas"]["SortOrder"] | null;
         };
         /** PatientCreate */
         PatientCreate: {
@@ -722,15 +769,14 @@ export interface components {
             /** Comment */
             comment?: string | null;
             entity: components["schemas"]["ReviewableEntity"];
-            /**
-             * Entity Id
-             * Format: uuid
-             */
+            /** Entity Id */
             entity_id: string;
             /** Appointment Id */
             appointment_id?: string | null;
             /** Patient Id */
             patient_id: string;
+        } & {
+            [key: string]: unknown;
         };
         /**
          * ReviewableEntity
@@ -741,7 +787,7 @@ export interface components {
          * Role
          * @enum {string}
          */
-        Role: "user" | "system" | "assistant" | "developer";
+        Role: "user" | "system" | "assistant" | "tool";
         /** Schedule */
         Schedule: {
             /**
@@ -771,17 +817,11 @@ export interface components {
              * @default 20
              */
             base_slot_duration: number | null;
-            /**
-             * Clinic Id
-             * Format: uuid
-             */
+            /** Clinic Id */
             clinic_id: string;
-            /**
-             * Doctor Id
-             * Format: uuid
-             */
+            /** Doctor Id */
             doctor_id: string;
-            clinic?: components["schemas"]["Clinic"] | null;
+            clinic?: components["schemas"]["ClinicHttpMinimal"] | null;
             /**
              * Slots
              * @default []
@@ -810,10 +850,7 @@ export interface components {
              * Format: date-time
              */
             slot_datetime: string;
-            /**
-             * Schedule Id
-             * Format: uuid
-             */
+            /** Schedule Id */
             schedule_id: string;
         } & {
             [key: string]: unknown;
@@ -1027,10 +1064,12 @@ export interface operations {
                 currentlyAvailable?: "1" | null;
                 specialization?: string | null;
                 experience?: number | null;
+                fee?: number | null;
+                gender?: components["schemas"]["Gender"] | null;
                 page?: number;
                 max?: number;
-                sortBy?: ("rating" | "reviews" | "experience" | "fee" | "name") | null;
-                sortOrder?: components["schemas"]["SortOrder"] | null;
+                sortBy?: string;
+                sortOrder?: components["schemas"]["SortOrder"];
             };
             header?: never;
             path?: never;
@@ -1044,7 +1083,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_Doctor_"];
+                    "application/json": components["schemas"]["PaginatedResponse_DoctorHttpMinimal_"];
                 };
             };
             /** @description Validation Error */
@@ -1075,7 +1114,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Doctor"] | null;
+                    "application/json": components["schemas"]["DoctorHttpFull"];
                 };
             };
             /** @description Validation Error */
@@ -1108,7 +1147,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Doctor"];
+                    "application/json": components["schemas"]["DoctorHttpMinimal"];
                 };
             };
             /** @description Validation Error */
@@ -1141,7 +1180,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AppointmentResponse"];
+                    "application/json": components["schemas"]["AppointmentConfirmation"];
                 };
             };
             /** @description Validation Error */
@@ -1186,16 +1225,24 @@ export interface operations {
             };
         };
     };
-    get: {
+    get_all: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                max?: number;
+                sortBy?: string;
+                sortOrder?: components["schemas"]["SortOrder"];
+                searchQuery?: string | null;
+                minRating?: number | null;
+                maxDistance?: number | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
-                "application/json": components["schemas"]["Body_get_clinics_get"];
+                "application/json": string[] | null;
             };
         };
         responses: {
@@ -1205,7 +1252,38 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_Clinic_"];
+                    "application/json": components["schemas"]["PaginatedResponse_ClinicHttpMinimal_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_one: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClinicHttpFull"];
                 };
             };
             /** @description Validation Error */
@@ -1248,7 +1326,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MessageRequest"];
+                "application/json": components["schemas"]["BaseChatMessage"];
             };
         };
         responses: {
@@ -1281,7 +1359,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MessageRequest"];
+                "application/json": components["schemas"]["BaseChatMessage"];
             };
         };
         responses: {
@@ -1301,26 +1379,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    root_path: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
                 };
             };
         };

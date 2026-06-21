@@ -23,7 +23,7 @@ function SchedulesView() {
     return <Spinner />;
   }
 
-  if (isError) {
+  if (isError || !doctor) {
     return (
       <div>
         An <Code>UNEXPECTED ERROR</Code> occurred.

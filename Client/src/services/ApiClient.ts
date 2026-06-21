@@ -70,6 +70,8 @@ class APIClient {
         errors here in a structured, regular and predictable order for the components|hooks to handle
         */
 
+        console.log("Api client \n", error);
+
         if (error.request && !error.response) {
           return Promise.reject(serverDownError);
         }

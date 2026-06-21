@@ -57,7 +57,10 @@ export default function getActions(
       { ...scheduleAction, handler: handlers.schedule },
     ],
 
-    unknown: [],
+    unknown: [
+      { ...messageAction, isPrimary: true, handler: handlers.message },
+      { ...scheduleAction, handler: handlers.schedule },
+    ],
   };
 
   return config[status];

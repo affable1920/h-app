@@ -8,7 +8,16 @@ import type {
 } from "react";
 import type { ButtonHTMLAttributes } from "react";
 
-export const COLORS = ["brand", "primary", "indicator", "white"] as const;
+export const COLORS = [
+  "brand",
+  "white",
+  "indicator",
+  "primary",
+  "secondary",
+  "danger",
+  "warning",
+  "success",
+] as const;
 
 export const SIZES = ["sm", "md", "lg"] as const;
 export const VARIANTS = ["ghost", "contained", "icon"] as const;
@@ -26,6 +35,8 @@ type ButtonBase = {
   color?: Color;
   variant?: Variant;
   background?: boolean;
+  border?: boolean;
+  bg?: boolean;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 export type ButtonProps<NeedsMotion extends true = true> =

@@ -17,6 +17,8 @@ function Button<NeedsMotion extends true>(props: ButtonProps<NeedsMotion>) {
     endIcon,
     needsMotion = false,
     type = "button",
+    border = true,
+    bg = false,
     ...rest
   } = props;
 

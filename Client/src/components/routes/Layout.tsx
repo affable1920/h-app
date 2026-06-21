@@ -1,11 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import NavBar from "../NavBar";
 import useAuthStore, { logout } from "@/stores/authStore";
 import useModalStore from "@/stores/modalStore";
 import { toast } from "sonner";
-import Button from "../ui/Button";
-import { ArrowBigDown } from "lucide-react";
 
 function handleLogout() {
   toast.message("Session expired. logging out");
@@ -48,7 +46,8 @@ const Layout = () => {
   return (
     <>
       <NavBar />
-      <main className="pt-24 md:pt-32 py-16 px-8">
+
+      <main className="pt-28 p-6 px-8">
         <div className="max-w-7xl mx-auto">
           <Outlet />
         </div>

@@ -119,7 +119,10 @@ const features = [
 
 function LandingPageBody() {
   return (
-    <div className="min-h-screen w-full relative overflow-x-hidden">
+    <div
+      id="landing-page"
+      className="min-h-screen w-full relative overflow-x-hidden"
+    >
       <Header />
 
       <section className="px-8 space-y-14 md:space-y-32 pb-4">
@@ -188,11 +191,39 @@ function LandingPageBody() {
                 <span>V1.0 is live now</span>
               </div>
               <article className="space-y-2">
-                <h1 className="text-2xl capitalize">
-                  The care you deserve
-                  <br />
-                  <span className="text-xl">Just a click away 🮰</span>
-                </h1>
+                <motion.div
+                  viewport={{ once: true }}
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                    transition: {
+                      ease: "easeIn",
+                      duration: 0.5,
+                    },
+                  }}
+                  className="capitalize"
+                >
+                  <h1 className="text-2xl">
+                    The care you deserve
+                    <br />
+                    <span className="text-xl inline-flex gap-2">
+                      Just a click away
+                      <motion.span
+                        viewport={{ once: true }}
+                        initial={{ opacity: 0 }}
+                        animate={{
+                          opacity: 1,
+                          scale: [1, 0.75, 0.5, 0.75, 1],
+                          transition: { delay: 0.5 },
+                        }}
+                        className="text-xl"
+                      >
+                        🮰
+                      </motion.span>
+                    </span>
+                  </h1>
+                </motion.div>
 
                 <p className="text-[.9rem] first-letter:capitalize font-bold leading-tight">
                   Verified specialists across Kashmir. <br />
@@ -245,20 +276,19 @@ function LandingPageBody() {
                     initial={
                       i % 2 === 0
                         ? {
-                            x: "-10%",
-                            rotate: 1,
+                            x: "-20%",
                             filter: "blur(1px)",
+                            opacity: 0,
                           }
                         : {
-                            x: "10%",
-                            rotate: -1,
+                            x: "20%",
+                            opacity: 0,
                             filter: "blur(1px)",
                           }
                     }
-                    whileInView={{ x: 0, rotate: 0, filter: "blur(0)" }}
+                    whileInView={{ x: 0, opacity: 1, filter: "blur(0)" }}
                     transition={{
                       x: { duration: 0.6, ease: "easeInOut" },
-                      rotate: { delay: 0.66, ease: "easeIn" },
                       filter: { delay: 0.33 },
                     }}
                     viewport={{ once: true }}

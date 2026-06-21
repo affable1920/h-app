@@ -1,6 +1,5 @@
 import { memo } from "react";
 import { X } from "lucide-react";
-import Button from "./Button";
 import Input from "./Input";
 
 interface SearchBarProps {
@@ -8,6 +7,7 @@ interface SearchBarProps {
   onChange: (value: string) => void;
   onClear?: () => void;
   clearable?: boolean;
+  placeholder?: string;
 }
 
 const SearchBar = memo(function ({
@@ -15,13 +15,14 @@ const SearchBar = memo(function ({
   onChange,
   clearable = false,
   onClear,
+  placeholder = "search ...",
 }: SearchBarProps) {
   return (
     <div className="relative flex items-center">
       <Input
         id="searchQuery"
         value={val}
-        placeholder="Search"
+        placeholder={placeholder}
         size="sm"
         className="italic placeholder:text-sm py-2"
         onChange={function (ev) {

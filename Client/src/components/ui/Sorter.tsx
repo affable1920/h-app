@@ -1,7 +1,12 @@
 import useQueryStore, { type SortOrder } from "@/stores/queryStore";
 import Badge from "./Badge";
+import { Stack, type StackProps } from "./Stack";
 
-function Sorter({ fields }: { fields: Array<string> }) {
+interface SorterProps extends StackProps {
+  fields: Array<string>;
+}
+
+function Sorter({ fields, ...rest }: SorterProps) {
   const { setSort, sortOrder } = useQueryStore();
 
   function sort(fieldName: string, order: SortOrder) {
@@ -9,7 +14,7 @@ function Sorter({ fields }: { fields: Array<string> }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 py-6 flex-wrap items-start justify-center">
+    <Stack {...rest}>
       {fields.map((field) => {
         return (
           <Badge
@@ -20,7 +25,7 @@ function Sorter({ fields }: { fields: Array<string> }) {
           </Badge>
         );
       })}
-    </div>
+    </Stack>
   );
 }
 

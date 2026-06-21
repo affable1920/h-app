@@ -1,57 +1,37 @@
-import { useGetAll } from "@/hooks/use-doctors";
+import { memo } from "react";
 import ButtonElement from "./ui/Button";
-import useQueryStore from "@/stores/queryStore";
-import { ArrowBigRightDash, ArrowBigLeftDash } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const EMPTY = Object.create(null);
+interface PaginationProps {
+  currentPage: number; // the current page number
+  onNext: () => void; // what to do when the user clicks next - api request, state change ...
+  onPrevious: () => void;
+  hasNext?: boolean;
+}
 
-function Pagination() {
-  const { page = 1, setPage } = useQueryStore();
-  const isFirstPage = page === 1;
-
-  const { data: { has_next } = { has_next: false } } = useGetAll();
-
-  function handlePageChange(dir: "next" | "prev") {
-    let nextPage: number;
-
-    const isInvalidPage =
-      (isFirstPage && dir === "prev") || (!has_next && dir === "next");
-
-    if (isInvalidPage) {
-      return;
-    }
-
-    if (dir === "next") {
-      nextPage = page + 1;
-    } else {
-      nextPage = page - 1;
-    }
-    setPage(nextPage);
-  }
+const Pagination = memo(function ({
+  currentPage,
+  hasNext,
+  onNext,
+  onPrevious,
+}: PaginationProps) {
+  const hasPrevious = currentPage > 1;
 
   return (
     <article className="flex self-end items-center gap-4">
-      {!isFirstPage && (
-        <ButtonElement
-          size="md"
-          variant="icon"
-          onClick={handlePageChange.bind(EMPTY, "prev")}
-        >
-          <ArrowBigLeftDash />
+      {hasPrevious && (
+        <ButtonElement bg={true} size="md" variant="icon" onClick={onPrevious}>
+          <ChevronLeft />
         </ButtonElement>
       )}
 
-      {has_next && (
-        <ButtonElement
-          size="md"
-          variant="icon"
-          onClick={handlePageChange.bind(EMPTY, "next")}
-        >
-          <ArrowBigRightDash />
+      {hasNext && (
+        <ButtonElement size="md" variant="icon" bg={true} onClick={onNext}>
+          <ChevronRight />
         </ButtonElement>
       )}
     </article>
   );
-}
+});
 
 export default Pagination;

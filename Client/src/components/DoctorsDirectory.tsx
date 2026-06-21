@@ -1,39 +1,41 @@
+import { useOutletContext } from "react-router-dom";
+import { useEffect } from "react";
 import Card from "@components/Card";
 import Spinner from "@/components/ui/Spinner";
-
 import { useGetAll } from "@/hooks/use-doctors";
-
 import DrCardFront from "./DrCardFront";
-import type { Doctor } from "@/types/http";
-
-function DrCardBack({ doctor }: { doctor: Doctor }) {
-  return (
-    <div className="flex flex-col h-1/2">
-      <h2 className="card-h2 grow">{doctor.name}</h2>
-
-      <section className="">
-        <div className="italic font-semibold text-sm flex flex-wrap justify-end gap-4 overflow-hidden relative"></div>
-      </section>
-    </div>
-  );
-}
 
 function DoctorsDirectory() {
-  const result = useGetAll();
+  const { setHasNext } = useOutletContext<{
+    setHasNext: (hasNext: boolean) => void;
+  }>();
 
-  if (result.isFetching) {
+  const {
+    data: { entities = [], has_next = true } = {},
+    isFetching,
+    isError,
+  } = useGetAll();
+
+  useEffect(
+    function () {
+      setHasNext(has_next ?? false);
+    },
+    [has_next],
+  );
+
+  if (isFetching) {
     return <Spinner />;
   }
 
-  if (result.isError) {
+  if (isError) {
     return null;
   }
+  console.log(entities[3]);
 
-  return (result.data?.entities || [])?.map((doctor) => (
+  return (entities || [])?.map((doctor) => (
     <Card
       key={doctor.id}
       entity={doctor}
-      CardBack={<DrCardBack doctor={doctor} />}
       CardFront={<DrCardFront doctor={doctor} />}
     />
   ));

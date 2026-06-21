@@ -12,7 +12,7 @@ import useModalStore from "@/stores/modalStore";
 import useQueryStore from "@/stores/queryStore";
 
 import { ArrowDown01, ArrowDown10 } from "lucide-react";
-import { ArrowLeftRight, X, SlidersHorizontal } from "lucide-react";
+import { ArrowLeftRight, SlidersHorizontal } from "lucide-react";
 import useFilterStore from "@/stores/filterStore";
 import SearchBar from "../ui/SearchBar";
 
@@ -44,11 +44,6 @@ function Directory() {
 
   const memoized = useMemo(() => debounce(setSearchQuery), []);
 
-  function handleDirectorySwitch() {
-    const nextDir = location === "doctors" ? "clinics" : "doctors";
-    navigate(`${nextDir}`);
-  }
-
   const handleSearch = useCallback(function (val: string) {
     setLocalSearch(val);
     memoized(val);
@@ -59,6 +54,28 @@ function Directory() {
     clearSearchQuery();
   }, []);
 
+  const { page = 1, setPage } = useQueryStore();
+  const [hasNext, setHasNext] = useState(false);
+
+  const handlePageChange = useCallback(
+    function (direction: "next" | "previous") {
+      const isChangeInvalid = page === 1 && direction === "previous";
+
+      if (isChangeInvalid) {
+        return;
+      }
+
+      const nextPage = direction === "next" ? page + 1 : page - 1;
+      setPage(nextPage);
+    },
+    [page, hasNext],
+  );
+
+  function handleDirectorySwitch() {
+    const nextDir = location === "doctors" ? "clinics" : "doctors";
+    navigate(`${nextDir}`);
+  }
+
   const open = function (modalName: string, options?: {}) {
     return openModal.bind(null, modalName, {
       ...options,
@@ -68,11 +85,12 @@ function Directory() {
   };
 
   return (
-    <section className="flex flex-col gap-8 mx-auto">
+    <section className="flex flex-col gap-8 mx-auto min-h-screen">
       <section className="w-full rounded-md flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button
             variant="icon"
+            bg={true}
             className="relative"
             onClick={open("directoryFilter")}
           >
@@ -86,6 +104,7 @@ function Directory() {
 
           <Button
             variant="icon"
+            bg={true}
             onClick={open("sorter", { fields: SORT_COLS })}
             data-tooltip={`sorted by ${sortBy} - ${sortOrder}`}
           >
@@ -99,25 +118,30 @@ function Directory() {
 
         <div className="flex gap-2 items-center">
           <SearchBar
+            clearable={true}
             onChange={handleSearch}
             val={localSearch ?? ""}
             onClear={clearSearch}
-            clearable
           />
 
-          <Button variant="icon" onClick={handleDirectorySwitch}>
+          <Button variant="icon" bg={true} onClick={handleDirectorySwitch}>
             <ArrowLeftRight />
           </Button>
         </div>
       </section>
 
-      <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(360px,1fr))]">
+      <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
         <Suspense fallback={<Spinner />}>
-          <Outlet />
+          <Outlet context={{ setHasNext }} />
         </Suspense>
       </section>
 
-      <Pagination />
+      <Pagination
+        currentPage={page ?? 1}
+        hasNext={hasNext ?? false}
+        onPrevious={handlePageChange.bind(null, "previous")}
+        onNext={handlePageChange.bind(null, "next")}
+      />
     </section>
   );
 }

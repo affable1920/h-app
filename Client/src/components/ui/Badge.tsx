@@ -16,6 +16,7 @@ const colors: Record<Color, string> = {
   indicator: "bg-indicator text-drk",
   primary: `bg-layout hover:bg-layout-raised text-text-secondary hover:text-text`,
   secondary: `bg-layout-raised hover:bg-text-teritiary/20`,
+  danger: `bg-red-400 text-black font-bold`,
 };
 
 const Badge = memo(
@@ -56,7 +57,7 @@ const Badge = memo(
           .filter(Boolean)
           .join(" ");
       },
-      [rounded, size, full, current, selected, className, disabled],
+      [rounded, size, full, color, current, selected, className, disabled],
     );
 
     const props =

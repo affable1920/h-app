@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -8,6 +8,7 @@ import useInjectModalHandlers from "../hooks/use-modal-handlers";
 import Overlay from "./ui/Overlay";
 import MODALS from "./modals/modal-mapper";
 import getModalConfig from "../utils/modal-styles";
+import { useLocation } from "react-router-dom";
 
 function Modal() {
   // Inject modal handlers for modal closers
@@ -15,12 +16,22 @@ function Modal() {
 
   const currModal = useModalStore((s) => s.currModal);
   const modalProps = useModalStore((s) => s.modalProps);
+  const closeModal = useModalStore((s) => s.closeModal);
+
+  const { pathname: route } = useLocation();
 
   const { variants, stylesConfig } = useMemo(
     function () {
       return getModalConfig(modalProps.position);
     },
     [modalProps.position],
+  );
+
+  useEffect(
+    function () {
+      closeModal();
+    },
+    [route],
   );
 
   const portal = document.getElementById("portal");

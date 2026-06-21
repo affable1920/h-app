@@ -1,11 +1,17 @@
-import { memo, type CSSProperties, type ReactNode } from "react";
+import {
+  memo,
+  useMemo,
+  type CSSProperties,
+  type HTMLAttributes,
+  type ReactNode,
+} from "react";
 
 const GAPSIZES = ["xs", "sm", "md", "lg"];
 type GapSize = (typeof GAPSIZES)[number];
 
 type StackPosition = "start" | "center" | "end" | "stretch" | "between";
 
-interface StackProps {
+export interface StackProps extends HTMLAttributes<HTMLElement> {
   children: ReactNode;
   gap?: GapSize;
   reverse?: boolean;
@@ -32,22 +38,27 @@ export const Stack = memo(function ({
   children,
   styles,
   className,
+  ...rest
 }: StackProps) {
-  function getStackOrientation() {
-    return orientation === "H"
-      ? reverse
-        ? "row-reverse"
-        : "row"
-      : reverse
-        ? "column-reverse"
-        : "column";
-  }
+  const getOrientation = useMemo(
+    function () {
+      return orientation === "H"
+        ? reverse
+          ? "row-reverse"
+          : "row"
+        : reverse
+          ? "column-reverse"
+          : "column";
+    },
+    [orientation, reverse],
+  );
 
   return (
     <article
+      {...rest}
       style={{
         display: "flex",
-        flexDirection: getStackOrientation(),
+        flexDirection: getOrientation,
         alignItems: orientation === "H" ? align : justify,
         gap: gaps[gap],
         justifyContent:

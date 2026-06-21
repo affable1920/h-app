@@ -10,18 +10,13 @@ interface ConfirmationProps {
 
 function Confirmation({ resolve, reject, tagline = "" }: ConfirmationProps) {
   return (
-    <div className="space-y-8 py-4 font-semibold">
-      <div
-        style={{ lineHeight: 1.2 }}
-        className="text-center first-letter:capitalize"
-      >
-        {tagline}
-      </div>
-      <div className="flex items-center justify-between px-4">
+    <div className="font-semibold py-6 px-8 space-y-8">
+      <div className="text-center first-letter:capitalize">{tagline}</div>
+      <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={reject}>
           Decline <X strokeWidth={4} />
         </Button>
-        <Button onClick={resolve}>
+        <Button onClick={resolve} color="white">
           Accept <Check strokeWidth={4} />
         </Button>
       </div>

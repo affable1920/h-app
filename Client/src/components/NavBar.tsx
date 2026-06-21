@@ -83,7 +83,9 @@ function NavBar() {
     {
       label: "Home",
       icon: Home,
-      route: "",
+      onClick() {
+        navigate("/view");
+      },
     },
     {
       label: "Find",
@@ -92,7 +94,7 @@ function NavBar() {
         {
           label: "doctor",
           icon: Stethoscope,
-          route: "idx/doctors",
+          route: "/view/idx/doctors",
         },
         {
           label: "hospital",
@@ -101,7 +103,7 @@ function NavBar() {
         {
           label: "pharmacy",
           icon: Syringe,
-          route: "idx/clinics",
+          route: "/view/idx/clinics",
         },
         {
           label: "ask assistant (Pro Plan)",
@@ -139,8 +141,8 @@ function NavBar() {
 
   return (
     <motion.header
-      className="absolute top-0 left-0 right-0 z-50 p-4 px-8 rounded-none border-b
-      border-border"
+      className="fixed top-0 left-0 right-0 z-50 p-6 px-8 shadow-md rounded-none shadow-black/25 
+      bg-background border-b border-border-strong"
     >
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <Button
@@ -158,7 +160,7 @@ function NavBar() {
               <Button
                 variant="icon"
                 key={navItem.label}
-                className="hover:text-blue-800 transition-colors"
+                className="hover:text-normal transition-colors"
                 onClick={handleLinkClick.bind(navItem)}
               >
                 {navItem.label}
@@ -166,7 +168,12 @@ function NavBar() {
             ))}
           </nav>
 
-          <Button endIcon={<ArrowRight />} className="w-full" color="brand">
+          <Button
+            endIcon={<ArrowRight />}
+            className="w-full"
+            border={false}
+            color="brand"
+          >
             {user ? (
               <Link to="/">Get started</Link>
             ) : (
@@ -208,7 +215,7 @@ function NavBar() {
           <motion.nav
             ref={ref}
             className="md:hidden absolute top-full left-0 w-full flex flex-col gap-10 shadow-md 
-            shadow-black/50 p-8 bg-background border-b border-border-strong"
+            shadow-black/25 p-6 px-8 bg-background border-b border-border-strong"
             initial={{
               y: -20,
               opacity: 0,
@@ -233,6 +240,7 @@ function NavBar() {
                   endIcon={<ArrowRight />}
                   className="w-full"
                   color="brand"
+                  border={false}
                   size="md"
                 >
                   sign in

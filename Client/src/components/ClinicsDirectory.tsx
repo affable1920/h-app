@@ -3,61 +3,71 @@ import { useGetAll } from "@/hooks/use-clinics";
 import Card from "./Card";
 import Spinner from "./ui/Spinner";
 import Ratings from "./Ratings";
-import { MapPin, Phone } from "lucide-react";
+import { Link, useOutletContext } from "react-router-dom";
+import { useEffect } from "react";
+import { Stack } from "./ui/Stack";
 import Button from "./ui/Button";
-import docImg from "@/assets/doctor.jpg";
 
 function ClinicsDirectory() {
-  const result = useGetAll();
+  const { setHasNext } = useOutletContext<{
+    setHasNext: (hasNext: boolean) => void;
+  }>();
 
-  if (result.isPending) {
+  const {
+    data: { entities = [], has_next = false } = {},
+    isFetching,
+    isError,
+  } = useGetAll();
+
+  useEffect(
+    function () {
+      setHasNext(has_next ?? false);
+    },
+    [has_next],
+  );
+
+  if (isFetching) {
     return <Spinner />;
   }
 
-  if (result.isError) {
+  if (isError) {
     return null;
   }
 
-  const { entities: clinics = [] } = result.data;
+  return entities.map((clinic) => (
+    <Card
+      key={clinic.id}
+      entity={clinic}
+      CardFront={
+        <Stack orientation="V">
+          <Stack>
+            <Stack className="gap-1!" orientation="V">
+              <Link to={`/view/clinic/${clinic.id}`}>
+                <h2 className="line-clamp-1 truncate capitalize text-text-normal">
+                  {clinic.name}
+                </h2>
+              </Link>
+              <h2 className="line-clamp-1 text-text-secondary text-sm">
+                {clinic.location}
+              </h2>
+            </Stack>
 
-  return clinics.map(function (clinic) {
-    return (
-      <Card
-        key={clinic.id}
-        entity={clinic}
-        CardFront={
-          <article className="flex flex-col gap-8" id={clinic.id}>
-            <header className="flex gap-1">
-              <div className="h-full w-full aspect-square bg-slate-100/30 rounded-md max-w-20">
-                <img
-                  className="h-full hover:scale-95 cursor-pointer w-full object-cover 
-          mix-blend-multiply transition-transform duration-150"
-                  src={docImg}
-                  alt="doc_img"
-                />
-              </div>
-              <div>
-                <h1>{clinic?.name}</h1>
-                <div className="flex items-center font-semibold mt-1.5 space-x-4">
-                  <Ratings rating={clinic?.rating || 0} />
-                  <h3 className="underline">({clinic.reviews})</h3>
-                </div>
-              </div>
-            </header>
+            {!!clinic.rating && (
+              <Stack gap="xs" align="center" className="font-semibold">
+                <Ratings rating={clinic.rating} />
+                <p className="text-text-secondary">({clinic.reviews.length})</p>
+              </Stack>
+            )}
+          </Stack>
 
-            <section className="flex items-center italic gap-1 self-end justify-self-end mt-2">
-              <Button variant="ghost" endIcon={<MapPin />}>
-                location
-              </Button>
-              <Button color="secondary" endIcon={<Phone />}>
-                call
-              </Button>
-            </section>
-          </article>
-        }
-      />
-    );
-  });
+          <Stack gap="xs" justify="end" align="center">
+            <Button color="secondary">Check all facilities</Button>
+            <Button color="brand">View all Doctors</Button>
+          </Stack>
+        </Stack>
+      }
+    />
+  ));
 }
 
 export default ClinicsDirectory;

@@ -15,10 +15,9 @@ function Chevron({ isOpen }: { isOpen: boolean }) {
     <motion.svg
       animate={{
         rotate: isOpen ? -90 : 0,
-        transition: { duration: 0.15 },
       }}
     >
-      <ChevronRight size={12} strokeWidth={3} />
+      <ChevronRight size={12} strokeWidth={4} />
     </motion.svg>
   );
 }
@@ -31,17 +30,21 @@ function SelectFilter({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col">
+    <div>
       <Dropdown
         show={isOpen}
         options={options}
         onOptionSelect={onOptionSelect}
       />
       <Button
+        color="brand"
         size="md"
-        color="white"
+        className="w-full"
+        border={false}
         endIcon={<Chevron isOpen={isOpen} />}
-        onClick={setIsOpen.bind(Object.create(null), (p) => !p)}
+        onClick={function () {
+          setIsOpen((p) => !p);
+        }}
       >
         {label}
       </Button>

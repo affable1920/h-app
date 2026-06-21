@@ -1,14 +1,11 @@
 import logging
-
 from fastapi import APIRouter, Depends
-
-from sqlalchemy.orm import Session
-
-from app.schemas.internals_ import Clinic
-from app.services.ClinicService import clinic_srvc
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.schemas.internals import ClinicHttpFull, ClinicHttpMinimal
+from app.services.ClinicService import ClinicService
 from app.schemas.outputs import PaginatedResponse
-from app.schemas.internals import ClinicRouteFilters, PaginationParams
-from app.database.entry import get_db
+from app.schemas.response_modifiers import ClinicRouteFilters, PaginationParams
+from app.database.entry_async import get_db
 
 
 router = APIRouter(prefix="/clinics")
@@ -16,32 +13,35 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-@router.get("", response_model=PaginatedResponse[Clinic])
-async def get(
-    pagination_params: PaginationParams,
-    filter_params: ClinicRouteFilters,
-    session: Session = Depends(get_db),
+@router.get("", response_model=PaginatedResponse[ClinicHttpMinimal])
+async def get_all(
+    pagination_params: PaginationParams = Depends(),
+    filter_params: ClinicRouteFilters = Depends(),
+    session: AsyncSession = Depends(get_db),
 ):
-    try:
-        logger.info("\nRecieved get all clinics request ..")
 
-        count, objs = clinic_srvc.get_all(
-            session=session,
-            pagination=pagination_params,
-            filters=filter_params
-        )
+    count, objs = await ClinicService.get_all(
+        session=session,
+        pagination=pagination_params,
+        filters=filter_params
+    )
 
-        logger.info(
-            f"\n{len(objs)} clinics fetched from database.. Creating paginated response..")
+    response = ClinicService.create_pg_response(
+        objs=objs,
+        count=count,
+        pagination=pagination_params
+    )
 
-        response = clinic_srvc.create_pg_response(
-            objs=objs,
-            count=count,
-            pagination=pagination_params
-        )
+    return response
 
-        return response
 
-    except Exception as e:
-        print(e)
-        raise
+@router.get("/{id}", response_model=ClinicHttpFull)
+async def get_one(
+    id: str,
+    session: AsyncSession = Depends(get_db)
+):
+    clinic = await ClinicService.get_by_id(
+        id=id, session=session
+    )
+
+    return clinic

@@ -1,38 +1,48 @@
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-from app.database.models import Patient
+from sqlalchemy import exists, literal, select
+from sqlalchemy.orm import selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.strategy_options import _AbstractLoad
+from app.services.entities.main import EntityService
+from app.database.models import Appointment, Patient
 from app.schemas.inputs import PatientCreate
 import app.middleware.auth_middleware as auth
 
 
-class PatientService:
-    def get_by_id(self, session: Session, id: str) -> Patient | None:
-        stmt = select(Patient).where(Patient.id == id)
-        return session.scalar(stmt)
+class PatientService(EntityService[Patient]):
+    entity = Patient
+
+    @classmethod
+    def load_options_full(cls) -> list[_AbstractLoad]:
+        appointments = selectinload(Patient.appointments)
+        return [
+            appointments,
+            appointments.joinedload(Appointment.clinic),
+            appointments.joinedload(Appointment.doctor)
+        ]
 
     #
 
-    def get_by_email(self, session: Session, email: str) -> Patient | None:
+    @classmethod
+    async def get_by_email(cls, session: AsyncSession, email: str) -> Patient | None:
         stmt = select(Patient).where(Patient.email == email)
-        return session.scalar(stmt)
+        stmt = stmt.options(*cls.load_options_full())
+        return await session.scalar(stmt)
 
     #
 
-    def create(self, session: Session, user: PatientCreate) -> Patient:
-        if self.get_by_email(session, user.email):
+    @classmethod
+    async def create(cls, session: AsyncSession, data: PatientCreate) -> Patient:
+        if await cls.email_exists(session, data.email):
             raise ValueError(
                 "Email id already in use. Try a different one or sign in.")
 
         created = Patient(
-            username=user.username,
-            hash=auth.hash(user.password),
-            email=user.email,
+            hash=auth.hash(data.password),
+            email=data.email,
+            username=data.username,
         )
 
         session.add(created)
-        session.flush([created])
-        session.refresh(created)
+        await session.flush([created])
+        await session.refresh(created)
         return created
-
-
-pt_srvc = PatientService()

@@ -30,6 +30,7 @@ class Settings(BaseSettings):
 
     # database
     database_url: str
+    database_url_async: str
 
     # jwt
     jwt_secret: str = ""
@@ -47,8 +48,12 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def adjust_db_host(self) -> "Settings":
-        if self.is_using_container and self.database_url:
+        if self.is_using_container == "1":
             self.database_url = self.database_url.replace("localhost", "db")
+            self.database_url_async = self.database_url_async.replace(
+                "localhost", "db"
+            )
+
         return self
 
 

@@ -1,35 +1,10 @@
-from typing import Literal
-
 from groq.types.chat import ChatCompletionToolParam
+from pathlib import Path
 
-SYSTEM_PROMPT = (
-    """
-You are an AI assistant built into and for this healthcare app. 
-Answer as if you are a member, use ours ..
+system_prompt = Path(
+    "app/features/chatbot/system-prompt.txt"
+).read_text(encoding="utf-8")
 
--- Your role
-[Role 1] - Help users find doctors or clinics by trying to understand what they're looking for.
-[Role 2] - Book appointments with any doctor 
-[Role 4] - Help users find and understand relevant medical/healthcare information 
-or give them general guidelines on their health etc ..
-
--- App Overview
-This app allows users to schedule appointments with a doctor of their choice, find doctors, see their schedules, slots
-open for booking, timings for schedules, on any day they'd like, just that it should match the doctor's schedule.
- 
--- How You Behave
-- You are concise, friendly, and always stay on topic.
-- You never make up anything that doesn't exist.
-- If you're unsure, you say so honestly.
-- If you are not able to get results related the user query, just say so honestly. 
-- If you or the tools i provide are not able to do something for instance connect with the database, say so subtly.
-
--- Guardrails
-- Keep your answers related to the healthcare app.
-- If a user asks something outside your scope, just say:
-  "That's outside what I can help with here. Is there anything about this app I can assist you with?"
-"""
-)
 
 ALL_MODELS = (['compound-beta', 'compound-beta-mini',
                'gemma2-9b-it', 'llama-3.1-8b-instant', 'llama-3.3-70b-versatile',
@@ -41,14 +16,14 @@ ALL_MODELS = (['compound-beta', 'compound-beta-mini',
 tools: list[ChatCompletionToolParam] = (
     [{"type": "function",
       "function": {
-          "name": "find_doctors",
-          "description": """This functions gets doctors from the database and returns a sequence of doctor after applying any filters and pagination params if given""",
+          "name": "find_drs_many",
+          "description": """Use to make sql query to our doctor's table in our database, and return those doctors""",
           "parameters": {
               "type": "object",
               "properties": {
                   "specialization": {
                       "type": "string",
-                      "description": "The doctor's specialization to filter by like cardiology, neurology, not neurologist"
+                      "description": "The doctor's specialization to filter by, for example cardiology, neurology"
                   },
                   "min_rating": {
                       "type": "number",
@@ -56,7 +31,15 @@ tools: list[ChatCompletionToolParam] = (
                   },
                   "experience": {
                       "type": "number",
-                      "description": "The minimum experience the doctor should have"
+                      "description": "The minimum experience a doctor should have"
+                  },
+                  "fee": {
+                      "type": "number",
+                      "description": "The max fee the doctor should have"
+                  },
+                  "gender": {
+                      "type": "string",
+                      "enum": ["Male", "Female"]
                   }
               },
           }
@@ -64,17 +47,22 @@ tools: list[ChatCompletionToolParam] = (
      {
         "type": "function",
         "function": {
-            "name": "get_next_availability",
-            "description": "Gets a doctor's next available schedule if given",
+            "name": "get_drprofile_single",
+            "description": "Use when a single doctor's profile is requested by a user."
+            "Only to be used when querying for a single doctor",
             "parameters": {
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The doctor's unique ID. Prefer this when available over other "
+                        "adjacent parameters when available from previous results."
+                    },
                     "name": {
                         "type": "string",
-                        "description": "The name of the doctor"
+                        "description": "The doctor's name. Use only if ID is not available."
                     }
                 },
-                "required": ["name"]
             }
         }
     }

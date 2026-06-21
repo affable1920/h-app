@@ -2,19 +2,17 @@ import logging
 
 from fastapi import (
     FastAPI,
-    Request,
 )
 
-from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from app.features.chatbot import chat
+from app.core.config import settings
 from app.scripts.openapi_spec import generate_openapi_spec
 from app.routes import auth, doctors, bookings, clinics
 from app.features.calling import ws_route
-from app.features.chatbot import chat_route
 
 
 #
@@ -39,17 +37,6 @@ app = FastAPI(
 )
 
 
-@app.exception_handler(RequestValidationError)
-async def validation_err_handler(req: Request, e: RequestValidationError):
-    logger.debug("Errors: ", e.errors())
-    return JSONResponse(
-        status_code=422,
-        content={
-            "detail": str(e.errors()),
-        },
-    )
-
-
 app.add_middleware(
     CORSMiddleware,
     allow_methods=["*"],
@@ -65,39 +52,12 @@ app.include_router(auth.router)
 app.include_router(doctors.router)
 app.include_router(bookings.router)
 app.include_router(clinics.router)
-app.include_router(chat_route.router)
+app.include_router(chat.router)
 app.add_websocket_route("/ws", ws_route.ws_endpoint)
 
 
-html = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Chat</title>
-    </head>
-    <body>
-        <h1>WebSocket Chat</h1>
-        <form onsubmit="sendMessage(event)">
-            <label>Message: <input type="text" id="messageText" autocomplete="off"/></label>
-            <button type="submit">Send</button>
-        </form>
-        <ul id='messages'>
-        </ul>
-        <script>
-            
-        </script>
-    </body>
-</html>
-"""
-
-
-@app.get("/")
-async def root_path():
-    return HTMLResponse(html)
-
-
 @app.get("/ping")
-async def ping():
+def ping():
     return {
         "message": "pong"
     }

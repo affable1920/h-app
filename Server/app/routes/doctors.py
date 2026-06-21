@@ -1,34 +1,32 @@
 import logging
 from typing import Optional
 from fastapi import Depends, APIRouter, HTTPException
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-from app.database.entry import get_db
-from app.database.models import Doctor as DoctorDB
-from app.services.DrService import dr_srvc
-from app.schemas.internals_ import Doctor
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database.entry_async import get_db
+from app.services.DrService import DoctorService
+from app.schemas.outputs import DoctorHttpFull, DoctorHttpMinimal
 from app.schemas.outputs import PaginatedResponse
 from app.schemas.inputs import DrCreate, get_dr_onboarding
-from app.schemas.internals import DrRouteFilters, PaginationParams
+from app.schemas.response_modifiers import DrRouteFilters, PaginationParams
 
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/doctors")
 
 
-@router.get("", response_model=PaginatedResponse[Doctor])
+@router.get("", response_model=PaginatedResponse[DoctorHttpMinimal])
 async def get_doctors(
     filters: DrRouteFilters = Depends(),
     pagination_params: PaginationParams = Depends(),
-    session: Session = Depends(get_db),
+    session: AsyncSession = Depends(get_db),
 ):
-    count, objects = dr_srvc.get_all(
+    count, objects = await DoctorService.get_all(
         session,
         pagination=pagination_params,
         filters=filters
     )
 
-    response = dr_srvc.create_pg_response(
+    response = DoctorService.create_pg_response(
         objs=objects,
         count=count,
         pagination=pagination_params
@@ -37,28 +35,28 @@ async def get_doctors(
     return response
 
 
-@router.get("/{id}", response_model=Optional[Doctor])
-async def get_doctor(id: str, session: Session = Depends(get_db)):
-    return dr_srvc.get_by_id(session, id=id)
+@router.get("/{id}", response_model=DoctorHttpFull)
+async def get_doctor(
+    id: str,
+    session: AsyncSession = Depends(get_db)
+):
+    dtr = await DoctorService.get_by_id(
+        session=session, id=id
+    )
+
+    return dtr
 
 #
 
 
-def get_doctor_user(id: str, session: Session) -> bool:
-    row = session.execute(
-        select(DoctorDB).where(DoctorDB.id == id)).scalar()
-
-    return row is not None
-
-
-@router.post("/onboard", response_model=Doctor)
+@router.post("/onboard", response_model=DoctorHttpMinimal)
 async def create(
     data: DrCreate = Depends(get_dr_onboarding),
-    session: Session = Depends(get_db)
+    session: AsyncSession = Depends(get_db)
 ):
     try:
-        with session.begin():
-            created = await dr_srvc.create(session, data=data)
+        async with session.begin():
+            created = await DoctorService.create(session, data=data)
             logger.info(created)
             return created
 

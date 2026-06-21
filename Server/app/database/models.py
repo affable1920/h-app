@@ -1,9 +1,11 @@
+from statistics import mean
 from uuid import UUID
 import sqlalchemy as sa
 from datetime import datetime, time
 from typing import Annotated, Optional
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, mapped_column, Mapped
-from app.database.entry import Base
+from app.database.entry_async import Base
 from app.schemas.enums import AppointmentStatus, Gender, Mode, ReviewableEntity, Status
 
 PrimaryKey = Annotated[UUID, mapped_column(
@@ -95,7 +97,7 @@ class Doctor(TimeStampMixin, Base):
 
     reviews: Mapped[list["Review"]] = relationship(
         primaryjoin="and_(Review.entity=='DOCTOR', foreign(Review.entity_id)==Doctor.id)",
-        viewonly=True
+        viewonly=True,
     )
 
 

@@ -1,4 +1,5 @@
 import enum
+from typing_extensions import deprecated
 
 
 class ReviewableEntity(enum.Enum):
@@ -6,9 +7,9 @@ class ReviewableEntity(enum.Enum):
     CLINIC = "CLINIC"
 
 
+@deprecated("This enum is deprecated. User UserRoleV2 instead")
 class UserRole(enum.Enum):
     """
-    This enum is deprecated. User UserRoleV2 instead
     """
     ADMIN = "admin"
     DOCTOR = "doctor"
@@ -35,7 +36,7 @@ class Status(enum.Enum):
     UNKNOWN = "unknown"
 
 
-class AppointmentStatus(enum.Enum):
+class AppointmentStatus(str, enum.Enum):
     ACTIVE = "active"
     COMPLETED = "completed"
     CANCELLED = "cancelled"

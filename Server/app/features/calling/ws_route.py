@@ -39,9 +39,11 @@ async def ws_endpoint(ws: WebSocket):
         return
 
     session = next(get_db())
-    from app.services.DrService import dr_srvc as usr_srvc
+    from app.services.DrService import DoctorService
 
-    db_user = usr_srvc.get_by_id(session=session, id=user_id)
+    db_user = DoctorService.get_by_id(
+        session=session, id=user_id
+    )
 
     if not db_user:
         logging.info("No db user found with id inside token sub")

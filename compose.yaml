@@ -19,6 +19,8 @@ services:
       - "8000:8000"
     env_file:
       - ./Server/.env
+    environment:
+      - IS_USING_CONTAINER=1
     depends_on:
       db:
         condition: service_healthy

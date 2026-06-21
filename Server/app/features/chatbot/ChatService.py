@@ -1,109 +1,132 @@
 import json
 import logging
-import asyncio
-from typing import AsyncGenerator
-
+from httpx import TimeoutException
 from fastapi import HTTPException
-from groq import AsyncGroq, RateLimitError
+from groq import AsyncGroq, RateLimitError, APIConnectionError
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.features.chatbot.schema import Role
+from app.scripts.utils import retry
 from app.adapters.doctor_tool_adapter import DoctorToolAdapter
-from app.database.entry import get_db
 from app.core.config import settings
-from app.features.chatbot.chat_constants import SYSTEM_PROMPT, tools
-
-from groq.types.chat import (ChatCompletionSystemMessageParam,
-                             ChatCompletionMessageToolCall)
+from app.features.chatbot.chat_constants import system_prompt, tools
+from groq.types.chat import (
+    ChatCompletionSystemMessageParam,
+    ChatCompletionMessageToolCall
+)
 #
 system_msg: ChatCompletionSystemMessageParam = {
     "role": "system",
-    "content": SYSTEM_PROMPT
+    "content": system_prompt
 }
 
-groq = AsyncGroq(
-    api_key=settings.groq_api_key,
-    max_retries=0
-)
 logger = logging.getLogger(__name__)
 
 
 class Assistant:
     """
     __client - same groq client across users
-    __history - a conversation history tracker object, separate per user, keyed by id
+    __history - a conversation history store shared across all instances, keyed by user_id 
+    __history - Moves to redis in PROD
 
-    -- constants
+    constants
     MODEL - the model name, same across the board
-
-    MAX_HISTORY_TOKENS - context window length - in tokens
-    [rough estimate] - 4 chars == 1 token
+    MAX_HISTORY_TOKENS - context window length - ensures fair usage
     """
 
-    MODEL = "openai/gpt-oss-120b"
-    MAX_HISTORY_TOKENS = 1500
+    MODEL = "llama-3.3-70b-versatile"
+    # 1/4 of the total context window length of the model - 3000 TPM for llama-3.3-70b
+    MAX_HISTORY_TOKENS = 7500
+    __client = AsyncGroq(
+        api_key=settings.groq_api_key,
+        max_retries=0
+    )
+    history: dict[str, list] = {}
 
-    __client = groq
-    history: dict[str, list[dict]] = {}
-
-    def __init__(self, user_id: str):
+    def __init__(self, user_id: str, session: AsyncSession):
+        """
+        user_id - Different groq http client for different users
+        session - sql_alchemy session object
+        instance level state so it lives only till the request and we don't get stale sessions
+        """
         self.user_id = user_id
+        self._session = session
 
     #
 
-    def get_user_history(self):
-        trgt = self.history.get(self.user_id, [])
+    @classmethod
+    def get_history_client(cls, user_id: str):
+        # creates user history suitable for the client (no tool calls included)
+        usr_history = cls.history.get(user_id, [])
+        response = [
+            chat for chat in usr_history
+            if not chat.get("role") == Role.TOOL and not chat.get("tool_calls")
+        ]
 
-        response = [chat for chat in trgt if chat.get(
-            "role") == "user" or chat.get("role") == "assistant" and not chat.get("tool_calls")]
-
+        logger.info(f"User history \n{response}")
         return response
 
     #
-    def build_history(self):
+
+    def build_context(self):
+        # builds history for groq
+
         tokens_accumulated = 0
+
+        # trimmed list of msgs to return
         trimmed = []
+        history = self.history.get(self.user_id, [])
 
-        def trim():
-            trgt = self.history.get(self.user_id) or []
+        for chat_msg in reversed(history):
+            """
+            starting from the most recently sent/recieved message
+            cost is the number of tokens (assuming 4 characters == 1 token) 
+            """
+            cost = len(chat_msg.get("content", "") or "") // 4
+            if tokens_accumulated + cost > Assistant.MAX_HISTORY_TOKENS:
+                break
 
-            for msg in reversed(trgt):
-                cost = len(msg.get("content", "")) // 4
+            tokens_accumulated += cost
+            next = [chat_msg, *trimmed]
+            trimmed = next
 
-                if tokens_accumulated + cost > Assistant.MAX_HISTORY_TOKENS:
-                    break
-
-                nonlocal trimmed
-                next = [msg, *trimmed]
-                trimmed = next
-
-        trim()
         return trimmed
 
     #
 
-    @staticmethod
-    def get_available_tools():
-        adapter = DoctorToolAdapter()
+    def get_tools(self) -> dict[str, dict]:
+        adapter = DoctorToolAdapter(session=self._session)
 
-        return {
-            "find_doctors": adapter.find,
-            "get_next_availability": adapter.get_next_av
+        registry = {
+            "find_drs_many": {
+                "function": adapter.find_drs_many
+            },
+            "get_drprofile_single": {
+                "function": adapter.get_drprofile_single
+            }
         }
+
+        return registry
 
     #
 
-    @staticmethod
-    def execute_tool(tool_call: ChatCompletionMessageToolCall):
+    @retry(max_retries=3, delay_seconds_factor=1)
+    async def execute_tool(self, tool_call: ChatCompletionMessageToolCall):
         fn_name = tool_call.function.name
-        fn_to_call = Assistant.get_available_tools()[fn_name]
+        fn_to_call = self.get_tools()[fn_name]
+
+        if fn_to_call is None:
+            raise ValueError(
+                "The tool to execute could not be found."
+            )
 
         fn_args = json.loads(tool_call.function.arguments)
-        logger.info(f"Fn to execute: name -> {fn_name}\t\tArgs -> {fn_args}\n")
+        logger.info(
+            f"\nThe arguments the tool call function wants: \n{fn_args}")
 
-        try:
-            response = fn_to_call(**fn_args)
-            logger.debug(f"Function response -> {response}\n")
-
-        except Exception as e:
-            raise e
+        response = await fn_to_call["function"](**fn_args)
+        logger.info(
+            f"\nTool call response: \nresponse -> {response}"
+        )
 
         msg = {
             "role": "tool",
@@ -116,14 +139,14 @@ class Assistant:
 
     #
 
-    async def create(self, msg: str):
+    async def converse(self, msg: str):
         prompt = {
             "role": "user",
             "content": msg
         }
 
-        messages = [*self.build_history(), prompt]
-        print(f"Build messages length {len(messages)}")
+        messages = [*self.build_context(), prompt]
+        logger.debug(f"Built messages length {len(messages)}")
 
         try:
             response = await self.__client.chat.completions.create(
@@ -143,10 +166,10 @@ class Assistant:
 
             if message.tool_calls:
                 for tool_call in message.tool_calls:
-                    print(f"tool call\n{tool_call}")
+                    logger.debug(f"tool call\n{tool_call}")
                     fn_response = self.execute_tool(tool_call)
 
-                    print(f"\nFunction response: {fn_response}")
+                    logger.debug(f"\nFunction response: {fn_response}")
 
                     messages.append({
                         "role": "tool",
@@ -175,7 +198,7 @@ class Assistant:
             }
 
         except Exception as e:
-            print(e)
+            logger.debug(e)
             raise HTTPException(
                 500, {"msg": "AN unexpected error occurred ..",
                       "type": "Model Conversation Error", "detail": str(e)}
@@ -183,73 +206,28 @@ class Assistant:
 
     #
 
-    async def stream(self, msg: str) -> AsyncGenerator:
-        logger.info(
-            "User prompt recieved. Starting the streaming process ...\n", f"Prompt: {msg}")
-
-        prompt = {"role": "user", "content": msg}
-        messages = [*self.build_history(), prompt]
-
-        logger.info(f"\nBuild messages {len(messages)}")
-
-        try:
-            stream = await self.__client.chat.completions.create(
-                model=self.MODEL,
-                messages=messages,
-                stream=True,
-                max_tokens=1024,
-            )
-
-            response = ""
-
-            async for chunk in stream:
-                # The model will either stream text or call tools
-                delta = chunk.choices[0].delta
-
-                chunk_content = delta.content
-
-                # Stream text back to client immediately
-                if chunk_content:
-                    response += chunk_content
-                    payload = {
-                        "type": "delta",
-                        "content": chunk_content,
-                        "stream": True
-                    }
-
-                    yield json.dumps(payload) + "\n"
-
-            messages.append({"role": "assistant", "content": response})
-            self.history[self.user_id] = messages
-
-        except ConnectionError as e:
-            print(e)
-            yield json.dumps({"type": "error", "content": str(e), "msg": "Connection error"})
-
-        except Exception as e:
-            payload = {
-                "type": "error", "content": str(e)
-            }
-
-            print(e)
-            yield json.dumps(payload) + "\n"
-            return
-
-    #
-
     async def stream_tc(self, msg: str):
+        logger.info(
+            "User prompt recieved.\n", f"Prompt: {msg}"
+        )
+
         prompt = {
             "role": "user",
             "content": msg
         }
 
-        messages = [*self.build_history(), prompt]
+        logger.info(f"History built: \n{self.build_context()} ")
+
+        messages = [*self.build_context(), prompt]
+        logger.info(
+            f"\nUser history built. Conversation length sent to the model -> {len(messages)}"
+        )
 
         while True:
-            # reset tool_calls_map and the response - why ? -> explained below
+            # A while loop for a many rounded tool_call response
+
             tool_calls_map = []
-            response = ""
-            finish_reason = None
+            finish_reason, acuumulated_response = None,  ""
 
             """
             make a request to the groq api and recieve a stream - a pipe which contains all our response in chunks.
@@ -263,122 +241,95 @@ class Assistant:
                     messages=[system_msg] + messages,
                     stream=True,
                     tools=tools,
-                    max_completion_tokens=968
+                    max_completion_tokens=968,
                 )
 
                 async for chunk in stream:
-                    # Go through each chunk
-                    # the delta object is what we work with - can contain tool_calls or some text content
+                    """
+                    Go through each chunk. The delta object is what we work with - Get to know what the model wants
+                    It can contain tool_calls, text content and the model's reasoning behind the response.
+                    """
                     delta = chunk.choices[0].delta
                     finish_reason = chunk.choices[0].finish_reason
 
-                    logger.info(f"delta object -> {delta}\n")
-
-                    # Check the chunk if it's text or a tool call fragment
                     if delta.content:
-                        # in case the delta object has content
-                        # Concat the text to the response string and yield delta content to client immediately
-                        response += delta.content
-                        payload = {
-                            "role": "assistant",
-                            "content": delta.content
+                        acuumulated_response += delta.content
+
+                        res = {
+                            "type": "delta",
+                            "payload": {
+                                "role": Role.ASSISTANT.value,
+                                "content": delta.content
+                            }
                         }
+                        yield json.dumps(res) + "\n"
 
-                        logger.info(f"delta content -> {delta.content}\n")
-                        yield json.dumps({"type": "delta", "data": payload}) + "\n"
-
-                    """
-                    if the delta has tool call(s), we add those to our map
-                    
-                    One important distinction -
-                    Unlike openAI, groq does not send each tool calls in fragments, rather it send one complete
-                    tool call per fragment
-                    """
-
+                    # if the delta has tool call(s), we add those to our map
                     if delta.tool_calls:
-                        logger.info(
-                            f"\ntotal tool calls inside delta -> {len(delta.tool_calls)}")
                         tool_calls_map.extend(delta.tool_calls)
 
-            except RateLimitError as e:
-                logger.error(e)
-
+            except (APIConnectionError, TimeoutException) as e:
+                logger.debug(e)
                 yield json.dumps({
                     "type": "error",
-                    "error": "Rate limit reached. Upgrade to pro or try after your limit is restored ."
-                })
+                    "msg": "You don't seem to be connected to the internet. Kindly try after sometime."
+                }) + "\n"
+                break
 
-                return
+            except RateLimitError as e:
+                logger.debug(e)
+                yield json.dumps({
+                    "type": "error",
+                    "msg": "Rate limit reached. Upgrade to pro to continue."
+                }) + "\n"
+                break
 
             except Exception as e:
                 # Http headers are sent to the client with the first chunk so we cannot raise an error
                 # instead we have to yield it via the same stream
-                payload = {
-                    "type": "error", "error": e.__str__()
-                }
-
-                logger.error(f"An Error occurred while streaming -> {e}")
-                yield json.dumps(payload) + "\n"
-
-                return
+                logger.debug(
+                    f"An unexpected error occurred while streaming, logged below:"
+                )
+                logger.error(e)
+                yield json.dumps({
+                    "type": "error",
+                    "msg": "An unexpected error occurred"
+                }) + "\n"
+                break
 
             # when the stream iteration is complete, not necessarily finished on groq's side
             # we append the accumulated response and tool_calls to groq's message history
             messages.append({
-                "role": "assistant",
-                "content": response,
+                "role": Role.ASSISTANT.value,
+                "content": acuumulated_response,
                 "tool_calls": tool_calls_map
             })
 
             # Here, either the stream is complete or groq is requesting a tool_call
+
             if finish_reason == "tool_calls":
                 """
                 given groq is requesting tool call(s), execute the tools, and append result to the history
                 these will go back to groq in the next request's messages argument.
-                - where we reset response and tool_calls_map first because we already executed and recieved results
-                of one tool call we don't wanna execute the same tool_call again and accumulate redundant data
-
-                groq, now, in case decides no further tool calling is required, makes its own response
-                using our function's results and yields them back to the client
-
-                That's why we reset the two variables
                 """
                 for tc in tool_calls_map:
-                    tc_result = self.execute_tool(tc)
+                    logger.info(f"The tool call requested by Groq: {tc}")
+                    try:
+                        tc_result = await self.execute_tool(tc)
+                        messages.append(tc_result)
 
-                    messages.append(tc_result)
+                    except Exception as e:
+                        logger.debug(e)
+                        yield json.dumps({
+                            "type": "error",
+                            "msg": ""
+                        })
 
-            # If the finish reason is stop -> stream complete - signal it to the user
             if finish_reason == "stop":
                 self.history[self.user_id] = messages
-                logger.info(
-                    "\nFinished streaming, signaling to the user .")
 
+                logger.info("\nStreaming finished successfully ...")
                 yield json.dumps({"type": "done"}) + "\n"
-                # and return
+
+                # return inside a generator function raises StopIteration, which we want at this point
                 return
-
-
-#
-async def simulate_stream():
-    assistant = Assistant('1')
-    async_gen = assistant.stream_tc(
-        "find me an ENT")
-
-    res = ""
-
-    async for chunk in async_gen:
-        try:
-            parsed_chunk = json.loads(chunk)
-            if parsed_chunk.get("type", "") == "delta":
-                res += parsed_chunk["data"]["content"]
-
-        except Exception as e:
-            return e
-
-    return res
-
-
-if __name__ == "__main__":
-    import asyncio
-    res = asyncio.run(simulate_stream())

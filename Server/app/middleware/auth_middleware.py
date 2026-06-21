@@ -12,11 +12,10 @@ from fastapi import (
 from sqlalchemy import select
 
 from app.database.models import Doctor, Patient
-from app.database.entry import get_db
 from app.schemas.enums import UserRoleV2
 from app.core.config import settings
 from app.schemas.outputs import AuthHdrPayload
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
 
 
@@ -84,13 +83,10 @@ def decode_access_token(token: str = Depends(bearer)) -> dict:
 #
 
 
-def get_curr_user(
-    payload: dict = Depends(decode_access_token),
-    session: Session = Depends(get_db)
+async def get_curr_user(
+    session: AsyncSession,
+    payload: dict,
 ):
-    if not payload or payload.get("role") is None:
-        return None
-
     """
     Type Callable is used to define a type for a function,
 
@@ -99,24 +95,19 @@ def get_curr_user(
     in this case the function takes no arguments and returns an optional doctor or patient
     """
 
-    model_map: dict[str, Callable[[], Optional[Doctor | Patient]]] = {
-        "doctor": lambda: session.execute(
-            select(Doctor).where(Doctor.id == payload["id"])
-        ).scalar(),
-        "patient": lambda: session.execute(
-            select(Patient).where(Patient.id == payload["id"])
-        ).scalar()
-    }
+    role, user_id = payload.get("role"), payload.get("id")
 
-    getter = model_map.get(payload["role"])
-    if getter:
-        return getter()
+    if not role or not user_id:
+        raise ValueError("Invalid token.")
 
+    if role == UserRoleV2.DOCTOR.value:
+        stmt = select(Doctor).where(Doctor.id == user_id)
 
-def get_pt_user(user=Depends(get_curr_user)):
-    if user is None or not isinstance(user, Patient):
-        raise ValueError(
-            "Invalid user credentials provided ."
-        )
+    elif role == UserRoleV2.PATIENT.value:
+        stmt = select(Patient).where(Patient.id == user_id)
 
-    return user
+    else:
+        return None
+
+    result = await session.scalar(stmt)
+    return result

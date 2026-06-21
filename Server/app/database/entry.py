@@ -27,6 +27,7 @@ class Base(DeclarativeBase):
 
 
 engine = create_engine(url=settings.database_url)
+Session = sessionmaker(autoflush=False, autocommit=False, bind=engine)
 
 
 def get_db():
@@ -35,7 +36,6 @@ def get_db():
     Routes our other consumers must manually rollback and commit
     """
 
-    Session = sessionmaker(autoflush=False, autocommit=False, bind=engine)
     session = Session()
 
     try:

@@ -1,42 +1,49 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import BackgroundTasks, HTTPException, APIRouter, Depends, HTTPException
-
+# grep -r "from sqlalchemy.orm import Session" app
 from app.database.models import Patient
 from app.services import MailService
-from app.schemas.outputs import AppointmentResponse
+from app.schemas.outputs import AppointmentConfirmation
 from app.schemas.inputs import BookingRequestData
 from app.services.BookingService import BookingService
-from app.database.entry import get_db
-from app.middleware.auth_middleware import get_curr_user
+from app.database.entry_async import get_db
+from app.middleware.auth_middleware import decode_access_token, get_curr_user
 
 
 router = APIRouter(prefix="/bookings")
-booker = BookingService()
 
 logger = logging.getLogger(__name__)
 
 
-@router.post("", response_model=AppointmentResponse)
+@router.post("", response_model=AppointmentConfirmation)
 async def book(
     data: BookingRequestData, background_tasks: BackgroundTasks,
-    session: Session = Depends(get_db),
-    user: Patient = Depends(get_curr_user)
+    session: AsyncSession = Depends(get_db),
+    payload: dict = Depends(decode_access_token)
 ):
+    user = await get_curr_user(
+        payload=payload, session=session
+    )
+
     if user is None or not isinstance(user, Patient):
-        raise ValueError(
-            "Invalid user details. "
+        raise HTTPException(
+            401,
+            detail={
+                "type": "authentication error",
+                "msg": "Invalid user details. "
+            }
         )
 
     try:
-        created = await booker.create_booking(
+        created = await BookingService.create_booking(
             session, user, data
         )
 
     except ValueError as e:
-        logger.error("Error booking slot for patient \n", user)
+        await session.rollback()
         raise HTTPException(
             400,
             detail={
@@ -46,17 +53,13 @@ async def book(
 
     except Exception as e:
         logger.debug(e)
+        await session.rollback()
         raise HTTPException(
             500,
             detail={
                 "msg": "An unexpected error occurred"
             }
         )
-
-    session.add(created)
-    session.commit()
-
-    session.refresh(created)
 
     mail = f"""
         Subject: Appointment Confirmation!
@@ -68,9 +71,11 @@ async def book(
         for {created.scheduled_date.isoformat(sep="-")} at {data.scheduled_date.time().isoformat()}
 """
 
+    await session.commit()
+
     background_tasks.add_task(
         lambda: MailService.send_mail(
-            recipient="affableshamik12@gmail.com",
+            recipient=user.email,
             msg=mail
         )
     )
@@ -80,23 +85,41 @@ async def book(
 
 #
 @router.delete("/cancel/{booking_id}")
-async def cancel_booking(booking_id: UUID, user: Patient = Depends(get_curr_user), session: Session = Depends(get_db)):
+async def cancel_booking(
+    booking_id: UUID,
+    session: AsyncSession = Depends(get_db),
+    payload: dict = Depends(decode_access_token)
+):
+    user = await get_curr_user(
+        session=session, payload=payload
+    )
+
+    if user is None or not isinstance(user, Patient):
+        raise HTTPException(
+            404,
+            detail={
+                "msg": "The user account does not exist. Please login first",
+                "type": "No Result Found"
+            }
+        )
+
     try:
-        booker.cancel_booking(
+        await BookingService.cancel_booking(
             session=session,
             booking_id=booking_id,
             patient=user
         )
 
-        session.commit()
         return {"msg": "Slot cancelled successfully."}
 
     except ValueError as e:
-        session.rollback()
+        await session.rollback()
         logger.debug(e)
         raise HTTPException(status_code=400, detail={"msg": str(e)})
+
     except Exception as e:
         logger.debug(e)
+        await session.rollback()
         raise HTTPException(
             500,
             detail={

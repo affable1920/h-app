@@ -1,30 +1,20 @@
 import enum
+from typing import Self
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, model_validator
 from app.schemas.Base import FromORM
 
 
-class Role(enum.Enum):
+class Role(str, enum.Enum):
     USER = "user"
     SYSTEM = "system"
     ASSISTANT = "assistant"
-    DEVELOPER = "developer"
+    TOOL = "tool"
 
 
 class BaseChatMessage(FromORM):
     role: Role
     content: str
-
-    model_config = ConfigDict(use_enum_values=True)
-
-
-#
-
-class MessageRequest(BaseChatMessage):
-    role: Role = Role.USER
-
-
-#
 
 
 class MessageResponse(BaseChatMessage):

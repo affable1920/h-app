@@ -1,20 +1,21 @@
 import logging
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, HTTPException, Response
 from app.schemas.enums import UserRoleV2
-from app.database.models import Doctor, Patient
-from app.database.entry import get_db
+from app.database.models import Doctor
+from app.database.entry_async import get_db
 from app.schemas.inputs import DoctorLogin, DrCreate, PatientLogin, PatientCreate, get_dr_onboarding
 from app.schemas.outputs import (
     DrProfileResponse,
     PatientProfileResponse,
     UserResponse
 )
-from app.services.PatientService import pt_srvc
-from app.services.DrService import dr_srvc
+from app.services.PatientService import PatientService
+from app.services.DrService import DoctorService
 from app.middleware.auth_middleware import (
     authenticate_pwd,
     create_access_token,
+    decode_access_token,
     get_curr_user,
 )
 
@@ -26,11 +27,11 @@ logger = logging.getLogger(__name__)
 async def register_pt(
     user: PatientCreate,
     response: Response,
-    session: Session = Depends(get_db)
+    session: AsyncSession = Depends(get_db)
 ):
     try:
-        with session.begin():
-            created = pt_srvc.create(session, user)
+        async with session.begin():
+            created = await PatientService.create(session, user)
 
     except ValueError as e:
         logger.info(e)
@@ -65,9 +66,9 @@ async def register_pt(
 
 
 @router.post("/login/patient", response_model=UserResponse)
-async def login_pt(user_cred: PatientLogin, response: Response, session: Session = Depends(get_db)):
+async def login_pt(user_cred: PatientLogin, response: Response, session: AsyncSession = Depends(get_db)):
     try:
-        row = pt_srvc.get_by_email(session, user_cred.email)
+        row = await PatientService.get_by_email(session, user_cred.email)
 
         if row is None:
             raise ValueError("Invalid email !")
@@ -105,11 +106,11 @@ async def login_pt(user_cred: PatientLogin, response: Response, session: Session
 async def register_dr(
     response: Response,
     data: DrCreate = Depends(get_dr_onboarding),
-    session: Session = Depends(get_db)
+    session: AsyncSession = Depends(get_db)
 ):
     try:
-        with session.begin():
-            created = await dr_srvc.create(session=session, data=data)
+        async with session.begin():
+            created = await DoctorService.create(session=session, data=data)
 
     except ValueError as e:
         raise HTTPException(
@@ -142,13 +143,13 @@ async def register_dr(
 
 
 @router.post("/login/doctor")
-async def login_dr(credentials: DoctorLogin, response: Response, session: Session = Depends(get_db)):
+async def login_dr(credentials: DoctorLogin, response: Response, session: AsyncSession = Depends(get_db)):
     method_used = "id" if credentials.id else 'email'
     cred = credentials.model_dump()
 
     assert cred[method_used] is not None, "Id or email can not be None"
 
-    row = dr_srvc.get(
+    row = await DoctorService.get(
         session=session,
         identKey=method_used,
         identVal=cred[method_used]
@@ -183,18 +184,26 @@ async def login_dr(credentials: DoctorLogin, response: Response, session: Sessio
 
 @router.get("/me", response_model=DrProfileResponse | PatientProfileResponse)
 async def profile(
-    model: Doctor | Patient = Depends(get_curr_user),
+    session: AsyncSession = Depends(get_db),
+    payload: dict = Depends(decode_access_token)
 ):
-    if model is None:
+    user = await get_curr_user(
+        session=session, payload=payload
+    )
+
+    if user is None:
         raise HTTPException(
             404,
             detail={
-                "msg": "No result found",
+                "type": "Not authenticated",
+                "msg": "The user does not exist.",
             }
         )
 
-    if isinstance(model, Doctor):
-        return DrProfileResponse.model_validate(model)
+    if isinstance(user, Doctor):
+        return DrProfileResponse.model_validate(user)
 
-    elif isinstance(model, Patient):
-        return PatientProfileResponse.model_validate(model)
+    patient = await PatientService.get_by_id(
+        session=session, id=str(user.id)
+    )
+    return PatientProfileResponse.model_validate(patient)

@@ -1,29 +1,25 @@
 from typing import Tuple
 
 from sqlalchemy import Select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.internals import ClinicRouteFilters
+from app.schemas.response_modifiers import ClinicRouteFilters
 from app.services.entities.main import EntityService
 from app.database.models import Clinic
 
 
-#
-
 class ClinicService(EntityService[Clinic]):
-    def __init__(self):
-        super().__init__(Clinic)
+    entity = Clinic
 
-    #
+    @classmethod
     def filter(
-        self, stmt: Select, filters: ClinicRouteFilters
+        cls, stmt: Select, filters: ClinicRouteFilters
     ) -> Select[Tuple[Clinic]]:
         if filters.search_query:
             stmt = stmt.where(
-                Clinic.name.icontains(f"%{filters.search_query}%"))
-
-        if filters.min_rating:
-            stmt = stmt.where(Clinic.rating >= filters.min_rating)
+                Clinic.name.icontains(filters.search_query)
+            )
 
         if filters.facilities:
             stmt = stmt.where(Clinic.facilities.op("&&")(filters.facilities))
@@ -32,7 +28,22 @@ class ClinicService(EntityService[Clinic]):
 
     #
 
-    async def create(self, session: Session, ident, data) -> Clinic:
+    @classmethod
+    def load_options(cls) -> list:
+        return [
+            selectinload(Clinic.reviews)
+        ]
+
+    #
+
+    @classmethod
+    def load_options_full(cls):
+        return super().load_options_full()
+
+    #
+
+    @classmethod
+    async def create(cls, session: AsyncSession, data) -> Clinic:
         return Clinic()
 
 

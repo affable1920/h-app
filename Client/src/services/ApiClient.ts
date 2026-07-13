@@ -82,10 +82,7 @@ class APIClient {
           status === 401 &&
           response?.headers?.["x-session-expire"] === "true"
         ) {
-          const msg = "session expired. Please login again";
-
-          console.log(msg);
-          toast.info(msg);
+          toast.info("Your session has expired. Please login again.");
 
           logout();
           return;

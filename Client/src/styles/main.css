@@ -141,7 +141,7 @@
     bottom: 100%; /* Position above the element */
     visibility: hidden;
     pointer-events: none;
-    background: var(--color-secondary);
+    background: var(--color-layout-raised);
     font-size: var(--text-xs);
     border-radius: var(--radius-md);
     transition: opacity 0.2s ease-in-out;

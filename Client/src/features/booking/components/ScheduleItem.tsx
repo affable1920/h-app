@@ -7,7 +7,7 @@ import {
   MobileNavVariants,
 } from "@/utils/motion-variants";
 import { ArrowRight, ChevronRight, MapPinCheckInside } from "lucide-react";
-import { AnimatePresence, motion, stagger } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import Badge from "@components/ui/Badge";
 import useModalStore from "@stores/modalStore";

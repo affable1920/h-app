@@ -14,12 +14,13 @@ import Directory from "@routes/Directory";
 import SignIn from "@/components/routes/SignIn";
 import Register from "@/components/routes/Register";
 import UserProfile from "@components/routes/UserProfile";
-import Consultation from "@/components/modals/Consultation";
 import LandingPageBody from "@/components/routes/LandingPage";
 import App from "@/components/App";
 import { useGetById } from "@/hooks/use-doctors";
 import Spinner from "./ui/Spinner";
 import useAuthStore from "@/stores/authStore";
+import TalkOverVideo from "../features/call/components/TalkOverVideo";
+import { CallProvider } from "@/features/call/components/CallProvider";
 
 const Chat = lazy(() => import("@routes/Chat"));
 const SchedulesView = lazy(
@@ -40,7 +41,11 @@ function Fallback({ children, key }: { children: ReactNode; key?: string }) {
 const router = createBrowserRouter([
   {
     path: "/",
-    Component: App,
+    element: (
+      <CallProvider>
+        <App />
+      </CallProvider>
+    ),
     children: [
       {
         index: true,
@@ -93,7 +98,7 @@ const router = createBrowserRouter([
 
           {
             path: "doctor/:id/consult",
-            Component: Consultation,
+            Component: TalkOverVideo,
           },
 
           {

@@ -1,32 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import NavBar from "../NavBar";
-import useAuthStore, { logout } from "@/stores/authStore";
 import useModalStore from "@/stores/modalStore";
-import { toast } from "sonner";
 
-function handleLogout() {
-  toast.message("Session expired. logging out");
-  logout();
-}
-
-const Layout = () => {
-  const jwt = useAuthStore((s) => s.token);
+function Layout() {
   const openModal = useModalStore((s) => s.openModal);
-
-  // useEffect(
-  //   function () {
-  //     if (!jwt) {
-  //       return;
-  //     }
-
-  //     signalingClient.connect(jwt);
-  //     signalingClient.addEventListener("session-expired", handleLogout);
-
-  //     return () => signalingClient.close(1000, "Unmounting!");
-  //   },
-  //   [jwt],
-  // );
 
   useEffect(function () {
     function keydown(ev: KeyboardEvent) {
@@ -54,6 +32,6 @@ const Layout = () => {
       </main>
     </>
   );
-};
+}
 
 export default Layout;

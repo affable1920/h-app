@@ -27,7 +27,8 @@ createRoot(document.getElementById("root")!).render(
         position="top-center"
         swipeDirections={["right", "left"]}
         closeButton
-        duration={1500}
+        duration={2000}
+        visibleToasts={2}
       />
       <RouterProvider router={router} />
 

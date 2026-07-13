@@ -8,7 +8,7 @@ import { useState, memo, useCallback } from "react";
 import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import type { APIError } from "@/types/http";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const MultiInput = memo(function MultiInput({
   methodA,
@@ -55,6 +55,8 @@ export function DrSignin() {
   const form = useForm<DoctorLogin>({ resolver: zodResolver(DrLoginSchema) });
   const signin = useSignin();
 
+  const { state = {} } = useLocation();
+
   const [loginMethod, setLoginMethod] = useState<"App id" | "email">("email");
   const {
     formState: { errors },
@@ -71,7 +73,7 @@ export function DrSignin() {
         },
         onSuccess() {
           toast.message("You're signed in.");
-          navigate("/view/idx/doctors");
+          navigate(state?.moveTo ?? "/view/idx/doctors");
         },
       },
     );

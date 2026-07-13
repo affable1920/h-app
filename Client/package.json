@@ -9,10 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "dev": "vite",
-    "generate-types": "openapi-typescript http://localhost:8000/openapi.json -o ./src/types/api.ts",
+    "generate-types": "openapi-typescript https://localhost:8000/openapi.json -o ./src/types/api.ts",
     "dev:with-types": "concurrently \"npm run generate-types\" \"npm run dev\"",
-    "generate-types:docker": "openapi-typescript http://server:8000/openapi.json -o ./src/types/api.ts",
-    "dev:with-types:docker": "concurrently \"npm run generate-types:docker\" \"npm run dev -- --host 0.0.0.0\""
+    "generate-types:docker": "NODE_TLS_REJECT_UNAUTHORIZED=0 openapi-typescript https://server:8000/openapi.json -o ./src/types/api.ts",
+    "dev:with-types:docker": "concurrently \"npm run generate-types:docker\" \"npm run dev -- --host\""
   },
   "dependencies": {
     "@fontsource/pt-sans": "^5.2.8",

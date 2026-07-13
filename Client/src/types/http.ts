@@ -5,7 +5,7 @@ export type Appointment = components["schemas"]["AppointmentResponse"];
 
 export type GetAllDrResponse =
   paths["/doctors"]["get"]["responses"]["200"]["content"]["application/json"];
-export type GetByIdResponse = components["schemas"]["Doctor"];
+export type GetByIdResponse = components["schemas"]["DoctorHttpFull"];
 
 export type GetAllClinicsResponse =
   paths["/clinics"]["get"]["responses"]["200"]["content"]["application/json"];
@@ -13,11 +13,11 @@ export type GetAllClinicsResponse =
 export type ValidationError = components["schemas"]["HTTPValidationError"];
 export type PydanticValidationError = ValidationError["detail"];
 
-export type Doctor = components["schemas"]["Doctor"];
+export type Doctor = components["schemas"]["DoctorHttpMinimal"];
 export type Status = components["schemas"]["Status"];
 
 export type Slot = components["schemas"]["Slot"];
-export type Clinic = components["schemas"]["Clinic"];
+export type Clinic = components["schemas"]["ClinicHttpMinimal"];
 export type Schedule = components["schemas"]["Schedule"];
 
 export type ChatRequest =

@@ -8,6 +8,7 @@ import Button from "./ui/Button";
 import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { usePrevious } from "@/hooks/use-previous";
 
 export function PatientSignin() {
   const form = useForm<PatientLogin>({
@@ -17,13 +18,15 @@ export function PatientSignin() {
   const signin = useSignin();
   const navigate = useNavigate();
 
+  const previousPath = usePrevious();
+
   async function submit(data: PatientLogin) {
     await signin.mutateAsync(
       { route: "patient", data },
       {
         onSuccess() {
           toast.message("Account successfully created.");
-          navigate("/view/idx/doctors");
+          navigate(previousPath ?? "/view/idx/doctors");
         },
 
         onError(error) {

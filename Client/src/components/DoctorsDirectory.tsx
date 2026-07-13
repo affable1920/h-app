@@ -30,7 +30,6 @@ function DoctorsDirectory() {
   if (isError) {
     return null;
   }
-  console.log(entities[3]);
 
   return (entities || [])?.map((doctor) => (
     <Card

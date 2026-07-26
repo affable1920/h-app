@@ -35,7 +35,7 @@ async def get_doctors(
     return response
 
 
-@router.get("/{id}", response_model=DoctorHttpFull)
+@router.get("/{id}", response_model=Optional[DoctorHttpFull])
 async def get_doctor(
     id: str,
     session: AsyncSession = Depends(get_db)
@@ -43,7 +43,6 @@ async def get_doctor(
     dtr = await DoctorService.get_by_id(
         session=session, id=id
     )
-
     return dtr
 
 #

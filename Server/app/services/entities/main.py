@@ -55,6 +55,9 @@ class EntityService(Generic[T], ABC):
         sort_order: SortOrder
     ) -> Select:
         col = getattr(cls.entity, sort_col, None)
+        logger.info(
+            f"Request to sort entities by column ({sort_col}) in order: ({sort_order})"
+        )
 
         if col is not None:
             if sort_order == SortOrder.DESC:
@@ -68,7 +71,6 @@ class EntityService(Generic[T], ABC):
     @classmethod
     def paginate(cls, stmt: Select, pagination: PaginationParams) -> Select:
         """ Concrete method - pagination logic is truly generic """
-        logger.info(f"\nParameters for pagination: {pagination}")
         stmt = stmt.offset(pagination.offset).limit(pagination.max)
         return stmt
 
@@ -100,14 +102,17 @@ class EntityService(Generic[T], ABC):
             stmt = cls.filter(stmt, filters)
 
         count = await session.scalar(
-            select(func.count()).select_from(stmt.subquery())
+            select(func.count()).select_from(
+                stmt.subquery()
+            )
         ) or 0
 
         if pagination is not None:
             if pagination.sort_by:
                 stmt = cls.sort(
                     stmt,
-                    pagination.sort_by, pagination.sort_order
+                    pagination.sort_by,
+                    pagination.sort_order if pagination.sort_order else SortOrder.ASC
                 )
 
             stmt = cls.paginate(stmt, pagination)
@@ -160,6 +165,8 @@ class EntityService(Generic[T], ABC):
             select(literal(True)).where(exists().where(
                 getattr(cls.entity, "email") == email))
         ) is not None
+
+    #
 
     @classmethod
     @abstractmethod

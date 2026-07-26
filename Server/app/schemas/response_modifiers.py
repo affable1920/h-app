@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Annotated, Literal
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, computed_field
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
 from app.schemas.Base import snake_to_camel
 from app.schemas.enums import Gender
@@ -14,8 +14,8 @@ class SortOrder(Enum):
 class PaginationParams(BaseModel):
     page: int = Field(default=1, gt=0)
     max: int = Field(default=10, gt=0, lt=25)
-    sort_by: str = Field(default="name")
-    sort_order: SortOrder = Field(default=SortOrder.ASC)
+    sort_by: str | None = None
+    sort_order: SortOrder | None = Field(default=None)
 
     @property
     def offset(self):

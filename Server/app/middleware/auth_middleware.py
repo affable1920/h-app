@@ -1,6 +1,3 @@
-
-from typing import Callable, Optional, Union
-
 import jwt
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
@@ -9,9 +6,9 @@ from fastapi import (
     HTTPException,
     Depends,
 )
-from sqlalchemy import select
 
-from app.database.models import Doctor, Patient
+from app.services.DrService import DoctorService
+from app.services.PatientService import PatientService
 from app.schemas.enums import UserRoleV2
 from app.core.config import settings
 from app.schemas.outputs import AuthHdrPayload
@@ -100,14 +97,20 @@ async def get_curr_user(
     if not role or not user_id:
         raise ValueError("Invalid token.")
 
-    if role == UserRoleV2.DOCTOR.value:
-        stmt = select(Doctor).where(Doctor.id == user_id)
+    match (role):
+        case UserRoleV2.DOCTOR.value:
+            usr = await DoctorService.get_by_id(
+                session=session,
+                id=user_id
+            )
 
-    elif role == UserRoleV2.PATIENT.value:
-        stmt = select(Patient).where(Patient.id == user_id)
+        case UserRoleV2.PATIENT.value:
+            usr = await PatientService.get_by_id(
+                session=session,
+                id=user_id
+            )
 
-    else:
-        return None
+        case _:
+            usr = None
 
-    result = await session.scalar(stmt)
-    return result
+    return usr

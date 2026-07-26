@@ -2,9 +2,8 @@ import logging
 from fastapi import WebSocket, WebSocketDisconnect
 import jwt
 from pydantic import ValidationError
-
-from .schema import MsgType, WS_Message
-from app.database.entry import get_db
+from .schema import WS_Message
+from app.database.entry_async import get_db
 from app.features.calling.WSService import WS_Service
 from .dependencies import decode
 
@@ -38,7 +37,7 @@ async def ws_endpoint(ws: WebSocket):
         await ws.close(code=4444, reason="invalid token")
         return
 
-    session = next(get_db())
+    session = await get_db().__anext__()
     from app.services.DrService import DoctorService
 
     db_user = DoctorService.get_by_id(
@@ -59,8 +58,10 @@ async def ws_endpoint(ws: WebSocket):
         while True:
             logger.info("\nloop start")
             raw = await ws.receive_json()
+
             try:
                 msg = WS_Message.model_validate(raw)
+                logger.info(f"message from client #{user_id}\n{msg}")
 
             except ValidationError as e:
                 logging.error(
@@ -77,23 +78,7 @@ async def ws_endpoint(ws: WebSocket):
             """
 
             match msg.msg_type:
-                case "join":
-                    joining_msg = WS_Message(
-                        type=MsgType.ACK, payload="Connection request acknowledged ."
-                    )
-                    logger.info(joining_msg.payload)
-                    await ws.send_json(joining_msg.model_dump_json())
-                    await WS_Service.broadcast(
-                        payload=f"Client #{user_id} joined the chat.",
-                    )
-
-                case "text":
-                    await ws.send_text(
-                        f"Hey Client #{user_id}. We recieved your text ."
-                    )
-
                 case "offer":
-                    logger.info(f"\nOffer recived from client #{user_id}")
                     await WS_Service.handle_offer(ws=ws, msg=msg)
 
                 case "answer":
@@ -101,6 +86,26 @@ async def ws_endpoint(ws: WebSocket):
 
                 case "ice-candidate":
                     await WS_Service.handle_ice(ws=ws, msg=msg)
+
+                case "hang-up":
+                    if not msg.metadata:
+                        logger.info(f"Client #{user_id} has hanged-up!")
+                        return
+                    target_ws = WS_Service.get_ws(id=msg.metadata.to_)
+
+                    if target_ws:
+                        await WS_Service.send_msg(
+                            reciever=target_ws, msg=msg
+                        )
+
+                case _:
+                    logger.info(
+                        f"wildcadrd (_) matched for the message type. Message logged below ..."
+                    )
+                    logger.info(msg)
+                    await WS_Service.hanlde_generic_msg(
+                        ws=ws, msg=msg
+                    )
 
     except WebSocketDisconnect as e:
         logger.warning(

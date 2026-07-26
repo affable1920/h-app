@@ -1,42 +1,38 @@
 import enum
-from typing import Annotated, Any
-from uuid import UUID
-
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
+from typing import Any
+from pydantic import BaseModel, ConfigDict
+from app.schemas.Base import snake_to_camel
 
 
 class MsgType(str, enum.Enum):
-    JOIN = "join"
-    ACK = "acknowledgement"
     OFFER = "offer"
     ANSWER = "answer"
-    USER_LEFT = "user-left"
-    OFFER_DECLINE = "offer-decline"
     ICE = "ice-candidate"
-    TEXT = "text"
+    USER_LEFT = "user-left"
     OFFLINE = "offline"
+    HANG_UP = "hang-up"
     BROADCAST = "broadcast"
+    OFFER_DECLINE = "offer-decline"
 
 
 class Metadata(BaseModel):
-    to_: Annotated[str, Field(alias="to")]
-    # Annotated[
-    #     UUID,
-    #     Field(serialization_alias="to"),
-    #     PlainSerializer(serialize, str, when_used="always"),
-    # ]
-    from_: Annotated[UUID | None, PlainSerializer(
-        func=lambda x: str(x)), Field(alias="from")]
+    to_: str
+    from_: str
+
+    model_config = ConfigDict(
+        alias_generator=snake_to_camel
+    )
 
 
 class WS_Message(BaseModel):
-    msg_type: MsgType = Field(alias="type")
-    payload: Any
+    msg_type: MsgType
+    payload: Any | None = {}
     metadata: Metadata | None = None
 
     model_config = ConfigDict(
         extra="allow",
         from_attributes=True,
         use_enum_values=True,
-        serialize_by_alias=True,
+        alias_generator=snake_to_camel,
+        validate_by_name=True
     )

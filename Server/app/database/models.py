@@ -1,10 +1,11 @@
-from statistics import mean
 from uuid import UUID
-import sqlalchemy as sa
 from datetime import datetime, time
-from typing import Annotated, Optional
+from typing import Annotated, ClassVar, Optional, Protocol
+
+import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, mapped_column, Mapped
+
 from app.database.entry_async import Base
 from app.schemas.enums import AppointmentStatus, Gender, Mode, ReviewableEntity, Status
 
@@ -13,11 +14,51 @@ PrimaryKey = Annotated[UUID, mapped_column(
 )]
 
 
+class Reviewable(Protocol):
+    id: PrimaryKey
+    reviews: list["Review"]
+    __reviewable_entity__: ClassVar[ReviewableEntity]
+
+
 class TimeStampMixin:
     created_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True), server_default=sa.func.now())
     last_updated: Mapped[Optional[datetime]] = mapped_column(
         server_onupdate=sa.func.now(), server_default=sa.func.now())
+
+
+class RatingMixin:
+    """
+    Mixin for any model that has a `reviews` relationship
+    pointing to a Review row with `entity_id` + `rating`.
+    """
+
+    # each subclass must set this
+    __reviewable_entity__: ClassVar[ReviewableEntity]
+
+    @hybrid_property  # a hybrid property behaves differently on a class and an instance
+    def avg_rating(self: Reviewable) -> float | None:  # pyright: ignore
+        # Access on the instance e,g some_dr.avg_rating
+        if not self.reviews:
+            return None
+        # else calculate aggregate
+        return sum(r.rating for r in self.reviews) / len(self.reviews)
+
+    #
+
+    @avg_rating.expression
+    def avg_rating(cls: type[Reviewable]):
+        # This decorator (expression) lets us register the class-level behaviour separately
+        # Access on the class e,g where(Doctor.avg_rating >= min_rating)
+        return (
+            sa.select(sa.func.avg(Review.rating))
+            .where(
+                Review.entity_id == cls.id,
+                Review.entity == cls.__reviewable_entity__
+            )
+            .correlate_except(Review)
+            .scalar_subquery()
+        )
 
 
 class Patient(TimeStampMixin, Base):
@@ -43,8 +84,9 @@ junction = sa.Table(
 )
 
 
-class Doctor(TimeStampMixin, Base):
+class Doctor(RatingMixin, TimeStampMixin, Base):
     __tablename__ = "doctor"
+    __reviewable_entity__ = ReviewableEntity.DOCTOR
 
     id: Mapped[PrimaryKey]
 
@@ -94,15 +136,15 @@ class Doctor(TimeStampMixin, Base):
     schedules: Mapped[list["Schedule"]] = relationship(
         back_populates="doctor", cascade="all, delete-orphan"
     )
-
     reviews: Mapped[list["Review"]] = relationship(
         primaryjoin="and_(Review.entity=='DOCTOR', foreign(Review.entity_id)==Doctor.id)",
         viewonly=True,
     )
 
 
-class Clinic(Base):
+class Clinic(RatingMixin, Base):
     __tablename__ = "clinic"
+    __reviewable_entity__ = ReviewableEntity.CLINIC
 
     id: Mapped[PrimaryKey]
     name: Mapped[str] = mapped_column(nullable=False, unique=True, index=True)
@@ -157,8 +199,9 @@ class Schedule(Base):
     )
 
     __table_args__ = (
-        sa.CheckConstraint(sqltext="start_time < end_time",
-                           name="chk_schedule_timing"),
+        sa.CheckConstraint(
+            sqltext="start_time < end_time", name="chk_schedule_timing"
+        ),
     )
 
 

@@ -1,4 +1,5 @@
 import logging
+import os
 
 from fastapi import (
     FastAPI,
@@ -67,23 +68,34 @@ if __name__ == "__main__":
     import uvicorn
     from app.core.config import settings
 
-    """
-    Hardcoding the base directory path to the root of the app for now
-    later, use a loop until the base dir becomes .h-app 
-    """
-
-    BASE_DIR = Path(__file__).parent.parent.parent
-    is_https = int(settings.use_https) == 1
+    base_dir = Path.cwd().parent  # is always the Server directory
+    mode_https = int(settings.use_https) == 1
 
     logging.info(
-        f"running server in {'https' if is_https else 'http'} mode".capitalize()
+        f"running server in ({'https' if mode_https else 'http'}) mode".capitalize(
+        )
     )
+
+    logging.info(
+        f"starting the server with ${base_dir.name} as the root directory".capitalize(
+        )
+    )
+
+    inside_container = settings.is_using_container == "1"
+
+    def get_ssl_key():
+        target_fl = "certs/key.pem" if inside_container else "../localhost+3-key.pem"
+        return Path.resolve(base_dir / target_fl) if mode_https else None
+
+    def get_ssl_cert():
+        target_fl = "certs/cert.pem" if inside_container else "../localhost+3.pem"
+        return Path.resolve(base_dir / target_fl) if mode_https else None
 
     uvicorn.run(
         app="app.main:app",
         port=8000,
         host="0.0.0.0",
         reload=True,
-        ssl_keyfile=str(BASE_DIR / "key.pem") if is_https else None,
-        ssl_certfile=str(BASE_DIR / "cert.pem") if is_https else None,
+        ssl_keyfile=get_ssl_key(),
+        ssl_certfile=get_ssl_cert(),
     )

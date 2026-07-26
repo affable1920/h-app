@@ -188,7 +188,8 @@ async def profile(
     payload: dict = Depends(decode_access_token)
 ):
     user = await get_curr_user(
-        session=session, payload=payload
+        session=session,
+        payload=payload
     )
 
     if user is None:
@@ -202,8 +203,4 @@ async def profile(
 
     if isinstance(user, Doctor):
         return DrProfileResponse.model_validate(user)
-
-    patient = await PatientService.get_by_id(
-        session=session, id=str(user.id)
-    )
-    return PatientProfileResponse.model_validate(patient)
+    return PatientProfileResponse.model_validate(user)

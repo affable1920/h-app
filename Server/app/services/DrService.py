@@ -1,9 +1,8 @@
 import base64
 import logging
-from statistics import mean
 from typing import Tuple
 
-from sqlalchemy import Select, exists, literal, or_, select
+from sqlalchemy import Select, or_
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -59,15 +58,31 @@ class DoctorService(EntityService[Doctor]):
                     filters.specialization
                 ))
 
+        if filters.min_rating:
+            stmt = stmt.where(
+                # usabe because avg_rating is a hybrid property
+                Doctor.avg_rating >= filters.min_rating
+            )
+
         if filters.currently_available:
             stmt = stmt.where(Doctor.status == Status.AVAILABLE)
 
         if filters.consults_online:
             stmt = stmt.where(Doctor.consults_online == True)
 
+        if filters.gender:
+            stmt = stmt.where(
+                Doctor.gender == filters.gender
+            )
+
         if filters.experience:
             stmt = stmt.where(
                 Doctor.experience >= filters.experience
+            )
+
+        if filters.fee:
+            stmt = stmt.where(
+                Doctor.fee <= filters.fee
             )
 
         if filters.search_query:
@@ -77,16 +92,6 @@ class DoctorService(EntityService[Doctor]):
                     Doctor.name.icontains(sq),
                     Doctor.primary_specialization.icontains(sq)
                 )
-            )
-
-        if filters.fee:
-            stmt = stmt.where(
-                Doctor.fee <= filters.fee
-            )
-
-        if filters.gender:
-            stmt = stmt.where(
-                Doctor.gender == filters.gender
             )
 
         return stmt
@@ -99,7 +104,7 @@ class DoctorService(EntityService[Doctor]):
                 await cls.email_exists(session, email=data.email)) \
                 or await PatientService.email_exists(session, email=data.email):
             raise ValueError(
-                "This emailId is already in use. Try a different one or sign in."
+                "This email Id is already in use! Please try using a different one."
             )
 
         if await cls.get(session, "license_number", data.license_number):
@@ -108,8 +113,12 @@ class DoctorService(EntityService[Doctor]):
         encoded = None
 
         if data.profile:
-            img = await data.profile.read()
-            encoded = base64.urlsafe_b64decode(img).decode("utf-8")
+            try:
+                img = await data.profile.read()
+                encoded = base64.urlsafe_b64decode(img).decode("utf-8")
+            except Exception as e:
+                logger.debug(e)
+                raise ValueError("Invalid image file.")
 
         created = Doctor(
             image=encoded,
@@ -132,13 +141,6 @@ class DoctorService(EntityService[Doctor]):
         await session.flush()
         await session.refresh(created)
         return created
-
-    #
-
-    @classmethod
-    def get_rating(cls, doctor: Doctor):
-        all_ratings = [review.rating for review in doctor.reviews]
-        return round(mean(all_ratings if all_ratings else [0]), 2)
 
     #
 

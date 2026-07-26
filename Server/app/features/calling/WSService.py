@@ -9,8 +9,10 @@ from .schema import MsgType, WS_Message
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-offline_msg = WS_Message(type=MsgType.OFFLINE,
-                         payload="Target socket is offline")
+offline_msg = WS_Message(
+    msg_type=MsgType.OFFLINE,
+    payload="Target socket is offline"
+)
 
 
 class WS_Service:
@@ -128,11 +130,11 @@ class WS_Service:
         logger.info(
             f"\nBroadcasting to active connections... \tCurrently active -> ({cls.count()})"
         )
-        msg = WS_Message(type=type_, payload=payload)
+        msg = WS_Message(msg_type=type_, payload=payload)
         for id, socket in cls.active_conns.items():
             try:
                 if socket.client_state == WebSocketState.CONNECTED:
-                    await socket.send_json(msg.model_dump_json())
+                    await socket.send_json(msg.model_dump_json(by_alias=True))
 
                 else:
                     continue
@@ -161,11 +163,11 @@ class WS_Service:
 
         if target_ws is None:
             logger.info("Target socket conn not active")
-            await ws.send_json(offline_msg.model_dump_json())
+            await ws.send_json(offline_msg.model_dump_json(by_alias=True))
             return
 
         logger.info("target socket online. Sending offer to target ...")
-        await target_ws.send_json(msg.model_dump_json())
+        await target_ws.send_json(msg.model_dump_json(by_alias=True))
 
     #
 
@@ -186,11 +188,11 @@ class WS_Service:
 
         if target_ws is None:
             logger.info("Target seems to be offline. Aborting ...")
-            await ws.send_json(offline_msg.model_dump_json())
+            await ws.send_json(offline_msg.model_dump_json(by_alias=True))
             return
 
         logger.info("Sending answer to target ...")
-        await target_ws.send_json(msg.model_dump_json())
+        await target_ws.send_json(msg.model_dump_json(by_alias=True))
 
     #
 
@@ -213,8 +215,47 @@ class WS_Service:
             logger.info(
                 "Target socket seems to be offline. Aborting ice candidate send ..."
             )
-            await ws.send_json(offline_msg.model_dump_json())
+            await ws.send_json(offline_msg.model_dump_json(by_alias=True))
             return
 
         logger.info("Sending ice candidate to target ...")
-        await target_ws.send_json(msg.model_dump_json())
+        await target_ws.send_json(msg.model_dump_json(by_alias=True))
+
+    #
+
+    @classmethod
+    async def send_msg(cls, reciever: WebSocket, msg: WS_Message | str):
+        if isinstance(msg, WS_Message):
+            await reciever.send_json(msg.model_dump_json(by_alias=True))
+
+        assert type(msg) is str, (
+            f"""
+            Message received inside send_msg is neither of the required type
+            not a string
+            """
+        )
+        await reciever.send_text(msg)
+
+    #
+
+    @classmethod
+    async def hanlde_generic_msg(cls, ws: WebSocket, msg: WS_Message):
+        if not msg.metadata or not msg.metadata.to_:
+            reply = (
+                "No metadata found in the ws message. Contuning as a simple text ..."
+            )
+            logger.info(reply)
+            await ws.send_text(reply)
+            return
+
+        target_ws = cls.get_ws(
+            id=msg.metadata.to_
+        )
+
+        logger.info(f"generic msg by user #{msg.metadata.from_} - {msg}")
+
+        if target_ws is not None:
+            await cls.send_msg(
+                reciever=target_ws,
+                msg=msg
+            )

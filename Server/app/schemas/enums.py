@@ -9,8 +9,6 @@ class ReviewableEntity(enum.Enum):
 
 @deprecated("This enum is deprecated. User UserRoleV2 instead")
 class UserRole(enum.Enum):
-    """
-    """
     ADMIN = "admin"
     DOCTOR = "doctor"
     PATIENT = "patient"

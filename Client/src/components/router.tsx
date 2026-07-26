@@ -3,7 +3,7 @@ import {
   createBrowserRouter,
   Navigate,
   Outlet,
-  useLocation,
+  type LoaderFunctionArgs,
 } from "react-router-dom";
 
 //
@@ -16,11 +16,12 @@ import Register from "@/components/routes/Register";
 import UserProfile from "@components/routes/UserProfile";
 import LandingPageBody from "@/components/routes/LandingPage";
 import App from "@/components/App";
-import { useGetById } from "@/hooks/use-doctors";
 import Spinner from "./ui/Spinner";
-import useAuthStore from "@/stores/authStore";
+import useAuthStore from "@/stores/auth-store";
 import TalkOverVideo from "../features/call/components/TalkOverVideo";
 import { CallProvider } from "@/features/call/components/CallProvider";
+import { getByIdOptions } from "@/hooks/use-doctors";
+import { queryClient } from "@/core/query-client";
 
 const Chat = lazy(() => import("@routes/Chat"));
 const SchedulesView = lazy(
@@ -36,6 +37,10 @@ function Fallback({ children, key }: { children: ReactNode; key?: string }) {
       {children}
     </Suspense>
   );
+}
+
+async function loaderDoctor({ params }: LoaderFunctionArgs) {
+  return queryClient.ensureQueryData(getByIdOptions(params.id as string));
 }
 
 const router = createBrowserRouter([
@@ -99,20 +104,12 @@ const router = createBrowserRouter([
           {
             path: "doctor/:id/consult",
             Component: TalkOverVideo,
+            loader: loaderDoctor,
           },
 
           {
             path: "doctor/:id",
-            Component: () => {
-              const id = useLocation().pathname.split("/").at(-1);
-              const { data: doctor, isLoading } = useGetById(id as string);
-
-              if (isLoading) {
-                return <Spinner loading={isLoading} />;
-              }
-
-              return <div>Dr {doctor?.name}'s Profile</div>;
-            },
+            loader: loaderDoctor,
           },
 
           {

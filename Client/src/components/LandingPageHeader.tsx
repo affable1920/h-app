@@ -11,7 +11,7 @@ import {
   Home,
 } from "lucide-react";
 import Button from "./ui/Button";
-import useAuthStore from "@/stores/authStore";
+import useAuthStore from "@/stores/auth-store";
 import { Link, useNavigate } from "react-router-dom";
 import { createStagger } from "@/utils/motion-variants";
 

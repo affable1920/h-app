@@ -236,7 +236,7 @@ function LandingPageBody() {
                 <Link to="/view/idx/doctors">
                   <Button endIcon={<ArrowRight />}>Find a doctor</Button>
                 </Link>
-                <Link to="/view/auth">
+                <Link to="/auth" state={{ role: "doctor" }}>
                   <Button color="brand" endIcon={<ArrowRight />}>
                     Join as a doctor
                   </Button>

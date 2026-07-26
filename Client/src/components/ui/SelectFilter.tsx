@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { motion } from "motion/react";
 import Button from "./Button";
 import Dropdown from "./Dropdown";
@@ -10,19 +10,7 @@ interface SelectFilterProps {
   onOptionSelect: (option: string) => void;
 }
 
-function Chevron({ isOpen }: { isOpen: boolean }) {
-  return (
-    <motion.svg
-      animate={{
-        rotate: isOpen ? -90 : 0,
-      }}
-    >
-      <ChevronRight size={12} strokeWidth={4} />
-    </motion.svg>
-  );
-}
-
-function SelectFilter({
+const SelectFilter = memo(function ({
   label = "",
   options = [],
   onOptionSelect,
@@ -38,18 +26,19 @@ function SelectFilter({
       />
       <Button
         color="brand"
-        size="md"
         className="w-full"
         border={false}
-        endIcon={<Chevron isOpen={isOpen} />}
         onClick={function () {
           setIsOpen((p) => !p);
         }}
       >
         {label}
+        <motion.i animate={{ rotate: isOpen ? -90 : 0 }}>
+          <ChevronRight size={14} strokeWidth={3} />
+        </motion.i>
       </Button>
     </div>
   );
-}
+});
 
 export default SelectFilter;

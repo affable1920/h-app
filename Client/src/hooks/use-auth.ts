@@ -1,5 +1,5 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import APIClient from "@/services/ApiClient";
+import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
+import APIClient from "@/core/ApiClient";
 import type {
   PatientCreate,
   DoctorLogin,
@@ -8,7 +8,7 @@ import type {
   ProfileResponse,
   Role,
 } from "@/types/http";
-import useAuthStore from "@/stores/authStore";
+import useAuthStore from "@/stores/auth-store";
 import type { AxiosRequestConfig } from "axios";
 
 type SignupContext =
@@ -84,16 +84,18 @@ export function useSignin() {
   });
 }
 
-export function useFetchProfile<R extends Role>(role: R) {
-  return useQuery<ProfileResponse<R>>({
+export function fetchProfileOptions<R extends Role>(role: Role) {
+  return queryOptions({
     queryKey: ["auth", "me", role],
     enabled: !!role,
-
     async queryFn() {
       const response = await api.get<ProfileResponse<R>>("me");
       return response.data;
     },
-
-    retry: false,
+    retry: 2,
   });
+}
+
+export function useFetchProfile<R extends Role>(role: R) {
+  return useQuery(fetchProfileOptions(role));
 }

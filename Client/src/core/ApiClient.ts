@@ -11,7 +11,7 @@ import {
   type APIError,
   type PydanticValidationError,
 } from "@/types/http";
-import useAuthStore, { logout } from "@/stores/authStore";
+import useAuthStore, { logout } from "@/stores/auth-store";
 import { config } from "@/config";
 import { toast } from "sonner";
 

@@ -1,48 +1,33 @@
-import { useState, Suspense, useMemo, useCallback } from "react";
+import { useState, Suspense, useCallback, useRef, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-
 import Spinner from "../ui/Spinner";
-
 import Pagination from "@components/Pagination";
 import Button from "@/components/ui/Button";
-
 import { debounce } from "@/utils/utils";
-
-import useModalStore from "@/stores/modalStore";
-import useQueryStore from "@/stores/queryStore";
-
-import { ArrowDown01, ArrowDown10 } from "lucide-react";
+import useModalStore from "@/stores/modal-store";
+import useQueryStore from "@/stores/query-store";
 import { ArrowLeftRight, SlidersHorizontal } from "lucide-react";
-import useFilterStore from "@/stores/filterStore";
+import useFilterStore from "@/stores/filter-store";
 import SearchBar from "../ui/SearchBar";
-
-const SORT_COLS: Array<string> = [
-  "rating",
-  "distance",
-  "reviews",
-  "experience",
-  "fee",
-  "name",
-] as const;
 
 function Directory() {
   const navigate = useNavigate();
+  const openModal = useModalStore((s) => s.openModal);
 
   const {
     searchQuery,
     setSearchQuery,
     clearSearchQuery,
-    sortOrder = "desc",
-    sortBy,
+    page = 1,
+    setPage,
   } = useQueryStore();
-  const [localSearch, setLocalSearch] = useState(searchQuery);
-
-  const location = useLocation().pathname.split("/").at(-1) ?? "doctors";
-  const openModal = useModalStore((s) => s.openModal);
-
   const { activeFiltersCount } = useFilterStore();
 
-  const memoized = useMemo(() => debounce(setSearchQuery), []);
+  const route = useLocation().pathname.split("/").at(-1) ?? "doctors";
+  const memoized = useRef(debounce(setSearchQuery, 350)).current;
+
+  const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [hasNext, setHasNext] = useState(false);
 
   const handleSearch = useCallback(function (val: string) {
     setLocalSearch(val);
@@ -54,12 +39,11 @@ function Directory() {
     clearSearchQuery();
   }, []);
 
-  const { page = 1, setPage } = useQueryStore();
-  const [hasNext, setHasNext] = useState(false);
-
   const handlePageChange = useCallback(
     function (direction: "next" | "previous") {
-      const isChangeInvalid = page === 1 && direction === "previous";
+      const isChangeInvalid =
+        (page === 1 && direction === "previous") ||
+        (!hasNext && direction === "next");
 
       if (isChangeInvalid) {
         return;
@@ -71,18 +55,10 @@ function Directory() {
     [page, hasNext],
   );
 
-  function handleDirectorySwitch() {
-    const nextDir = location === "doctors" ? "clinics" : "doctors";
+  function switchDirectory() {
+    const nextDir = route === "doctors" ? "clinics" : "doctors";
     navigate(`${nextDir}`);
   }
-
-  const open = function (modalName: string, options?: {}) {
-    return openModal.bind(null, modalName, {
-      ...options,
-      viewOverlay: true,
-      position: "bottom",
-    });
-  };
 
   return (
     <section className="flex flex-col gap-8 mx-auto min-h-screen">
@@ -92,26 +68,17 @@ function Directory() {
             variant="icon"
             bg={true}
             className="relative"
-            onClick={open("directoryFilter")}
+            onClick={function () {
+              openModal("directoryFilter", {
+                position: "left",
+              });
+            }}
           >
             <SlidersHorizontal />
             {!!activeFiltersCount && (
               <span className="absolute -top-2 -right-2 bg-accent text-white rounded-md w-4 h-4 flex items-center justify-center text-xs">
                 {activeFiltersCount}
               </span>
-            )}
-          </Button>
-
-          <Button
-            variant="icon"
-            bg={true}
-            onClick={open("sorter", { fields: SORT_COLS })}
-            data-tooltip={`sorted by ${sortBy} - ${sortOrder}`}
-          >
-            {sortOrder === "asc" ? (
-              <ArrowDown01 />
-            ) : (
-              sortOrder === "desc" && <ArrowDown10 />
             )}
           </Button>
         </div>
@@ -124,7 +91,7 @@ function Directory() {
             onClear={clearSearch}
           />
 
-          <Button variant="icon" bg={true} onClick={handleDirectorySwitch}>
+          <Button variant="icon" bg={true} onClick={switchDirectory}>
             <ArrowLeftRight />
           </Button>
         </div>
@@ -137,10 +104,14 @@ function Directory() {
       </section>
 
       <Pagination
-        currentPage={page ?? 1}
+        currentPage={page}
         hasNext={hasNext ?? false}
-        onPrevious={handlePageChange.bind(null, "previous")}
-        onNext={handlePageChange.bind(null, "next")}
+        onPrevious={function () {
+          handlePageChange("previous");
+        }}
+        onNext={function () {
+          handlePageChange("next");
+        }}
       />
     </section>
   );

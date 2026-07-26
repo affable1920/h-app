@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import useModalStore, { removeModal } from "../stores/modalStore";
+import useModalStore, { removeModal } from "../stores/modal-store";
 
 function useInjectModalHandlers() {
   const currModal = useModalStore((s) => s.currModal);

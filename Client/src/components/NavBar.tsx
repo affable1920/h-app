@@ -10,6 +10,7 @@ import {
 import Button from "@/components/ui/Button";
 import {
   ArrowRight,
+  BellOff,
   Bot,
   History,
   Home,
@@ -24,7 +25,7 @@ import {
   Syringe,
   User,
 } from "lucide-react";
-import useAuthStore, { logout } from "@/stores/authStore";
+import useAuthStore, { logout } from "@/stores/auth-store";
 import type { MobileNavItem } from "@/types/utils";
 import MobileNavigationItem from "./MobileNavigationItem";
 import Divider from "./ui/Divider";
@@ -121,13 +122,16 @@ function NavBar() {
               { label: "profile", icon: User, route: "/view/auth/me" },
               { label: "messages", icon: Mail },
               {
-                label: "history",
-                icon: History,
+                label: "DND (Do Not Disturb)",
+                icon: BellOff,
+                onClick: function () {},
               },
               {
                 label: "logout",
                 icon: LogOut,
-                onClick: () => logout(window.location.href),
+                onClick: function () {
+                  logout(window.location.href);
+                },
               },
             ],
           },

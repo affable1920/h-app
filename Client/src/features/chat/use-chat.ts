@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { request } from "@/features/chat/fetch";
 import { Buffer } from "@/features/chat/buffer";
 import { stream } from "@/features/chat/stream";
-import useAuthStore from "@/stores/authStore";
-import APIClient from "@/services/ApiClient";
+import useAuthStore from "@/stores/auth-store";
+import APIClient from "@/core/ApiClient";
 import type { ChatRequest } from "@/types/http";
 import { config } from "@/config";
 

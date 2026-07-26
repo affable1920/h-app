@@ -13,9 +13,9 @@ import {
   useUnbookingMutation,
 } from "@/features/booking/use-booking";
 import { toast } from "sonner";
-import useModalStore from "@stores/modalStore";
+import useModalStore from "@/stores/modal-store";
 
-import useAuthStore from "@stores/authStore";
+import useAuthStore from "@/stores/auth-store";
 import { MapPinCheckInside } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

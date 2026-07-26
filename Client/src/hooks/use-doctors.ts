@@ -1,6 +1,10 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  queryOptions,
+  useQuery,
+} from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import APIClient from "@/services/ApiClient";
+import APIClient from "@/core/ApiClient";
 import type { operations } from "@/types/api";
 import type { GetByIdResponse, GetAllDrResponse } from "@/types/http";
 
@@ -28,12 +32,16 @@ export function useGetAll() {
   });
 }
 
-export function useGetById(id: string) {
-  return useQuery({
+export function getByIdOptions(id: string) {
+  return queryOptions({
     queryKey: ["doctor", id],
     async queryFn() {
       const response = await api.get<GetByIdResponse>(id);
       return response.data;
     },
   });
+}
+
+export function useGetById(id: string) {
+  return useQuery(getByIdOptions(id));
 }

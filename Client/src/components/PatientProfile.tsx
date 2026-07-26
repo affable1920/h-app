@@ -11,8 +11,7 @@ import { fromISO } from "@/utils/utils";
 import Badge from "./ui/Badge";
 import { Link } from "react-router-dom";
 import { useUnbookingMutation } from "@/features/booking/use-booking";
-import useModalStore from "@/stores/modalStore";
-import Code from "./ui/Code";
+import useModalStore from "@/stores/modal-store";
 import { toast } from "sonner";
 import type { APIError, ProfileResponse } from "@/types/http";
 import SearchBar from "./ui/SearchBar";
@@ -26,7 +25,7 @@ const personal = {
     }
 
     return (
-      <article>
+      <article key={profile.id}>
         <header className="mb-5 italic">Personal Info</header>
 
         <section className="space-y-4">
@@ -35,7 +34,7 @@ const personal = {
 
             return (
               val && (
-                <div className="flex gap-8 items-center ">
+                <div key={field} className="flex gap-8 items-center ">
                   <p className="italic capitalize">{field}</p>
                   {(val as string) && <p>{val}</p>}
                 </div>
@@ -121,108 +120,106 @@ export function PatientProfile() {
                 exit="exit"
                 className="flex flex-col gap-6 py-6"
               >
-                {profile?.appointments.map(function (appointment, i) {
+                {profile?.appointments.map(function (appointment) {
                   return (
-                    <>
-                      <motion.div
-                        key={appointment.id}
-                        className="flex flex-col justify-between bg-layout p-4 rounded-lg shadow-black/20 shadow-md border-2 border-border"
-                        variants={createStagger().children}
-                      >
-                        <Stack styles={{ gap: "4px" }} orientation="V">
-                          <Stack justify="between">
-                            <Link
-                              to={`/view/doctor/${appointment.doctor_id}`}
-                              className="text-text-normal hover:text-blue-400 transition-colors
+                    <motion.div
+                      key={appointment.id}
+                      className="flex flex-col justify-between bg-layout p-4 rounded-lg shadow-black/20 shadow-md border-2 border-border"
+                      variants={createStagger().children}
+                    >
+                      <Stack style={{ gap: "4px" }} orientation="V">
+                        <Stack justify="between">
+                          <Link
+                            to={`/view/doctor/${appointment.doctor_id}`}
+                            className="text-text-normal hover:text-blue-400 transition-colors
                                 duration-150"
-                            >
-                              Dr. {appointment.doctor.name}
-                            </Link>
-
-                            <p className="text-sm">
-                              {fromISO(appointment.scheduled_date).toFormat(
-                                "dd LLL yyyy",
-                              )}
-                            </p>
-                          </Stack>
-
-                          <Link to={`/view/clinic/${appointment.clinic_id}`}>
-                            {appointment.clinic.name}
+                          >
+                            Dr. {appointment.doctor.name}
                           </Link>
+
+                          <p className="text-sm">
+                            {fromISO(appointment.scheduled_date).toFormat(
+                              "dd LLL yyyy",
+                            )}
+                          </p>
                         </Stack>
 
-                        <div className="flex self-end gap-1">
-                          <Badge
-                            className="capitalize font-semibold scale-90 cursor-default!"
-                            color={
-                              appointment.status === "active"
-                                ? "indicator"
-                                : "secondary"
-                            }
-                            disabled={appointment.status !== "active"}
+                        <Link to={`/view/clinic/${appointment.clinic_id}`}>
+                          {appointment.clinic.name}
+                        </Link>
+                      </Stack>
+
+                      <div className="flex self-end gap-1">
+                        <Badge
+                          className="capitalize font-semibold scale-90 cursor-default!"
+                          color={
+                            appointment.status === "active"
+                              ? "indicator"
+                              : "secondary"
+                          }
+                          disabled={appointment.status !== "active"}
+                        >
+                          {appointment.status}
+                        </Badge>
+
+                        {appointment.status === "active" && (
+                          <Button
+                            loading={isPending}
+                            onClick={function () {
+                              openModal("confirmation", {
+                                tagline: (
+                                  <span>
+                                    <p className="leading-1.2 mb-3">
+                                      Are you sure you want to cancel your
+                                      appointment ?
+                                    </p>
+                                    <Badge
+                                      color="danger"
+                                      style={{
+                                        fontWeight: 700,
+                                        fontFamily: "monospace",
+                                      }}
+                                    >
+                                      This step can not be undone !
+                                    </Badge>
+                                  </span>
+                                ),
+                                async resolve() {
+                                  unBook(
+                                    {
+                                      appointmentId: appointment.id,
+                                      doctorId: appointment.doctor_id,
+                                    },
+                                    {
+                                      onSuccess() {
+                                        toast.message(
+                                          "Appointment successfully cancelled.",
+                                        );
+                                        closeModal();
+                                      },
+                                      onError(error) {
+                                        const resolved =
+                                          error as unknown as APIError;
+
+                                        toast(resolved.type, {
+                                          description() {
+                                            return resolved.msg;
+                                          },
+                                        });
+                                      },
+                                    },
+                                  );
+                                },
+                                reject: closeModal,
+                              });
+                            }}
+                            color="brand"
                           >
-                            {appointment.status}
-                          </Badge>
-
-                          {appointment.status === "active" && (
-                            <Button
-                              loading={isPending}
-                              onClick={function () {
-                                openModal("confirmation", {
-                                  tagline: (
-                                    <span>
-                                      <p className="leading-1.2 mb-3">
-                                        Are you sure you want to cancel your
-                                        appointment ?
-                                      </p>
-                                      <Badge
-                                        color="danger"
-                                        style={{
-                                          fontWeight: 700,
-                                          fontFamily: "monospace",
-                                        }}
-                                      >
-                                        This step can not be undone !
-                                      </Badge>
-                                    </span>
-                                  ),
-                                  async resolve() {
-                                    unBook(
-                                      {
-                                        appointmentId: appointment.id,
-                                        doctorId: appointment.doctor_id,
-                                      },
-                                      {
-                                        onSuccess() {
-                                          toast.message(
-                                            "Appointment successfully cancelled.",
-                                          );
-                                          closeModal();
-                                        },
-                                        onError(error) {
-                                          const resolved =
-                                            error as unknown as APIError;
-
-                                          toast(resolved.type, {
-                                            description() {
-                                              return resolved.msg;
-                                            },
-                                          });
-                                        },
-                                      },
-                                    );
-                                  },
-                                  reject: closeModal,
-                                });
-                              }}
-                              color="brand"
-                            >
-                              Cancel
-                            </Button>
-                          )}
-                        </div>
-                      </motion.div>
-                    </>
+                            Cancel
+                          </Button>
+                        )}
+                      </div>
+                    </motion.div>
                   );
                 })}
               </motion.section>

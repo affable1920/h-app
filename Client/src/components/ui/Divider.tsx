@@ -1,9 +1,8 @@
-import type { COLORS } from "@/types/ui";
+import type { Color } from "@/types/ui";
 import { memo, type CSSProperties, type ElementType } from "react";
 
 type Labelposition = "start" | "center" | "end";
-
-type DividerColor = (typeof COLORS)[number] | "secondary";
+type DividerColor = Exclude<Color, "danger" | "success" | "warning">;
 
 type LabelProps = {
   as?: ElementType;
@@ -11,7 +10,7 @@ type LabelProps = {
   position: Labelposition;
   styles?: CSSProperties;
   className?: string;
-  color?: DividerColor;
+  color?: Color;
 };
 
 interface DividerProps {
@@ -48,10 +47,15 @@ const Divider = memo(function ({
     .join(" ")
     .trim();
 
+  const lblColor =
+    label?.color && (label.color as Color) in colors
+      ? colors[label.color as DividerColor]
+      : colors[color];
+
   const lblStyles = [
     "shrink-0 capitalize inline-flex",
     label?.position === "end" ? "order-1" : "order-0",
-    "text" + colors[label?.color ?? "primary"].slice(2),
+    "text" + lblColor.slice(2),
     label?.className,
   ]
     .filter(Boolean)

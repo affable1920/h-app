@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import NavBar from "../NavBar";
-import useModalStore from "@/stores/modalStore";
+import useModalStore from "@/stores/modal-store";
 
 function Layout() {
   const openModal = useModalStore((s) => s.openModal);

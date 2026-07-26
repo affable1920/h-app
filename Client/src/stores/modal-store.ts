@@ -1,9 +1,11 @@
 import { create } from "zustand";
 
+type Position = "top" | "bottom" | "center" | "left";
+
 type ModalProps = {
   [k: string]: unknown;
   viewOverlay?: boolean;
-  position?: "top" | "bottom" | "center";
+  position?: Position;
 };
 
 type ModalState = {
@@ -20,10 +22,10 @@ const useModalStore = create<ModalState & ModalActions>((set) => ({
   currModal: null,
   modalProps: {},
 
-  openModal(modal, options) {
+  openModal(modal, options = {}) {
     set({
       currModal: modal,
-      modalProps: options ?? {},
+      modalProps: options,
     });
   },
 

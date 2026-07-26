@@ -1,4 +1,4 @@
-import APIClient from "@/services/ApiClient";
+import APIClient from "@/core/ApiClient";
 import type { Clinic, GetAllClinicsResponse } from "@/types/http";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useLocation, useSearchParams } from "react-router-dom";

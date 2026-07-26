@@ -52,6 +52,7 @@ export default function DrProfileSetup() {
   const goForward = useCallback(
     async function () {
       const ok = !FIELDS[step] || (await form.trigger(FIELDS[step]));
+      console.log(form.getValues("profile"));
 
       if (!ok) {
         return;
@@ -69,8 +70,8 @@ export default function DrProfileSetup() {
     for (const [key, val] of Object.entries(formData)) {
       if (Array.isArray(val)) {
         val.forEach((v) => fd.append(key, String(v)));
-      } else if ((val as any) instanceof File) {
-        fd.append(key, val as any as File);
+      } else if ((val as unknown) instanceof File) {
+        fd.append(key, val as unknown as File);
       } else if (val != null) {
         fd.append(key, String(val));
       }
@@ -91,8 +92,9 @@ export default function DrProfileSetup() {
           onError(error) {
             toast.message((error as unknown as APIError).msg);
           },
+
           onSuccess() {
-            toast.message("Doctor profile created successfully!");
+            toast.message("Your doctor profile created successfully!");
             navigate("/main/idx/doctors");
           },
         },

@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 
-import useModalStore from "../stores/modalStore";
+import useModalStore from "../stores/modal-store";
 import useInjectModalHandlers from "../hooks/use-modal-handlers";
 
 import Overlay from "./ui/Overlay";

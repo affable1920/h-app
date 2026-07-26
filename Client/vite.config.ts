@@ -16,19 +16,22 @@ const https: CommonServerOptions["https"] = !useHttps
   ? undefined
   : {
       key: fs.readFileSync(
-        is_using_container
-          ? "/certs/key.pem"
-          : path.resolve(__dirname, "../localhost+3-key.pem"),
+        path.resolve(
+          __dirname,
+          is_using_container ? "../certs/key.pem" : "../localhost+3-key.pem",
+        ),
       ),
       cert: fs.readFileSync(
-        is_using_container
-          ? "/certs/cert.pem"
-          : path.resolve(__dirname, "../localhost+3.pem"),
+        path.resolve(
+          __dirname,
+          is_using_container ? "../certs/cert.pem" : "../localhost+3.pem",
+        ),
       ),
     };
 
 const protocol = (useHttps ? "https" : "http") + "://";
 const wsProtocol = (useHttps ? "wss" : "ws") + "://";
+const host = is_using_container ? "server:8000" : "localhost:8000";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -44,15 +47,13 @@ export default defineConfig({
     host: useHttps ? "0.0.0.0" : "127.0.0.1",
     proxy: {
       "/api": {
-        target:
-          protocol + (is_using_container ? "server:8000" : "localhost:8000"),
+        target: protocol + host,
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
       "/ws": {
-        target:
-          wsProtocol + (is_using_container ? "server:8000" : "localhost:8000"),
+        target: wsProtocol + host,
         changeOrigin: true,
         secure: false,
         ws: true,

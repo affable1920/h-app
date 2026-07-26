@@ -1,14 +1,13 @@
 import type { Variant } from "motion/react";
 
-export type Position = "top" | "bottom" | "center";
+export type Position = "top" | "bottom" | "center" | "left";
 
-const modalProperties: Record<string, string> = {
+const modalProperties: Record<Position, string> = {
   top: `fixed inset-0 w-full h-full max-h-52 rounded-b-md border-2 border-border-strong rounded-md`,
-
   bottom: `fixed bottom-0 min-h-48 left-0 w-full rounded-t-md`,
-
   center: `absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[300px] rounded-lg 
   border-2 border-border`,
+  left: `absolute inset-0 max-w-72`,
 };
 
 function YModalVariants(
@@ -30,7 +29,7 @@ function YModalVariants(
         },
       },
       exit: {
-        y: "40%",
+        y: "25%",
         opacity: 0,
         transition: {
           ease: "easeIn",
@@ -83,10 +82,29 @@ const modalVariants: Record<Position, Record<string, Variant>> = {
       },
     },
   },
+  left: {
+    initial: {
+      x: "-40px",
+    },
+    animate: {
+      x: 0,
+      transition: {
+        duration: 0.24,
+        ease: "easeOut",
+      },
+    },
+    exit: {
+      x: "-20px",
+      transition: {
+        duration: 0.05,
+        type: "tween",
+      },
+    },
+  },
 };
 
 export default function getModalConfig(pstn: Position = "center") {
-  const baseModal = `bg-layout shadow-lg shadow-black/40 p-2 scrollbar-hidden`;
+  const baseModal = `bg-layout shadow-lg shadow-black/40 scrollbar-hidden`;
   const variants = modalVariants[pstn];
 
   const stylesConfig = [baseModal, modalProperties[pstn]]

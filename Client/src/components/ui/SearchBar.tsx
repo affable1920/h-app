@@ -20,7 +20,7 @@ const SearchBar = memo(function ({
   return (
     <div className="relative flex items-center">
       <Input
-        id="searchQuery"
+        id="search-query"
         value={val}
         placeholder={placeholder}
         size="sm"

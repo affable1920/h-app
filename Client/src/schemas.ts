@@ -24,13 +24,16 @@ export const PatientLoginSchema = z.object({
   password: z.string().min(6),
 });
 
-const MAX_SIZE = 5 * 1024 * 1024;
+const MAX_SIZE = 1;
 
 export const stepIdentity = z.object({
   profile: z
-    .custom()
-    .transform((v) => (v instanceof FileList && v.length > 0 ? v[0] : null))
-    .refine((file) => !file || (file?.size ?? 0) >= MAX_SIZE, "Max size 5MB")
+    .transform(function (fl) {
+      return fl instanceof FileList && fl.length > 0 ? fl.item(0) : null;
+    })
+    .refine(function (file) {
+      return !file || (file?.size ?? 0) <= MAX_SIZE * 1024 * 1024;
+    }, `file size must not be greater than ${MAX_SIZE}mb!`)
     .default(null),
   name: z.string().min(4, {
     error: "A name is required",

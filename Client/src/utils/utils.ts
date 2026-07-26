@@ -73,18 +73,21 @@ export function fromISO(iso: string): DateTime {
   return DateTime.fromISO(iso);
 }
 
-export function debounce(fn: Function, ms: number = 200) {
+export function debounce<Args extends Array<unknown>>(
+  fn: (...args: Args) => void,
+  ms: number = 200,
+) {
   let timeoutId: ReturnType<typeof setTimeout>;
 
-  function memoized(query: string) {
+  return function memoized(...args: Args) {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
 
-    timeoutId = setTimeout(fn.bind(fn, query), ms);
-  }
-
-  return memoized;
+    timeoutId = setTimeout(function () {
+      fn(...args);
+    }, ms);
+  };
 }
 
 const dtUnits: Array<DateTimeUnit> = ["day", "month"];

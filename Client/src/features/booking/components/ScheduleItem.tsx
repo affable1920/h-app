@@ -10,7 +10,7 @@ import { ArrowRight, ChevronRight, MapPinCheckInside } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import Badge from "@components/ui/Badge";
-import useModalStore from "@stores/modalStore";
+import useModalStore from "@/stores/modal-store";
 import { useSearchParams } from "react-router-dom";
 import Button from "@components/ui/Button";
 import type { DateTimeUnit } from "luxon";

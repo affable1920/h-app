@@ -1,4 +1,8 @@
-import type { SignalingEvent, SignalingEventMessage } from "../types";
+import {
+  type SignalingEvent,
+  type SignalingEventMessage,
+  type WebRTCEvents,
+} from "../types";
 import signalingClient from "@/features/call/core/SignalingClient";
 import EventEmitter from "../core/EventEmitter";
 
@@ -9,7 +13,12 @@ const config = {
   ],
 };
 
-export class WebRTC extends EventEmitter {
+export class WebRTC extends EventEmitter<WebRTCEvents> {
+  /** - Web rtc event and the lifetime of their listeners
+   * this client is also lazily initialized and is scoped per call, native events like ontrack, onice don't need
+   * any manual removal, that automatically happens on rtc.close()
+   */
+
   // delay rtc creation - create only on demand using the connect method
   private _rtc: RTCPeerConnection | null = null;
 
@@ -20,9 +29,17 @@ export class WebRTC extends EventEmitter {
 
   constructor() {
     super();
+    this.listenOnSignaling();
+  }
+
+  private listenOnSignaling() {
+    signalingClient.on("answer", this.onAnswer);
+    signalingClient.on("ice-candidate", this.onIceCandidate);
+
     this.relay(signalingClient, "offer", "incoming-offer");
-    this.relay(signalingClient, "hang-up", "peer-hungup");
-    this.addWsListeners();
+    this.relay(signalingClient, "offer-decline");
+    this.relay(signalingClient, "offer-accpet");
+    this.relay(signalingClient, "hang-up");
   }
 
   private get rtc() {
@@ -42,10 +59,17 @@ export class WebRTC extends EventEmitter {
     return true;
   }
 
-  private sendToPeer(
-    msgType: SignalingEvent,
-    payload: SignalingEventMessage["payload"] = {},
+  private sendToPeer<K extends SignalingEvent>(
+    msgType: K,
+    payload?: SignalingEventMessage<K>["payload"],
   ) {
+    const lg = this.getLogger("WebRTC.sendToPeer");
+    if (!this.peerId) {
+      lg(
+        "No peerId specified yet. please specify the remote peer before sending a message.",
+      );
+    }
+
     signalingClient.send(msgType, {
       payload,
       metadata: {
@@ -64,13 +88,6 @@ export class WebRTC extends EventEmitter {
   }
 
   connect({ token, id }: { id: string; token: string }) {
-    console.log(
-      "[WebRTC.connect] Called with id:",
-      id,
-      "isConnected:",
-      this.isCreated,
-    );
-
     if (!signalingClient.isConnected) {
       console.log(
         `[WebRTC.connect] SignalingClient not connected! Current state: ${signalingClient.connectionState}`,
@@ -85,11 +102,11 @@ export class WebRTC extends EventEmitter {
       );
       return;
     }
+
     this._rtc = new RTCPeerConnection(config);
     this.localId = id;
-
-    this._rtc.ontrack = this.onRemoteTrack.bind(this);
-    this._rtc.onicecandidate = this.onIce.bind(this);
+    this._rtc.ontrack = this.onRemoteTrack;
+    this._rtc.onicecandidate = this.onIce;
   }
 
   private onRemoteTrack(ev: RTCTrackEvent) {
@@ -104,10 +121,7 @@ export class WebRTC extends EventEmitter {
       return;
     }
 
-    console.log(
-      "Remote stream found, emitting the remote track event with the stream ...",
-    );
-    this.emit("remote-stream", { stream });
+    this.emit("remote-stream", stream);
   }
 
   private onIce({ candidate }: RTCPeerConnectionIceEvent) {
@@ -119,14 +133,19 @@ export class WebRTC extends EventEmitter {
   }
 
   async createOffer() {
+    if (!this.rtc) {
+      return;
+    }
+
     const log = this.getLogger("createOffer");
     const sdp = await this.rtc?.createOffer();
 
-    await this.rtc?.setLocalDescription(sdp);
-    log("Offer created and set as local description.");
+    await this.rtc.setLocalDescription(sdp);
 
     this.sendToPeer("offer", sdp);
-    log("offer sent to remote peer via signalingClient.");
+    log(
+      "Offer created, set as local description and sent to remote peer via signalingClient.",
+    );
   }
 
   async createAnswer(ev: CustomEvent, peerId: string) {
@@ -141,16 +160,16 @@ export class WebRTC extends EventEmitter {
   }
 
   private async onAnswer(ev: CustomEvent) {
-    const log = this.getLogger("WebRTC.onAnswer");
-    const msg = ev.detail;
+    this.emit("offer-accept");
 
+    const lg = this.getLogger("WebRTC.onAnswer");
+    const msg = ev.detail;
     await this.rtc?.setRemoteDescription(msg.payload);
-    log(
+
+    lg(
       `Answer recieved, and set as remote description. flushing ice candidates ...`,
     );
-
     await this.flushIceCandidates();
-    log(`All Ice-candidates flushed.`);
   }
 
   private async flushIceCandidates() {
@@ -164,18 +183,16 @@ export class WebRTC extends EventEmitter {
   private async onIceCandidate(ev: CustomEvent) {
     // ice candidates can start ticking even before recieving an answer,
     // save them till then
-    const log = this.getLogger("onIceCandidate");
+    const lg = this.getLogger("onIceCandidate");
 
     const candidate = ev.detail.payload;
 
     if (candidate && this.rtc?.remoteDescription?.type) {
-      log("answer already set, adding ice-candidates to peer conenction ...");
+      lg("answer already set, adding ice-candidates to peer conenction ...");
 
       await this.rtc.addIceCandidate(candidate);
     } else if (candidate) {
-      log(
-        "answer yet to be recieved, saving candidates to the buffer for now.",
-      );
+      lg("answer yet to be recieved, saving candidates to the buffer for now.");
       this.iceCandidateBuffer.push(candidate);
     }
   }
@@ -185,30 +202,30 @@ export class WebRTC extends EventEmitter {
     await this.createOffer();
   }
 
-  private addWsListeners() {
-    console.log("[WebRTC.addWsListeners] Ws listeners attached");
+  disconnect(reason: keyof WebRTCEvents = "hang-up") {
+    this.sendToPeer(reason);
 
-    signalingClient.on("answer", this.onAnswer);
-    signalingClient.on("ice-candidate", this.onIceCandidate);
+    if (this.rtc) {
+      this.rtc?.close();
+      this.rtc = null;
+    }
+
+    this.stoplisteningOnSignaling();
+    this.localId = null;
+    this.peerId = null;
+    this.iceCandidateBuffer = [];
   }
 
-  private removeWsListeners() {
-    console.log("[WebRTC.removeWsListeners] Ws listeners removed");
-
+  private stoplisteningOnSignaling() {
     signalingClient.off("answer", this.onAnswer);
     signalingClient.off("ice-candidate", this.onIceCandidate);
   }
 
-  disconnect(reason: SignalingEvent & string = "hang-up") {
-    this.rtc?.close();
-    this.sendToPeer(reason);
+  declineCall(localId: string, peerId: string) {
+    this.localId = localId;
+    this.peerId = peerId;
+    this.sendToPeer("offer-decline");
   }
 
-  unsubscribe() {
-    this.rtc = null;
-    this.localId = null;
-    this.peerId = null;
-    this.iceCandidateBuffer = [];
-    this.removeWsListeners();
-  }
+  cleanup() {}
 }

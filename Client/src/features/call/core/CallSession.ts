@@ -1,6 +1,8 @@
 import { type ExternalToast, toast } from "sonner";
 import { WebRTC } from "./WebRTC";
 import EventEmitter from "./EventEmitter";
+import type { CallSessionEvents, CallSessionState } from "../types";
+import router from "@/components/router";
 
 /**
  * The intention for this class's implementation is to make it represent an ongoing call session from both -
@@ -24,18 +26,18 @@ import EventEmitter from "./EventEmitter";
  *     itself, not threaded through the hook's internals.
  */
 
-export default class CallSession extends EventEmitter {
+export default class CallSession extends EventEmitter<CallSessionEvents> {
   private client: WebRTC;
-  #state = "idle";
+  #state: CallSessionState = "idle";
   #controller = new AbortController();
 
   private localStream: MediaStream | null = null;
   private remoteStream: MediaStream | null = null;
-
   private readonly localUser: { id: string; token: string };
-  // private handleIncoming = this.onIncoming.bind(this);
 
   constructor({ id, token }: { id: string; token: string }) {
+    console.log("Call session instance created .");
+
     super();
     this.localUser = {
       id,
@@ -43,29 +45,37 @@ export default class CallSession extends EventEmitter {
     };
 
     this.client = new WebRTC();
+    this.listen();
+  }
 
-    this.client.on("remote-stream", this.saveRemoteStream, {
-      signal: this.#controller.signal,
-    });
-    this.client.on("incoming-offer", this.onIncoming, {
-      signal: this.#controller.signal,
-    });
-    this.client.on("peer-hungup", this.endOngoingCall, {
-      signal: this.#controller.signal,
-    });
+  listen() {
+    // understanding events and their lifetime
+    /** incoming-offer - must always have a listener
+     *  hang-up/peer-hangup - for the duration of a call
+     *  remote-stream       - same ..
+     *  offer-accept        - ..
+     *  offer-decline       - ..
+     */
+
+    this.client.on("incoming-offer", this.onIncoming);
+  }
+
+  private listenForPerCallEvents() {
+    this.client.on("hang-up", this.endOngoingCall);
+    this.client.on("remote-stream", this.saveRemoteStream);
+    this.client.on("offer-accept", this.onPeerAccept);
+    this.client.on("offer-decline", this.onPeerDecline);
+  }
+
+  private stoplisteningForPerCallEvents() {
+    this.client.off("hang-up", this.endOngoingCall);
+    this.client.off("remote-stream", this.saveRemoteStream);
+    this.client.off("offer-accept", this.onPeerAccept);
+    this.client.off("offer-decline", this.onPeerDecline);
   }
 
   get state() {
     return this.#state;
-  }
-
-  #setState(next: string) {
-    console.log(
-      `[CallSession.state-change] State machine moving from ${this.state} to ${next}`,
-    );
-
-    this.#state = next;
-    this.emit("state-change", next);
   }
 
   get audio() {
@@ -76,26 +86,26 @@ export default class CallSession extends EventEmitter {
     return this.localStream?.getVideoTracks()[0];
   }
 
-  private cleanup() {
-    this.localStream = null;
-    this.remoteStream = null;
-    this.#controller.abort();
-    this.#controller = new AbortController();
+  get local() {
+    return this.localStream;
   }
 
-  endOngoingCall() {
-    this.localStream?.getTracks().forEach(function (track) {
-      track.stop();
-    });
-    this.remoteStream?.getTracks().forEach(function (track) {
-      track.stop();
-    });
+  get remote() {
+    return this.remoteStream;
+  }
 
-    this.#setState("idle");
-    this.client.disconnect();
-    this.client.unsubscribe();
+  #setState(next: CallSessionState) {
+    const lg = this.getLogger("CallSession.setState");
+    lg(`State machine moving from ${this.state} to ${next}`);
 
-    this.cleanup();
+    if (next !== "idle") {
+      this.listenForPerCallEvents();
+    } else {
+      this.stoplisteningForPerCallEvents();
+    }
+
+    this.#state = next;
+    this.emit("state-change", next);
   }
 
   private notify(message: string, data?: ExternalToast): string | number {
@@ -104,10 +114,80 @@ export default class CallSession extends EventEmitter {
     });
   }
 
-  private async saveRemoteStream(ev: CustomEvent) {
-    const stream = ev.detail as MediaStream;
+  private async saveRemoteStream(ev: CustomEvent<MediaStream>) {
+    const stream = ev.detail;
     this.remoteStream = stream;
     this.emit("remote-stream", stream);
+    this.#setState("connected");
+  }
+
+  private async acceptIncoming(ev: CustomEvent, peerId: string) {
+    this.#setState("connecting");
+    await router.navigate(`/view/doctor/${peerId}/consult`, {
+      replace: true, // set replace to true, so on an accidental back press, nothing happens
+    });
+    this.client.connect(this.localUser);
+    await this.acquireMedia();
+    this.emit("local-stream", this.localStream!);
+    await this.client.createAnswer(ev, peerId);
+  }
+
+  private declineIncoming(ev: CustomEvent, peerId: string) {
+    ev.preventDefault();
+    this.client.declineCall(this.localUser.id, peerId);
+    toast.dismiss();
+    this.#setState("idle");
+  }
+
+  private onIncoming(ev: CustomEvent) {
+    this.#setState("ringing-incoming");
+
+    const { metadata = {} } = ev.detail;
+    const peer = metadata?.from ?? null;
+
+    this.notify(peer + " wants to connect with you.", {
+      action: {
+        label: "Accept",
+        onClick: this.acceptIncoming.bind(this, ev, peer),
+      },
+      cancel: {
+        label: "Decline",
+        onClick: this.declineIncoming.bind(this, ev, peer),
+      },
+      duration: 5000,
+    });
+  }
+
+  onPeerAccept() {
+    this.#setState("connecting");
+    this.emit("local-stream", this.localStream!);
+  }
+
+  onPeerDecline(ev: CustomEvent) {
+    ev.preventDefault();
+    this.#setState("idle");
+    this.client.disconnect("offer-decline");
+    this.notify("Connection request declined by peer!");
+  }
+
+  private cleanup() {
+    this.localStream = null;
+    this.remoteStream = null;
+  }
+
+  endOngoingCall() {
+    this.localStream?.getTracks().forEach(function (track) {
+      track.stop();
+    });
+
+    this.remoteStream?.getTracks().forEach(function (track) {
+      track.stop();
+    });
+
+    this.client.disconnect("hang-up");
+    this.client.cleanup();
+    this.#setState("idle");
+    this.cleanup();
   }
 
   async acquireMedia() {
@@ -124,57 +204,13 @@ export default class CallSession extends EventEmitter {
     this.client.addTracks(stream);
 
     log(
-      "Media acquired, set local stream, and added tracks to the RTC client instance.",
+      "Media acquired, local stream saved inside the class, and added tracks to the RTC client instance.",
     );
-    log("Emitting local stream ev with the stream acquired ...");
-    this.emit("local-stream", stream);
-  }
-
-  private async onAcceptIncoming(ev: CustomEvent, peerId: string) {
-    this.client.connect(this.localUser);
-    await this.acquireMedia();
-    await this.client.createAnswer(ev, peerId);
-  }
-
-  private onDeclineIncoming(ev: CustomEvent) {
-    ev.preventDefault();
-    this.client.disconnect();
-    toast.dismiss();
-  }
-
-  private onIncoming(ev: CustomEvent) {
-    console.log("Recieving an Incoming offer ...");
-
-    this.#setState("ringing-incoming");
-    const offer = ev.detail;
-
-    const { metadata = {} } = offer;
-    const peer = metadata?.from ?? null;
-
-    console.log(
-      "[CallSession.onIncoming] Recieving an incoming call from " + peer,
-    );
-
-    this.notify(peer + " wants to connect with you.", {
-      action: {
-        label: "Accept",
-        onClick: this.onAcceptIncoming.bind(this, ev, peer),
-      },
-      cancel: {
-        label: "Decline",
-        onClick: this.onDeclineIncoming.bind(this, ev),
-      },
-      duration: 5000,
-    });
   }
 
   async sendOutgoing(peerId: string) {
     this.#setState("ringing-outgoing");
-    const logger = this.getLogger("CallSession.sendOutgoing");
-    logger("calling peer with id " + peerId);
-
     this.client.connect(this.localUser);
-
     await this.acquireMedia();
     await this.client.start(peerId);
   }

@@ -1,20 +1,8 @@
-export type PeerIdentity = {
-  peerId: string;
-};
+import type { SignalingEventMessage } from "./types";
 
-export type ErrorDetail = {
-  msg?: string;
-  code?: string;
-};
-
-export type SessionDescriptionPayload = {
-  sdp: RTCSessionDescriptionInit;
-};
-
-export type IceCandidatePayload = {
-  candidate: RTCIceCandidateInit;
-};
-
-export type MediaPayload = {
-  stream: MediaStream;
+type RtcEvent = "incoming-offer" | "peer-hangup" | "remote-stream";
+type RtcEventPayload = {
+  "incoming-offer": SignalingEventMessage<"offer">;
+  "peer-hangup": SignalingEventMessage<"hang-up">;
+  "remote-stream": CustomEvent<MediaStream>;
 };

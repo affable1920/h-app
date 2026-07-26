@@ -1,7 +1,10 @@
-export default abstract class EventEmitter extends EventTarget {
+export default abstract class EventEmitter<
+  Events extends Record<string, unknown>,
+> extends EventTarget {
   #autoBind() {
     console.log(
-      `Performing an autobind operation on methods of client [${this.className}]`,
+      "Performing auto-bind operation for class ",
+      "(" + this.className + ")",
     );
 
     const ownMethods = Object.getOwnPropertyDescriptors(
@@ -10,16 +13,18 @@ export default abstract class EventEmitter extends EventTarget {
 
     for (const [key, descriptor] of Object.entries(ownMethods)) {
       // object.entries returns a -> detached copy
-      if (key === "constructor" || !("value" in descriptor)) {
+      if (!("value" in descriptor) || typeof descriptor.value !== "function") {
         continue;
       }
 
-      if (typeof descriptor.value === "function") {
-        Object.defineProperty(this, key, {
-          ...descriptor,
-          value: descriptor.value.bind(this),
-        });
+      if (key === "constructor") {
+        continue;
       }
+
+      Object.defineProperty(this, key, {
+        ...descriptor,
+        value: descriptor.value.bind(this),
+      });
     }
   }
 
@@ -38,34 +43,25 @@ export default abstract class EventEmitter extends EventTarget {
     this.#autoBind();
   }
 
-  on(
-    ev: string,
-    listener: (ev: CustomEvent<any>) => void,
+  on<K extends keyof Events & string>(
+    ev: K,
+    listener: (ev: CustomEvent<Events[K]>) => void,
     options: AddEventListenerOptions = {},
   ) {
-    const logger = this.getLogger(`[${this.className}.on]`);
-    logger(
-      `Adding a listener for event of type (${ev}) on client ${this.className}...`,
+    console.log(
+      `[EventEmitter.on] Client (${this.className}) subscribed to event (${ev})`,
     );
-
     this.addEventListener(ev, listener as EventListener, options);
   }
 
-  off(ev: string, listener: (e: CustomEvent<any>) => void) {
-    const logger = this.getLogger(`[${this.className}.off]`);
-    logger(
-      `removing a listener for event of type (${ev}) on client ${this.className}...`,
-    );
-
+  off<K extends keyof Events & string>(
+    ev: K,
+    listener: (e: CustomEvent<Events[K]>) => void,
+  ) {
     this.removeEventListener(ev, listener as EventListener);
   }
 
-  emit(ev: string, detail?: unknown) {
-    const logger = this.getLogger(`[${this.className}.emit]`);
-    if (ev !== "ice-candidate") {
-      logger(`Emitting event (${ev}) on client ${this.className}...`);
-    }
-
+  emit<K extends keyof Events & string>(ev: K, detail?: Events[K]) {
     this.dispatchEvent(new CustomEvent(ev, { detail }));
   }
 
@@ -77,7 +73,15 @@ export default abstract class EventEmitter extends EventTarget {
     return logger;
   }
 
-  protected relay(source: EventEmitter, ev: string, as: string) {
+  protected relay<
+    SourceEvents extends Record<string, unknown>,
+    K extends keyof SourceEvents & string,
+    As extends keyof Events & string,
+  >(
+    source: EventEmitter<SourceEvents>,
+    ev: K,
+    as?: SourceEvents[K] extends Events[As] ? K : As,
+  ) {
     /* a helper function that abstracts the repititve subscription and re-emitting implementation of an 
        event - (addEventListener + handler + dispatchEvent), 
        particularly useful for events needing no transformation at all.
@@ -93,13 +97,18 @@ export default abstract class EventEmitter extends EventTarget {
        just so an interested party consumes it.
     */
 
-    const lg = this.getLogger(`[EventEmitter.relay]`);
+    const lg = this.getLogger(`EventEmitter.relay`);
     lg(
       `Relay created - for event ${ev}, with ${source.className} as the source and the emitter to be ${this.className}`,
     );
 
-    function relayImpl(this: EventEmitter) {
-      this.emit(as);
+    const relayEv = as ?? ev;
+
+    function relayImpl(
+      this: EventEmitter<Events>,
+      sourceEv: CustomEvent<SourceEvents[K]>,
+    ) {
+      this.emit(relayEv as any, sourceEv.detail as any);
     }
 
     source.on(ev, relayImpl.bind(this));

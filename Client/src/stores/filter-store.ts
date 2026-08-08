@@ -97,6 +97,7 @@ function useFilterStore() {
 
       return keys.every(function (key) {
         const urlVal = searchParams.get(key);
+
         const filterVal = filters[key];
         return (
           (!!urlVal ? String(urlVal) : null) ===

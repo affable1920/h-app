@@ -5,8 +5,8 @@ export type Position = "top" | "bottom" | "center" | "left";
 const modalProperties: Record<Position, string> = {
   top: `fixed inset-0 w-full h-full max-h-52 rounded-b-md border-2 border-border-strong rounded-md`,
   bottom: `fixed bottom-0 min-h-48 left-0 w-full rounded-t-md`,
-  center: `absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[300px] rounded-lg 
-  border-2 border-border`,
+  center: `absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md lg:max-w-lg 
+  border-2 border-border rounded-lg`,
   left: `absolute inset-0 max-w-72`,
 };
 
@@ -66,38 +66,37 @@ const modalVariants: Record<Position, Record<string, Variant>> = {
       opacity: 1,
       scale: 1,
       transition: {
-        ease: "easeOut",
-        duration: 0.25,
-        type: "spring",
-        stiffness: 200,
-        damping: 20,
+        ease: "easeIn",
       },
     },
     exit: {
       scale: 0,
       opacity: 0,
       transition: {
-        duration: 0.12,
-        ease: "easeIn",
+        ease: "easeOut",
+        duration: 0.1,
       },
     },
   },
   left: {
     initial: {
-      x: "-40px",
+      x: "-100%",
     },
     animate: {
       x: 0,
       transition: {
-        duration: 0.24,
         ease: "easeOut",
+        stiffness: 50,
+        damping: 15,
       },
     },
     exit: {
-      x: "-20px",
+      x: "-100%",
       transition: {
-        duration: 0.05,
-        type: "tween",
+        ease: "easeIn",
+        stiffness: 110,
+        damping: 10,
+        duration: 0.1,
       },
     },
   },

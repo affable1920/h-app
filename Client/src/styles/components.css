@@ -3,10 +3,6 @@
     @apply mx-auto bg-layout my-24 rounded-xl shadow-lg shadow-black/30 
     border border-border-strong overflow-hidden;
   }
-
-  .profile-section {
-    margin-block: calc(var(--spacing) * 8);
-  }
 }
 
 /* @utility flex-box-* {

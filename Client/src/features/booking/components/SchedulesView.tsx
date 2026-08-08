@@ -40,32 +40,42 @@ function SchedulesView() {
 
   return (
     <section>
-      <header className="flex justify-center mb-10">
+      <header className="flex justify-center">
         <h2 className="text-lg">Dr. {doctor.name}</h2>
       </header>
 
-      <section className="flex flex-col md:flex-row gap-12">
-        <motion.section
-          key={`${doctor.id}-schedule-view`}
-          viewport={{ once: true }}
-          variants={ClinicViewVariants.containerVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          className="flex flex-1 flex-col gap-10 shadow-md rounded-xl border-2 border-border p-6 bg-layout
+      {!!doctor.schedules.length ? (
+        <section className="flex flex-col md:flex-row gap-12 mt-10">
+          <motion.section
+            key={`${doctor.id}-schedule-view`}
+            viewport={{ once: true }}
+            variants={ClinicViewVariants.containerVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="flex flex-1 flex-col gap-10 shadow-md rounded-xl border-2 border-border p-6 bg-layout
            shadow-black/20"
+          >
+            {doctor.schedules.map(function (schedule) {
+              return (
+                <ScheduleItem
+                  doctor={doctor}
+                  key={schedule.id}
+                  schedule={schedule}
+                />
+              );
+            })}
+          </motion.section>
+          <Calendar schedules={doctor.schedules} />
+        </section>
+      ) : (
+        <div
+          className="text-center text-md text-brand-hover bg-white flex justify-center 
+          items-center p-2 font-bold rounded-lg w-full max-w-md mx-auto mt-6"
         >
-          {doctor.schedules.map((schedule) => (
-            <ScheduleItem
-              doctor={doctor}
-              key={schedule.id}
-              schedule={schedule}
-            />
-          ))}
-        </motion.section>
-
-        <Calendar schedules={doctor.schedules} />
-      </section>
+          The Doctor has no active schedules yet .. !
+        </div>
+      )}
     </section>
   );
 }

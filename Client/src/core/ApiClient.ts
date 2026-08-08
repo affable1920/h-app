@@ -12,7 +12,7 @@ import {
   type PydanticValidationError,
 } from "@/types/http";
 import useAuthStore, { logout } from "@/stores/auth-store";
-import { config } from "@/config";
+import { config } from "@/core/config";
 import { toast } from "sonner";
 
 const CONFIG: Record<number, string> = {

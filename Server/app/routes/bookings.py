@@ -33,7 +33,7 @@ async def book(
             401,
             detail={
                 "type": "authentication error",
-                "msg": "Invalid user details. "
+                "msg": "Invalid user details. Doctors cannot book appointments for themselves yet."
             }
         )
 
@@ -68,8 +68,7 @@ async def book(
         Hi {user.username},
 
         Your appointment with Dr {created.doctor.name} is succesffuly scheduled at {created.clinic.name}
-        for {created.scheduled_date.isoformat(sep="-")} at {data.scheduled_date.time().isoformat()}
-"""
+        for {created.scheduled_date.isoformat(sep="-")} at {data.scheduled_date.time().isoformat()}"""
 
     await session.commit()
 
@@ -87,6 +86,7 @@ async def book(
 @router.delete("/cancel/{booking_id}")
 async def cancel_booking(
     booking_id: UUID,
+    background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_db),
     payload: dict = Depends(decode_access_token)
 ):
@@ -110,8 +110,6 @@ async def cancel_booking(
             patient=user
         )
 
-        return {"msg": "Slot cancelled successfully."}
-
     except ValueError as e:
         await session.rollback()
         logger.debug(e)
@@ -127,3 +125,11 @@ async def cancel_booking(
                 "msg": "An unexpected error occurred and your slot could not be cancelled"
             }
         )
+
+    background_tasks.add_task(
+        lambda: MailService.send_mail(
+            recipient=user.email,
+            msg="Your appointment has been cancelled."
+        )
+    )
+    return {"msg": "Slot cancelled successfully."}

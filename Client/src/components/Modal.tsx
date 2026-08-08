@@ -9,6 +9,7 @@ import Overlay from "./ui/Overlay";
 import MODALS from "./modals/modal-mapper";
 import getModalConfig from "../utils/modal-styles";
 import { useLocation } from "react-router-dom";
+import { toast } from "sonner";
 
 function Modal() {
   // Inject modal handlers for modal closers

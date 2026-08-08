@@ -17,6 +17,8 @@ const colors: Record<Color, string> = {
   primary: `bg-layout hover:bg-layout-raised text-text-secondary hover:text-text`,
   secondary: `bg-layout-raised hover:bg-text-teritiary/20`,
   danger: `bg-red-400 text-black font-bold`,
+  warning: "",
+  success: "",
 };
 
 const Badge = memo(
@@ -39,7 +41,7 @@ const Badge = memo(
     const classConfig = useMemo(
       function () {
         const BASE = `inline-flex items-center justify-center transition-colors duration-150 border-2 
-        border-border-strong text-center cursor-pointer p-2`;
+        border-border-strong text-center cursor-pointer p-2 capitalize`;
 
         return [
           BASE,

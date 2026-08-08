@@ -36,11 +36,12 @@ export type UserResponse = components["schemas"]["UserResponse"];
 
 export type Role = "doctor" | "patient";
 
-export type ProfileResponse<R extends Role> = R extends "doctor"
-  ? components["schemas"]["DrProfileResponse"]
-  : R extends "patient"
-    ? components["schemas"]["PatientProfileResponse"]
-    : never;
+type ProfileResponseMap = {
+  doctor: components["schemas"]["DrProfileResponse"];
+  patient: components["schemas"]["PatientProfileResponse"];
+};
+
+export type ProfileResponse<R extends Role> = ProfileResponseMap[R];
 
 export type APIError = {
   msg: string;

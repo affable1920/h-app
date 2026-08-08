@@ -4,13 +4,12 @@ import CalendarBody from "./CalendarBody";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import Button from "@/components/ui/Button";
 import type { Schedule } from "@/types/http";
-import { motion } from "motion/react";
 import Badge from "./ui/Badge";
 
 const currDate = DateTime.local();
 type Direction = "left" | "right";
 
-const Calendar = ({ schedules }: { schedules: Schedule[] }) => {
+function Calendar({ schedules }: { schedules: Schedule[] }) {
   const [monthInView, setMonthInView] = useState<DateTime>(DateTime.local());
 
   const handleMonthChange = useCallback(
@@ -74,6 +73,6 @@ const Calendar = ({ schedules }: { schedules: Schedule[] }) => {
       </footer>
     </section>
   );
-};
+}
 
 export default Calendar;

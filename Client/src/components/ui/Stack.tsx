@@ -1,5 +1,5 @@
 import { useBreakpoint } from "@/hooks/use-breakpoint";
-import { memo, type HTMLAttributes, type ReactNode } from "react";
+import { type HTMLAttributes, type ReactNode } from "react";
 
 const GAPSIZES = ["xs", "sm", "md", "lg"] as const;
 type GapSize = (typeof GAPSIZES)[number];
@@ -11,7 +11,7 @@ export type StackProps = HTMLAttributes<HTMLElement> & {
   [breakPoint in Breakpoint]?: Omit<StackProps, "children">;
 } & {
   children: ReactNode;
-  gap?: GapSize;
+  gap?: GapSize | number;
   reverse?: boolean;
   justify?: StackPosition;
   align?: StackPosition;
@@ -25,7 +25,7 @@ const gaps: Record<GapSize, string> = {
   lg: "48px",
 };
 
-export const Stack = memo(function ({ md, lg, children, ...rest }: StackProps) {
+export function Stack({ md, lg, children, ...rest }: StackProps) {
   const tier = useBreakpoint();
   const source =
     tier === "lg" ? (lg ?? rest) : tier === "md" ? (md ?? rest) : rest;
@@ -47,6 +47,8 @@ export const Stack = memo(function ({ md, lg, children, ...rest }: StackProps) {
         ? "column-reverse"
         : "column";
 
+  const calculatedGap = typeof gap === "number" ? `${gap}px` : gaps[gap];
+
   return (
     <article
       {...rest}
@@ -54,7 +56,7 @@ export const Stack = memo(function ({ md, lg, children, ...rest }: StackProps) {
         display: "flex",
         flexDirection: getOrientation,
         alignItems: orientation === "H" ? align : justify,
-        gap: gaps[gap],
+        gap: calculatedGap,
         justifyContent:
           orientation === "H"
             ? justify === "between"
@@ -67,4 +69,4 @@ export const Stack = memo(function ({ md, lg, children, ...rest }: StackProps) {
       {children}
     </article>
   );
-});
+}

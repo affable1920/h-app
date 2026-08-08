@@ -1,9 +1,10 @@
 import logging
+from typing import Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.internals import ClinicHttpFull, ClinicHttpMinimal
 from app.services.ClinicService import ClinicService
 from app.schemas.outputs import PaginatedResponse
+from app.schemas.models import ClinicHttpMinimal, ClinicHttpFull
 from app.schemas.response_modifiers import ClinicRouteFilters, PaginationParams
 from app.database.entry_async import get_db
 
@@ -35,7 +36,7 @@ async def get_all(
     return response
 
 
-@router.get("/{id}", response_model=ClinicHttpFull)
+@router.get("/{id}", response_model=Optional[ClinicHttpFull])
 async def get_one(
     id: str,
     session: AsyncSession = Depends(get_db)

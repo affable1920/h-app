@@ -1,11 +1,5 @@
 import useModalStore from "@/stores/modal-store";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Button from "./ui/Button";
 import SelectFilter from "./ui/SelectFilter";
@@ -14,14 +8,17 @@ import { useSearchParams } from "react-router-dom";
 import useFilterStore, { type FilterState } from "@/stores/filter-store";
 import { Stack } from "./ui/Stack";
 import Ratings from "./Ratings";
-import { ArrowDownAZ, Mars, SlidersHorizontal, Venus } from "lucide-react";
-import { toast } from "sonner";
-import StepInput from "./ui/StepInput";
-import { debounce } from "@/utils/utils";
+import {
+  ArrowDownAZ,
+  Mars,
+  ShieldCheck,
+  SlidersHorizontal,
+  Venus,
+} from "lucide-react";
+import StepInput, { type StepHandle } from "./ui/StepInput";
 import { AnimatePresence, motion, stagger } from "motion/react";
 
-const labelFilters = "text-text-normal capitalize text-center";
-type NumericFilterKey = Extract<keyof FilterState, "experience" | "fee">;
+const labelStyle = "text-text-normal capitalize text-center";
 
 function DirectoryFilter() {
   const [, setSearchParams] = useSearchParams();
@@ -35,8 +32,8 @@ function DirectoryFilter() {
   } = useFilterStore();
 
   const closeModal = useModalStore((s) => s.closeModal);
-  const experienceRef = useRef<HTMLInputElement>(null);
-  const feeRef = useRef<HTMLInputElement>(null);
+  const experienceRef = useRef<StepHandle>(null);
+  const feeRef = useRef<StepHandle>(null);
 
   const [showSorter, setShowSorter] = useState(false);
 
@@ -66,14 +63,12 @@ function DirectoryFilter() {
 
   useEffect(
     function () {
-      if (experienceRef.current) {
-        experienceRef.current.value = !!filters.experience
-          ? String(filters.experience)
-          : "-";
+      if (experienceRef.current && filters.experience) {
+        experienceRef.current.val = filters.experience;
       }
 
-      if (feeRef.current) {
-        feeRef.current.value = !!filters.fee ? String(filters.fee) : "-";
+      if (feeRef.current && filters.fee) {
+        feeRef.current.val = filters.fee;
       }
     },
     [filters.experience, filters.fee],
@@ -98,82 +93,6 @@ function DirectoryFilter() {
     }
   }
 
-  const debounced = useRef(debounce(update, 200)).current;
-
-  function handleFilterChange<K extends NumericFilterKey>(
-    key: K,
-    op: "inc" | "dec",
-  ) {
-    const el = key === "experience" ? experienceRef.current : feeRef.current;
-
-    if (!el) {
-      return;
-    }
-
-    if (op === "inc") {
-      if (Number(el.value) === Number(el.max)) {
-        return;
-      }
-
-      el.stepUp();
-      debounced(key, Number(el.value)); // el.value after stepUp is the incremented val here
-    }
-
-    if (op === "dec") {
-      const minReached =
-        !el.value.trim() || Number(el.value) === 1 || Number(el.value) === 0;
-
-      if (minReached) {
-        el.value = "-";
-        clearField(key);
-        return;
-      } else {
-        el.stepDown();
-        debounced(key, Number(el.value));
-      }
-    }
-  }
-
-  function isNumericKey(id: string): id is NumericFilterKey {
-    return id === "experience" || id === "fee";
-  }
-
-  function handleFilterInput(ev: ChangeEvent<HTMLInputElement>) {
-    const id = ev.target.id;
-    if (!isNumericKey(id)) {
-      return;
-    }
-
-    const el = id === "fee" ? feeRef.current : experienceRef.current;
-
-    if (!el) {
-      return;
-    }
-
-    const val = ev.target.value;
-
-    if (val.startsWith("-")) {
-      el.value = "-";
-      clearField(id);
-      toast.warning(el.id + " can not be negative!", {
-        className: "capitalize",
-      });
-      return;
-    }
-
-    if (Number(val) > Number(el.max)) {
-      el.value = "-";
-      clearField(id);
-      toast.warning(el.id + " can not be greater than " + el.max, {
-        className: "capitalize",
-      });
-      return;
-    }
-
-    el.value = val;
-    update(id, Number(val));
-  }
-
   return (
     <section className="h-full flex flex-col gap-8 py-6">
       <Stack justify="between" className="px-6">
@@ -189,7 +108,9 @@ function DirectoryFilter() {
 
         <Button
           onClick={function () {
-            setShowSorter((p) => !p);
+            setShowSorter(function (p) {
+              return !p;
+            });
           }}
           variant="icon"
           bg={true}
@@ -221,12 +142,14 @@ function DirectoryFilter() {
             <SelectFilter
               label="filter by specialization"
               options={constants.SPECIALIZATIONS}
-              onOptionSelect={update.bind(filters, "specialization")}
+              onOptionSelect={function (option) {
+                update("specialization", option as string);
+              }}
             />
           </div>
 
           <Stack orientation="V" gap="sm">
-            <p className={labelFilters}>
+            <p className={labelStyle}>
               filter by{" "}
               <em>
                 <strong>rating</strong>
@@ -253,7 +176,7 @@ function DirectoryFilter() {
           </Stack>
 
           <Stack orientation="V" gap="sm">
-            <p className={labelFilters}>Availability</p>
+            <p className={labelStyle}>Availability</p>
             <Badge
               selected={filters.currentlyAvailable === "1"}
               className={`font-semibold`}
@@ -261,12 +184,27 @@ function DirectoryFilter() {
                 update("currentlyAvailable", "1");
               }}
             >
-              Doctors Online Now !
+              Doctors Online Now
+            </Badge>
+          </Stack>
+
+          <Stack orientation="V" gap="sm">
+            <Stack justify="center" align="center">
+              <p className={labelStyle}>Verfied</p>
+              <ShieldCheck size={13} color="teal" />
+            </Stack>
+            <Badge
+              className={`font-semibold`}
+              onClick={function () {
+                update("currentlyAvailable", "1");
+              }}
+            >
+              Verified Doctors only
             </Badge>
           </Stack>
 
           <Stack orientation="V">
-            <p className={labelFilters}>Gender</p>
+            <p className={labelStyle}>Gender</p>
             <Stack justify="between">
               {Object.entries({ male: <Mars />, female: <Venus /> }).map(
                 function ([gender, icon]) {
@@ -294,15 +232,17 @@ function DirectoryFilter() {
             justify="center"
           >
             <StepInput
-              label="min experience"
-              stepUp={function () {
-                handleFilterChange("experience", "inc");
+              label="min experience (years)"
+              onStepUp={function (val) {
+                experienceRef.current?.stepUp();
+                update("experience", (filters.experience ?? 0) + val);
               }}
-              stepDown={function () {
-                handleFilterChange("experience", "dec");
+              onStepDown={function (val) {
+                experienceRef.current?.stepDown();
+                update("experience", (filters.experience ?? 0) - val);
               }}
               ref={experienceRef}
-              onChange={handleFilterInput}
+              onChange={experienceRef.current?.handleChange}
               id="experience"
               placeholder="-"
               min="0"
@@ -312,13 +252,15 @@ function DirectoryFilter() {
 
             <StepInput
               label="max fee"
-              stepUp={function () {
-                handleFilterChange("fee", "inc");
+              onStepUp={function (val) {
+                feeRef.current?.stepUp();
+                update("experience", (filters.fee ?? 0) + val);
               }}
-              stepDown={function () {
-                handleFilterChange("fee", "dec");
+              onStepDown={function (val) {
+                feeRef.current?.stepDown();
+                update("experience", (filters.fee ?? 0) - val);
               }}
-              onChange={handleFilterInput}
+              onChange={feeRef.current?.handleChange}
               ref={feeRef}
               id="fee"
               placeholder="-"

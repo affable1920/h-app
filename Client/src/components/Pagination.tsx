@@ -1,34 +1,44 @@
 import { memo } from "react";
-import ButtonElement from "./ui/Button";
+import Button from "./ui/Button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationProps {
   currentPage: number; // the current page number
-  onNext: () => void; // what to do when the user clicks next - api request, state change ...
-  onPrevious: () => void;
   hasNext?: boolean;
+  onPageChange: (dir: "next" | "previous") => void;
 }
 
 const Pagination = memo(function ({
   currentPage,
   hasNext,
-  onNext,
-  onPrevious,
+  onPageChange,
 }: PaginationProps) {
-  const hasPrevious = currentPage > 1;
-
   return (
     <article className="flex self-end items-center gap-4">
-      {hasPrevious && (
-        <ButtonElement bg={true} size="md" variant="icon" onClick={onPrevious}>
+      {currentPage > 1 && (
+        <Button
+          bg={true}
+          size="md"
+          variant="icon"
+          onClick={function () {
+            onPageChange("previous");
+          }}
+        >
           <ChevronLeft />
-        </ButtonElement>
+        </Button>
       )}
 
       {hasNext && (
-        <ButtonElement size="md" variant="icon" bg={true} onClick={onNext}>
+        <Button
+          size="md"
+          variant="icon"
+          bg={true}
+          onClick={function () {
+            onPageChange("next");
+          }}
+        >
           <ChevronRight />
-        </ButtonElement>
+        </Button>
       )}
     </article>
   );

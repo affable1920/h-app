@@ -6,23 +6,20 @@ export const PatientCreateSchema = z.object({
   password: z.string().min(6, "password must be atleast 6 characters long"),
 });
 
-export const DrLoginSchema = z
-  .object({
-    id: z.string().optional(),
-    email: z.email().optional(),
-    password: z.string().min(6, "Password is required"),
-  })
-  .refine(
-    function (data) {
-      return !!(data.email || data.id);
-    },
-    { error: "An email or the app-specific id is required", path: ["email"] },
-  );
+export type PatientCreate = z.infer<typeof PatientCreateSchema>;
 
-export const PatientLoginSchema = z.object({
+export const DrLoginSchema = z.object({
+  id: z.string().optional(),
+  email: z.email().optional(),
+  password: z.string().min(6),
+});
+export type DoctorLogin = z.infer<typeof DrLoginSchema>;
+
+export const PatientSigninSchema = z.object({
   email: z.email(),
   password: z.string().min(6),
 });
+export type PatientSignin = z.infer<typeof PatientSigninSchema>;
 
 const MAX_SIZE = 1;
 
@@ -35,9 +32,9 @@ export const stepIdentity = z.object({
       return !file || (file?.size ?? 0) <= MAX_SIZE * 1024 * 1024;
     }, `file size must not be greater than ${MAX_SIZE}mb!`)
     .default(null),
-  name: z.string().min(4, {
-    error: "A name is required",
-  }),
+  name: z
+    .string({ error: "A name is required" })
+    .min(4, "Name must have atleast 4 characters"),
   gender: z.enum(["male", "female"] as const, {
     error: "Please select your gender",
   }),
@@ -50,17 +47,25 @@ export const stepCredentials = z.object({
     .number({ error: "Enter a valid year" })
     .min(4, { error: "Enter a valid year" }),
   license_number: z.string().min(4, { error: "Enter a valid license number" }),
-  experience: z.number().nullable().optional(),
+  experience: z.number().nullable(),
 });
 
 export const stepCraft = z.object({
   primary_specialization: z.string({
     error: "A primary field of practice is required",
   }),
-  secondary_focus_areas: z.union([
-    z.string().transform((v) => (v ? v.split(",").map((e) => e.trim()) : [])),
-    z.array(z.string()),
-  ]),
+  secondary_focus_areas: z
+    .union([
+      z.array(z.string()),
+      z.string().transform(function (v) {
+        return v
+          ? v.split(",").map(function (v) {
+              return v.trim();
+            })
+          : [];
+      }),
+    ])
+    .default([]),
   bio: z.string().nullable().optional(),
 });
 
@@ -70,10 +75,9 @@ export const stepAuth = z.object({
   phone: z.string().nullable().optional(),
 });
 
-export const DrCreateSchema = stepIdentity
+export const DoctorOnboardingSchema = stepIdentity
   .extend(stepCredentials.shape)
   .extend(stepCraft.shape)
   .extend(stepAuth.shape);
 
-export type DrCreate = z.infer<typeof DrCreateSchema>;
-export type DoctorLogin = z.infer<typeof DrLoginSchema>;
+export type DoctorOnboarding = z.infer<typeof DoctorOnboardingSchema>;

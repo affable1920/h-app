@@ -12,7 +12,6 @@ import {
   ArrowRight,
   BellOff,
   Bot,
-  History,
   Home,
   Hospital,
   LogOut,
@@ -29,6 +28,7 @@ import useAuthStore, { logout } from "@/stores/auth-store";
 import type { MobileNavItem } from "@/types/utils";
 import MobileNavigationItem from "./MobileNavigationItem";
 import Divider from "./ui/Divider";
+import NavigationItem from "./NavigationItem";
 
 function NavBar() {
   const { pathname = "" } = useLocation();
@@ -130,7 +130,7 @@ function NavBar() {
                 label: "logout",
                 icon: LogOut,
                 onClick: function () {
-                  logout(window.location.href);
+                  logout("/");
                 },
               },
             ],
@@ -139,14 +139,10 @@ function NavBar() {
       : []),
   ];
 
-  function handleLinkClick(this: MobileNavItem) {
-    this.onClick ? this.onClick() : navigate(this.route ?? "");
-  }
-
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 p-6 px-8 shadow-md rounded-none shadow-black/25 
-      bg-background border-b border-border-strong"
+      className="fixed top-0 left-0 right-0 z-50 p-6 px-8 shadow-sm rounded-none shadow-black/25 
+      bg-background border-b border-border-strong md:px-12"
     >
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <Button
@@ -159,31 +155,22 @@ function NavBar() {
         </Button>
 
         <div className="hidden md:flex items-center gap-12">
-          <nav className="space-x-8 font-semibold [&>a]:hover:text-accent [&>a]:transition-colors md:flex md:items-center">
-            {navLinks.map((navItem) => (
-              <Button
-                variant="icon"
-                key={navItem.label}
-                className="hover:text-normal transition-colors"
-                onClick={handleLinkClick.bind(navItem)}
-              >
-                {navItem.label}
-              </Button>
-            ))}
+          <nav className="space-x-18 font-semibold [&>a]:hover:text-accent [&>a]:transition-colors md:flex md:items-center">
+            {navLinks.map(function (navItem) {
+              return <NavigationItem key={navItem.label} {...navItem} />;
+            })}
           </nav>
 
-          <Button
-            endIcon={<ArrowRight />}
-            className="w-full"
-            border={false}
-            color="brand"
-          >
-            {user ? (
-              <Link to="/">Get started</Link>
-            ) : (
+          {!user && (
+            <Button
+              endIcon={<ArrowRight />}
+              className="w-full"
+              border={false}
+              color="brand"
+            >
               <Link to="/auth">sign in</Link>
-            )}
-          </Button>
+            </Button>
+          )}
         </div>
 
         <div className="flex items-center gap-4 md:hidden">
@@ -191,8 +178,8 @@ function NavBar() {
             <Button
               onClick={function () {
                 const ev = new KeyboardEvent("keydown", {
-                  ctrlKey: true,
                   key: "k",
+                  ctrlKey: true,
                 });
 
                 window.dispatchEvent(ev);

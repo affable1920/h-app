@@ -1,4 +1,9 @@
-import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  mutationOptions,
+  queryOptions,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 import APIClient from "@/core/ApiClient";
 import type {
   PatientCreate,
@@ -84,7 +89,7 @@ export function useSignin() {
   });
 }
 
-export function fetchProfileOptions<R extends Role>(role: Role) {
+export function fetchProfileOptions<R extends Role>(role: R) {
   return queryOptions({
     queryKey: ["auth", "me", role],
     enabled: !!role,
@@ -97,5 +102,21 @@ export function fetchProfileOptions<R extends Role>(role: Role) {
 }
 
 export function useFetchProfile<R extends Role>(role: R) {
-  return useQuery(fetchProfileOptions(role));
+  return useQuery(fetchProfileOptions<R>(role));
+}
+
+export function removeAccountOptions(role: Role) {
+  return mutationOptions({
+    mutationKey: [
+      ["auth", "delete"],
+      ["auth", "me", role],
+    ],
+    async mutationFn(id: string) {
+      return await api.delete(id);
+    },
+  });
+}
+
+export function useRemoveAccount(role: Role) {
+  return useMutation(removeAccountOptions(role));
 }

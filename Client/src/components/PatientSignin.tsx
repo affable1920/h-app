@@ -1,5 +1,5 @@
-import { PatientLoginSchema } from "@/schemas";
-import { type APIError, type PatientLogin } from "@/types/http";
+import { type PatientSignin, PatientSigninSchema } from "@/schemas";
+import { type APIError } from "@/types/http";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Stack } from "./ui/Stack";
@@ -8,25 +8,24 @@ import Button from "./ui/Button";
 import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { usePrevious } from "@/hooks/use-previous";
 
 export function PatientSignin() {
-  const form = useForm<PatientLogin>({
-    resolver: zodResolver(PatientLoginSchema),
-  });
-
   const signin = useSignin();
   const navigate = useNavigate();
 
-  const previousPath = usePrevious();
+  const form = useForm<PatientSignin>({
+    resolver: zodResolver(PatientSigninSchema),
+  });
 
-  async function submit(data: PatientLogin) {
+  const { errors } = form.formState;
+
+  async function submit(data: PatientSignin) {
     await signin.mutateAsync(
       { route: "patient", data },
       {
         onSuccess() {
           toast.message("Account successfully created.");
-          navigate(previousPath ?? "/view/idx/doctors");
+          navigate("/view/idx/doctors");
         },
 
         onError(error) {
@@ -44,19 +43,21 @@ export function PatientSignin() {
           type="email"
           id="email"
           label="email"
+          error={errors["email"]}
           autoFocus
         />
         <Input
           label="password"
           type="password"
+          error={errors["password"]}
           {...form.register("password")}
           id="password"
         />
       </Stack>
       <Button
+        type="submit"
         className="mt-6 w-full"
         color="white"
-        type="submit"
         loading={signin.isPending}
       >
         sign in

@@ -32,7 +32,7 @@ export const SPECIALIZATIONS = [
   "Dietetics & Nutrition",
   "Ayurveda",
   "Homeopathy",
-] as const;
+];
 
 export const WEEKDAYS = [
   "monday",

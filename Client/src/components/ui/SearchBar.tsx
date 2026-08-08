@@ -1,39 +1,40 @@
-import { memo } from "react";
+import { memo, type HTMLAttributes } from "react";
 import { X } from "lucide-react";
 import Input from "./Input";
 
-interface SearchBarProps {
+interface SearchBarProps extends HTMLAttributes<HTMLInputElement> {
   val: string;
-  onChange: (value: string) => void;
-  onClear?: () => void;
   clearable?: boolean;
+  onClear?: () => void;
   placeholder?: string;
+  grow?: boolean;
+  label?: string;
 }
 
 const SearchBar = memo(function ({
   val,
-  onChange,
   clearable = false,
   onClear,
   placeholder = "search ...",
+  grow = false,
+  label,
+  ...rest
 }: SearchBarProps) {
   return (
-    <div className="relative flex items-center">
+    <div className="relative">
       <Input
-        id="search-query"
+        label={label}
+        id={rest.id ?? "search-bar"}
         value={val}
         placeholder={placeholder}
-        size="sm"
-        className="italic placeholder:text-sm py-2"
-        onChange={function (ev) {
-          onChange(ev.target.value);
-        }}
+        className="text-sm"
+        {...rest}
       />
       {clearable && val && (
         <X
           size={12}
           onClick={onClear}
-          className="absolute right-3 active:scale-98 cursor-pointer hover:scale-103"
+          className="active:scale-98 cursor-pointer hover:scale-103 absolute right-3 top-1/2"
         />
       )}
     </div>

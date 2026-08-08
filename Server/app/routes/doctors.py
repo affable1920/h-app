@@ -4,7 +4,7 @@ from fastapi import Depends, APIRouter, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.entry_async import get_db
 from app.services.DrService import DoctorService
-from app.schemas.outputs import DoctorHttpFull, DoctorHttpMinimal
+from app.schemas.models import DoctorHttpFull, DoctorHttpMinimal
 from app.schemas.outputs import PaginatedResponse
 from app.schemas.inputs import DrCreate, get_dr_onboarding
 from app.schemas.response_modifiers import DrRouteFilters, PaginationParams

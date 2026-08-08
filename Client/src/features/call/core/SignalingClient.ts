@@ -1,4 +1,4 @@
-import { config } from "@/config";
+import { config } from "@/core/config";
 import EventEmitter from "@/features/call/core/EventEmitter";
 import type {
   SignalingEventMessage,

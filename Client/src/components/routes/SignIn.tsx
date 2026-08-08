@@ -40,12 +40,13 @@ function SignIn() {
             text: "OR",
             position: "center",
           }}
-          color="secondary"
         />
 
         <Button
           onClick={function () {
-            setRole((p) => (p === "doctor" ? "patient" : "doctor"));
+            setRole(function (p) {
+              return p === "doctor" ? "patient" : "doctor";
+            });
           }}
           className="w-fit self-center"
         >

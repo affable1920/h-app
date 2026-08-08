@@ -4,14 +4,14 @@ import { ArrowRight } from "lucide-react";
 import Button from "../ui/Button";
 import { Stack } from "../ui/Stack";
 
-const HomePage = () => {
+function HomePage() {
   return (
     <section className="flex flex-col h-1/2 text-center items-center gap-2 max-h-full py-12 pb-2">
       <h1 className="mb-2">
         In <Code size="sm">Production</Code> Hold on tight
       </h1>
 
-      <Stack align="center">
+      <Stack align="center" gap="md">
         <Link
           className="flex items-center gap-1 hover:[&>svg]:translate-x-2 transition-transform duration-200"
           to="chat"
@@ -32,6 +32,6 @@ const HomePage = () => {
       </Stack>
     </section>
   );
-};
+}
 
 export default HomePage;

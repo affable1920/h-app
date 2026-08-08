@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
-from app.schemas.Base import snake_to_camel
+from app.schemas.Base import Aliased, snake_to_camel
 from app.schemas.enums import Gender
 
 
@@ -11,7 +11,7 @@ class SortOrder(Enum):
     DESC = "desc"
 
 
-class PaginationParams(BaseModel):
+class PaginationParams(Aliased):
     page: int = Field(default=1, gt=0)
     max: int = Field(default=10, gt=0, lt=25)
     sort_by: str | None = None
@@ -21,18 +21,11 @@ class PaginationParams(BaseModel):
     def offset(self):
         return (self.page - 1) * (self.max)
 
-    model_config = ConfigDict(
-        alias_generator=snake_to_camel
-    )
-#
 
-
-class BaseFilters(BaseModel):
+class BaseFilters(Aliased):
     search_query: str | None = None
     min_rating: float | None = None
     max_distance: int | None = None
-
-    model_config = ConfigDict(alias_generator=snake_to_camel)
 
 
 class DrRouteFilters(BaseFilters):

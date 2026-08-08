@@ -6,21 +6,19 @@ import { useGetAll } from "@/hooks/use-doctors";
 import DrCardFront from "./DrCardFront";
 
 function DoctorsDirectory() {
-  const { setHasNext } = useOutletContext<{
-    setHasNext: (hasNext: boolean) => void;
-  }>();
+  const setHasNext = useOutletContext<(hasNext: boolean) => void>();
 
   const {
-    data: { entities = [], has_next = true } = {},
+    data: { entities: doctors = [], hasNext = true } = {},
     isFetching,
     isError,
   } = useGetAll();
 
   useEffect(
     function () {
-      setHasNext(has_next ?? false);
+      setHasNext(hasNext ?? false);
     },
-    [has_next],
+    [hasNext],
   );
 
   if (isFetching) {
@@ -31,13 +29,11 @@ function DoctorsDirectory() {
     return null;
   }
 
-  return (entities || [])?.map((doctor) => (
-    <Card
-      key={doctor.id}
-      entity={doctor}
-      CardFront={<DrCardFront doctor={doctor} />}
-    />
-  ));
+  return doctors.map(function (dr) {
+    return (
+      <Card key={dr.id} entity={dr} CardFront={<DrCardFront doctor={dr} />} />
+    );
+  });
 }
 
 export default DoctorsDirectory;

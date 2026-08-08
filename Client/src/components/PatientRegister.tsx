@@ -6,9 +6,9 @@ import Button from "./ui/Button";
 import Input from "./ui/Input";
 import { Stack } from "./ui/Stack";
 import { useForm } from "react-hook-form";
-import { type APIError, type PatientCreate } from "@/types/http";
+import { type PatientCreate, PatientCreateSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PatientCreateSchema } from "@/schemas";
+import { type APIError } from "@/types/http";
 
 export const PatientRegister = memo(function () {
   const signup = useSignup();

@@ -6,7 +6,12 @@ import { getClassConfig } from "../../utils/button-styles";
 import type { ButtonProps } from "@/types/ui";
 
 function Button<NeedsMotion extends true>(props: ButtonProps<NeedsMotion>) {
-  const classConfig = useMemo(() => getClassConfig(props), [{ ...props }]);
+  const classConfig = useMemo(
+    function () {
+      return getClassConfig(props);
+    },
+    [{ ...props }],
+  );
 
   const {
     children,

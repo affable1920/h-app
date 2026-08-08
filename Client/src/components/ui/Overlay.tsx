@@ -12,7 +12,7 @@ function Overlay({
         inset: 0,
         zIndex: 999,
         transition: "none",
-        background: "rgba(0, 0, 0, 0.5)",
+        background: "rgba(0, 0, 0, 0.35)",
       }}
       className={`${viewOverlay ? "" : "bg-transparent"}`}
     >

@@ -1,5 +1,4 @@
 import logging
-import os
 
 from fastapi import (
     FastAPI,
@@ -9,9 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from app.scripts.openapi_spec import generate_openapi_spec
 from app.features.chatbot import chat
 from app.core.config import settings
-from app.scripts.openapi_spec import generate_openapi_spec
 from app.routes import auth, doctors, bookings, clinics
 from app.features.calling import ws_route
 
@@ -24,7 +23,7 @@ logger = logging.getLogger(__name__)
 async def root(app: FastAPI):
     logger.info("Starting up")
 
-    app.openapi_schema = generate_openapi_spec(app)  # Generate schema once
+    app.openapi_schema = generate_openapi_spec(app=app)
 
     yield
     logger.info("Shutting down")

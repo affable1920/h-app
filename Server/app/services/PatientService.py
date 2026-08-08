@@ -1,9 +1,9 @@
-from sqlalchemy import exists, literal, select
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.strategy_options import _AbstractLoad
 from app.services.entities.main import EntityService
-from app.database.models import Appointment, Patient
+from app.database.models import Appointment, Clinic, Doctor, Patient
 from app.schemas.inputs import PatientCreate
 import app.middleware.auth_middleware as auth
 
@@ -14,10 +14,13 @@ class PatientService(EntityService[Patient]):
     @classmethod
     def load_options_full(cls) -> list[_AbstractLoad]:
         appointments = selectinload(Patient.appointments)
+
         return [
             appointments,
-            appointments.joinedload(Appointment.clinic),
+            appointments.joinedload(Appointment.clinic)
+            .selectinload(Clinic.reviews),
             appointments.joinedload(Appointment.doctor)
+            .selectinload(Doctor.reviews)
         ]
 
     #

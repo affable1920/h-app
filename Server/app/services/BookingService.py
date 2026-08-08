@@ -5,7 +5,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.inputs import BookingRequestData
 from app.schemas.enums import AppointmentStatus
-from app.database.models import Appointment, Patient, Schedule, Slot, UUID
+from app.database.models import Appointment, Patient, Slot, UUID
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ class BookingService:
     ) -> Appointment:
 
         logger.info(
-            f"\nPatient {user.username} wants to book a slot..."
+            f"\nPatient ({user.username}) wants to book a slot..."
         )
 
         stmt = select(Slot).options(joinedload(Slot.schedule)
@@ -96,7 +96,7 @@ class BookingService:
 
     @classmethod
     async def cancel_booking(cls, session: AsyncSession, booking_id: UUID, patient: Patient):
-        logger.info("\nAppointment cancellation request recieved ...")
+        logger.info("Appointment cancellation request recieved ...")
 
         stmt = (
             select(Appointment)
@@ -113,10 +113,10 @@ class BookingService:
             logger.debug(f"\nmsg")
             raise ValueError(msg)
 
-        logger.info(f"\nResetting appointment to default state ...")
+        logger.info(f"Resetting appointment to default state ...")
 
         result.slot.is_booked = False
         result.status = AppointmentStatus.CANCELLED
 
         await session.commit()
-        logger.info("\nAppointment successfully cancelled ..")
+        logger.info("Appointment successfully cancelled ..")

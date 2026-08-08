@@ -1,17 +1,8 @@
-import type { Color } from "@/types/ui";
-import React, {
-  useMemo,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-} from "react";
+import { forwardRef, useMemo, type ComponentPropsWithoutRef } from "react";
 import type { FieldError } from "react-hook-form";
+import { Stack } from "./Stack";
 
 type Size = "sm" | "md" | "lg";
-
-interface BaseProps {
-  label?: string;
-  error?: FieldError;
-}
 
 const sizes: Record<Size, string> = {
   sm: `py-2`,
@@ -19,78 +10,53 @@ const sizes: Record<Size, string> = {
   lg: `py-4`,
 };
 
-const textSizes: Record<Size, string> = {
-  sm: "text-sm",
-  md: "text-base",
-  lg: "text-md",
-};
-
-type TextProps = {
+export type InputProps = {
   size?: Size;
-  color?: Color;
-  style?: CSSProperties;
-  className?: string;
-  truncate?: number | false;
-};
-
-type Rest = {
-  size?: Size;
-  color?: string;
-
-  label?: Rest;
-};
-
-export type InputProps = BaseProps & {
-  size?: Size;
-  rest?: Rest;
+  error?: FieldError;
+  label?: string;
+  orientation?: "H" | "V";
 } & Omit<ComponentPropsWithoutRef<"input">, "size">;
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, id, className, error, size = "sm", rest, ...props }, ref) => {
-    const base = `border-2 border-border-strong rounded-md outline-none w-full font-semibold placeholder:italic
-            hover:border-border-strong placeholder:capitalize transition-colors px-3 bg-layout-raised`;
-
-    const sz = sizes[size];
-
-    const txtSz = textSizes[rest?.size ?? "sm"];
-    const lblSz = rest?.label?.size ? textSizes[rest.label.size] : txtSz;
-
+const Input = forwardRef<HTMLInputElement, InputProps>(
+  (
+    { label, id, className, error, orientation = "V", size = "sm", ...props },
+    ref,
+  ) => {
     const inputStyles = useMemo(
       function () {
-        return [base, sz, txtSz].filter(Boolean).join(" ").trim();
-      },
-      [sz, txtSz],
-    );
+        const base = `border-2 border-border-strong rounded-md outline-none w-full font-semibold 
+        placeholder:italic hover:border-border-strong placeholder:capitalize transition-colors px-3 
+        bg-layout-raised`;
 
-    const lblStyles = useMemo(
-      function () {
-        return ["px-1", "capitalize", "inline-flex", lblSz]
-          .filter(Boolean)
-          .join(" ")
-          .trim();
+        return [base, sizes[size], className].filter(Boolean).join(" ").trim();
       },
-      [lblSz],
+      [className, size],
     );
 
     return (
-      <div className="flex flex-col gap-2">
+      <Stack
+        orientation={orientation}
+        align={orientation === "H" ? "center" : "stretch"}
+        gap="xs"
+      >
         {label && (
-          <label htmlFor={id ?? props.name} className={`${lblStyles}`}>
-            {label}{" "}
+          <label
+            htmlFor={id ?? props.name}
+            className="capitalize inline-flex px-1 text-sm"
+          >
+            {label}
           </label>
         )}
 
         <input
-          id={id}
+          id={id ?? props.name}
           ref={ref}
           {...props}
-          className={`${inputStyles + ` ${txtSz}`}`}
+          className={inputStyles}
         />
 
-        {error && (
-          <div className="text-red-400 text-sm px-1">{error.message}</div>
-        )}
-      </div>
+        <div className="text-red-400 text-sm px-1">{error?.message}</div>
+      </Stack>
     );
   },
 );

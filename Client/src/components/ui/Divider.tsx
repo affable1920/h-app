@@ -2,7 +2,7 @@ import type { Color } from "@/types/ui";
 import { memo, type CSSProperties, type ElementType } from "react";
 
 type Labelposition = "start" | "center" | "end";
-type DividerColor = Exclude<Color, "danger" | "success" | "warning">;
+type DividerColor = "primary" | "secondary" | "white";
 
 type LabelProps = {
   as?: ElementType;
@@ -29,10 +29,8 @@ const sizes: Record<"sm" | "md" | "lg", string> = {
 };
 
 const colors: Record<DividerColor, string> = {
-  primary: "bg-layout",
-  brand: "bg-brand",
+  primary: "bg-border-vivid",
   white: "bg-text-normal",
-  indicator: "bg-indicator",
   secondary: "bg-layout-raised",
 };
 
@@ -47,15 +45,14 @@ const Divider = memo(function ({
     .join(" ")
     .trim();
 
-  const lblColor =
-    label?.color && (label.color as Color) in colors
-      ? colors[label.color as DividerColor]
-      : colors[color];
+  const lblColor = label?.color
+    ? colors[label.color as DividerColor]
+    : colors[color];
 
   const lblStyles = [
     "shrink-0 capitalize inline-flex",
     label?.position === "end" ? "order-1" : "order-0",
-    "text" + lblColor.slice(2),
+    "text" + lblColor.slice(3),
     label?.className,
   ]
     .filter(Boolean)

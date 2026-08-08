@@ -58,6 +58,9 @@ services:
       - ./localhost+3-key.pem:/certs/key.pem:ro,z
       - ./localhost+3.pem:/certs/cert.pem:ro,z
     command: ["npm", "run", "dev:with-types:docker"]
+    depends_on:
+      server:
+        condition: service_healthy
 
 volumes:
   postgres_data:

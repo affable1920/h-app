@@ -1,11 +1,15 @@
 import { useState, Suspense, useCallback, useRef, useEffect } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import Spinner from "../ui/Spinner";
 import Pagination from "@components/Pagination";
 import Button from "@/components/ui/Button";
 import { debounce } from "@/utils/utils";
 import useModalStore from "@/stores/modal-store";
-import useQueryStore from "@/stores/query-store";
 import { ArrowLeftRight, SlidersHorizontal } from "lucide-react";
 import useFilterStore from "@/stores/filter-store";
 import SearchBar from "../ui/SearchBar";
@@ -13,30 +17,56 @@ import SearchBar from "../ui/SearchBar";
 function Directory() {
   const navigate = useNavigate();
   const openModal = useModalStore((s) => s.openModal);
-
-  const {
-    searchQuery,
-    setSearchQuery,
-    clearSearchQuery,
-    page = 1,
-    setPage,
-  } = useQueryStore();
-  const { activeFiltersCount } = useFilterStore();
-
   const route = useLocation().pathname.split("/").at(-1) ?? "doctors";
-  const memoized = useRef(debounce(setSearchQuery, 350)).current;
 
-  const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [params, setParams] = useSearchParams();
+  const { activeFiltersCount } = useFilterStore();
+  const [localSearch, setLocalSearch] = useState<string | null>(null);
   const [hasNext, setHasNext] = useState(false);
+
+  const page = params.get("page") ? Number(params.get("page")) : 1;
+
+  useEffect(
+    function () {
+      setLocalSearch(params.get("searchQuery"));
+    },
+    [params.get("searchQuery")],
+  );
+
+  const setPage = useCallback(function (pg: number) {
+    setParams(function (prev) {
+      const next = new URLSearchParams(prev);
+      next.set("page", String(pg));
+      return next;
+    });
+  }, []);
+
+  const setSearchQuery = useRef(
+    debounce(function (sq: string) {
+      const key = "searchQuery";
+      setParams(function (prev) {
+        const next = new URLSearchParams(prev);
+
+        next.set(key, sq);
+        next.set("page", "1");
+
+        return next;
+      });
+    }, 350),
+  ).current;
 
   const handleSearch = useCallback(function (val: string) {
     setLocalSearch(val);
-    memoized(val);
+    setSearchQuery(val);
   }, []);
 
   const clearSearch = useCallback(function () {
     setLocalSearch("");
-    clearSearchQuery();
+    setParams(function (prev) {
+      const next = new URLSearchParams(prev);
+      next.delete("searchQuery");
+      return next;
+    });
   }, []);
 
   const handlePageChange = useCallback(
@@ -86,7 +116,9 @@ function Directory() {
         <div className="flex gap-2 items-center">
           <SearchBar
             clearable={true}
-            onChange={handleSearch}
+            onChange={function (ev) {
+              handleSearch(ev.currentTarget.value);
+            }}
             val={localSearch ?? ""}
             onClear={clearSearch}
           />
@@ -99,19 +131,14 @@ function Directory() {
 
       <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
         <Suspense fallback={<Spinner />}>
-          <Outlet context={{ setHasNext }} />
+          <Outlet context={setHasNext} />
         </Suspense>
       </section>
 
       <Pagination
+        onPageChange={handlePageChange}
         currentPage={page}
         hasNext={hasNext ?? false}
-        onPrevious={function () {
-          handlePageChange("previous");
-        }}
-        onNext={function () {
-          handlePageChange("next");
-        }}
       />
     </section>
   );

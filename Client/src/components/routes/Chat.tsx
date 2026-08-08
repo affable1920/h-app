@@ -61,10 +61,14 @@ function Chat() {
       return;
     }
 
-    const onScroll = () => setShow(el.scrollTop > 20);
+    function onScroll() {
+      setShow((el as HTMLDivElement).scrollTop > 20);
+    }
 
     el.addEventListener("scroll", onScroll);
-    return () => el.removeEventListener("scroll", onScroll);
+    return function () {
+      el.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   function clearPrompt() {
@@ -137,7 +141,9 @@ function Chat() {
     const lookouts = ["button", "svg", "i", "a"];
 
     // None of the look out elements should be the click event target
-    const intentionFocus = lookouts.every((lo) => !target.closest(lo));
+    const intentionFocus = lookouts.every(function (lo) {
+      return !target.closest(lo);
+    });
 
     if (intentionFocus) {
       editorRef.current?.focus();

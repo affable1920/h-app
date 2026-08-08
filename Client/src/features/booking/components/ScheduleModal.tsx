@@ -1,4 +1,3 @@
-import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
 import type {
@@ -25,6 +24,9 @@ import { PatientCreateSchema } from "@/schemas";
 import { fromISO } from "@/utils/utils";
 import Badge from "@/components/ui/Badge";
 import { Stack } from "@/components/ui/Stack";
+import { useState } from "react";
+import { PatientSignin } from "@/components/PatientSignin";
+import { PatientRegister } from "@/components/PatientRegister";
 
 type ScheduleModalProps = {
   doctor: Doctor;
@@ -44,10 +46,6 @@ function ScheduleModal({
   const form = useForm<PatientCreate>({
     resolver: zodResolver(PatientCreateSchema),
   });
-
-  const {
-    formState: { errors },
-  } = form;
 
   const slotDatetimeISO = fromISO(slot.slot_datetime);
   const fullDate = slotDatetimeISO.toFormat("dd LLL - yyyy");
@@ -122,6 +120,12 @@ function ScheduleModal({
     await signup.mutateAsync({ data, route: "patient" });
   }
 
+  const [mode, setMode] = useState<"login" | "register">("login");
+
+  function showAuthForm() {
+    return mode === "login" ? <PatientSignin /> : <PatientRegister />;
+  }
+
   return (
     <section className="p-3">
       <header
@@ -180,42 +184,22 @@ function ScheduleModal({
             </Stack>
           </form>
         ) : (
-          <form
-            onSubmit={form.handleSubmit(confirmOnboarding)}
-            className="flex flex-col gap-6 shadow-lg p-4 rounded-md"
-          >
-            <h1 className="text-lg text-center font-black leading-tight">
-              Get Onboard now to confirm your slot!
-            </h1>
-            <Input
-              autoFocus
-              {...form.register("username")}
-              label="name"
-              error={errors["username"]}
-              className="italic font-semibold text-sm"
-            />
-
-            <Input
-              {...form.register("email")}
-              label="email"
-              error={errors.email}
-              className="italic font-semibold text-sm"
-            />
-            <Input
-              {...form.register("password")}
-              label="set a password"
-              error={errors.password}
-              className="font-bold italic text-sm"
-            />
-            <div className="flex items-center justify-between">
-              <Button type="button" onClick={closeModal}>
-                Cancel
-              </Button>
-              <Button type="submit" color="white" loading={signup.isPending}>
-                Sign up
-              </Button>
-            </div>
-          </form>
+          <>
+            {showAuthForm()}
+            <Button
+              variant="icon"
+              className="hover:underline underline-offset-4"
+              onClick={function () {
+                setMode(function (p) {
+                  return p === "login" ? "register" : "login";
+                });
+              }}
+            >
+              {mode === "login"
+                ? "Don't have an Account ? Register"
+                : "Already have an account ? login"}
+            </Button>
+          </>
         )}
       </section>
     </section>

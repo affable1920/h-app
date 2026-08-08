@@ -1,6 +1,5 @@
 import { DateTime, type DateTimeUnit } from "luxon";
 import { WEEKDAYS } from "./constants";
-import { toast, type ExternalToast } from "sonner";
 
 function getPreviousMonthDays(dt: DateTime<true>): DateTime[] {
   /**
@@ -107,4 +106,17 @@ export function datesAreEqual(dtA: DateTime, dtB: DateTime) {
     dtA.hasSame(dtB, unit),
   );
   return areEqual;
+}
+
+export function paginate<T extends unknown>(
+  list: Array<T> = [],
+  iter: number = 1,
+  max: number = 5,
+) {
+  const itemCount = list.length;
+
+  const start = (iter - 1) * max;
+  const limit = Math.min(itemCount, start + max);
+
+  return list.slice(start, limit);
 }

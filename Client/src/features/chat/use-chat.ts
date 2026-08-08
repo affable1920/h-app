@@ -5,7 +5,7 @@ import { stream } from "@/features/chat/stream";
 import useAuthStore from "@/stores/auth-store";
 import APIClient from "@/core/ApiClient";
 import type { ChatRequest } from "@/types/http";
-import { config } from "@/config";
+import { config } from "@/core/config";
 
 const DRAIN_INTERVAL_MS = 16; // 60fps
 const api = new APIClient("/chat");

@@ -115,7 +115,7 @@ class DoctorService(EntityService[Doctor]):
         if data.profile:
             try:
                 img = await data.profile.read()
-                encoded = base64.urlsafe_b64decode(img).decode("utf-8")
+                encoded = base64.b64encode(img).decode("utf-8")
             except Exception as e:
                 logger.debug(e)
                 raise ValueError("Invalid image file.")

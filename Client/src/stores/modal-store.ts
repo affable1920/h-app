@@ -3,9 +3,9 @@ import { create } from "zustand";
 type Position = "top" | "bottom" | "center" | "left";
 
 type ModalProps = {
-  [k: string]: unknown;
   viewOverlay?: boolean;
   position?: Position;
+  [k: string]: unknown;
 };
 
 type ModalState = {

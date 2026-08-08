@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Account */
+        delete: operations["remove_account"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/doctors": {
         parameters: {
             query?: never;
@@ -271,21 +288,19 @@ export interface components {
              * @description the unique identifier of the record
              */
             id: string;
-            /** Patient Id */
-            patient_id: string;
+            /** Patientid */
+            patientId: string;
             /**
-             * Scheduled Date
+             * Scheduleddate
              * Format: date-time
              */
-            scheduled_date: string;
+            scheduledDate: string;
             /**
-             * Created At
+             * Createdat
              * Format: date-time
              */
-            created_at: string;
+            createdAt: string;
             status: components["schemas"]["AppointmentStatus"];
-        } & {
-            [key: string]: unknown;
         };
         /** AppointmentResponse */
         AppointmentResponse: {
@@ -294,30 +309,28 @@ export interface components {
              * @description the unique identifier of the record
              */
             id: string;
-            /** Patient Id */
-            patient_id: string;
+            /** Patientid */
+            patientId: string;
             /**
-             * Scheduled Date
+             * Scheduleddate
              * Format: date-time
              */
-            scheduled_date: string;
+            scheduledDate: string;
             /**
-             * Created At
+             * Createdat
              * Format: date-time
              */
-            created_at: string;
+            createdAt: string;
             status: components["schemas"]["AppointmentStatus"];
-            /** Clinic Id */
-            clinic_id: string;
-            /** Doctor Id */
-            doctor_id: string;
-            /** Slot Id */
-            slot_id: string;
+            /** Clinicid */
+            clinicId: string;
+            /** Doctorid */
+            doctorId: string;
+            /** Slotid */
+            slotId: string;
             slot: components["schemas"]["Slot"];
-            doctor: components["schemas"]["DrMinimal"];
+            doctor: components["schemas"]["DoctorHttpMinimal"];
             clinic: components["schemas"]["ClinicHttpMinimal"];
-        } & {
-            [key: string]: unknown;
         };
         /**
          * AppointmentStatus
@@ -329,8 +342,6 @@ export interface components {
             role: components["schemas"]["Role"];
             /** Content */
             content: string;
-        } & {
-            [key: string]: unknown;
         };
         /** Body_create_doctors_onboard_post */
         Body_create_doctors_onboard_post: {
@@ -351,8 +362,6 @@ export interface components {
             license_number: string;
             /** Primary Specialization */
             primary_specialization: string;
-            /** Experience */
-            experience: number;
             /**
              * Email
              * Format: email
@@ -360,6 +369,11 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+            /**
+             * Experience
+             * @default 0
+             */
+            experience: number | null;
             /**
              * Secondary Focus Areas
              * @default []
@@ -391,8 +405,6 @@ export interface components {
             license_number: string;
             /** Primary Specialization */
             primary_specialization: string;
-            /** Experience */
-            experience: number;
             /**
              * Email
              * Format: email
@@ -400,6 +412,11 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+            /**
+             * Experience
+             * @default 0
+             */
+            experience: number | null;
             /**
              * Secondary Focus Areas
              * @default []
@@ -429,8 +446,6 @@ export interface components {
              * Format: uuid
              */
             slotId: string;
-        } & {
-            [key: string]: unknown;
         };
         /** ClinicHttpFull */
         ClinicHttpFull: {
@@ -444,6 +459,11 @@ export interface components {
             /** Location */
             location?: string | null;
             /**
+             * Reviews
+             * @default []
+             */
+            reviews: components["schemas"]["Review"][];
+            /**
              * Facilities
              * @default []
              */
@@ -453,19 +473,12 @@ export interface components {
             /** Pincode */
             pincode?: number | null;
             /**
-             * Reviews
-             * @default []
-             */
-            reviews: components["schemas"]["Review"][];
-            /**
              * Contacts
              * @default []
              */
             contacts: number[];
             /** Rating */
             readonly rating: number;
-        } & {
-            [key: string]: unknown;
         };
         /** ClinicHttpMinimal */
         ClinicHttpMinimal: {
@@ -479,12 +492,17 @@ export interface components {
             /** Location */
             location?: string | null;
             /**
+             * Reviews
+             * @default []
+             */
+            reviews: components["schemas"]["Review"][];
+            /**
              * Facilities
              * @default []
              */
             facilities: string[];
-        } & {
-            [key: string]: unknown;
+            /** Rating */
+            readonly rating: number;
         };
         /** DoctorHttpFull */
         DoctorHttpFull: {
@@ -495,8 +513,8 @@ export interface components {
             id: string;
             /** Name */
             name: string;
-            /** Primary Specialization */
-            primary_specialization: string;
+            /** Primaryspecialization */
+            primarySpecialization: string;
             /** Experience */
             experience: number;
             /**
@@ -517,22 +535,22 @@ export interface components {
             credentials: string;
             gender: components["schemas"]["Gender"];
             /**
-             * Consults Online
+             * Consultsonline
              * @default false
              */
-            consults_online: boolean;
+            consultsOnline: boolean;
             /**
-             * Booking Enabled
+             * Bookingenabled
              * @default false
              */
-            booking_enabled: boolean;
+            bookingEnabled: boolean;
             /**
-             * Secondary Focus Areas
+             * Secondaryfocusareas
              * @default []
              */
-            secondary_focus_areas: string[];
-            /** Last Updated */
-            last_updated?: string | null;
+            secondaryFocusAreas: string[];
+            /** Lastupdated */
+            lastUpdated?: string | null;
             /**
              * Schedules
              * @default []
@@ -540,10 +558,8 @@ export interface components {
             schedules: components["schemas"]["Schedule"][];
             /** Rating */
             readonly rating: number;
-            /** Image Url */
-            readonly image_url: string | null;
-        } & {
-            [key: string]: unknown;
+            /** Imageurl */
+            readonly imageUrl: string | null;
         };
         /** DoctorHttpMinimal */
         DoctorHttpMinimal: {
@@ -554,8 +570,8 @@ export interface components {
             id: string;
             /** Name */
             name: string;
-            /** Primary Specialization */
-            primary_specialization: string;
+            /** Primaryspecialization */
+            primarySpecialization: string;
             /** Experience */
             experience: number;
             /**
@@ -574,10 +590,8 @@ export interface components {
             image?: string | null;
             /** Rating */
             readonly rating: number;
-            /** Image Url */
-            readonly image_url: string | null;
-        } & {
-            [key: string]: unknown;
+            /** Imageurl */
+            readonly imageUrl: string | null;
         };
         /** DoctorLogin */
         DoctorLogin: {
@@ -588,26 +602,6 @@ export interface components {
             /** Id */
             id?: string | null;
         };
-        /**
-         * DrMinimal
-         * @description A minimal dr object model to be sent to the client in the model's response
-         */
-        DrMinimal: {
-            /**
-             * Id
-             * @description the unique identifier of the record
-             */
-            id: string;
-            /** Name */
-            name: string;
-            /** Primary Specialization */
-            primary_specialization: string;
-            gender: components["schemas"]["Gender"];
-            /** Experience */
-            experience: number;
-        } & {
-            [key: string]: unknown;
-        };
         /** DrProfileResponse */
         DrProfileResponse: {
             /**
@@ -617,8 +611,8 @@ export interface components {
             id: string;
             /** Name */
             name: string;
-            /** Primary Specialization */
-            primary_specialization: string;
+            /** Primaryspecialization */
+            primarySpecialization: string;
             /** Experience */
             experience: number;
             /**
@@ -639,44 +633,42 @@ export interface components {
             credentials: string;
             gender: components["schemas"]["Gender"];
             /**
-             * Consults Online
+             * Consultsonline
              * @default false
              */
-            consults_online: boolean;
+            consultsOnline: boolean;
             /**
-             * Booking Enabled
+             * Bookingenabled
              * @default false
              */
-            booking_enabled: boolean;
+            bookingEnabled: boolean;
             /**
-             * Secondary Focus Areas
+             * Secondaryfocusareas
              * @default []
              */
-            secondary_focus_areas: string[];
-            /** Last Updated */
-            last_updated?: string | null;
+            secondaryFocusAreas: string[];
+            /** Lastupdated */
+            lastUpdated?: string | null;
             /**
              * Schedules
              * @default []
              */
             schedules: components["schemas"]["Schedule"][];
-            /** College Studied */
-            college_studied?: string | null;
-            /** Graduation Year */
-            graduation_year?: number | null;
+            /** Collegestudied */
+            collegeStudied?: string | null;
+            /** Graduationyear */
+            graduationYear?: number | null;
             /**
              * Bio
              * @default
              */
             bio: string | null;
-            /** License Number */
-            license_number: string;
+            /** Licensenumber */
+            licenseNumber: string;
             /** Rating */
             readonly rating: number;
-            /** Image Url */
-            readonly image_url: string | null;
-        } & {
-            [key: string]: unknown;
+            /** Imageurl */
+            readonly imageUrl: string | null;
         };
         /**
          * Gender
@@ -699,8 +691,8 @@ export interface components {
             entities: components["schemas"]["ClinicHttpMinimal"][];
             /** Count */
             count: number;
-            /** Has Next */
-            has_next?: boolean | null;
+            /** Hasnext */
+            hasNext?: boolean | null;
         };
         /** PaginatedResponse[DoctorHttpMinimal] */
         PaginatedResponse_DoctorHttpMinimal_: {
@@ -708,8 +700,8 @@ export interface components {
             entities: components["schemas"]["DoctorHttpMinimal"][];
             /** Count */
             count: number;
-            /** Has Next */
-            has_next?: boolean | null;
+            /** Hasnext */
+            hasNext?: boolean | null;
         };
         /** PatientCreate */
         PatientCreate: {
@@ -754,8 +746,6 @@ export interface components {
              * @default []
              */
             appointments: components["schemas"]["AppointmentResponse"][];
-        } & {
-            [key: string]: unknown;
         };
         /** Review */
         Review: {
@@ -775,8 +765,6 @@ export interface components {
             appointment_id?: string | null;
             /** Patient Id */
             patient_id: string;
-        } & {
-            [key: string]: unknown;
         };
         /**
          * ReviewableEntity
@@ -827,8 +815,6 @@ export interface components {
              * @default []
              */
             slots: components["schemas"]["Slot"][];
-        } & {
-            [key: string]: unknown;
         };
         /** Slot */
         Slot: {
@@ -852,8 +838,6 @@ export interface components {
             slot_datetime: string;
             /** Schedule Id */
             schedule_id: string;
-        } & {
-            [key: string]: unknown;
         };
         /**
          * SortOrder
@@ -881,8 +865,6 @@ export interface components {
             name?: string | null;
             /** Username */
             username?: string | null;
-        } & {
-            [key: string]: unknown;
         };
         /** ValidationError */
         ValidationError: {
@@ -1049,7 +1031,27 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DrProfileResponse"] | components["schemas"]["PatientProfileResponse"];
+                    "application/json": components["schemas"]["DrProfileResponse"] | components["schemas"]["PatientProfileResponse"] | null;
+                };
+            };
+        };
+    };
+    remove_account: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
         };
@@ -1068,8 +1070,8 @@ export interface operations {
                 gender?: components["schemas"]["Gender"] | null;
                 page?: number;
                 max?: number;
-                sortBy?: string;
-                sortOrder?: components["schemas"]["SortOrder"];
+                sortBy?: string | null;
+                sortOrder?: components["schemas"]["SortOrder"] | null;
             };
             header?: never;
             path?: never;
@@ -1114,7 +1116,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DoctorHttpFull"];
+                    "application/json": components["schemas"]["DoctorHttpFull"] | null;
                 };
             };
             /** @description Validation Error */
@@ -1230,8 +1232,8 @@ export interface operations {
             query?: {
                 page?: number;
                 max?: number;
-                sortBy?: string;
-                sortOrder?: components["schemas"]["SortOrder"];
+                sortBy?: string | null;
+                sortOrder?: components["schemas"]["SortOrder"] | null;
                 searchQuery?: string | null;
                 minRating?: number | null;
                 maxDistance?: number | null;
@@ -1283,7 +1285,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ClinicHttpFull"];
+                    "application/json": components["schemas"]["ClinicHttpFull"] | null;
                 };
             };
             /** @description Validation Error */

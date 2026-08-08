@@ -1,6 +1,8 @@
 import logging
+from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
+from app.services import MailService
 from app.schemas.enums import UserRoleV2
 from app.database.models import Doctor
 from app.database.entry_async import get_db
@@ -105,6 +107,7 @@ async def login_pt(user_cred: PatientLogin, response: Response, session: AsyncSe
 @router.post("/register/doctor", response_model=UserResponse)
 async def register_dr(
     response: Response,
+    background_tasks: BackgroundTasks,
     data: DrCreate = Depends(get_dr_onboarding),
     session: AsyncSession = Depends(get_db)
 ):
@@ -127,6 +130,12 @@ async def register_dr(
         )
 
         response.headers["x-auth-token"] = token
+        background_tasks.add_task(
+            lambda: MailService.send_mail(
+                recipient=created.email,
+                msg=f"You account has been sucessfully created. Welcome Onboard Dr {created.name} "
+            )
+        )
         return UserResponse.model_validate(created)
 
     except Exception as e:
@@ -146,14 +155,22 @@ async def register_dr(
 async def login_dr(credentials: DoctorLogin, response: Response, session: AsyncSession = Depends(get_db)):
     method_used = "id" if credentials.id else 'email'
     cred = credentials.model_dump()
-
     assert cred[method_used] is not None, "Id or email can not be None"
 
-    row = await DoctorService.get(
-        session=session,
-        identKey=method_used,
-        identVal=cred[method_used]
-    )
+    try:
+        row = await DoctorService.get(
+            session,
+            identKey=method_used,
+            identVal=cred[method_used]
+        )
+
+    except Exception:
+        raise HTTPException(
+            401,
+            detail={
+                "msg": f"Invalid {method_used}"
+            }
+        )
 
     if not row:
         raise HTTPException(
@@ -172,7 +189,7 @@ async def login_dr(credentials: DoctorLogin, response: Response, session: AsyncS
         )
 
     token = create_access_token(
-        id=row.id.__str__(),
+        id=str(row.id),
         role=UserRoleV2.DOCTOR
     )
 
@@ -182,7 +199,7 @@ async def login_dr(credentials: DoctorLogin, response: Response, session: AsyncS
 #
 
 
-@router.get("/me", response_model=DrProfileResponse | PatientProfileResponse)
+@router.get("/me", response_model=Optional[DrProfileResponse | PatientProfileResponse])
 async def profile(
     session: AsyncSession = Depends(get_db),
     payload: dict = Depends(decode_access_token)
@@ -202,5 +219,37 @@ async def profile(
         )
 
     if isinstance(user, Doctor):
-        return DrProfileResponse.model_validate(user)
-    return PatientProfileResponse.model_validate(user)
+        return DrProfileResponse.model_validate(user, by_name=True)
+    return PatientProfileResponse.model_validate(user, by_name=True)
+
+
+@router.delete("/{id}")
+async def remove_account(
+    session: AsyncSession = Depends(get_db),
+    payload: dict = Depends(decode_access_token)
+):
+    usr = await get_curr_user(
+        session=session,
+        payload=payload
+    )
+
+    logger.info(usr)
+
+    if not usr:
+        return
+
+    try:
+        await session.delete(usr)
+
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(
+            500,
+            detail={
+                "msg": "Could not remove account! Please try again later ..."
+            }
+        )
+
+    await session.flush()
+    await session.commit()
+    return "Account deleted sucessfully"

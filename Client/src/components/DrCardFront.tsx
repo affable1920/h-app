@@ -36,8 +36,8 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
         <div className="aspect-square rounded-md overflow-hidden max-w-20 mix-blend-difference">
           <img
             className="h-full rounded-md cursor-pointer w-full object-cover"
-            src={docImg}
-            alt="doc_img"
+            src={(doctor?.imageUrl || doctor?.image) ?? (docImg as string)}
+            alt={`Dr. ${doctor.name}`}
           />
         </div>
         <Stack orientation="V" align="between">
@@ -56,7 +56,7 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
             </Stack>
             <Stack gap="xs" align="center" className="text-[10px]">
               <h2 className="line-clamp-1 text-text-secondary">
-                {doctor.primary_specialization}
+                {doctor.primarySpecialization}
               </h2>
               {!!doctor.experience && <p>({doctor.experience}y)</p>}
             </Stack>
@@ -74,7 +74,7 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
       </Stack>
 
       <Stack gap="xs" justify="end" align="end">
-        {(actions || []).map((action) => {
+        {(actions || []).map(function (action) {
           const { name, label = "", icon: Icon } = action;
 
           return (

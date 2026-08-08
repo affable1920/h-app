@@ -8,25 +8,6 @@ from pydantic import (
 )
 
 
-class FromORM(BaseModel):
-    model_config = ConfigDict(from_attributes=True, extra="allow")
-
-
-class IDMixin(BaseModel):
-    id: Annotated[
-        UUID,
-        Field(description="the unique identifier of the record"),
-        PlainSerializer(func=lambda x: str(x), return_type=str),
-    ]
-
-
-IDSerialized = Annotated[
-    UUID, PlainSerializer(
-        func=lambda x: str(x), return_type=str
-    )
-]
-
-
 def snake_to_camel(field_name: str):
     if field_name.find("_") == -1:
         return field_name
@@ -41,3 +22,29 @@ def snake_to_camel(field_name: str):
     )
 
     return alias
+
+
+IDSerialized = Annotated[
+    UUID, PlainSerializer(
+        func=lambda x: str(x), return_type=str
+    )
+]
+
+
+class Aliased(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=snake_to_camel,
+        validate_by_name=True,
+        serialize_by_alias=True
+    )
+
+
+class FromORM(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+
+class IDMixin(BaseModel):
+    id: Annotated[
+        IDSerialized,
+        Field(description="the unique identifier of the record"),
+    ]

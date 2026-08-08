@@ -73,9 +73,9 @@ export const ScheduleItem = memo(function ({
       return slots.filter(function (slot) {
         const slotDatetime = fromISO(slot.slot_datetime);
 
-        const checkA = ["month", "day"].every((unit) =>
-          slotDatetime.hasSame(dtParam, unit as DateTimeUnit),
-        );
+        const checkA = ["month", "day"].every(function (unit) {
+          return slotDatetime.hasSame(dtParam, unit as DateTimeUnit);
+        });
 
         // const checkB = slotDatetime.weekday === scheduleState.weekday;
 
@@ -89,7 +89,9 @@ export const ScheduleItem = memo(function ({
 
   const allBooked = useMemo(
     function () {
-      return slotsFiltered.every((slot) => slot.is_booked);
+      return slotsFiltered.every(function (slot) {
+        return slot.is_booked;
+      });
     },
     [slotsFiltered],
   );
@@ -209,7 +211,7 @@ export const ScheduleItem = memo(function ({
                   className="flex flex-wrap gap-4 justify-center my-6"
                   layout
                 >
-                  {slotsFiltered.map((slot) => {
+                  {slotsFiltered.map(function (slot) {
                     return (
                       <motion.button
                         variants={createStagger().children}

@@ -3,8 +3,8 @@ from typing import Annotated, Literal, Self
 from uuid import UUID
 
 from fastapi import File, Form, UploadFile
-from pydantic import BaseModel, EmailStr, Field, model_validator
-from app.schemas.Base import FromORM
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+from app.schemas.Base import Aliased, FromORM, IDSerialized, snake_to_camel
 
 
 class PatientCreate(BaseModel):
@@ -32,7 +32,13 @@ class DoctorLogin(BaseModel):
         return self
 
 
-class DrCreate(BaseModel):
+class BookingRequestData(FromORM, Aliased):
+    scheduled_date: Annotated[datetime, Field(alias="date")]
+    doctor_id: IDSerialized
+    slot_id: IDSerialized
+
+
+class DrCreate(Aliased):
     name: Annotated[str, Form(...)]
     gender: Annotated[Literal["male", "female"], Form(...)]
     profile: Annotated[UploadFile | None, File(...)] = None
@@ -41,7 +47,7 @@ class DrCreate(BaseModel):
     medical_college: Annotated[str, Form(...)]
     graduation_year: Annotated[int, Form(...)]
     license_number: Annotated[str, Form(...)]
-    experience: Annotated[int, Form(...)]
+    experience: Annotated[int | None, Form(...)] = None
 
     primary_specialization: Annotated[str, Form(...)]
     secondary_focus_areas: Annotated[list[str] | str, Form(...)] = []
@@ -51,15 +57,9 @@ class DrCreate(BaseModel):
     password: Annotated[str, Form(...)]
     phone: Annotated[str | None, Form(max_length=10)] = None
 
-    model_config = {
-        "arbitrary_types_allowed": True,
-    }
-
-
-class BookingRequestData(FromORM):
-    scheduled_date: Annotated[datetime, Field(alias="date")]
-    doctor_id: Annotated[UUID, Field(alias="doctorId")]
-    slot_id: Annotated[UUID, Field(alias="slotId")]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True
+    )
 
 
 def get_dr_onboarding(
@@ -70,9 +70,9 @@ def get_dr_onboarding(
     graduation_year: Annotated[int, Form(...)],
     license_number: Annotated[str, Form(...)],
     primary_specialization: Annotated[str, Form(...)],
-    experience: Annotated[int, Form(...)],
     email: Annotated[EmailStr, Form(...)],
     password: Annotated[str, Form(...)],
+    experience: Annotated[int | None, Form(...)] = 0,
     secondary_focus_areas: Annotated[list[str] | str, Form(...)] = [],
     bio: Annotated[str | None, Form(...)] = None,
     phone: Annotated[str | None, Form(...)] = None,

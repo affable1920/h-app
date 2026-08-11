@@ -155,7 +155,7 @@ function DirectoryFilter() {
                 <strong>rating</strong>
               </em>
             </p>
-            <Stack orientation="H" style={{ flexWrap: "wrap" }}>
+            <Stack orientation="H" gap={12} style={{ flexWrap: "wrap" }}>
               {[2, 3, 4].map(function (option) {
                 return (
                   <Badge

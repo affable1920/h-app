@@ -23,13 +23,13 @@ function SignIn() {
       </section>
 
       <Stack orientation="V" className="p-4 bg-layout-raised">
-        <Stack justify="center">
+        <Stack justify="center" gap={12}>
           <span>Don't have an account</span>
           <Link
             to="register"
             state={{ role }}
-            className="capitalize text-text-normal underline-offset-2 focus:underline hover:underline 
-            hover:text-text transition-colors"
+            className="capitalize text-text-normal underline-offset-4 focus:underline hover:underline 
+            hover:text-text transition-colors outline-none focus:text-white"
           >
             Sign up
           </Link>

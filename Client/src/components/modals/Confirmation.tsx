@@ -1,4 +1,4 @@
-import { useEffect, type JSX } from "react";
+import { useEffect, useRef, type JSX } from "react";
 import Button from "../ui/Button";
 import { ChevronRight, X } from "lucide-react";
 import { removeModal } from "@/stores/modal-store";
@@ -18,12 +18,24 @@ function Confirmation({
   autoClose = false,
   timeout = 3000,
 }: ConfirmationProps) {
-  useEffect(function () {
-    if (autoClose)
-      setTimeout(function () {
-        removeModal();
-      }, timeout);
-  }, []);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    function () {
+      if (autoClose) {
+        timerRef.current = setTimeout(function () {
+          removeModal();
+        }, timeout);
+      }
+
+      return function () {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+        }
+      };
+    },
+    [autoClose, timeout],
+  );
 
   return (
     <div className="font-semibold py-6 px-8 space-y-8">

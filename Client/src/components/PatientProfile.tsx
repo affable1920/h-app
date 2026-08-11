@@ -75,34 +75,66 @@ export function PatientProfile() {
 
   return (
     <ProfileShell isError={isError} isPending={isLoading}>
-      <Stack gap="sm" align="center" justify="end" className="mb-8 relative">
-        <SearchBar clearable val="" onChange={function () {}} />
+      <Stack justify="end" align="center" orientation="V">
         <Button
-          onClick={function () {
-            remove.mutate(profile?.id!, {
-              onSuccess() {
-                toast("your account was sucessfully deleted.", {
-                  className: "capitalize",
-                });
-                logout("/");
-              },
-              onError(ex) {
-                console.log(ex);
-                toast.error("you account could not be deleted", {
-                  className: "capitalize",
-                });
-              },
-            });
+          onMouseEnter={function () {
+            setShowSettings(true);
           }}
-          variant="icon"
+          onMouseLeave={setTimer}
           bg={true}
           color="secondary"
+          variant="icon"
         >
-          <Delete />
+          <Settings />
         </Button>
+
+        {showSettings && (
+          <Button
+            className="absolute"
+            onMouseEnter={function () {
+              if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+              }
+              setShowSettings(true);
+            }}
+            onMouseLeave={setTimer}
+            onClick={function () {
+              openModal("confirmation", {
+                resolve() {
+                  remove.mutate(profile?.id!, {
+                    onSuccess() {
+                      toast("You account was successfully deleted !", {
+                        description() {
+                          return "logging out ...";
+                        },
+                      });
+                      logout("/");
+                    },
+                    onError(ex) {
+                      console.log(ex);
+                      toast.error("Account deletion failed !");
+                    },
+                    onSettled() {
+                      closeModal();
+                    },
+                  });
+                },
+                tagline: (
+                  <>
+                    Are you sure you want to delete your account ?<br />
+                    This action can not be undone!
+                  </>
+                ),
+              });
+            }}
+          >
+            Delete account <Delete />
+          </Button>
+        )}
       </Stack>
 
-      <section className="space-y-6">
+      <section className="space-y-6 mt-6">
         {sections.map(function (section) {
           return section.markup(profile!);
         })}

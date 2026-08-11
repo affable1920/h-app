@@ -23,12 +23,13 @@ function Register() {
       </section>
 
       <Stack className="p-4 bg-layout-raised" orientation="V" gap="sm">
-        <Stack justify="center">
+        <Stack justify="center" gap={12}>
           <span>Already have an account</span>
           <Link
             to="/auth"
             state={{ role }}
-            className="ml-2 text-text-normal hover:underline underline-offset-2 capitalize"
+            className="text-text-normal hover:underline underline-offset-4 focus:underline focus:text-white 
+            capitalize hover:text-white outline-none"
           >
             sign in
           </Link>
@@ -47,7 +48,6 @@ function Register() {
               return p === "doctor" ? "patient" : "doctor";
             });
           }}
-          variant="ghost"
           className="w-fit self-center"
         >
           Sign up as a {role === "doctor" ? "patient" : "doctor"}

@@ -1,4 +1,9 @@
-import { forwardRef, useMemo, type ComponentPropsWithoutRef } from "react";
+import {
+  forwardRef,
+  useMemo,
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+} from "react";
 import type { FieldError } from "react-hook-form";
 import { Stack } from "./Stack";
 
@@ -15,18 +20,28 @@ export type InputProps = {
   error?: FieldError;
   label?: string;
   orientation?: "H" | "V";
+  icon?: ReactNode;
 } & Omit<ComponentPropsWithoutRef<"input">, "size">;
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { label, id, className, error, orientation = "V", size = "sm", ...props },
+    {
+      label,
+      id,
+      className,
+      error,
+      icon,
+      orientation = "V",
+      size = "sm",
+      ...props
+    },
     ref,
   ) => {
     const inputStyles = useMemo(
       function () {
         const base = `border-2 border-border-strong rounded-md outline-none w-full font-semibold 
         placeholder:italic hover:border-border-strong placeholder:capitalize transition-colors px-3 
-        bg-layout-raised`;
+        bg-layout-raised focus:ring-4 focus:ring-brand/20`;
 
         return [base, sizes[size], className].filter(Boolean).join(" ").trim();
       },
@@ -36,8 +51,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <Stack
         orientation={orientation}
+        className="relative"
         align={orientation === "H" ? "center" : "stretch"}
-        gap="xs"
+        gap={12}
       >
         {label && (
           <label
@@ -55,7 +71,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           className={inputStyles}
         />
 
-        <div className="text-red-400 text-sm px-1">{error?.message}</div>
+        <span className="inline-flex absolute right-2.5 bottom-1/2">
+          {icon && icon}
+        </span>
+        {error && (
+          <div className="text-red-400 text-sm px-1">{error.message}</div>
+        )}
       </Stack>
     );
   },

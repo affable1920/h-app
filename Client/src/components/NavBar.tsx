@@ -141,8 +141,8 @@ function NavBar() {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 p-6 px-8 shadow-sm rounded-none shadow-black/25 
-      bg-background border-b border-border-strong md:px-12"
+      className="fixed top-0 left-0 right-0 z-50 p-6 px-8 shadow-md rounded-none 
+      shadow-black/25 bg-background border-b border-border-strong md:px-12"
     >
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <Button
@@ -174,27 +174,29 @@ function NavBar() {
         </div>
 
         <div className="flex items-center gap-4 md:hidden">
-          <div className="flex md:hidden items-center gap-4 font-bold cursor-pointer">
-            <Button
-              onClick={function () {
-                const ev = new KeyboardEvent("keydown", {
-                  key: "k",
-                  ctrlKey: true,
-                });
-
-                window.dispatchEvent(ev);
-              }}
-              className="italic gap-2 text-sm tracking-wider"
-            >
-              Ctrl K
-              <Search />
-            </Button>
-          </div>
+          <Button
+            className="italic text-sm"
+            variant="icon"
+            onClick={function () {
+              const ev = new KeyboardEvent("keydown", {
+                ctrlKey: true,
+                key: "k",
+              });
+              window.dispatchEvent(ev);
+            }}
+          >
+            Ctrl K
+            <Search />
+          </Button>
 
           <Button
             variant="icon"
             className="md:hidden"
-            onClick={setShowMobileMenu.bind(null, (p) => !p)}
+            onClick={function () {
+              setShowMobileMenu(function (p) {
+                return !p;
+              });
+            }}
           >
             {showMobileMenu ? <Minimize2 /> : <Menu />}
           </Button>
@@ -205,8 +207,8 @@ function NavBar() {
         {showMobileMenu && (
           <motion.nav
             ref={ref}
-            className="md:hidden absolute top-full left-0 w-full flex flex-col gap-10 shadow-md 
-            shadow-black/25 p-6 px-8 bg-background border-b border-border-strong"
+            className="md:hidden absolute top-full left-0 right-0 p-6 px-8
+             shadow-md shadow-black/25 border-b flex flex-col gap-10 border-border-strong bg-background"
             initial={{
               y: -20,
               opacity: 0,
@@ -221,9 +223,9 @@ function NavBar() {
               transition: { ease: "backOut" },
             }}
           >
-            {navLinks.map((navItem) => (
-              <MobileNavigationItem key={navItem.label} {...navItem} />
-            ))}
+            {navLinks.map(function (navItem) {
+              return <MobileNavigationItem key={navItem.label} {...navItem} />;
+            })}
 
             {!user && (
               <Link to="/auth" className="px-4">

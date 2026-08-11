@@ -24,14 +24,21 @@ const MultiInput = forwardRef<HTMLInputElement, MultiInputProps>(
     ref,
   ) {
     return (
-      <Stack orientation="V" gap="xs">
+      <Stack orientation="V" gap={12}>
         <Stack className="text-sm" justify="between" align="center">
           <label className="capitalize px-1" htmlFor="email">
             {methodA}
           </label>
           <span
+            tabIndex={0}
             onClick={changeMethod}
-            className="text-text-normal capitalize cursor-pointer hover:text-white"
+            onKeyDown={function (ev) {
+              if (ev.key.toLowerCase() === "enter") {
+                changeMethod();
+              }
+            }}
+            className="text-text-normal capitalize cursor-pointer hover:text-white focus:underline 
+            underline-offset-4 focus:outline-none focus:text-white"
           >
             {methodB}
           </span>
@@ -41,7 +48,7 @@ const MultiInput = forwardRef<HTMLInputElement, MultiInputProps>(
           ref={ref}
           className="border-2 border-border-strong rounded-md outline-none w-full font-semibold 
         placeholder:italic hover:border-border-strong placeholder:capitalize transition-colors px-3
-        bg-layout-raised p-2"
+        bg-layout-raised p-2 focus:ring-4 focus:ring-brand/20"
           type={type}
           id="email"
           autoFocus

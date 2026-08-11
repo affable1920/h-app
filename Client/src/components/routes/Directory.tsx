@@ -13,6 +13,7 @@ import useModalStore from "@/stores/modal-store";
 import { ArrowLeftRight, SlidersHorizontal } from "lucide-react";
 import useFilterStore from "@/stores/filter-store";
 import SearchBar from "../ui/SearchBar";
+import { Stack } from "../ui/Stack";
 
 function Directory() {
   const navigate = useNavigate();
@@ -113,7 +114,7 @@ function Directory() {
           </Button>
         </div>
 
-        <div className="flex gap-2 items-center">
+        <Stack align="center">
           <SearchBar
             clearable={true}
             onChange={function (ev) {
@@ -123,10 +124,15 @@ function Directory() {
             onClear={clearSearch}
           />
 
-          <Button variant="icon" bg={true} onClick={switchDirectory}>
+          <Button
+            className="self-stretch"
+            variant="icon"
+            bg={true}
+            onClick={switchDirectory}
+          >
             <ArrowLeftRight />
           </Button>
-        </div>
+        </Stack>
       </section>
 
       <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">

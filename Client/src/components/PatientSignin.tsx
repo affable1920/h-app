@@ -25,11 +25,29 @@ export function PatientSignin() {
       {
         onSuccess() {
           toast.message("Account successfully created.");
-          navigate("/view/idx/doctors");
+          navigate("/view/idx/doctors", {
+            replace: true,
+          });
         },
 
-        onError(error) {
-          toast.message((error as unknown as APIError)?.msg);
+        onError(ex) {
+          const msg = (ex as unknown as APIError).msg;
+
+          const field = msg.includes("email")
+            ? "email"
+            : msg.includes("password")
+              ? "password"
+              : "root";
+
+          form.setError(
+            field,
+            {
+              message: msg,
+            },
+            {
+              shouldFocus: true,
+            },
+          );
         },
       },
     );
@@ -54,14 +72,19 @@ export function PatientSignin() {
           id="password"
         />
       </Stack>
-      <Button
-        type="submit"
-        className="mt-6 w-full"
-        color="white"
-        loading={signin.isPending}
-      >
-        sign in
-      </Button>
+      <Stack orientation="V" className="mt-4">
+        <div className="text-red-400 text-center">
+          {errors["root"] && errors["root"].message}
+        </div>
+        <Button
+          type="submit"
+          className="w-full"
+          color="white"
+          loading={signin.isPending}
+        >
+          sign in
+        </Button>
+      </Stack>
     </form>
   );
 }

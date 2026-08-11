@@ -133,7 +133,7 @@ const StepInput = forwardRef<StepHandle, StepProps>(function (
           type="number"
           inputMode="numeric"
           className="bg-layout-raised shadow-sm shadow-black/15 rounded-md ring-2 ring-border-strong 
-          outline-none p-2 text-center"
+          outline-none p-2 text-center focus:ring-3 focus:ring-sky-500/20"
           {...rest}
         />
         <Button

@@ -16,8 +16,10 @@ export const DrLoginSchema = z.object({
 export type DoctorLogin = z.infer<typeof DrLoginSchema>;
 
 export const PatientSigninSchema = z.object({
-  email: z.email(),
-  password: z.string().min(6),
+  email: z.email("An email address is required."),
+  password: z
+    .string("A password is required.")
+    .min(6, "A password must have atleast 6 characters"),
 });
 export type PatientSignin = z.infer<typeof PatientSigninSchema>;
 

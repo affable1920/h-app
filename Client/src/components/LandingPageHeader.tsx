@@ -22,6 +22,19 @@ function Header() {
   const user = useAuthStore((s) => s.token);
   const navigate = useNavigate();
 
+  const navLinks = [
+    {
+      label: "Home",
+      icon: Home,
+      onClick() {
+        navigate("/view");
+      },
+    },
+    { label: "features", icon: Waypoints },
+    { label: "how it works", icon: StepForward },
+    { label: "pricing", icon: LucideCurrency },
+  ];
+
   useEffect(
     function () {
       function handleMousedown(ev: MouseEvent) {
@@ -50,7 +63,7 @@ function Header() {
   return (
     <motion.header
       className="fixed top-0 left-0 right-0 z-50 p-6 px-8 shadow-md rounded-none 
-      shadow-black/25 bg-background border-b border-border-strong"
+      shadow-black/25 bg-background border-b border-border-strong md:px-12"
     >
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <Button variant="icon">
@@ -82,7 +95,11 @@ function Header() {
           needsMotion={true}
           initial={{ scale: 0.75 }}
           animate={{ scale: 1 }}
-          onClick={() => setIsMobileMenuOpen((p) => !p)}
+          onClick={function () {
+            setIsMobileMenuOpen(function (p) {
+              return !p;
+            });
+          }}
           className="md:hidden"
           variant="icon"
         >
@@ -101,18 +118,7 @@ function Header() {
             className="md:hidden absolute top-full left-0 right-0 p-6 px-8
              shadow-md shadow-black/25 border-b flex flex-col gap-8 border-border-strong bg-background"
           >
-            {[
-              {
-                label: "Home",
-                icon: Home,
-                onClick() {
-                  navigate("/view");
-                },
-              },
-              { label: "features", icon: Waypoints },
-              { label: "how it works", icon: StepForward },
-              { label: "pricing", icon: LucideCurrency },
-            ].map((item) => {
+            {navLinks.map(function (item) {
               return (
                 <motion.article variants={createStagger().children}>
                   <MobileNavigationItem {...item} />

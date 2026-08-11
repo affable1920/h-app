@@ -21,23 +21,23 @@ const SearchBar = memo(function ({
   ...rest
 }: SearchBarProps) {
   return (
-    <div className="relative">
-      <Input
-        label={label}
-        id={rest.id ?? "search-bar"}
-        value={val}
-        placeholder={placeholder}
-        className="text-sm"
-        {...rest}
-      />
-      {clearable && val && (
-        <X
-          size={12}
-          onClick={onClear}
-          className="active:scale-98 cursor-pointer hover:scale-103 absolute right-3 top-1/2"
-        />
-      )}
-    </div>
+    <Input
+      label={label}
+      id={rest.id ?? "search-bar"}
+      value={val}
+      placeholder={placeholder}
+      className="text-sm"
+      icon={
+        val ? (
+          <X
+            size={12}
+            onClick={onClear}
+            className={`cursor-pointer ${clearable ? "visible" : "invisible"}`}
+          />
+        ) : null
+      }
+      {...rest}
+    />
   );
 });
 

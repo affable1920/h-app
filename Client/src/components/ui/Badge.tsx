@@ -41,7 +41,8 @@ const Badge = memo(
     const classConfig = useMemo(
       function () {
         const BASE = `inline-flex items-center justify-center transition-colors duration-150 border-2 
-        border-border-strong text-center cursor-pointer p-2 capitalize`;
+        border-border-strong text-center cursor-pointer p-2 capitalize outline-none 
+        focus:ring-3 focus:ring-brand/20`;
 
         return [
           BASE,

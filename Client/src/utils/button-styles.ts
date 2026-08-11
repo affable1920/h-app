@@ -24,11 +24,14 @@ const borderStyles: Record<Color, string> = {
 };
 
 const colors: Record<Color, string> = {
-  brand: "bg-brand hover:bg-brand-hover text-white shadow-md",
-  white: "bg-text hover:bg-text-normal text-drk",
+  brand:
+    "bg-brand hover:bg-brand-hover text-white shadow-md focus:ring-3 focus:ring-brand-drk/30",
+  white:
+    "bg-text hover:bg-text-normal text-drk focus:ring-3 focus:ring-white/30",
   indicator: "bg-indicator text-drk hover:bg-indicator-hover",
-  primary: `bg-layout hover:bg-layout-raised hover:text-text`,
-  secondary: "bg-[#31313e] hover:bg-[#363639] hover:text-text",
+  primary: `bg-layout hover:bg-layout-raised hover:text-text focus:ring-3 focus:ring-text-teritiary/5`,
+  secondary:
+    "bg-[#31313e] hover:bg-[#363639] hover:text-text focus:ring-3 focus:ring-border-vivid/30",
   danger: `bg-red-600 hover:bg-red-500 text-drk`,
   success: `bg-green-500 text-drk hover:bg-green-400`,
   warning: `bg-yellow-400 text-drk hover:bg-yellow-300`,

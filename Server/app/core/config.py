@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     # database
     database_url: str
     database_url_async: str
+    allowed_origins: str
 
     # jwt
     jwt_secret: str
@@ -54,6 +55,13 @@ class Settings(BaseSettings):
                 "localhost", "db"
             )
 
+        return self
+
+    @model_validator(mode="after")
+    def adjust_allowed_origins(self) -> "Settings":
+        if self.env == "dev":
+            self.allowed_origins = "*"
+        self.allowed_origins = "http://localhost:5173"
         return self
 
 

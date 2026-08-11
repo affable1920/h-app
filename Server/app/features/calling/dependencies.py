@@ -8,7 +8,7 @@ from app.core.config import settings
 
 def decode(token: str):
     try:
-        return jwt.decode(token, settings.jwt_secret, [settings.jwt_algorithm])
+        return jwt.decode(token, settings.jwt_secret, ["HS256"])
 
     except jwt.ExpiredSignatureError:
         raise

@@ -1,9 +1,8 @@
 from groq.types.chat import ChatCompletionToolParam
 from pathlib import Path
 
-system_prompt = Path(
-    "app/features/chatbot/system-prompt.txt"
-).read_text(encoding="utf-8")
+system_prompt = (Path(__file__).resolve().parent /
+                 "system-prompt.txt").read_text(encoding="utf-8")
 
 
 ALL_MODELS = (['compound-beta', 'compound-beta-mini',

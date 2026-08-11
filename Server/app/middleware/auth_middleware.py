@@ -47,7 +47,10 @@ def create_access_token(id: str, role: UserRoleV2, exp_dur: timedelta = timedelt
         exp=exp.timestamp(),
     )
 
-    return jwt.encode(payload.model_dump(), key=settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    return jwt.encode(
+        payload.model_dump(),
+        key=settings.jwt_secret, algorithm="HS256"
+    )
 
 
 def decode_access_token(token: str = Depends(bearer)) -> dict:
@@ -60,7 +63,8 @@ def decode_access_token(token: str = Depends(bearer)) -> dict:
     try:
         return jwt.decode(
             jwt=token,
-            key=settings.jwt_secret, algorithms=[settings.jwt_algorithm]
+            key=settings.jwt_secret,
+            algorithms=["HS256"]
         )
 
     except jwt.ExpiredSignatureError:

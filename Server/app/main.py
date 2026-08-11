@@ -70,6 +70,8 @@ if __name__ == "__main__":
     base_dir = Path.cwd().parent  # is always the Server directory
     mode_https = int(settings.use_https) == 1
 
+    mode = settings.env
+
     logging.info(
         f"running server in ({'https' if mode_https else 'http'}) mode".capitalize(
         )

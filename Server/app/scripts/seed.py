@@ -350,6 +350,6 @@ if __name__ == "__main__":
     import asyncio
     from app.core.config import settings
     logger.info(
-        f"using container -> {settings.is_using_container}\nDatabase URL -> {settings.database_url}"
+        f"using container -> {settings.is_using_container}\nDatabase URL -> {settings.database_url_async}"
     )
     asyncio.run(seed_db())

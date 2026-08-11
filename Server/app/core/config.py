@@ -12,7 +12,8 @@ def setup_logging():
     )
 
     loggers_to_suppress = ["faker", "passlib",
-                           "httpx", "httpcore", "groq"]
+                           "httpx", "httpcore", "groq"
+                           ]
 
     for l in loggers_to_suppress:
         logging.getLogger(l).handlers = []
@@ -24,7 +25,7 @@ setup_logging()
 
 class Settings(BaseSettings):
     # env-specific
-    env: str = "DEV"
+    env: Literal["dev", "prod"] = "dev"
     use_https: Literal["0", "1"] = "0"
     is_using_container: Literal["0", "1"] = "0"
 
@@ -33,8 +34,7 @@ class Settings(BaseSettings):
     database_url_async: str
 
     # jwt
-    jwt_secret: str = ""
-    jwt_algorithm: str = "HS256"
+    jwt_secret: str
 
     # Third-party api's
     groq_api_key: str

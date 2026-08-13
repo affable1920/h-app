@@ -52,4 +52,5 @@ export type CallSessionEvents = {
   "remote-stream": MediaStream;
   "local-stream": MediaStream;
   "peer-hungup": void;
+  incoming: SignalingEventMessage<"offer">;
 };

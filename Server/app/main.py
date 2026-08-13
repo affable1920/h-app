@@ -67,8 +67,14 @@ if __name__ == "__main__":
     import uvicorn
     from app.core.config import settings
 
-    base_dir = Path.cwd().parent  # is always the Server directory
-    mode_https = int(settings.use_https) == 1
+    inside_container = settings.is_using_container == "1"
+
+    # when not running the server inside a container, locally for instance,
+    # we always set the server as the current directory so Path.cwd()
+    # always resolves sucessfully to the server, our target.
+
+    base_dir = Path(__file__).parent
+    mode_https = settings.use_https == "1"
 
     mode = settings.env
 
@@ -82,7 +88,11 @@ if __name__ == "__main__":
         )
     )
 
-    inside_container = settings.is_using_container == "1"
+    logger.info(f"""
+        base directory -> {base_dir}
+        inside container -> {inside_container}
+        mode -> {mode}
+    """)
 
     def get_ssl_key():
         target_fl = "certs/key.pem" if inside_container else "../localhost+3-key.pem"

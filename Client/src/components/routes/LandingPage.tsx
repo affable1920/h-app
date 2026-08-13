@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { Marquee } from "../ui/Marquee";
 import Header from "../LandingPageHeader";
-import HD from "@/assets/HD.jpg";
+import HD from "@/assets/mockup-1.webp";
 import MockupBooking from "../MockupBooking";
 import Divider from "../ui/Divider";
 

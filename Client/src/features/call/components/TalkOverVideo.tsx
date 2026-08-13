@@ -1,5 +1,5 @@
 import { useLoaderData } from "react-router-dom";
-import drImg from "@/assets/doctor.jpg";
+import drImg from "@/assets/doctor.webp";
 import {
   type ToggledControlProps,
   ToggledControl,
@@ -22,7 +22,7 @@ import Spinner from "@/components/ui/Spinner";
 import type { Doctor } from "@/types/http";
 import { useEffect, useRef } from "react";
 
-function TalkOverVideo() {
+export function TalkOverVideo() {
   const doctor = useLoaderData<Doctor>();
   const { callPeer, callState, ...elements } = useCall();
 
@@ -195,9 +195,3 @@ h-[calc(100vh-40rem)] justify-center"
     </section>
   );
 }
-
-export default TalkOverVideo;
-
-//   if (callState === "ringing-outgoing") {
-//     return
-//   }

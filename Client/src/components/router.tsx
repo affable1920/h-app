@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense } from "react";
 import {
   createBrowserRouter,
   Navigate,
@@ -18,27 +18,22 @@ import LandingPageBody from "@/components/routes/LandingPage";
 import App from "@/components/App";
 import Spinner from "./ui/Spinner";
 import useAuthStore from "@/stores/auth-store";
-import TalkOverVideo from "../features/call/components/TalkOverVideo";
 import { CallProvider } from "@/features/call/components/CallProvider";
 import { getByIdOptions } from "@/hooks/use-doctors";
 import { queryClient } from "@/core/query-client";
 
-const Chat = lazy(() => import("@routes/Chat"));
-const SchedulesView = lazy(
-  () => import("@/features/booking/components/SchedulesView"),
-);
-
-const ClinicsDirectory = lazy(() => import("@components/ClinicsDirectory"));
-const DoctorsDirectory = lazy(() => import("@/components/DoctorsDirectory"));
-
-function Fallback({ children, key }: { children: ReactNode; key?: string }) {
-  return (
-    <Suspense key={key} fallback={<Spinner loading />}>
-      {children}
-    </Suspense>
-  );
-}
-
+const Chat = lazy(function () {
+  return import("@routes/Chat");
+});
+const SchedulesView = lazy(function () {
+  return import("@/features/booking/components/SchedulesView");
+});
+const ClinicsDirectory = lazy(function () {
+  return import("@components/ClinicsDirectory");
+});
+const DoctorsDirectory = lazy(function () {
+  return import("@/components/DoctorsDirectory");
+});
 async function loaderDoctor({ params }: LoaderFunctionArgs) {
   return queryClient.ensureQueryData(getByIdOptions(params.id as string));
 }
@@ -66,11 +61,7 @@ const router = createBrowserRouter([
 
           {
             path: "chat",
-            element: (
-              <Fallback key="chat-route">
-                <Chat />
-              </Fallback>
-            ),
+            Component: Chat,
           },
 
           {
@@ -80,10 +71,7 @@ const router = createBrowserRouter([
               {
                 path: "doctors",
                 element: (
-                  <Suspense
-                    key="doctor-directory"
-                    fallback={<Spinner loading />}
-                  >
+                  <Suspense key="doctor-directory" fallback={<Spinner />}>
                     <DoctorsDirectory />
                   </Suspense>
                 ),
@@ -94,7 +82,11 @@ const router = createBrowserRouter([
                 children: [
                   {
                     index: true,
-                    Component: ClinicsDirectory,
+                    element: (
+                      <Suspense key="clinics-directory" fallback={<Spinner />}>
+                        <ClinicsDirectory />
+                      </Suspense>
+                    ),
                   },
                 ],
               },
@@ -103,7 +95,11 @@ const router = createBrowserRouter([
 
           {
             path: "doctor/:id/consult",
-            Component: TalkOverVideo,
+            lazy: async function () {
+              const { TalkOverVideo } =
+                await import("@/features/call/components/TalkOverVideo");
+              return { Component: TalkOverVideo };
+            },
             loader: loaderDoctor,
           },
 

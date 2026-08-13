@@ -1,5 +1,5 @@
 import { ShieldCheck } from "lucide-react";
-import docImg from "@/assets/doctor.jpg";
+import docImg from "@/assets/doctor.webp";
 import { Link, useNavigate } from "react-router-dom";
 import Ratings from "./Ratings";
 import type { Doctor } from "@/types/http";

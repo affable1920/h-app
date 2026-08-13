@@ -1,5 +1,6 @@
 import path from "path";
 import { defineConfig, type CommonServerOptions } from "vite";
+import { visualizer } from "rollup-plugin-visualizer";
 import react from "@vitejs/plugin-react";
 import fs from "fs";
 import tailwindcss from "@tailwindcss/vite";
@@ -34,7 +35,13 @@ const wsProtocol = (useHttps ? "wss" : "ws") + "://";
 const host = is_using_container ? "server:8000" : "localhost:8000";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    visualizer({
+      open: true,
+    }),
+  ],
 
   server: {
     https,

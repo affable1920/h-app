@@ -29,7 +29,6 @@ createRoot(document.getElementById("root")!).render(
         visibleToasts={2}
       />
       <RouterProvider router={router} />
-
       {import.meta.env.DEV && (
         <ReactQueryDevtools buttonPosition="bottom-left" />
       )}

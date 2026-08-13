@@ -53,6 +53,7 @@ export function useCall() {
       return next;
     });
   }
+
   function invertCamera(el: HTMLVideoElement) {
     el.style.scale = el.style.scale === "-1 1" ? "1 1" : "-1 1";
   }

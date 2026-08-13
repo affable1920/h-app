@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Components
 import { Toaster } from "sonner";
@@ -32,6 +33,7 @@ createRoot(document.getElementById("root")!).render(
       {import.meta.env.DEV && (
         <ReactQueryDevtools buttonPosition="bottom-left" />
       )}
+      <SpeedInsights />
     </QueryClientProvider>
   </StrictMode>,
 );

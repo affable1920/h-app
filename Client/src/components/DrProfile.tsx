@@ -5,10 +5,11 @@ import { Stack } from "./ui/Stack";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "./ui/Button";
 import useModalStore from "@/stores/modal-store";
-import { Delete, Settings } from "lucide-react";
+import { Delete, Edit, Plus, Settings } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { logout } from "@/stores/auth-store";
+import Divider from "./ui/Divider";
 
 export function DrProfile() {
   const openModal = useModalStore((s) => s.openModal);
@@ -86,13 +87,31 @@ export function DrProfile() {
       <Stack orientation="V" gap="sm">
         <Stack orientation="V" gap="sm">
           <Stack className="relative" justify="between">
-            <Stack orientation="V" gap="xs">
+            <Stack gap="sm" justify="center" align="end">
               {profile.imageUrl ? (
-                <div className="size-32 rounded-full">
-                  <img src={profile.imageUrl as string} />
+                <div className="aspect-square rounded-full overflow-hidden size-32">
+                  <img
+                    className="h-full w-full cursor-pointer object-cover"
+                    src={profile?.imageUrl}
+                    alt={`Dr. ${profile.name}`}
+                  />
                 </div>
               ) : null}
-              <h1 className="text-lg capitalize">Dr. {profile?.name}</h1>
+              <Stack align="center" className="group/name">
+                <h1
+                  className="text-lg capitalize text-text-normal 
+                group-hover/name:text-text group-hover/name:cursor-pointer"
+                >
+                  Dr. {profile?.name}
+                </h1>
+                <Button
+                  data-tooltip="edit your name"
+                  className="opacity-75 hover:opacity-100 transition-opacity duration-150"
+                  variant="icon"
+                >
+                  <Edit />
+                </Button>
+              </Stack>
             </Stack>
 
             {show && (
@@ -109,7 +128,7 @@ export function DrProfile() {
                   y: show ? 0 : 5,
                   pointerEvents: show ? "all" : "none",
                 }}
-                className="flex flex-col gap-4 p-2 rounded-md absolute right-10 top-1/2 -translate-y-1/2"
+                className="flex flex-col gap-4 p-2 rounded-md absolute right-8 bottom-0"
               >
                 <Button
                   onClick={function () {
@@ -142,7 +161,7 @@ export function DrProfile() {
               </motion.div>
             )}
 
-            <Stack>
+            <Stack align="end">
               <Button
                 onMouseEnter={function () {
                   setShow(true);
@@ -156,7 +175,7 @@ export function DrProfile() {
               </Button>
             </Stack>
           </Stack>
-          <Stack align="center">
+          <Stack className="mx-4" align="center">
             <div
               id="progress-box"
               className="relative w-full bg-layout-raised overflow-hidden rounded-md shadow-sm 
@@ -171,9 +190,25 @@ export function DrProfile() {
           </Stack>
         </Stack>
 
-        <section className="mt-4 space-y-4">
-          <Stack>
-            <h2 className="text-lg">Scheduling</h2>
+        <section className="mt-10 space-y-4">
+          <Stack justify="between" align="center">
+            <h2 className="text-lg text-text-normal">Schedules</h2>
+            <Stack>
+              <Button
+                onClick={function () {
+                  openModal("create-schedule", {
+                    doctor: profile,
+                  });
+                }}
+                variant="icon"
+                bg={true}
+              >
+                <Plus />
+              </Button>
+              <Button variant="icon" bg={true}>
+                <Edit />
+              </Button>
+            </Stack>
           </Stack>
 
           <section>
@@ -182,18 +217,10 @@ export function DrProfile() {
                 return <span>{s.id}</span>;
               })
             ) : (
-              <Stack orientation="V">
-                <p className="text-text-normal">No schedules yet!</p>
-                <Button
-                  onClick={function () {
-                    openModal("create-schedule", {
-                      doctor: profile,
-                    });
-                  }}
-                  className="self-start"
-                >
-                  Create one
-                </Button>
+              <Stack justify="center">
+                <h2 className="text-text-secondary text-md">
+                  No schedules yet!
+                </h2>
               </Stack>
             )}
           </section>

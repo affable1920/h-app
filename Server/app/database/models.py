@@ -269,4 +269,7 @@ class Review(TimeStampMixin, Base):
 
     __table_args__ = (
         sa.CheckConstraint("rating >= 0 AND rating <= 5", "chk_review_rating"),
+        sa.Index(
+            "ix_review_entity_entity_id", "entity", "entity_id"
+        )
     )

@@ -53,7 +53,7 @@ function ClinicsDirectory() {
 
               <Link to={`/view/doctor/${clinic.id}/reviews`}>
                 <Stack
-                  data-tooltip={`Rated ${clinic.rating} across ${clinic.reviews.length} reviews`}
+                  data-tooltip={`Rated ${clinic.rating} across ${clinic.reviewCount} reviews`}
                   gap="xs"
                   align="center"
                 >

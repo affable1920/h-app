@@ -5,8 +5,8 @@ export type Position = "top" | "bottom" | "center" | "left";
 const modalProperties: Record<Position, string> = {
   top: `fixed inset-0 w-full h-full max-h-52 rounded-b-md border-2 border-border-strong rounded-md`,
   bottom: `fixed bottom-0 min-h-48 left-0 w-full rounded-t-md`,
-  center: `absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md lg:max-w-lg 
-  border-2 border-border rounded-lg`,
+  center: `absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md 
+  lg:max-w-lg border-2 border-border rounded-lg`,
   left: `absolute inset-0 max-w-72`,
 };
 
@@ -59,23 +59,25 @@ const modalVariants: Record<Position, Record<string, Variant>> = {
   bottom: YModalVariants("bottom"),
   center: {
     initial: {
-      scale: 0,
       opacity: 0,
+      scale: 0.94,
+      y: 15,
     },
     animate: {
       opacity: 1,
       scale: 1,
+      y: 0,
       transition: {
-        ease: "easeIn",
+        type: "spring",
+        stiffness: 350,
+        damping: 24,
       },
     },
     exit: {
-      scale: 0,
+      y: 15,
+      scale: 0.96,
       opacity: 0,
-      transition: {
-        ease: "easeOut",
-        duration: 0.1,
-      },
+      transition: { duration: 0.125 },
     },
   },
   left: {

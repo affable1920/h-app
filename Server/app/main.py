@@ -73,7 +73,7 @@ if __name__ == "__main__":
     # we always set the server as the current directory so Path.cwd()
     # always resolves sucessfully to the server, our target.
 
-    base_dir = Path(__file__).parent
+    base_dir = Path.cwd() if inside_container else Path(__file__).parent
     mode_https = settings.use_https == "1"
 
     mode = settings.env
@@ -95,11 +95,11 @@ if __name__ == "__main__":
     """)
 
     def get_ssl_key():
-        target_fl = "certs/key.pem" if inside_container else "../localhost+3-key.pem"
+        target_fl = "../certs/key.pem" if inside_container else "../localhost+3-key.pem"
         return Path.resolve(base_dir / target_fl) if mode_https else None
 
     def get_ssl_cert():
-        target_fl = "certs/cert.pem" if inside_container else "../localhost+3.pem"
+        target_fl = "../certs/cert.pem" if inside_container else "../localhost+3.pem"
         return Path.resolve(base_dir / target_fl) if mode_https else None
 
     uvicorn.run(

@@ -23,6 +23,7 @@ export function useGetAll() {
 
     placeholderData: keepPreviousData,
     enabled: route === "clinics",
+    staleTime: 30 * 60 * 1000,
   });
 }
 

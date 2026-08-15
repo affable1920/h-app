@@ -459,11 +459,6 @@ export interface components {
             /** Location */
             location?: string | null;
             /**
-             * Reviews
-             * @default []
-             */
-            reviews: components["schemas"]["Review"][];
-            /**
              * Facilities
              * @default []
              */
@@ -479,6 +474,8 @@ export interface components {
             contacts: number[];
             /** Rating */
             readonly rating: number;
+            /** Reviewcount */
+            readonly reviewCount: number;
         };
         /** ClinicHttpMinimal */
         ClinicHttpMinimal: {
@@ -492,17 +489,14 @@ export interface components {
             /** Location */
             location?: string | null;
             /**
-             * Reviews
-             * @default []
-             */
-            reviews: components["schemas"]["Review"][];
-            /**
              * Facilities
              * @default []
              */
             facilities: string[];
             /** Rating */
             readonly rating: number;
+            /** Reviewcount */
+            readonly reviewCount: number;
         };
         /** DoctorHttpFull */
         DoctorHttpFull: {
@@ -518,19 +512,12 @@ export interface components {
             /** Experience */
             experience: number;
             /**
-             * Reviews
-             * @default []
-             */
-            reviews: components["schemas"]["Review"][];
-            /**
              * Verified
              * @default false
              */
             verified: boolean;
             /** @default unknown */
             status: components["schemas"]["Status"] | null;
-            /** Image */
-            image?: string | null;
             /** Credentials */
             credentials: string;
             gender: components["schemas"]["Gender"];
@@ -556,6 +543,8 @@ export interface components {
              * @default []
              */
             schedules: components["schemas"]["Schedule"][];
+            /** Reviewcount */
+            readonly reviewCount: number;
             /** Rating */
             readonly rating: number;
             /** Imageurl */
@@ -575,19 +564,14 @@ export interface components {
             /** Experience */
             experience: number;
             /**
-             * Reviews
-             * @default []
-             */
-            reviews: components["schemas"]["Review"][];
-            /**
              * Verified
              * @default false
              */
             verified: boolean;
             /** @default unknown */
             status: components["schemas"]["Status"] | null;
-            /** Image */
-            image?: string | null;
+            /** Reviewcount */
+            readonly reviewCount: number;
             /** Rating */
             readonly rating: number;
             /** Imageurl */
@@ -616,19 +600,12 @@ export interface components {
             /** Experience */
             experience: number;
             /**
-             * Reviews
-             * @default []
-             */
-            reviews: components["schemas"]["Review"][];
-            /**
              * Verified
              * @default false
              */
             verified: boolean;
             /** @default unknown */
             status: components["schemas"]["Status"] | null;
-            /** Image */
-            image?: string | null;
             /** Credentials */
             credentials: string;
             gender: components["schemas"]["Gender"];
@@ -665,6 +642,8 @@ export interface components {
             bio: string | null;
             /** Licensenumber */
             licenseNumber: string;
+            /** Reviewcount */
+            readonly reviewCount: number;
             /** Rating */
             readonly rating: number;
             /** Imageurl */
@@ -747,30 +726,6 @@ export interface components {
              */
             appointments: components["schemas"]["AppointmentResponse"][];
         };
-        /** Review */
-        Review: {
-            /**
-             * Id
-             * @description the unique identifier of the record
-             */
-            id: string;
-            /** Rating */
-            rating: number;
-            /** Comment */
-            comment?: string | null;
-            entity: components["schemas"]["ReviewableEntity"];
-            /** Entity Id */
-            entity_id: string;
-            /** Appointment Id */
-            appointment_id?: string | null;
-            /** Patient Id */
-            patient_id: string;
-        };
-        /**
-         * ReviewableEntity
-         * @enum {string}
-         */
-        ReviewableEntity: "DOCTOR" | "CLINIC";
         /**
          * Role
          * @enum {string}

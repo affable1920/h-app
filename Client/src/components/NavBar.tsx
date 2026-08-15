@@ -147,6 +147,7 @@ function NavBar() {
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <Button
           variant="icon"
+          aria-label="icon"
           onClick={function () {
             moveTo("/");
           }}

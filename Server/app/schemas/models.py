@@ -47,10 +47,21 @@ class DoctorHttpMinimal(FromORM, IDMixin, Aliased):
     name: str
     primary_specialization: str
     experience: int
-    reviews: list[Review] = []
     verified: bool = False
     status: Annotated[Status | None, Field(...)] = Status.UNKNOWN
-    image: str | None = None
+
+    """
+    exclude=True makes sure the properties are available for the computed field internally,
+    but is not serialized into JSOn for the response.
+    """
+
+    reviews: list[Review] = Field(default=[], exclude=True)
+    image: Annotated[str | None, Field(exclude=True)]
+
+    @computed_field
+    @property
+    def review_count(self) -> int:
+        return len(self.reviews)
 
     @computed_field
     @property
@@ -71,14 +82,17 @@ class DoctorHttpMinimal(FromORM, IDMixin, Aliased):
 class ClinicHttpMinimal(FromORM, IDMixin, Aliased):
     name: str
     location: str | None = None
-    reviews: list[Review] = []
+    reviews: list[Review] = Field(default=[], exclude=True)
     facilities: list[str] = []
 
     @computed_field
-    @property
     def rating(self) -> float:
         all_ratings = [review.rating for review in self.reviews]
         return round(mean(all_ratings if all_ratings else [0.0]), 2)
+
+    @computed_field
+    def review_count(self) -> int:
+        return len(self.reviews)
 
 
 class ClinicHttpFull(ClinicHttpMinimal, Aliased):

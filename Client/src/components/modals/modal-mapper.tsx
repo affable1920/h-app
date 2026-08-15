@@ -25,6 +25,7 @@ import { CalendarPlus, SaveAll, X } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Badge from "../ui/Badge";
+import { motion } from "motion/react";
 
 type CreateSchedule = {
   weekdays: Array<Weekday>;
@@ -41,15 +42,15 @@ const schema = z.object({
   baseSlotDuration: z.number().min(10, "Minimum duration is 10 minutes"),
   repeat: z.boolean(),
   isActive: z.boolean(),
-  location: z
-    .string("A valid location or a clinic name is required")
-    .min(8, "location must be atleast 8 characters long"),
   startTime: z
     .string("start time is required")
     .regex(/^\d{2}:\d{2}$/, "Invalid time format"),
   endTime: z
     .string("end time is required")
     .regex(/^\d{2}:\d{2}$/, "Invalid time format"),
+  location: z
+    .string("A valid location or a clinic name is required")
+    .min(8, "A valid location or a clinic name is required"),
 });
 
 const MODALS: Record<string, React.ElementType> = {
@@ -83,10 +84,12 @@ const MODALS: Record<string, React.ElementType> = {
     const wkdays = form.watch("weekdays");
     const { errors } = form.formState;
 
+    console.log(form.getValues());
+
     const updateSlotDuration = useCallback(function (operation: "up" | "down") {
       return function (val: number) {
         if (operation === "down") {
-          ref.current?.stepDown();
+          ref.current?.stepDown(String(10));
           form.setValue(
             "baseSlotDuration",
             form.getValues("baseSlotDuration") - val,
@@ -195,21 +198,19 @@ const MODALS: Record<string, React.ElementType> = {
               label="base slot duration (Minutes)"
             />
 
-            <Stack align="center" justify="center" gap="md">
-              <Stack>
+            <Stack justify="center" orientation="V" gap="sm">
+              <Stack align="center">
                 <Switch label="repeat" toggle={function () {}} isOn={true} />
 
-                <Stack orientation="V">
-                  <label className="text-sm px-1 capitalize">Every</label>
-                  <select>
+                <Stack>
+                  <motion.p className="font-semibold first-letter:capitalize">
+                    every
+                  </motion.p>
+                  <select className="bg-layout-raised p-1 px-2 capitalize rounded-md text-sm cursor-pointer">
                     {(["week", "month"] as const).map(function (frame) {
                       return (
-                        <option
-                          key={frame}
-                          defaultValue={frame === "week" ? "week" : undefined}
-                          value={frame}
-                        >
-                          {frame}
+                        <option key={frame} value={frame}>
+                          {frame[0]?.toUpperCase() + frame.substring(1)}
                         </option>
                       );
                     })}
@@ -228,7 +229,7 @@ const MODALS: Record<string, React.ElementType> = {
             />
           </Stack>
 
-          <Stack justify="between" className="mt-4">
+          <Stack justify="between" className="mt-8">
             <Button onClick={removeModal} variant="ghost">
               Cancel <X />
             </Button>

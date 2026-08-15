@@ -36,7 +36,7 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
         <div className="aspect-square rounded-md overflow-hidden max-w-20 mix-blend-difference">
           <img
             className="h-full rounded-md cursor-pointer w-full object-cover"
-            src={(doctor?.imageUrl || doctor?.image) ?? (docImg as string)}
+            src={doctor?.imageUrl ?? (docImg as string)}
             alt={`Dr. ${doctor.name}`}
           />
         </div>
@@ -63,7 +63,7 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
           </Stack>
           <Link to={`/view/doctor/${doctor.id}/reviews`}>
             <Stack
-              data-tooltip={`Rated ${doctor.rating} across ${doctor.reviews.length} reviews`}
+              data-tooltip={`Rated ${doctor.rating} across ${doctor.reviewCount} reviews`}
               gap="xs"
               align="center"
             >

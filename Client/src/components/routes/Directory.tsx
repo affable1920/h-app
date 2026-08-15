@@ -1,11 +1,10 @@
-import { useState, Suspense, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   Outlet,
   useLocation,
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import Spinner from "../ui/Spinner";
 import Pagination from "@components/Pagination";
 import Button from "@/components/ui/Button";
 import { debounce } from "@/utils/utils";
@@ -136,9 +135,7 @@ function Directory() {
       </section>
 
       <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
-        <Suspense fallback={<Spinner />}>
-          <Outlet context={setHasNext} />
-        </Suspense>
+        <Outlet context={setHasNext} />
       </section>
 
       <Pagination

@@ -29,6 +29,7 @@ export function useGetAll() {
     },
 
     placeholderData: keepPreviousData,
+    staleTime: 30 * 60 * 1000,
   });
 }
 

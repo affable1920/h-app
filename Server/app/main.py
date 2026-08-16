@@ -41,8 +41,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_origins=["*"],
     allow_credentials=True,
+    allow_origins=settings.allowed_origins.split(","),
     expose_headers=["x-session-expire", "x-auth-token"],
 )
 

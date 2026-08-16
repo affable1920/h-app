@@ -13,18 +13,20 @@ console.log(
   in ${useHttps ? "https" : "http"} mode.`,
 );
 
+const DIR_NAME = import.meta.dirname;
+
 const https: CommonServerOptions["https"] = !useHttps
   ? undefined
   : {
       key: fs.readFileSync(
         path.resolve(
-          __dirname,
+          DIR_NAME,
           is_using_container ? "../certs/key.pem" : "../localhost+3-key.pem",
         ),
       ),
       cert: fs.readFileSync(
         path.resolve(
-          __dirname,
+          DIR_NAME,
           is_using_container ? "../certs/cert.pem" : "../localhost+3.pem",
         ),
       ),
@@ -70,12 +72,12 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@hooks": path.resolve(__dirname, "./src/hooks"),
-      "@stores": path.resolve(__dirname, "./src/stores"),
-      "@services": path.resolve(__dirname, "./src/services"),
-      "@components": path.resolve(__dirname, "./src/components"),
-      "@routes": path.resolve(__dirname, "./src/components/routes"),
+      "@": path.resolve(DIR_NAME, "./src"),
+      "@hooks": path.resolve(DIR_NAME, "./src/hooks"),
+      "@stores": path.resolve(DIR_NAME, "./src/stores"),
+      "@services": path.resolve(DIR_NAME, "./src/services"),
+      "@components": path.resolve(DIR_NAME, "./src/components"),
+      "@routes": path.resolve(DIR_NAME, "./src/components/routes"),
     },
   },
 });

@@ -101,7 +101,8 @@ class Doctor(RatingMixin, TimeStampMixin, Base):
     verified: Mapped[bool] = mapped_column(server_default="False")
 
     primary_specialization: Mapped[str] = mapped_column(
-        nullable=False, index=True)
+        nullable=False, index=True
+    )
     secondary_focus_areas: Mapped[Optional[list[str]]] = mapped_column(
         sa.JSON, server_default="[]"
     )

@@ -6,6 +6,8 @@ import { RouterProvider } from "react-router-dom";
 import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 import "./styles/main.css";
 import "@fontsource/pt-sans/400";
@@ -17,6 +19,8 @@ import { queryClient } from "./core/query-client.ts";
 // container
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
+    <SpeedInsights />
+    <Analytics />
     <QueryClientProvider client={queryClient}>
       <Toaster
         style={{

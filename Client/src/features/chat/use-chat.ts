@@ -22,7 +22,6 @@ function useChat() {
     // fetch history once, on first render (if any)
     getHistory();
   }, []);
-  console.log(conversation);
 
   const streamDoneRef = useRef(false);
   const controllerRef = useRef<AbortController>(null);

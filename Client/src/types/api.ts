@@ -106,6 +106,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edit */
+        put: operations["edit"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/doctors": {
         parameters: {
             query?: never;
@@ -385,6 +402,11 @@ export interface components {
             phone?: string | null;
             /** Profile */
             profile?: string | null;
+        };
+        /** Body_edit_auth_edit_put */
+        Body_edit_auth_edit_put: {
+            /** Nw */
+            nw: string;
         };
         /** Body_register_dr_auth_register_doctor_post */
         Body_register_dr_auth_register_doctor_post: {
@@ -1011,6 +1033,41 @@ export interface operations {
             };
         };
     };
+    edit: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Body_edit_auth_edit_put"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_doctors: {
         parameters: {
             query?: {
@@ -1019,14 +1076,15 @@ export interface operations {
                 maxDistance?: number | null;
                 consultsOnline?: "1" | null;
                 currentlyAvailable?: "1" | null;
+                verified?: "1" | null;
                 specialization?: string | null;
                 experience?: number | null;
                 fee?: number | null;
                 gender?: components["schemas"]["Gender"] | null;
                 page?: number;
                 max?: number;
-                sortBy?: string | null;
-                sortOrder?: components["schemas"]["SortOrder"] | null;
+                sortColumn?: string | null;
+                sortOrder?: components["schemas"]["SortOrder"];
             };
             header?: never;
             path?: never;
@@ -1187,8 +1245,6 @@ export interface operations {
             query?: {
                 page?: number;
                 max?: number;
-                sortBy?: string | null;
-                sortOrder?: components["schemas"]["SortOrder"] | null;
                 searchQuery?: string | null;
                 minRating?: number | null;
                 maxDistance?: number | null;

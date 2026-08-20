@@ -3,6 +3,10 @@
     @apply mx-auto bg-layout my-24 rounded-xl shadow-lg shadow-black/30 
     border border-border-strong overflow-hidden;
   }
+
+  .form-label {
+    @apply text-text-normal capitalize text-center;
+  }
 }
 
 /* @utility flex-box-* {

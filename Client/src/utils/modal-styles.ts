@@ -82,23 +82,22 @@ const modalVariants: Record<Position, Record<string, Variant>> = {
   },
   left: {
     initial: {
-      x: "-100%",
+      x: "-25%",
     },
     animate: {
       x: 0,
       transition: {
-        ease: "easeOut",
-        stiffness: 50,
-        damping: 15,
+        type: "spring",
+        stiffness: 220,
+        damping: 22,
       },
     },
     exit: {
-      x: "-100%",
+      x: "-10%",
       transition: {
-        ease: "easeIn",
-        stiffness: 110,
+        stiffness: 300,
         damping: 10,
-        duration: 0.1,
+        duration: 0,
       },
     },
   },

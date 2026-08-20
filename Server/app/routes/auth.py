@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, HTTPException, Query, Response
 from app.services import MailService
 from app.schemas.enums import UserRoleV2
 from app.database.models import Doctor
@@ -253,3 +253,35 @@ async def remove_account(
     await session.flush()
     await session.commit()
     return "Account deleted sucessfully"
+
+
+ALLOWED_FIELDS = {"name", "email", "phone"}
+
+
+@router.put("/edit")
+async def edit(
+    nw: str = Body(embed=True),
+    q: str = Query(),
+    session: AsyncSession = Depends(get_db),
+    payload: dict = Depends(decode_access_token),
+):
+    user = await get_curr_user(
+        session=session,
+        payload=payload
+    )
+
+    if not user:
+        return
+
+    if q not in ALLOWED_FIELDS:
+        raise HTTPException(
+            400,
+            detail={
+                "msg": f"Bad request. You can only edit the following fields: {ALLOWED_FIELDS}"
+            }
+        )
+
+    setattr(user, q, nw)
+
+    await session.commit()
+    await session.refresh(user)

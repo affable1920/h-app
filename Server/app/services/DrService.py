@@ -19,6 +19,10 @@ logger = logging.getLogger(__name__)
 
 class DoctorService(EntityService[Doctor]):
     entity = Doctor
+    sort_col_map = {
+        "reviews": "review_count",
+        "rating": "avg_rating"
+    }
 
     #
 
@@ -64,11 +68,8 @@ class DoctorService(EntityService[Doctor]):
                 Doctor.avg_rating >= filters.min_rating
             )
 
-        if filters.currently_available:
-            stmt = stmt.where(Doctor.status == Status.AVAILABLE)
-
         if filters.consults_online:
-            stmt = stmt.where(Doctor.consults_online == True)
+            stmt = stmt.where(Doctor.consults_online.is_(True))
 
         if filters.gender:
             stmt = stmt.where(
@@ -93,6 +94,9 @@ class DoctorService(EntityService[Doctor]):
                     Doctor.primary_specialization.icontains(sq)
                 )
             )
+
+        if filters.verified:
+            stmt = stmt.where(Doctor.verified.is_(True))
 
         return stmt
 

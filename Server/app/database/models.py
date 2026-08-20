@@ -44,8 +44,6 @@ class RatingMixin:
         # else calculate aggregate
         return sum(r.rating for r in self.reviews) / len(self.reviews)
 
-    #
-
     @avg_rating.expression
     def avg_rating(cls: type[Reviewable]):
         # This decorator (expression) lets us register the class-level behaviour separately
@@ -53,8 +51,29 @@ class RatingMixin:
         return (
             sa.select(sa.func.avg(Review.rating))
             .where(
-                Review.entity_id == cls.id,
-                Review.entity == cls.__reviewable_entity__
+                Review.entity == cls.__reviewable_entity__,
+                Review.entity_id == cls.id
+            )
+            .correlate_except(Review)
+            .scalar_subquery()
+        )
+
+    #
+
+    @hybrid_property
+    def review_count(self: Reviewable):  # pyright: ignore
+        if not self.reviews:
+            return 0
+        else:
+            return len(self.reviews)
+
+    @review_count.expression
+    def review_count(cls: type[Reviewable]):
+        return (
+            sa.select(sa.func.count(Review.id))
+            .where(
+                Review.entity == cls.__reviewable_entity__,
+                Review.entity_id == cls.id
             )
             .correlate_except(Review)
             .scalar_subquery()
@@ -118,7 +137,8 @@ class Doctor(RatingMixin, TimeStampMixin, Base):
     )
 
     gender: Mapped[Gender] = mapped_column(
-        sa.Enum(Gender, name="gender"), nullable=False)
+        sa.Enum(Gender, name="gender"), nullable=False
+    )
     college_studied: Mapped[Optional[str]] = mapped_column(server_default="NA")
     license_number: Mapped[str] = mapped_column(nullable=False, unique=True)
     graduation_year: Mapped[Optional[int]] = mapped_column()

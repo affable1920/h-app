@@ -1,8 +1,8 @@
 from enum import Enum
 from typing import Annotated, Literal
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
+from pydantic import BaseModel, Field, PlainSerializer
 
-from app.schemas.Base import Aliased, snake_to_camel
+from app.schemas.Base import Aliased
 from app.schemas.enums import Gender
 
 
@@ -14,12 +14,21 @@ class SortOrder(Enum):
 class PaginationParams(Aliased):
     page: int = Field(default=1, gt=0)
     max: int = Field(default=10, gt=0, lt=25)
-    sort_by: str | None = None
-    sort_order: SortOrder | None = Field(default=None)
 
     @property
     def offset(self):
         return (self.page - 1) * (self.max)
+
+
+class SortParams(BaseModel):
+    column: str | None = Field(
+        default=None,
+        alias="sortColumn"
+    )
+    order: SortOrder = Field(
+        default=SortOrder.ASC,
+        alias="sortOrder"
+    )
 
 
 class BaseFilters(Aliased):
@@ -31,6 +40,7 @@ class BaseFilters(Aliased):
 class DrRouteFilters(BaseFilters):
     consults_online: Literal["1"] | None = None
     currently_available: Literal["1"] | None = None
+    verified: Literal["1"] | None = None
     specialization: Annotated[
         str | None,
         PlainSerializer(

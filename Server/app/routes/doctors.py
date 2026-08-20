@@ -7,7 +7,7 @@ from app.services.DrService import DoctorService
 from app.schemas.models import DoctorHttpFull, DoctorHttpMinimal
 from app.schemas.outputs import PaginatedResponse
 from app.schemas.inputs import DrCreate, get_dr_onboarding
-from app.schemas.response_modifiers import DrRouteFilters, PaginationParams
+from app.schemas.response_modifiers import DrRouteFilters, PaginationParams, SortOrder, SortParams
 
 
 logger = logging.getLogger(__name__)
@@ -18,12 +18,14 @@ router = APIRouter(prefix="/doctors")
 async def get_doctors(
     filters: DrRouteFilters = Depends(),
     pagination_params: PaginationParams = Depends(),
+    sort: SortParams = Depends(),
     session: AsyncSession = Depends(get_db),
 ):
     count, objects = await DoctorService.get_all(
         session,
         pagination=pagination_params,
-        filters=filters
+        filters=filters,
+        sort=sort
     )
 
     response = DoctorService.create_pg_response(

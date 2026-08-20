@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm.strategy_options import _AbstractLoad
 from app.schemas.outputs import PaginatedResponse
-from app.schemas.response_modifiers import BaseFilters, PaginationParams, SortOrder
+from app.schemas.response_modifiers import BaseFilters, PaginationParams, SortOrder, SortParams
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -18,6 +18,7 @@ T = TypeVar("T", bound=DeclarativeBase)
 
 class EntityService(Generic[T], ABC):
     entity: ClassVar[Type]
+    sort_col_map: dict[str, str]
 
     #
 
@@ -54,16 +55,19 @@ class EntityService(Generic[T], ABC):
         sort_col: str,
         sort_order: SortOrder
     ) -> Select:
-        col = getattr(cls.entity, sort_col, None)
+        col = getattr(
+            cls.entity, cls.sort_col_map.get(sort_col, sort_col), None
+        )
+
         logger.info(
-            f"Request to sort entities by column ({sort_col}) in order: ({sort_order})"
+            f"Request to sort entities by column ({col}) in order: ({sort_order})"
         )
 
         if col is not None:
             if sort_order == SortOrder.DESC:
                 col = col.desc()
 
-            stmt = stmt.order_by(col)
+            stmt = stmt.order_by(col.nullslast())
         return stmt
 
     #
@@ -93,7 +97,8 @@ class EntityService(Generic[T], ABC):
     async def get_all(
         cls, session: AsyncSession,
         pagination: PaginationParams | None = None,
-        filters: BaseFilters | None = None
+        filters: BaseFilters | None = None,
+        sort: SortParams | None = None
     ) -> Tuple[int, Sequence[T]]:
         """ Public API - combines abstract methods' implementations """
         stmt = select(cls.entity)
@@ -107,14 +112,14 @@ class EntityService(Generic[T], ABC):
             )
         ) or 0
 
-        if pagination is not None:
-            if pagination.sort_by:
-                stmt = cls.sort(
-                    stmt,
-                    pagination.sort_by,
-                    pagination.sort_order if pagination.sort_order else SortOrder.ASC
-                )
+        if sort and sort.column:
+            stmt = cls.sort(
+                stmt,
+                sort_col=sort.column,
+                sort_order=sort.order
+            )
 
+        if pagination is not None:
             stmt = cls.paginate(stmt, pagination)
 
         stmt = stmt.options(*cls.load_options())

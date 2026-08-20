@@ -1,23 +1,31 @@
-import { useFetchProfile, useRemoveAccount } from "@/hooks/use-auth";
+import {
+  useEditProfile,
+  useFetchProfile,
+  useRemoveAccount,
+} from "@/hooks/use-auth";
 import ProfileShell from "./ProfileShell";
 import Spinner from "./ui/Spinner";
 import { Stack } from "./ui/Stack";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "./ui/Button";
 import useModalStore from "@/stores/modal-store";
-import { Delete, Edit, Plus, Settings } from "lucide-react";
+import { Delete, Edit, Plus, Save, Settings, X } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { logout } from "@/stores/auth-store";
-import Divider from "./ui/Divider";
 
 export function DrProfile() {
   const openModal = useModalStore((s) => s.openModal);
 
-  const { data: profile, isError, isLoading } = useFetchProfile("doctor");
+  const { mutate: edit } = useEditProfile();
   const { mutate: removeAccount } = useRemoveAccount("doctor");
+  const { data: profile, isError, isLoading } = useFetchProfile("doctor");
 
   const [show, setShow] = useState(false);
+  const [isNameDirty, setIsNameDirty] = useState(false);
+  const initialNameValue = profile?.name ?? "";
+
+  const editorRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   useEffect(
@@ -74,12 +82,49 @@ export function DrProfile() {
     [show],
   );
 
-  if (!profile) {
-    return;
+  function handleFocus() {
+    const editButton = document.getElementById("edit-button");
+    const saveButton = document.getElementById("save-button");
+
+    if (!editButton || !saveButton) {
+      return;
+    }
+
+    editButton.style.display = "none";
+    saveButton.style.display = "block";
+
+    const range = document.createRange();
+    const selection = document.getSelection();
+
+    const el = editorRef.current as HTMLDivElement;
+
+    range.selectNodeContents(el);
+    range.collapse(false);
+
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  }
+
+  function handleBlur() {
+    const editButton = document.getElementById("edit-button");
+    const saveButton = document.getElementById("save-button");
+
+    if (!saveButton || !editButton) {
+      return;
+    }
+
+    if (!isNameDirty) {
+      saveButton.style.display = "none";
+      editButton.style.display = "block";
+    }
   }
 
   if (isLoading) {
     return <Spinner />;
+  }
+
+  if (!profile) {
+    return;
   }
 
   return (
@@ -98,19 +143,86 @@ export function DrProfile() {
                 </div>
               ) : null}
               <Stack align="center" className="group/name">
-                <h1
-                  className="text-lg capitalize text-text-normal 
-                group-hover/name:text-text group-hover/name:cursor-pointer"
+                <div
+                  ref={editorRef}
+                  spellCheck={false}
+                  translate="no"
+                  role="textbox"
+                  aria-multiline="false"
+                  enterKeyHint="enter"
+                  onInput={function (ev) {
+                    setIsNameDirty(
+                      ev.currentTarget.textContent?.trim() !==
+                        profile.name.trim(),
+                    );
+                  }}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  defaultValue={profile.name}
+                  className="text-md flex items-center gap-2 capitalize text-text-normal group-hover/name:text-text 
+                  group-hover/name:cursor-pointer font-semibold outline-none focus:ring-2 hover:cursor-text 
+                  focus:ring-blue-400/20 rounded-md focus:ring-offset-2 focus:ring-offset-blue-400/15 
+                  px-3 py-1"
                 >
-                  Dr. {profile?.name}
-                </h1>
+                  {initialNameValue}
+                </div>
                 <Button
-                  data-tooltip="edit your name"
+                  id="edit-button"
+                  data-tooltip="Edit your name"
+                  aria-label="edit-button"
                   className="opacity-75 hover:opacity-100 transition-opacity duration-150"
                   variant="icon"
+                  size="sm"
+                  onClick={function () {
+                    if (editorRef.current) {
+                      editorRef.current.contentEditable = "true";
+                      editorRef.current.focus();
+                    }
+                  }}
                 >
                   <Edit />
                 </Button>
+                <Stack align="center" gap={4}>
+                  {isNameDirty && (
+                    <Button
+                      data-tooltip="Clear changes"
+                      onClick={function () {
+                        if (editorRef.current) {
+                          editorRef.current.textContent = initialNameValue;
+                          setIsNameDirty(false);
+                        }
+                      }}
+                      variant="icon"
+                    >
+                      <X />
+                    </Button>
+                  )}
+                  <Button
+                    aria-label="save-button"
+                    data-tooltip="save changes"
+                    type="submit"
+                    id="save-button"
+                    variant="icon"
+                    size="sm"
+                    disabled={!isNameDirty}
+                    onClick={function () {
+                      edit(
+                        {
+                          fieldName: "name",
+                          newValue: editorRef.current?.textContent,
+                        },
+                        {
+                          onSuccess() {
+                            setIsNameDirty(false);
+                          },
+                        },
+                      );
+                    }}
+                    style={{ display: "none", marginLeft: "4px" }}
+                  >
+                    <Save />
+                  </Button>
+                </Stack>
               </Stack>
             </Stack>
 
@@ -169,12 +281,14 @@ export function DrProfile() {
                 onMouseLeave={setTimer}
                 variant="icon"
                 bg={true}
+                size="sm"
                 color={"secondary"}
               >
                 <Settings />
               </Button>
             </Stack>
           </Stack>
+
           <Stack className="mx-4" align="center">
             <div
               id="progress-box"
@@ -202,10 +316,11 @@ export function DrProfile() {
                 }}
                 variant="icon"
                 bg={true}
+                size="sm"
               >
                 <Plus />
               </Button>
-              <Button variant="icon" bg={true}>
+              <Button size="sm" variant="icon" bg={true}>
                 <Edit />
               </Button>
             </Stack>
@@ -218,7 +333,7 @@ export function DrProfile() {
               })
             ) : (
               <Stack justify="center">
-                <h2 className="text-text-secondary text-md">
+                <h2 className="text-text-secondary text-[13px]">
                   No schedules yet!
                 </h2>
               </Stack>

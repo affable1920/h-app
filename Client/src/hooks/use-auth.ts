@@ -15,6 +15,7 @@ import type {
 } from "@/types/http";
 import useAuthStore from "@/stores/auth-store";
 import type { AxiosRequestConfig } from "axios";
+import { queryClient } from "@/core/query-client";
 
 type SignupContext =
   | { route: "doctor"; data: FormData }
@@ -119,4 +120,35 @@ export function removeAccountOptions(role: Role) {
 
 export function useRemoveAccount(role: Role) {
   return useMutation(removeAccountOptions(role));
+}
+
+export function useEditProfile<
+  R extends Role,
+  K extends keyof ProfileResponse<R>,
+>() {
+  return useMutation({
+    async mutationFn({
+      fieldName,
+      newValue,
+    }: {
+      fieldName: K;
+      newValue: ProfileResponse<R>[K];
+    }) {
+      return await api.put(
+        "edit",
+        { nw: newValue },
+        {
+          params: {
+            q: fieldName,
+          },
+        },
+      );
+    },
+
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: ["auth", "me"],
+      });
+    },
+  });
 }

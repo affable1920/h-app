@@ -1,6 +1,8 @@
 import type { ServerParams } from "@/types/http";
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
+import z from "zod";
 
 export type FilterState = Omit<
   NonNullable<ServerParams>,
@@ -9,115 +11,62 @@ export type FilterState = Omit<
 
 export type FilterKey = keyof FilterState;
 
-let filters: FilterState = {};
-const listeners: Set<() => void> = new Set();
+export const EMPTY_FILTERS: FilterState = {
+  specialization: null,
+  minRating: null,
+  currentlyAvailable: null,
+  verified: null,
+  gender: null,
+  experience: null,
+  fee: null,
+  sortColumn: null,
+  sortOrder: undefined,
+};
 
-function subscribe(cb: () => void) {
-  listeners.add(cb);
-  return function () {
-    listeners.delete(cb);
-  };
-}
+const schema = z.object({
+  specialization: z.string().nullish(),
+  minRating: z.number().min(2).max(5).nullish(),
+  currentlyAvailable: z.enum(["1"]).nullish(),
+  verified: z.enum(["1"]).nullish(),
+  gender: z.enum(["male", "female"]).nullish(),
+  experience: z.number().min(0).max(40).nullish(),
+  fee: z.number().min(0).max(800).nullish(),
+  sortColumn: z.string().nullish(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+});
 
-function setFilters(next: FilterState | ((p: FilterState) => FilterState)) {
-  filters = typeof next === "function" ? next(filters) : next;
-  listeners.forEach(function (l) {
-    l();
-  });
-}
-
-function getSnapshot() {
-  return filters;
-}
-
-function useFilterStore() {
-  const [searchParams] = useSearchParams();
-  const filters = useSyncExternalStore(subscribe, getSnapshot);
-
-  useEffect(function () {
-    function getNumberParam(key: FilterKey) {
-      return !!searchParams.get(key) ? Number(searchParams.get(key)) : null;
-    }
-
-    const sortOrderParam = searchParams.get("sortOrder") ?? undefined;
-    const sortOrder: FilterState["sortOrder"] =
-      sortOrderParam === "asc" || sortOrderParam === "desc"
-        ? sortOrderParam
-        : undefined;
-
-    setFilters({
-      specialization: searchParams.get("specialization"),
-      minRating: getNumberParam("minRating"),
-      currentlyAvailable:
-        searchParams.get("currentlyAvailable") === "1" ? "1" : null,
-      gender: (searchParams.get("gender") as FilterState["gender"]) ?? null,
-      experience: getNumberParam("experience"),
-      fee: getNumberParam("fee"),
-      sortBy: searchParams.get("sortBy") ?? undefined,
-      sortOrder,
-    });
-  }, []);
-
-  const handleFilterUpdate = useCallback(function handleFilterUpdate<
-    K extends FilterKey,
-  >(key: K, val: FilterState[K]) {
-    setFilters(function (p) {
-      return { ...p, [key]: val };
-    });
-  }, []);
-
-  function reset() {
-    setFilters({});
+function seedFromParams(searchParams: URLSearchParams): FilterState {
+  function getNumberParam(key: FilterKey) {
+    return !!searchParams.get(key) ? Number(searchParams.get(key)) : null;
   }
 
-  const activeFiltersCount = useMemo(
-    function () {
-      return Object.values(filters).filter(Boolean).length;
-    },
-    [filters],
-  );
+  const sortOrderParam = searchParams.get("sortOrder") ?? undefined;
+  const sortOrder: FilterState["sortOrder"] =
+    sortOrderParam === "asc" || sortOrderParam === "desc"
+      ? sortOrderParam
+      : undefined;
 
-  const clearField = useCallback(function <K extends FilterKey>(key: K) {
-    const next = key === "sortBy" || key === "sortOrder" ? undefined : null;
-    handleFilterUpdate(key, next as FilterState[K]);
-  }, []);
-
-  const allUpdatesFlushed = useMemo(
-    function () {
-      // keys as filterkey array prevents allUpdatesFlushed var being incorrectly false when filters = {}
-      const keys: Array<FilterKey> = [
-        "currentlyAvailable",
-        "minRating",
-        "specialization",
-        "fee",
-        "experience",
-        "gender",
-        "sortBy",
-      ];
-
-      return keys.every(function (key) {
-        const urlVal = searchParams.get(key);
-
-        const filterVal = filters[key];
-        return (
-          (!!urlVal ? String(urlVal) : null) ===
-          (!!filterVal ? String(filterVal) : null)
-        );
-      });
-    },
-    [filters],
-  );
-
-  const publicApi = {
-    filters,
-    handleFilterUpdate,
-    reset,
-    activeFiltersCount,
-    allUpdatesFlushed,
-    clearField,
+  return {
+    specialization: searchParams.get("specialization"),
+    minRating: getNumberParam("minRating"),
+    currentlyAvailable:
+      searchParams.get("currentlyAvailable") === "1" ? "1" : null,
+    gender: (searchParams.get("gender") as FilterState["gender"]) ?? null,
+    experience: getNumberParam("experience"),
+    fee: getNumberParam("fee"),
+    sortColumn: searchParams.get("sortColumn"),
+    sortOrder,
+    verified: searchParams.get("verified") === "1" ? "1" : null,
   };
-
-  return publicApi;
 }
 
-export default useFilterStore;
+export function useFilterStore() {
+  const [searchParams] = useSearchParams();
+
+  const form = useForm<FilterState>({
+    defaultValues: seedFromParams(searchParams),
+    resolver: zodResolver(schema),
+  });
+
+  return form;
+}

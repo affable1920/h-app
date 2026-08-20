@@ -1,11 +1,10 @@
 import useModalStore from "@/stores/modal-store";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Button from "./ui/Button";
 import SelectFilter from "./ui/SelectFilter";
 import * as constants from "@/utils/constants";
 import { useSearchParams } from "react-router-dom";
-import useFilterStore, { type FilterState } from "@/stores/filter-store";
 import { Stack } from "./ui/Stack";
 import Ratings from "./Ratings";
 import {
@@ -15,69 +14,60 @@ import {
   SlidersHorizontal,
   Venus,
 } from "lucide-react";
-import StepInput, { type StepHandle } from "./ui/StepInput";
-import { AnimatePresence, motion, stagger } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import Divider from "./ui/Divider";
+import { Controller } from "react-hook-form";
+import {
+  useFilterStore,
+  EMPTY_FILTERS,
+  type FilterState,
+} from "@stores/filter-store";
+import { ControlledStepInput } from "./ui/ControlledStepInput";
 
 const labelStyle = "text-text-normal capitalize text-center";
 
+const SORT_COLS = {
+  name: "asc",
+  rating: "desc",
+  reviews: "desc",
+  experience: "desc",
+  fee: "asc",
+};
+
 function DirectoryFilter() {
   const [, setSearchParams] = useSearchParams();
-  const {
-    filters,
-    handleFilterUpdate,
-    reset,
-    allUpdatesFlushed,
-    clearField,
-    activeFiltersCount,
-  } = useFilterStore();
-
   const closeModal = useModalStore((s) => s.closeModal);
-  const experienceRef = useRef<StepHandle>(null);
-  const feeRef = useRef<StepHandle>(null);
-
   const [showSorter, setShowSorter] = useState(false);
+
+  const { setValue, resetField, getValues, control, ...form } =
+    useFilterStore();
+
+  const so = form.watch("sortColumn");
 
   useEffect(
     function () {
-      if (!!filters.sortBy) {
+      if (so) {
         setShowSorter(true);
       }
     },
-    [filters.sortBy, showSorter],
+    [so],
   );
 
-  const update = useCallback(
-    // extends handleFilterUpdate and adds toggle functionality for a given param
-    function <K extends keyof FilterState>(key: K, val: FilterState[K]) {
-      if (filters[key] === val) {
-        clearField(key);
-        return;
-      }
+  const fields = form.watch();
 
-      handleFilterUpdate(key, val);
-    },
-    [filters],
-  );
-
-  const selectedSpecialization = filters.specialization ?? null;
-
-  useEffect(
+  const hasActiveFilters = useMemo(
     function () {
-      if (experienceRef.current && filters.experience) {
-        experienceRef.current.val = filters.experience;
-      }
-
-      if (feeRef.current && filters.fee) {
-        feeRef.current.val = filters.fee;
-      }
+      return Object.values(fields).some(function (v) {
+        return Boolean(v);
+      });
     },
-    [filters.experience, filters.fee],
+    [fields],
   );
 
   async function applyFiltersHttp() {
     const newParams = new URLSearchParams();
 
-    for (const [key, val] of Object.entries(filters)) {
+    for (const [key, val] of Object.entries(getValues())) {
       if (!val) {
         continue;
       }
@@ -102,6 +92,7 @@ function DirectoryFilter() {
           color="secondary"
           className="disabled:opacity-75 disabled:shadow-xs"
           bg={true}
+          aria-label="filter-opener"
         >
           <SlidersHorizontal />
         </Button>
@@ -112,6 +103,7 @@ function DirectoryFilter() {
               return !p;
             });
           }}
+          aria-label="sorter-opener"
           variant="icon"
           bg={true}
           color="secondary"
@@ -121,82 +113,168 @@ function DirectoryFilter() {
       </Stack>
 
       <Stack
-        orientation="H"
-        className="grow relative px-6 py-6 overflow-y-scroll overflow-x-hidden"
+        orientation="V"
+        gap={0}
+        className="grow relative px-8 py-6 overflow-y-scroll"
         style={{ scrollbarWidth: "none", scrollBehavior: "smooth" }}
       >
-        <Stack gap="lg" orientation="V">
+        <AnimatePresence mode="wait">
+          {showSorter && (
+            <motion.div
+              className="flex flex-col gap-4"
+              initial={{ height: 0, marginBottom: 0 }}
+              animate={{ height: "auto", marginBottom: "32px" }}
+              exit={{ height: 0, marginBottom: 0 }}
+            >
+              <Stack justify="between" align="center" className="relative">
+                <p className={labelStyle + " mx-auto"}>Sort by</p>
+                {so && (
+                  <Button
+                    onClick={function () {
+                      form.reset(
+                        {
+                          sortColumn: null,
+                          sortOrder: undefined,
+                        },
+                        { keepDefaultValues: true },
+                      );
+                    }}
+                    aria-label="clear-sort"
+                    size="sm"
+                    variant="icon"
+                    className="absolute right-2 underline-offset-2 hover:underline hover:text-blue-500 
+                    transition-colors"
+                  >
+                    clear
+                  </Button>
+                )}
+              </Stack>
+              <motion.div
+                initial={{ y: "-20px", opacity: 0 }}
+                animate={{
+                  y: 0,
+                  opacity: 1,
+                }}
+                exit={{
+                  y: "-10px",
+                  opacity: 0,
+                }}
+                className="flex flex-wrap gap-2"
+              >
+                {Object.entries(
+                  SORT_COLS as Record<string, FilterState["sortOrder"]>,
+                ).map(function ([col, order]) {
+                  return (
+                    <Button
+                      aria-selected={col === fields.sortColumn}
+                      onClick={function () {
+                        const sc = col === fields.sortColumn ? null : col;
+                        setValue("sortColumn", sc, {
+                          shouldDirty: true,
+                        });
+                        setValue("sortOrder", order, {
+                          shouldDirty: true,
+                        });
+                      }}
+                      key={col}
+                      size="sm"
+                      variant="icon"
+                      bg={true}
+                      color={col === fields.sortColumn ? "white" : "secondary"}
+                      needsMotion={true}
+                      className="text-xs capitalize grow"
+                    >
+                      {col}
+                    </Button>
+                  );
+                })}
+              </motion.div>
+              <Divider />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <Stack gap="md" orientation="V">
           <div>
-            {selectedSpecialization && (
+            {getValues("specialization") && (
               <Badge
                 as="button"
                 className="max-w-fit capitalize mb-2"
-                selected={!!selectedSpecialization}
+                selected={true}
                 onClick={function () {
-                  clearField("specialization");
+                  form.reset(
+                    {
+                      specialization: null,
+                    },
+                    {
+                      keepDefaultValues: true,
+                    },
+                  );
                 }}
               >
-                {selectedSpecialization}
+                {getValues("specialization")}
               </Badge>
             )}
             <SelectFilter
               label="filter by specialization"
               options={constants.SPECIALIZATIONS}
               onOptionSelect={function (option) {
-                update("specialization", option as string);
+                setValue("specialization", option as string, {
+                  shouldDirty: true,
+                });
               }}
             />
           </div>
 
-          <Stack orientation="V" gap="sm">
+          <Stack orientation="V">
             <p className={labelStyle}>
               filter by{" "}
               <em>
                 <strong>rating</strong>
               </em>
             </p>
-            <Stack orientation="H" gap={12} style={{ flexWrap: "wrap" }}>
-              {[2, 3, 4].map(function (option) {
+
+            <Stack
+              orientation="H"
+              gap={10}
+              style={{
+                flexWrap: "wrap",
+              }}
+            >
+              {[2, 3, 4].map(function (rating) {
                 return (
                   <Badge
                     full={false}
-                    key={option}
                     className="grow"
-                    size="sm"
-                    selected={option === filters.minRating}
+                    selected={rating === fields.minRating}
                     onClick={function () {
-                      update("minRating", option);
+                      setValue(
+                        "minRating",
+                        rating === fields.minRating ? null : rating,
+                        {
+                          shouldDirty: true,
+                        },
+                      );
                     }}
                   >
-                    <Ratings rating={option as number} />
+                    <Ratings rating={rating} />
                   </Badge>
                 );
               })}
             </Stack>
           </Stack>
 
-          <Stack orientation="V" gap="sm">
-            <p className={labelStyle}>Availability</p>
-            <Badge
-              selected={filters.currentlyAvailable === "1"}
-              className={`font-semibold`}
-              onClick={function () {
-                update("currentlyAvailable", "1");
-              }}
-            >
-              Doctors Online Now
-            </Badge>
-          </Stack>
-
-          <Stack orientation="V" gap="sm">
-            <Stack justify="center" align="center">
-              <p className={labelStyle}>Verfied</p>
+          <Stack orientation="V">
+            <Stack justify="center" gap={4} align="center">
+              <p className={labelStyle}>Verfication</p>
               <ShieldCheck size={13} color="teal" />
             </Stack>
             <Badge
+              selected={fields.verified === "1"}
               className={`font-semibold`}
               onClick={function () {
-                update("currentlyAvailable", "1");
+                setValue("verified", fields.verified === "1" ? null : "1", {
+                  shouldDirty: true,
+                });
               }}
             >
               Verified Doctors only
@@ -205,15 +283,18 @@ function DirectoryFilter() {
 
           <Stack orientation="V">
             <p className={labelStyle}>Gender</p>
-            <Stack justify="between">
+            <Stack justify="between" gap="sm">
               {Object.entries({ male: <Mars />, female: <Venus /> }).map(
                 function ([gender, icon]) {
+                  const gdr = gender as FilterState["gender"];
                   return (
                     <Badge
                       className="[&>svg]:size-4 items-center gap-2 capitalize"
-                      selected={gender === filters.gender}
+                      selected={gdr === fields.gender}
                       onClick={function () {
-                        update("gender", gender as FilterState["gender"]);
+                        setValue("gender", gdr === fields.gender ? null : gdr, {
+                          shouldDirty: true,
+                        });
                       }}
                       key={gender}
                     >
@@ -225,121 +306,81 @@ function DirectoryFilter() {
             </Stack>
           </Stack>
 
-          <Stack
-            orientation="H"
-            gap="lg"
-            style={{ flexWrap: "wrap" }}
-            justify="center"
-          >
-            <StepInput
-              label="min experience (years)"
-              onStepUp={function (val) {
-                experienceRef.current?.stepUp();
-                update("experience", (filters.experience ?? 0) + val);
-              }}
-              onStepDown={function (val) {
-                experienceRef.current?.stepDown();
-                update("experience", (filters.experience ?? 0) - val);
-              }}
-              ref={experienceRef}
-              onChange={experienceRef.current?.handleChange}
-              id="experience"
-              placeholder="-"
-              min="0"
-              max="60"
-              step="1"
-            />
+          <Controller
+            name="experience"
+            control={control}
+            render={function ({ field: { onChange, ...field }, fieldState }) {
+              return (
+                <ControlledStepInput
+                  label="min experience (years)"
+                  id="experience"
+                  placeholder="-"
+                  min="0"
+                  max="60"
+                  step="1"
+                  onChange={function (e) {
+                    form.clearErrors(field.name);
+                    onChange(e);
+                  }}
+                  onBlur={field.onBlur}
+                  value={field.value ?? ""}
+                  error={fieldState.error?.message}
+                  onInvalid={function (msg) {
+                    onChange(null);
+                    if (msg !== "-") {
+                      form.setError(field.name, {
+                        message: msg,
+                      });
+                    }
+                  }}
+                />
+              );
+            }}
+          />
 
-            <StepInput
-              label="max fee"
-              onStepUp={function (val) {
-                feeRef.current?.stepUp();
-                update("experience", (filters.fee ?? 0) + val);
-              }}
-              onStepDown={function (val) {
-                feeRef.current?.stepDown();
-                update("experience", (filters.fee ?? 0) - val);
-              }}
-              onChange={feeRef.current?.handleChange}
-              ref={feeRef}
-              id="fee"
-              placeholder="-"
-              min="0"
-              max="800"
-              step="50"
-            />
-          </Stack>
+          <Controller
+            name="fee"
+            control={control}
+            render={function ({ field: { onChange, ...field }, fieldState }) {
+              return (
+                <ControlledStepInput
+                  label="max fee"
+                  id="fee"
+                  placeholder="-"
+                  min="0"
+                  max="800"
+                  step="50"
+                  name={field.name}
+                  onChange={function (e) {
+                    form.clearErrors(field.name);
+                    onChange(e);
+                  }}
+                  onBlur={field.onBlur}
+                  value={field.value ?? ""}
+                  error={fieldState.error?.message}
+                  onInvalid={function (msg) {
+                    onChange(null);
+                    if (msg !== "-") {
+                      form.setError(field.name, {
+                        message: msg,
+                      });
+                    }
+                  }}
+                />
+              );
+            }}
+          />
         </Stack>
-
-        <AnimatePresence>
-          {showSorter && (
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{
-                width: showSorter ? "auto" : 0,
-              }}
-              exit={{ width: 0 }}
-            >
-              <motion.div
-                initial={{ x: "40px", opacity: 0 }}
-                animate={{
-                  x: 0,
-                  opacity: 1,
-                  transition: {
-                    delayChildren: stagger(0.125, { startDelay: 0.5 }),
-                    ease: "easeOut",
-                  },
-                }}
-                exit={{
-                  x: "20px",
-                  opacity: 0,
-                }}
-                className="flex flex-col gap-2 whitespace-nowrap"
-              >
-                {Object.entries({
-                  name: "asc",
-                  rating: "desc",
-                  reviews: "desc",
-                  experience: "desc",
-                  fee: "asc",
-                } as Record<string, FilterState["sortOrder"]>).map(function ([
-                  col,
-                  order,
-                ]) {
-                  return (
-                    <Button
-                      onClick={function () {
-                        update("sortBy", col);
-                        update(
-                          "sortOrder",
-                          !!filters.sortOrder
-                            ? filters.sortOrder === "asc"
-                              ? "desc"
-                              : "asc"
-                            : order,
-                        );
-                      }}
-                      size="sm"
-                      needsMotion={true}
-                      variant="icon"
-                      bg={true}
-                      color={filters.sortBy === col ? "white" : "secondary"}
-                      key={col}
-                      className="capitalize text-xs"
-                    >
-                      {col}
-                    </Button>
-                  );
-                })}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </Stack>
 
-      <Stack justify="end" align="end" className="px-6">
-        {!!activeFiltersCount && (
-          <Button size="sm" onClick={reset} color="warning">
+      <Stack align="end" justify="end" className="px-6 [&_button]:scale-90">
+        {hasActiveFilters && (
+          <Button
+            onClick={function () {
+              form.reset(EMPTY_FILTERS, { keepDefaultValues: true });
+            }}
+            color="indicator"
+          >
             Reset
           </Button>
         )}
@@ -351,7 +392,7 @@ function DirectoryFilter() {
           Cancel
         </Button>
         <Button
-          disabled={allUpdatesFlushed}
+          disabled={!form.formState.isDirty}
           color="white"
           onClick={applyFiltersHttp}
         >

@@ -10,21 +10,23 @@ import Button from "@/components/ui/Button";
 import { debounce } from "@/utils/utils";
 import useModalStore from "@/stores/modal-store";
 import { ArrowLeftRight, SlidersHorizontal } from "lucide-react";
-import useFilterStore from "@/stores/filter-store";
 import SearchBar from "../ui/SearchBar";
 import { Stack } from "../ui/Stack";
+import { useFilterStore } from "@/stores/filter-store";
 
 function Directory() {
   const navigate = useNavigate();
   const openModal = useModalStore((s) => s.openModal);
   const route = useLocation().pathname.split("/").at(-1) ?? "doctors";
 
+  const { getValues } = useFilterStore();
+
   const [params, setParams] = useSearchParams();
-  const { activeFiltersCount } = useFilterStore();
   const [localSearch, setLocalSearch] = useState<string | null>(null);
   const [hasNext, setHasNext] = useState(false);
 
   const page = params.get("page") ? Number(params.get("page")) : 1;
+  const activeFilterCount = Object.values(getValues()).filter(Boolean).length;
 
   useEffect(
     function () {
@@ -105,9 +107,9 @@ function Directory() {
             }}
           >
             <SlidersHorizontal />
-            {!!activeFiltersCount && (
+            {!!activeFilterCount && (
               <span className="absolute -top-2 -right-2 bg-accent text-white rounded-md w-4 h-4 flex items-center justify-center text-xs">
-                {activeFiltersCount}
+                {activeFilterCount}
               </span>
             )}
           </Button>

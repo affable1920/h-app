@@ -1,117 +1,100 @@
 import { Minus, Plus } from "lucide-react";
 import {
   forwardRef,
-  useImperativeHandle,
   useRef,
+  type ChangeEvent,
   type InputHTMLAttributes,
   type ReactNode,
 } from "react";
 import Button from "./Button";
 import { Stack } from "./Stack";
-import { toast } from "sonner";
-
-const labelStyle = "text-text-normal capitalize text-center";
-
-export type StepHandle = {
-  stepUp: () => void;
-  stepDown: () => void;
-  handleChange: () => void;
-  val?: number;
-};
 
 type StepProps = {
   label: string;
   icon?: ReactNode;
+  error?: string;
   onStepUp: (n: number) => void;
   onStepDown: (n: number) => void;
-  warn?: "true" | "false";
+  onClear?: (msg?: string) => void;
 } & InputHTMLAttributes<HTMLInputElement>;
 
-const StepInput = forwardRef<StepHandle, StepProps>(function (
-  { label, warn = "true", icon, onStepDown, onStepUp, ...rest },
+const StepInput = forwardRef<HTMLInputElement, StepProps>(function (
+  {
+    label,
+    icon,
+    min = 0,
+    max,
+    step = 1,
+    onStepDown,
+    onStepUp,
+    error,
+    onChange,
+    onClear,
+    ...rest
+  },
   ref,
 ) {
+  const maxValue = Number(max);
+  const stepValue = Number(step);
+  const minValue = Number(min);
+
   const stepRef = useRef<HTMLInputElement>(null);
 
-  function shouldWarn(input: string | null, msg: string) {
-    if (warn === "false") {
+  function stepUp() {
+    const el = stepRef.current;
+
+    if (!el) {
       return;
-    } else {
-      toast(`${input} ${msg}`, {
-        className: "capitalize",
-      });
     }
+
+    const nxt = el.valueAsNumber ?? 0 + stepValue;
+
+    if (nxt > maxValue) {
+      onClear?.("-");
+      return;
+    }
+
+    onStepUp(stepValue);
   }
 
-  useImperativeHandle<StepHandle, StepHandle>(ref, function () {
-    return {
-      stepUp() {
-        const el = stepRef.current;
+  function stepDown() {
+    const el = stepRef.current;
 
-        if (!el) {
-          return;
-        }
+    if (!el) {
+      return;
+    }
 
-        if (Number(el.value) >= Number(el.max)) {
-          return;
-        }
+    const nxt = (el.valueAsNumber ?? 0) - stepValue;
 
-        el.stepUp();
-      },
+    if (nxt < minValue) {
+      onClear?.("-");
+      return;
+    }
 
-      stepDown() {
-        const el = stepRef.current;
+    onStepDown(stepValue);
+  }
 
-        if (!el) {
-          return;
-        }
-        const minReached =
-          !el.value.trim() ||
-          Number(el.value) === Number(el.step) ||
-          Number(el.value) <= Number(el.min);
+  function handleChange(ev: ChangeEvent<HTMLInputElement>) {
+    const raw = ev.target.value;
+    const name = ev.target.name || ev.target.id || "field";
 
-        if (minReached) {
-          el.placeholder = "-";
-          el.value = "";
-          return;
-        } else {
-          el.stepDown();
-        }
-      },
+    if (raw.startsWith("-") || Number(raw) < minValue) {
+      onClear?.(name + " cannot be less than " + minValue);
+      return;
+    }
 
-      handleChange() {
-        const el = stepRef.current;
+    if (Number(raw) > maxValue) {
+      onClear?.(name + " cannot be greater than " + maxValue);
+      return;
+    }
 
-        if (!el) {
-          return;
-        }
-
-        const val = el.value;
-        const name = el.id || el.name || "value";
-
-        if (val.startsWith("-")) {
-          el.placeholder = "-";
-          el.value = "";
-          shouldWarn(name, "can not be negative !");
-          return;
-        }
-
-        if (Number(val) > Number(el.max)) {
-          el.placeholder = "-";
-          el.value = "";
-          shouldWarn(name, "can not be greater than " + el.max);
-          return;
-        }
-
-        el.value = val;
-      },
-    };
-  });
+    onChange?.(ev);
+  }
 
   return (
-    <Stack orientation="V" gap="sm">
+    <Stack orientation="V">
       <Stack justify="center" align="center">
-        <p className={labelStyle}>{label}</p>
+        <p className={"form-label"}>{label}</p>
         {icon && icon}
       </Stack>
       <Stack align="center" justify="center" gap="sm">
@@ -122,16 +105,18 @@ const StepInput = forwardRef<StepHandle, StepProps>(function (
           color="secondary"
           bg={true}
           size="sm"
-          onClick={function () {
-            onStepDown(Number(rest.step));
-          }}
+          onClick={stepDown}
         >
           <Minus />
         </Button>
         <input
-          ref={stepRef}
           type="number"
           inputMode="numeric"
+          min={min}
+          max={max}
+          step={step}
+          ref={stepRef}
+          onChange={handleChange}
           className="bg-layout-raised shadow-sm shadow-black/15 rounded-md ring-2 ring-border-strong 
           outline-none p-2 text-center focus:ring-3 focus:ring-sky-500/20"
           {...rest}
@@ -139,17 +124,23 @@ const StepInput = forwardRef<StepHandle, StepProps>(function (
         <Button
           size="sm"
           id="inc"
-          aria-label="Increase"
+          aria-label="increase"
           variant="icon"
           bg={true}
           color="secondary"
-          onClick={function () {
-            onStepUp(Number(rest.step));
-          }}
+          onClick={stepUp}
         >
           <Plus />
         </Button>
       </Stack>
+      {error && (
+        <span
+          role="alert"
+          className="capitalize text-sm text-red-400 text-center leading-1.2"
+        >
+          {error}
+        </span>
+      )}
     </Stack>
   );
 });

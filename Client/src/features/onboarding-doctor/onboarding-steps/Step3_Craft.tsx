@@ -9,13 +9,12 @@ import { SPECIALIZATIONS } from "@/utils/constants";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback } from "react";
-import { useFormContext } from "react-hook-form";
+import { useController, useFormContext } from "react-hook-form";
 
 export function Step3_Craft() {
   const form = useFormContext<DoctorOnboarding>();
   const { errors } = form.formState;
 
-  const ps = form.watch("primary_specialization");
   const openModal = useModalStore((s) => s.openModal);
 
   const sortFn = useCallback(function (a: string, b: string) {
@@ -25,6 +24,14 @@ export function Step3_Craft() {
   const filterFn = useCallback(function (item: string, query: string) {
     return item.toLowerCase().includes(query.toLowerCase().trim());
   }, []);
+
+  const { field: ps } = useController({
+    name: "primary_specialization",
+    control: form.control,
+    rules: {
+      required: "Primary specialization is required",
+    },
+  });
 
   const {
     query,
@@ -82,7 +89,8 @@ export function Step3_Craft() {
                 openModal("picker", {
                   name: "primary_specialization",
                   items: SPECIALIZATIONS.sort(sortFn),
-                  control: form.control,
+                  onSelect: ps.onChange,
+                  selected: ps.value,
                 });
               }}
             >
@@ -118,7 +126,7 @@ export function Step3_Craft() {
                     className={`grow cursor-pointer inline-flex px-2 py-1 text-center items-center
                         justify-center rounded-md text-xs h-10 shadow-md shadow-black/10
                         ${
-                          spec === ps
+                          spec === ps.value
                             ? "bg-white text-layout-raised font-semibold"
                             : "bg-layout-raised text-text-normal"
                         }`}

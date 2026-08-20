@@ -10,7 +10,13 @@ interface Props extends HTMLAttributes<"article"> {
 
 const Switch = memo(function ({ label, isOn, toggle }: Props) {
   return (
-    <Stack gap="xs" justify="end" align="center">
+    <Stack
+      onClick={toggle}
+      className="cursor-pointer"
+      gap="xs"
+      justify="end"
+      align="center"
+    >
       {label && (
         <motion.p
           animate={{
@@ -23,7 +29,6 @@ const Switch = memo(function ({ label, isOn, toggle }: Props) {
         </motion.p>
       )}
       <motion.div
-        onClick={toggle}
         animate={{
           background: isOn ? "var(--color-amber-700)" : "var(--color-layout)",
           justifyContent: isOn ? "flex-end" : "flex-start",

@@ -3,6 +3,7 @@ import {
   createBrowserRouter,
   Navigate,
   Outlet,
+  useLoaderData,
   type LoaderFunctionArgs,
 } from "react-router-dom";
 
@@ -21,6 +22,8 @@ import useAuthStore from "@/stores/auth-store";
 import { CallProvider } from "@/features/call/components/CallProvider";
 import { getByIdOptions } from "@/hooks/use-doctors";
 import { queryClient } from "@/core/query-client";
+import type { Doctor } from "@/types/http";
+import { Stack } from "./ui/Stack";
 
 const Chat = lazy(function () {
   return import("@routes/Chat");
@@ -106,6 +109,26 @@ const router = createBrowserRouter([
           {
             path: "doctor/:id",
             loader: loaderDoctor,
+            Component: function () {
+              const dr = useLoaderData<Doctor>();
+
+              if (!dr) {
+                return;
+              }
+
+              return (
+                <Stack orientation="V" gap="sm">
+                  {Object.entries(dr).map(function ([key, val]) {
+                    return typeof val === "string" && key != "id" ? (
+                      <Stack gap="md">
+                        <span className="capitalize text-blue-400">{key}</span>
+                        <span className="capitalize">{val}</span>
+                      </Stack>
+                    ) : null;
+                  })}
+                </Stack>
+              );
+            },
           },
 
           {

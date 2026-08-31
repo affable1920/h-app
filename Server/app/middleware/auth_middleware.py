@@ -7,6 +7,8 @@ from fastapi import (
     Depends,
 )
 
+from app.database.models import Doctor
+from app.database.entry_async import get_db
 from app.services.DrService import DoctorService
 from app.services.PatientService import PatientService
 from app.schemas.enums import UserRoleV2
@@ -30,14 +32,19 @@ def authenticate_pwd(pwd: str, hash: str) -> bool:
 """
 
 OAuth2PasswordBearer --
-OAuth2PwdBearer is a dependency that auomatically extracts the bearer "token" inside the auth header
+OAuth2PwdBearer is a dependency that auomatically extracts the bearer "token" 
+inside the auth header
 
 """
 
 bearer = OAuth2PasswordBearer(tokenUrl="auth")
 
 
-def create_access_token(id: str, role: UserRoleV2, exp_dur: timedelta = timedelta(days=2)) -> str:
+def create_access_token(
+        id: str,
+        role: UserRoleV2,
+        exp_dur: timedelta = timedelta(days=2)
+) -> str:
     iat = datetime.now()
     exp = iat + exp_dur
 
@@ -49,7 +56,8 @@ def create_access_token(id: str, role: UserRoleV2, exp_dur: timedelta = timedelt
 
     return jwt.encode(
         payload.model_dump(),
-        key=settings.jwt_secret, algorithm="HS256"
+        key=settings.jwt_secret,
+        algorithm="HS256"
     )
 
 
@@ -74,12 +82,19 @@ def decode_access_token(token: str = Depends(bearer)) -> dict:
                 "msg": "Token expired. please login again",
                 "type": "Session expiry"
             },
-            headers={"x-session-expire": "true"},
+            headers={
+                "x-session-expire": "true"
+            },
         )
 
     except (jwt.InvalidTokenError, jwt.PyJWTError):
         raise HTTPException(
-            401, {"type": "generic jwt error", "msg": "invalid token"})
+            401,
+            detail={
+                "msg": "Invalid token",
+                "type": "Invalid credentials"
+            }
+        )
 
 #
 
@@ -118,3 +133,19 @@ async def get_curr_user(
             usr = None
 
     return usr
+
+
+async def require_doctor(
+        session: AsyncSession = Depends(get_db),
+        payload: dict = Depends(decode_access_token),
+):
+    user = await get_curr_user(session=session, payload=payload)
+    if not isinstance(user, Doctor):
+        raise HTTPException(
+            404,
+            detail={
+                "msg": "You're not allowed to access this resource."
+            }
+        )
+
+    return user

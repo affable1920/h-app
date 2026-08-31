@@ -6,9 +6,9 @@ from sqlalchemy import Select, or_
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.scripts.one_off_db_script import compress
 from app.schemas.inputs import DrCreate
 from app.services.entities.main import EntityService
-from app.schemas.enums import Status
 from app.database.models import Clinic, Doctor, Schedule
 from app.schemas.response_modifiers import DrRouteFilters
 import app.middleware.auth_middleware as auth
@@ -114,18 +114,19 @@ class DoctorService(EntityService[Doctor]):
         if await cls.get(session, "license_number", data.license_number):
             raise ValueError("License number already in use.")
 
-        encoded = None
+        compressed = None
 
         if data.profile:
             try:
                 img = await data.profile.read()
-                encoded = base64.b64encode(img).decode("utf-8")
+                compressed, _ = compress(base64.b64encode(img).decode("utf-8"))
+
             except Exception as e:
                 logger.debug(e)
                 raise ValueError("Invalid image file.")
 
         created = Doctor(
-            image=encoded,
+            image=compressed,
             name=data.name,
             gender=data.gender,
             primary_specialization=data.primary_specialization,
@@ -148,15 +149,15 @@ class DoctorService(EntityService[Doctor]):
 
     #
 
-    @classmethod
-    def get_available_wkdays(cls, doctor: Doctor) -> set[int]:
+    @staticmethod
+    def get_available_wkdays(doctor: Doctor) -> set[int]:
         all_wkdays = [s.weekdays for s in doctor.schedules]
         return set().union(*all_wkdays)
 
     #
 
-    @classmethod
-    def get_available_slots(cls, doctor: Doctor, max: int = 5):
+    @staticmethod
+    def get_available_slots(doctor: Doctor, max: int = 5):
         slots = [
             {
                 "duration": slot.duration,

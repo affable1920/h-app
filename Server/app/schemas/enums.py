@@ -7,7 +7,7 @@ class ReviewableEntity(enum.Enum):
     CLINIC = "CLINIC"
 
 
-@deprecated("This enum is deprecated. User UserRoleV2 instead")
+@deprecated("This enum is deprecated. Use UserRoleV2 instead")
 class UserRole(enum.Enum):
     ADMIN = "admin"
     DOCTOR = "doctor"
@@ -19,6 +19,7 @@ class UserRole(enum.Enum):
 class Mode(enum.Enum):
     ONLINE = "online"
     IN_PERSON = "in person"
+    HYBRID = "hybrid"
 
 
 class UserRoleV2(enum.Enum):

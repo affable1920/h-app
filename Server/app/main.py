@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from app.routes import schedules
 from app.scripts.openapi_spec import generate_openapi_spec
 from app.features.chatbot import chat
 from app.core.config import settings
@@ -53,6 +54,7 @@ app.include_router(doctors.router)
 app.include_router(bookings.router)
 app.include_router(clinics.router)
 app.include_router(chat.router)
+app.include_router(schedules.router)
 app.add_websocket_route("/ws", ws_route.ws_endpoint)
 
 

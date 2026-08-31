@@ -57,7 +57,8 @@ async def register_pt(
         raise HTTPException(
             500,
             detail={
-                "msg": "Your account was successfully created but we couldn't log you in. Please login manually."
+                "msg": "Your account was successfully created but we couldn't log you in. "
+                "Please login manually."
             }
         )
 
@@ -75,17 +76,18 @@ async def login_pt(user_cred: PatientLogin, response: Response, session: AsyncSe
         if row is None:
             raise ValueError("Invalid email !")
 
-        is_authenticated = authenticate_pwd(
-            user_cred.password,
-            row.hash
-        )
-
-        if not is_authenticated:
+        if not authenticate_pwd(
+            pwd=user_cred.password,
+            hash=row.hash
+        ):
             raise ValueError("Invalid password !")
 
-        token = create_access_token(id=str(row.id), role=UserRoleV2.PATIENT)
-        response.headers["x-auth-token"] = token
+        token = create_access_token(
+            id=str(row.id),
+            role=UserRoleV2.PATIENT
+        )
 
+        response.headers["x-auth-token"] = token
         return UserResponse.model_validate(row)
 
     except ValueError as e:
@@ -223,7 +225,7 @@ async def profile(
     return PatientProfileResponse.model_validate(user, by_name=True)
 
 
-@router.delete("/{id}")
+@router.delete("")
 async def remove_account(
     session: AsyncSession = Depends(get_db),
     payload: dict = Depends(decode_access_token)
@@ -233,7 +235,7 @@ async def remove_account(
         payload=payload
     )
 
-    logger.info(usr)
+    logger.info(f"{usr} wants to delete their account!")
 
     if not usr:
         return
@@ -253,35 +255,3 @@ async def remove_account(
     await session.flush()
     await session.commit()
     return "Account deleted sucessfully"
-
-
-ALLOWED_FIELDS = {"name", "email", "phone"}
-
-
-@router.put("/edit")
-async def edit(
-    nw: str = Body(embed=True),
-    q: str = Query(),
-    session: AsyncSession = Depends(get_db),
-    payload: dict = Depends(decode_access_token),
-):
-    user = await get_curr_user(
-        session=session,
-        payload=payload
-    )
-
-    if not user:
-        return
-
-    if q not in ALLOWED_FIELDS:
-        raise HTTPException(
-            400,
-            detail={
-                "msg": f"Bad request. You can only edit the following fields: {ALLOWED_FIELDS}"
-            }
-        )
-
-    setattr(user, q, nw)
-
-    await session.commit()
-    await session.refresh(user)

@@ -110,7 +110,6 @@ class Schedule(FromORM, IDMixin):
     clinic_id: IDSerialized
     doctor_id: IDSerialized
     clinic: ClinicHttpMinimal | None = None
-    slots: list[Slot] = []
 
 #
 

@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import Generic, Self, Sequence, TypeVar
+from datetime import datetime, time
+from typing import Generic, Literal, Self, Sequence, TypeVar
 from pydantic import (
     ConfigDict,
     EmailStr,
@@ -73,3 +73,8 @@ class UserResponse(IDMixin, FromORM, Aliased):
     email: EmailStr
     name: str | None = None
     username: str | None = None
+
+
+class ScheduleResponse(IDMixin, FromORM, Aliased):
+    weekdays: list[int]
+    max_slots: int | Literal[False] = False

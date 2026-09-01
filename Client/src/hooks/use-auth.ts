@@ -1,9 +1,4 @@
-import {
-  mutationOptions,
-  queryOptions,
-  useMutation,
-  useQuery,
-} from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import APIClient from "@/core/ApiClient";
 import type {
   PatientCreate,
@@ -15,7 +10,8 @@ import type {
 } from "@/types/http";
 import useAuthStore from "@/stores/auth-store";
 import type { AxiosRequestConfig } from "axios";
-import { queryClient } from "@/core/query-client";
+import { createMutationHook } from "./use-http";
+import { doctorKeys } from "./keys";
 
 type SignupContext =
   | { route: "doctor"; data: FormData }
@@ -106,49 +102,7 @@ export function useFetchProfile<R extends Role>(role: R) {
   return useQuery(fetchProfileOptions<R>(role));
 }
 
-export function removeAccountOptions(role: Role) {
-  return mutationOptions({
-    mutationKey: [
-      ["auth", "delete"],
-      ["auth", "me", role],
-    ],
-    async mutationFn(id: string) {
-      return await api.delete(id);
-    },
-  });
-}
-
-export function useRemoveAccount(role: Role) {
-  return useMutation(removeAccountOptions(role));
-}
-
-export function useEditProfile<
-  R extends Role,
-  K extends keyof ProfileResponse<R>,
->() {
-  return useMutation({
-    async mutationFn({
-      fieldName,
-      newValue,
-    }: {
-      fieldName: K;
-      newValue: ProfileResponse<R>[K];
-    }) {
-      return await api.put(
-        "edit",
-        { nw: newValue },
-        {
-          params: {
-            q: fieldName,
-          },
-        },
-      );
-    },
-
-    onSuccess() {
-      queryClient.invalidateQueries({
-        queryKey: ["auth", "me"],
-      });
-    },
-  });
-}
+export const useDeleteAccount = createMutationHook(
+  () => api.delete(""),
+  (id: string) => [doctorKeys.detail(id), doctorKeys.lists()],
+);

@@ -1,23 +1,18 @@
 import { useLocation } from "react-router-dom";
-import Code from "../../../components/ui/Code";
+import Code from "../../components/ui/Code";
 import Calendar from "@components/Calendar";
-import Spinner from "../../../components/ui/Spinner";
-import { useGetById } from "@/hooks/use-doctors";
+import Spinner from "../../components/ui/Spinner";
 import { ClinicViewVariants } from "@/utils/motion-variants";
 import { motion } from "motion/react";
 import { ScheduleItem } from "./ScheduleItem";
 import Button from "@/components/ui/Button";
+import { useDoctor } from "@/hooks/use-doctors";
 
 function SchedulesView() {
   const path = useLocation().pathname;
   const id = path.split("/").filter(Boolean).at(-2);
 
-  const {
-    data: doctor,
-    isPending,
-    isError,
-    refetch,
-  } = useGetById(id as string);
+  const { data: doctor, isPending, isError, refetch } = useDoctor(id!);
 
   if (isPending) {
     return <Spinner />;

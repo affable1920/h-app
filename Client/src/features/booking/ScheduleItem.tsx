@@ -8,7 +8,7 @@ import {
 } from "@/utils/motion-variants";
 import { ArrowRight, ChevronRight, MapPinCheckInside } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Badge from "@components/ui/Badge";
 import useModalStore from "@/stores/modal-store";
 import { useSearchParams } from "react-router-dom";
@@ -26,16 +26,15 @@ type ScheduleState = {
   weekday: number | null;
 };
 
-export const ScheduleItem = memo(function ({
-  schedule,
-  doctor,
-}: ScheduleProps) {
+export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
+  const openModal = useModalStore((s) => s.openModal);
+
   const { id, slots, clinic, ...rest } = schedule;
   const [params, setParams] = useSearchParams();
 
   const dtParam = fromISO(params.get("date") ?? "");
-  const [clearDtParam, setClearDtParam] = useState(false);
 
+  const [clearDtParam, setClearDtParam] = useState(false);
   const [scheduleState, setScheduleState] = useState<ScheduleState>({
     schedule,
     slot: null,
@@ -43,7 +42,6 @@ export const ScheduleItem = memo(function ({
   });
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const openModal = useModalStore((s) => s.openModal);
 
   useEffect(
     function () {
@@ -127,6 +125,8 @@ export const ScheduleItem = memo(function ({
             animate={{
               rotate: isExpanded ? 90 : 0,
             }}
+            aria-label="toggle-button"
+            aria-expanded={isExpanded}
           >
             <ArrowRight size={12} />
           </motion.button>
@@ -169,7 +169,7 @@ export const ScheduleItem = memo(function ({
                             textTransform: "capitalize",
                           }}
                           rounded={false}
-                          as={"span"}
+                          as="span"
                           onClick={function () {
                             if (dtParam.weekday !== wkday) {
                               setClearDtParam(true);
@@ -193,53 +193,52 @@ export const ScheduleItem = memo(function ({
 
       <AnimatePresence>
         {showSlots && (
-          <div className="flex flex-col">
-            <motion.div
-              className="flex flex-col"
-              initial={{ height: 0 }}
-              animate={{ height: "auto" }}
-              exit={{ height: 0 }}
-            >
-              {allBooked ? (
-                <p className="text-center">All slots booked !</p>
-              ) : (
-                <motion.div
-                  variants={createStagger({ exitDelay: false }).parent}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  className="flex flex-wrap gap-4 justify-center my-6"
-                  layout
-                >
-                  {slotsFiltered.map(function (slot) {
-                    return (
-                      <motion.button
-                        variants={createStagger().children}
-                        className="flex-1"
-                        key={slot.id}
-                        onClick={function () {
-                          update("slot", slot);
-                        }}
+          <motion.div
+            className="flex flex-col"
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
+          >
+            {allBooked ? (
+              <p className="text-center">All slots booked !</p>
+            ) : (
+              <motion.div
+                variants={createStagger({ exitDelay: false }).parent}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="flex flex-wrap gap-4 justify-center my-6"
+              >
+                {slotsFiltered.map(function (slot) {
+                  return (
+                    <motion.button
+                      variants={createStagger().children}
+                      className="flex-1"
+                      key={slot.id}
+                      onClick={function () {
+                        update("slot", slot);
+                      }}
+                      disabled={slot.is_booked}
+                    >
+                      <Badge
+                        as="span"
+                        selected={slot.id === scheduleState.slot?.id}
                         disabled={slot.is_booked}
                       >
-                        <Badge
-                          as="span"
-                          selected={slot.id === scheduleState.slot?.id}
-                          disabled={slot.is_booked}
-                        >
-                          {
-                            fromISO(slot.slot_datetime)
-                              ?.toISOTime({ suppressSeconds: true })
-                              ?.split("+")?.[0]
-                          }
-                        </Badge>
-                      </motion.button>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </motion.div>
-          </div>
+                        {
+                          fromISO(slot.slot_datetime)
+                            ?.toISOTime({
+                              precision: "minutes",
+                            })
+                            ?.split("+")?.[0]
+                        }
+                      </Badge>
+                    </motion.button>
+                  );
+                })}
+              </motion.div>
+            )}
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -274,9 +273,10 @@ export const ScheduleItem = memo(function ({
                 <Button
                   color="white"
                   onClick={function () {
-                    openModal("schedule", {
-                      doctor,
-                      clinic,
+                    openModal("schedule-modal", {
+                      doctor: doctor,
+                      clinic: clinic!,
+                      slot: scheduleState.slot!,
                       onSuccess() {
                         setClearDtParam(true);
                         setScheduleState((p) => ({
@@ -285,7 +285,6 @@ export const ScheduleItem = memo(function ({
                           slot: null,
                         }));
                       },
-                      ...scheduleState,
                     });
                   }}
                 >
@@ -298,4 +297,4 @@ export const ScheduleItem = memo(function ({
       </AnimatePresence>
     </motion.article>
   );
-});
+}

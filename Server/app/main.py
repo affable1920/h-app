@@ -8,11 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from app.core.exceptions import AppException
+from app.routes import schedules
 from app.scripts.openapi_spec import generate_openapi_spec
 from app.features.chatbot import chat
 from app.core.config import settings
 from app.routes import auth, doctors, bookings, clinics
 from app.features.calling import ws_route
+from app.core.exception_handlers import application_error_handler, unhandled_error_handler
 
 
 #
@@ -36,7 +39,6 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_methods=["*"],
@@ -54,6 +56,23 @@ app.include_router(bookings.router)
 app.include_router(clinics.router)
 app.include_router(chat.router)
 app.add_websocket_route("/ws", ws_route.ws_endpoint)
+
+# Global Exception Handlers
+
+
+def _application_error_handler(request, exc):
+    return application_error_handler(request, exc)
+
+
+app.add_exception_handler(
+    AppException,
+    _application_error_handler
+)
+
+app.add_exception_handler(
+    Exception,
+    unhandled_error_handler
+)
 
 
 @app.get("/ping")

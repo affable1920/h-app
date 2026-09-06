@@ -6,6 +6,8 @@ from sqlalchemy import Select, or_
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import AlreadyInUseException
+from app.scripts.one_off_db_script import compress
 from app.schemas.inputs import DrCreate
 from app.services.entities.main import EntityService
 from app.schemas.enums import Status
@@ -106,23 +108,22 @@ class DoctorService(EntityService[Doctor]):
     async def create(cls, session: AsyncSession, data: DrCreate) -> Doctor:
         if (
                 await cls.email_exists(session, email=data.email)) \
-                or await PatientService.email_exists(session, email=data.email):
-            raise ValueError(
-                "This email Id is already in use! Please try using a different one."
-            )
+                or await PatientService.email_exists(session, email=data.email
+                                                     ):
+            raise AlreadyInUseException("email")
 
         if await cls.get(session, "license_number", data.license_number):
-            raise ValueError("License number already in use.")
+            raise AlreadyInUseException("license")
 
         encoded = None
 
         if data.profile:
-            try:
-                img = await data.profile.read()
-                encoded = base64.b64encode(img).decode("utf-8")
-            except Exception as e:
-                logger.debug(e)
-                raise ValueError("Invalid image file.")
+            logger.info(
+                f"Compressing profile image for doctor {data.name} ..."
+            )
+
+            img = await data.profile.read()
+            compressed, _ = compress(base64.b64encode(img).decode("utf-8"))
 
         created = Doctor(
             image=encoded,
@@ -160,10 +161,10 @@ class DoctorService(EntityService[Doctor]):
         slots = [
             {
                 "duration": slot.duration,
-                "slot_datetime": slot.slot_datetime.strftime("%y-%m-%d %H:%m")
+                "slot_datetime": slot.slot_datetime.strftime("%y-%m-%d %H:%M")
             }
             for schedule in doctor.schedules
             for slot in schedule.slots if not slot.is_booked
         ]
 
-        return slots[min(len(slots), max)]
+        return slots[:min(len(slots), max)]

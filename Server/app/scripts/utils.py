@@ -14,8 +14,6 @@ def retry(
 ):
     # 2. Target function layer
     def decorator(func):
-        logger.info(f"Calling function {func.__name__} with retry logic...")
-        # functool.wraps preserves original function name and docstring
 
         @functools.wraps(func)
         # 3. Execution wrapper that essentially replaces the actual function
@@ -30,7 +28,8 @@ def retry(
 
                 except exceptions as error:
                     logger.debug(
-                        f"\nAttempt {attempts} failed. logging the exception below:\n")
+                        f"\nAttempt {attempts} failed. logging the exception below:\n"
+                    )
                     logger.error(error)
 
                     if attempts >= max_retries:

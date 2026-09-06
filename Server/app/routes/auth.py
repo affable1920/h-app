@@ -2,24 +2,29 @@ import logging
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, BackgroundTasks, Body, Depends, HTTPException, Query, Response
+
+from app.features.auth.dependencies import get_current_user, require_patient
+from app.features.auth.service import AuthService
+
 from app.services import MailService
-from app.schemas.enums import UserRoleV2
-from app.database.models import Doctor
+from app.core.exceptions import AlreadyInUseException
+
+from app.database.models import Doctor, Patient
 from app.database.entry_async import get_db
-from app.schemas.inputs import DoctorLogin, DrCreate, PatientLogin, PatientCreate, get_dr_onboarding
+
+from app.schemas.inputs import (
+    DoctorLogin,
+    DrCreate,
+    PatientLogin,
+    PatientCreate,
+    get_dr_onboarding
+)
 from app.schemas.outputs import (
     DrProfileResponse,
     PatientProfileResponse,
     UserResponse
 )
-from app.services.PatientService import PatientService
-from app.services.DrService import DoctorService
-from app.middleware.auth_middleware import (
-    authenticate_pwd,
-    create_access_token,
-    decode_access_token,
-    get_curr_user,
-)
+
 
 router = APIRouter(prefix="/auth")
 logger = logging.getLogger(__name__)
@@ -32,35 +37,37 @@ async def register_pt(
     session: AsyncSession = Depends(get_db)
 ):
     try:
-        async with session.begin():
-            created = await PatientService.create(session, user)
+        token, created = await AuthService.register_patient(
+            session=session,
+            payload=user
+        )
 
-    except ValueError as e:
+    except AlreadyInUseException as e:
         logger.info(e)
         raise HTTPException(
             400,
             detail={
-                "msg": str(e)
+                "code": "already_in_use",
+                "message": "The email is already registered with another acoount.",
+                "detail": str(e)
             }
-        )
-
-    logger.info("Patient sucessfully created and committed to database.")
-
-    try:
-        token = create_access_token(
-            id=str(created.id),
-            role=UserRoleV2.PATIENT
         )
 
     except Exception as e:
-        logger.debug(e)
+        logger.exception(e)
         raise HTTPException(
             500,
             detail={
-                "msg": "Your account was successfully created but we couldn't log you in. "
+                "code": "failed_login_error",
+                "message": "Your account was successfully created but we couldn't log you in. "
                 "Please login manually."
             }
         )
+
+    await session.commit()
+    logger.info(
+        "Patient sucessfully created and committed to database."
+    )
 
     response.headers["x-auth-token"] = token
     return UserResponse.model_validate(created)
@@ -69,39 +76,18 @@ async def register_pt(
 
 
 @router.post("/login/patient", response_model=UserResponse)
-async def login_pt(user_cred: PatientLogin, response: Response, session: AsyncSession = Depends(get_db)):
-    try:
-        row = await PatientService.get_by_email(session, user_cred.email)
+async def login_pt(
+    user_cred: PatientLogin,
+    response: Response,
+    session: AsyncSession = Depends(get_db)
+):
+    token, patient = await AuthService.login_patient(
+        session=session,
+        credentials=user_cred
+    )
 
-        if row is None:
-            raise ValueError("Invalid email !")
-
-        if not authenticate_pwd(
-            pwd=user_cred.password,
-            hash=row.hash
-        ):
-            raise ValueError("Invalid password !")
-
-        token = create_access_token(
-            id=str(row.id),
-            role=UserRoleV2.PATIENT
-        )
-
-        response.headers["x-auth-token"] = token
-        return UserResponse.model_validate(row)
-
-    except ValueError as e:
-        logger.debug(e)
-        raise HTTPException(
-            401,
-            detail={"msg": str(e), "type": "Invalid credentials"},
-        )
-
-    except Exception as e:
-        logger.debug(e)
-        raise HTTPException(
-            500
-        )
+    response.headers["x-auth-token"] = token
+    return UserResponse.model_validate(patient)
 
 #
 
@@ -114,144 +100,116 @@ async def register_dr(
     session: AsyncSession = Depends(get_db)
 ):
     try:
-        async with session.begin():
-            created = await DoctorService.create(session=session, data=data)
+        token, created = await AuthService.register_doctor(
+            session=session,
+            payload=data
+        )
 
-    except ValueError as e:
+    except AlreadyInUseException as e:
+        logger.exception(e)
         raise HTTPException(
             400,
             detail={
-                "msg": str(e)
+                "code": "already_in_use",
+                "message": e.message,
             }
         )
 
-    try:
-        token = create_access_token(
-            id=created.id.__str__(),
-            role=UserRoleV2.DOCTOR
-        )
-
-        response.headers["x-auth-token"] = token
-        background_tasks.add_task(
-            lambda: MailService.send_mail(
-                recipient=created.email,
-                msg=f"You account has been sucessfully created. Welcome Onboard Dr {created.name} "
-            )
-        )
-        return UserResponse.model_validate(created)
-
     except Exception as e:
+        logger.exception(e)
         raise HTTPException(
             500,
             detail={
-                "msg": "Your account was successfully created but we couldn't log you in. "
+                "code": "failed_login_error",
+                "message": "Your account was successfully created but we couldn't log you in. "
                 "Please login manually."
             }
         )
 
+    response.headers["x-auth-token"] = token
+    background_tasks.add_task(
+        lambda: MailService.send_mail(
+            recipient=created.email,
+            msg=(
+                f"You account has been sucessfully created."
+                f"Welcome Onboard Dr {created.name} "
+            )
+        )
+    )
+    return UserResponse.model_validate(created)
 
 #
 
 
 @router.post("/login/doctor")
-async def login_dr(credentials: DoctorLogin, response: Response, session: AsyncSession = Depends(get_db)):
-    method_used = "id" if credentials.id else 'email'
-    cred = credentials.model_dump()
-    assert cred[method_used] is not None, "Id or email can not be None"
-
-    try:
-        row = await DoctorService.get(
-            session,
-            identKey=method_used,
-            identVal=cred[method_used]
-        )
-
-    except Exception:
-        raise HTTPException(
-            401,
-            detail={
-                "msg": f"Invalid {method_used}"
-            }
-        )
-
-    if not row:
-        raise HTTPException(
-            401,
-            detail={
-                "msg": f"Invalid {method_used}"
-            }
-        )
-
-    if not authenticate_pwd(credentials.password, row.hash):
-        raise HTTPException(
-            401,
-            detail={
-                "msg": "Invalid password."
-            }
-        )
-
-    token = create_access_token(
-        id=str(row.id),
-        role=UserRoleV2.DOCTOR
+async def login_dr(
+    credentials: DoctorLogin,
+    response: Response,
+    session: AsyncSession = Depends(get_db)
+):
+    token, doctor = await AuthService.login_doctor(
+        credentials=credentials,
+        session=session
     )
 
     response.headers["x-auth-token"] = token
-    return UserResponse.model_validate(row)
+    return UserResponse.model_validate(doctor)
 
 #
 
 
-@router.get("/me", response_model=Optional[DrProfileResponse | PatientProfileResponse])
-async def profile(
-    session: AsyncSession = Depends(get_db),
-    payload: dict = Depends(decode_access_token)
+@router.get(
+    path="/me",
+    response_model=Optional[
+        DrProfileResponse | PatientProfileResponse
+    ]
+)
+async def me(
+    current_user=Depends(get_current_user)
 ):
-    user = await get_curr_user(
-        session=session,
-        payload=payload
-    )
-
-    if user is None:
-        raise HTTPException(
-            404,
-            detail={
-                "type": "Not authenticated",
-                "msg": "The user does not exist.",
-            }
+    if isinstance(current_user, Doctor):
+        return DrProfileResponse.model_validate(
+            current_user,
+            by_name=True
         )
 
-    if isinstance(user, Doctor):
-        return DrProfileResponse.model_validate(user, by_name=True)
-    return PatientProfileResponse.model_validate(user, by_name=True)
+    return PatientProfileResponse.model_validate(
+        current_user,
+        by_name=True
+    )
 
 
-@router.delete("")
+#
+
+@router.delete("/")
 async def remove_account(
     session: AsyncSession = Depends(get_db),
-    payload: dict = Depends(decode_access_token)
+    patient: Patient = Depends(require_patient)
 ):
-    usr = await get_curr_user(
-        session=session,
-        payload=payload
-    )
+    await session.delete(patient)
+    await session.commit()
+    return "Account deleted sucessfully"
 
-    logger.info(f"{usr} wants to delete their account!")
 
-    if not usr:
-        return
+ALLOWED_FIELDS = {"name", "email", "phone"}
 
-    try:
-        await session.delete(usr)
 
-    except Exception as e:
-        logger.error(e)
+@router.put("/edit")
+async def edit(
+    nw: str = Body(embed=True),
+    q: str = Query(),
+    session: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    if q not in ALLOWED_FIELDS:
         raise HTTPException(
-            500,
+            400,
             detail={
-                "msg": "Could not remove account! Please try again later ..."
+                "msg": f"Bad request. You can only edit the following fields: {ALLOWED_FIELDS}"
             }
         )
 
-    await session.flush()
+    setattr(current_user, q, nw)
+
     await session.commit()
-    return "Account deleted sucessfully"
+    await session.refresh(current_user)

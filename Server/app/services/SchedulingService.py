@@ -1,15 +1,15 @@
 import logging
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, time, timedelta
 from typing import Any
 
-from fastapi import HTTPException
 from pydantic import Field
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import exists, select
 
 from app.schemas.enums import Mode
 from app.schemas.inputs import CreateSchedule
-from app.database.models import Schedule, Slot
+from app.database.models import Appointment, Schedule, Slot
+from app.core.exceptions import ScheduleHasAppointments, EntityNotFoundException
 
 logger = logging.getLogger(__name__)
 
@@ -95,64 +95,62 @@ class ScheduleService:
 
     #
 
+    async def get_schedule(
+            self,
+            schedule_id: str,
+            doctor_id: str,
+            session: AsyncSession
+    ) -> Schedule | None:
+        stmt = (
+            select(Schedule).where(
+                Schedule.id == schedule_id, Schedule.doctor_id == doctor_id
+            )
+        )
+        return await session.scalar(stmt)
+
+    #
+
     async def create_schedule(
             self,
             doctor_id: str,
             session: AsyncSession,
             payload: CreateSchedule,
     ) -> Schedule:
-        try:
-            schedule = Schedule(
-                weekdays=payload.weekdays,
-                is_active=payload.active,
-                start_time=payload.start_time,
-                end_time=payload.end_time,
-                doctor_id=doctor_id,
-                clinic_id="9d4a95d4-152a-448f-85b4-605b0d596ebf",
-                base_slot_duration=payload.base_slot_duration,
-            )
+        schedule = Schedule(
+            weekdays=payload.weekdays,
+            is_active=payload.active,
+            start_time=payload.start_time,
+            end_time=payload.end_time,
+            doctor_id=doctor_id,
+            clinic_id="9d4a95d4-152a-448f-85b4-605b0d596ebf",
+            base_slot_duration=payload.base_slot_duration,
+        )
+        session.add(schedule)
+        await session.flush([schedule])
+        await session.refresh(schedule)
 
-            session.add(schedule)
-            await session.flush([schedule])
-            await session.refresh(schedule)
+        all_slots = []
+        week_count = 4 if payload.repeat else 1
 
-        except Exception as e:
-            logger.error(e)
-            await session.rollback()
-            raise HTTPException(
-                500,
-                detail={
-                    "msg": "An unexpected error occurred.",
-                    "detail": str(e)
-                }
-            )
+        for i in range(week_count):
+            for wkd in payload.weekdays:
+                dt = self.get_datetime_from_wkday(wkd)
+                dt += timedelta(days=i*7)
 
-        try:
-            all_slots = []
-            week_count = 4 if payload.repeat else 1
+                slots = self.generate_slots(
+                    duration=payload.base_slot_duration,
+                    dt=dt, start_time=payload.start_time,
+                    end_time=payload.end_time,
+                    max_count=payload.max_slots,
+                    schedule_id=str(schedule.id)
+                )
+                all_slots.extend(slots)
 
-            for i in range(week_count):
-                for wkd in payload.weekdays:
-                    dt = self.get_datetime_from_wkday(wkd)
-                    dt += timedelta(days=i*7)
+        model_instances = [Slot(**slot) for slot in all_slots]
+        session.add_all(model_instances)
+        return schedule
 
-                    slots = self.generate_slots(
-                        duration=payload.base_slot_duration,
-                        dt=dt, start_time=payload.start_time,
-                        end_time=payload.end_time,
-                        max_count=payload.max_slots,
-                        schedule_id=str(schedule.id)
-                    )
-
-                    all_slots.extend(slots)
-
-            model_instances = [Slot(**slot) for slot in all_slots]
-            session.add_all(model_instances)
-            return schedule
-
-        except Exception as e:
-            logger.error(e)
-            raise
+    #
 
     async def edit(
             self,
@@ -162,20 +160,57 @@ class ScheduleService:
             field_name: str,
             val: Any
     ):
-        stmt = (select(Schedule).where(Schedule.id ==
-                id, Schedule.doctor_id == doctor_id)
-                )
-
-        schedule = await session.scalar(stmt)
+        schedule = await self.get_schedule(
+            id,
+            doctor_id,
+            session
+        )
 
         if schedule is None:
-            raise ValueError(
-                "No schedule found with the given id and doctor id combination."
+            raise EntityNotFoundException(
+                entity_name="Schedule",
+                identifier=id
             )
 
         setattr(schedule, field_name, val)
         await session.commit()
         await session.refresh(schedule, ["is_active"])
+
+    #
+
+    async def remove_schedule(
+            self,
+            schedule_id: str,
+            doctor_id: str,
+            session: AsyncSession,
+            confirm: bool = False
+    ):
+        schedule = await self.get_schedule(
+            schedule_id=schedule_id,
+            doctor_id=doctor_id,
+            session=session
+        )
+
+        if schedule is None:
+            raise EntityNotFoundException(
+                entity_name="Schedule",
+                identifier=schedule_id
+            )
+
+        has_any_history = await session.scalar(
+            select(exists().where(
+                Appointment.slot_id == Slot.id,
+                Slot.schedule_id == schedule_id,
+            ))
+        )
+
+        if has_any_history:
+            raise ScheduleHasAppointments(
+                identifier=schedule_id
+            )
+
+        await session.delete(schedule)
+        await session.commit()
 
 
 schedule_service = ScheduleService()

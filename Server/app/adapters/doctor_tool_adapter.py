@@ -116,7 +116,6 @@ class DoctorToolAdapter:
         response.update({
             "available_slots": DoctorService.get_available_slots(result),
             "available_weekdays": DoctorService.get_available_wkdays(result),
-            "rating": DoctorService.get_rating(result)
         })
 
         return response

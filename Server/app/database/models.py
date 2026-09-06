@@ -257,33 +257,48 @@ class Appointment(TimeStampMixin, Base):
 
     id: Mapped[PrimaryKey]
     scheduled_date: Mapped[datetime] = mapped_column(
-        sa.DateTime(timezone=True))
+        sa.DateTime(timezone=True)
+    )
+
     status: Mapped[AppointmentStatus] = mapped_column(
-        sa.Enum(AppointmentStatus, name="appointment_status"),
+        sa.Enum(
+            enums=AppointmentStatus,
+            name="appointment_status"
+        ),
         server_default=sa.text("'ACTIVE'"),
     )
 
     patient_id: Mapped[UUID] = mapped_column(
         sa.ForeignKey("patient.id")
     )
+
     patient: Mapped[Patient] = relationship(
         back_populates="appointments"
     )
 
     slot_id: Mapped[UUID] = mapped_column(
-        sa.ForeignKey("slot.id"), unique=True
+        sa.ForeignKey("slot.id"),
+        nullable=False
     )
-    slot: Mapped[Slot] = relationship(lazy="immediate")
 
+    slot: Mapped[Slot] = relationship(lazy="immediate")
     doctor_id: Mapped[UUID] = mapped_column(sa.ForeignKey("doctor.id"))
     doctor: Mapped["Doctor"] = relationship()
-
     clinic_id: Mapped[UUID] = mapped_column(sa.ForeignKey("clinic.id"))
     clinic: Mapped["Clinic"] = relationship()
 
     """
     Add consultation link, a sql text type for online consultations later
     """
+
+    __table_args__ = (
+        sa.Index(
+            "uq_appointment_active_slot",
+            "slot_id",
+            unique=True,
+            postgresql_where=status != "CANCELLED"
+        ),
+    )
 
 
 class Review(TimeStampMixin, Base):

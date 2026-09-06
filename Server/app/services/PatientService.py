@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.strategy_options import _AbstractLoad
+from app.core.exceptions import AlreadyInUseException
 from app.services.entities.main import EntityService
 from app.database.models import Appointment, Clinic, Doctor, Patient
 from app.schemas.inputs import PatientCreate
@@ -36,8 +37,9 @@ class PatientService(EntityService[Patient]):
     @classmethod
     async def create(cls, session: AsyncSession, data: PatientCreate) -> Patient:
         if await cls.email_exists(session, data.email):
-            raise ValueError(
-                "Email id already in use. Try a different one or sign in.")
+            raise AlreadyInUseException(
+                identifier="email"
+            )
 
         created = Patient(
             hash=auth.hash(data.password),
@@ -46,6 +48,9 @@ class PatientService(EntityService[Patient]):
         )
 
         session.add(created)
+
+        # flush returns instance with its generated id.
         await session.flush([created])
+
         await session.refresh(created)
         return created

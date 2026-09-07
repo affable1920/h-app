@@ -7,14 +7,14 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import AlreadyInUseException
-from app.scripts.one_off_db_script import compress
+from app.scripts.one_off import compress
 from app.schemas.inputs import DrCreate
 from app.services.entities.main import EntityService
 from app.schemas.enums import Status
 from app.database.models import Clinic, Doctor, Schedule
 from app.schemas.response_modifiers import DrRouteFilters
-import app.middleware.auth_middleware as auth
 from app.services.PatientService import PatientService
+from app.features.auth import security
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +115,7 @@ class DoctorService(EntityService[Doctor]):
         if await cls.get(session, "license_number", data.license_number):
             raise AlreadyInUseException("license")
 
-        encoded = None
+        compressed = None
 
         if data.profile:
             logger.info(
@@ -126,7 +126,7 @@ class DoctorService(EntityService[Doctor]):
             compressed, _ = compress(base64.b64encode(img).decode("utf-8"))
 
         created = Doctor(
-            image=encoded,
+            image=compressed,
             name=data.name,
             gender=data.gender,
             primary_specialization=data.primary_specialization,
@@ -138,7 +138,7 @@ class DoctorService(EntityService[Doctor]):
             graduation_year=data.graduation_year,
             college_studied=data.medical_college,
             email=data.email,
-            hash=auth.hash(data.password),
+            hash=security.hash(data.password),
             phone=data.phone
         )
 

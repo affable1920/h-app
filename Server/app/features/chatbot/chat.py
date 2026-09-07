@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
 from app.database.entry_async import get_db
-from app.middleware.dependencies import get_current_user
+from app.features.auth.dependencies import get_current_user
 from app.features.chatbot.schema import BaseChatMessage
 from app.features.chatbot.ChatService import Assistant
 

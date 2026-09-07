@@ -6,6 +6,7 @@ from sqlalchemy import Select, or_
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.features.auth import security
 from app.core.exceptions import AlreadyInUseException
 from app.scripts.one_off import compress
 from app.schemas.inputs import DrCreate
@@ -123,7 +124,9 @@ class DoctorService(EntityService[Doctor]):
             )
 
             img = await data.profile.read()
-            compressed, _ = compress(base64.b64encode(img).decode("utf-8"))
+            compressed, _ = compress(
+                base64.b64encode(img).decode("utf-8")
+            )
 
         created = Doctor(
             image=compressed,

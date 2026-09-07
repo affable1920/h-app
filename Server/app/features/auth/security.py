@@ -59,7 +59,7 @@ def create_access_token(
     )
 
 
-def decode_access_token(token: str) -> dict:
+def decode_access_token(token: str) -> AuthHdrPayload:
     try:
         decoded = jwt.decode(
             jwt=token,
@@ -67,13 +67,7 @@ def decode_access_token(token: str) -> dict:
             algorithms=["HS256"]
         )
 
-        if "id" not in decoded or "role" not in decoded:
-            raise InvalidTokenError()
-
-        return {
-            "id": decoded["id"],
-            "role": decoded["role"]
-        }
+        return AuthHdrPayload.model_validate(decoded)
 
     except jwt.ExpiredSignatureError:
         raise InvalidTokenError()

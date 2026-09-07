@@ -10,7 +10,7 @@ from app.schemas.outputs import AppointmentConfirmation
 from app.schemas.inputs import BookingRequestData
 from app.services.BookingService import BookingService
 from app.database.entry_async import get_db
-from app.middleware.auth_middleware import require_patient
+from app.features.auth.dependencies import require_patient
 
 
 router = APIRouter(

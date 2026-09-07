@@ -2,27 +2,15 @@ import io
 import base64
 import logging
 
-from sqlalchemy import create_engine, select, update
+from sqlalchemy import create_engine, inspect, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 from app.database.models import Doctor
 from PIL import Image, UnidentifiedImageError
 
 logger = logging.getLogger(__name__)
-
-
-def get_session():
-    engine = create_engine(url=settings.database_url)
-    SessionLocal = sessionmaker(bind=engine)
-    session = SessionLocal()
-
-    try:
-        yield session
-
-    finally:
-        session.close()
 
 
 async def fix_corrupt_imgs(session: AsyncSession):
@@ -47,7 +35,8 @@ async def fix_corrupt_imgs(session: AsyncSession):
 # 3. CORE COMPRESSION UTILITY
 # ==========================================
 def compress(
-        base64_string: str, quality: int = 80,
+        base64_string: str,
+        quality: int = 75,
         max_dimensions: tuple[int, int] = (800, 800)
 ) -> tuple[str | None, float]:
     """
@@ -123,17 +112,22 @@ def compress(
 
 
 def run_migration():
-    session: Session = next(get_session())
     MAX_IMG_DIMENSION = (800, 800)
     # Max width/height maintaining aspect ratio
     JPEG_QUALITY = 75
     # compression ratio (1-100)
 
-    # if not inspector.has_table(Doctor.__tablename__):
-    #     logger.error(
-    #         f"Table Doctor not found in target database. Exiting..."
-    #     )
-    #     return
+    engine = create_engine(url=settings.database_url)
+    SessionLocal = sessionmaker(bind=engine)
+    session = SessionLocal()
+
+    inspector = inspect(engine)
+
+    if not inspector.has_table(Doctor.__tablename__):
+        logger.error(
+            f"Table Doctor not found in target database. Exiting..."
+        )
+        return
 
     stmt = select(Doctor.id, Doctor.image).where(Doctor.image.isnot(None))
     records = session.execute(stmt)

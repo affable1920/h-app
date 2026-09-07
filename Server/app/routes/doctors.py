@@ -3,15 +3,18 @@ from typing import Optional
 from fastapi import Body, Depends, APIRouter, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from Server.app.features.auth.dependencies import require_doctor
+from app.database.models import Doctor
+from app.features.auth.dependencies import require_doctor
 from app.schemas.outputs import PaginatedResponse
 from app.schemas.response_modifiers import DrRouteFilters, PaginationParams, SortParams
 from app.schemas.models import DoctorHttpFull, DoctorHttpMinimal
-
-
-from app.database.models import Doctor
+from app.schemas.response_modifiers import DrRouteFilters, PaginationParams, SortParams
 from app.database.entry_async import get_db
 from app.services.DrService import DoctorService
+
+
+logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/doctors")
 
 
 logger = logging.getLogger(__name__)
@@ -86,3 +89,6 @@ async def edit_doctor(
 
     await session.commit()
     await session.refresh(doctor)
+
+
+# ================================================================================================

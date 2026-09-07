@@ -35,8 +35,9 @@ async def fix_corrupt_imgs(session: AsyncSession):
 # 3. CORE COMPRESSION UTILITY
 # ==========================================
 def compress(
-        base64_string: str, quality: int,
-        max_dimensions: tuple[int, int]
+        base64_string: str,
+        quality: int = 75,
+        max_dimensions: tuple[int, int] = (800, 800)
 ) -> tuple[str | None, float]:
     """
     Decodes, resizes, compresses, and re-encodes a Base64 image string.

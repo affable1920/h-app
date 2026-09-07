@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exception_handlers import ErrorHttp
 from app.core.exceptions import EntityNotFoundException, ScheduleHasAppointments
-from app.middleware.auth_middleware import require_doctor
+from app.features.auth.dependencies import require_doctor
 from app.services.SchedulingService import schedule_service
 
 from app.database.models import Doctor

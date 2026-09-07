@@ -6,7 +6,7 @@ from app.core.exceptions import AlreadyInUseException
 from app.services.entities.main import EntityService
 from app.database.models import Appointment, Clinic, Doctor, Patient
 from app.schemas.inputs import PatientCreate
-import app.middleware.auth_middleware as auth
+from app.features.auth import security
 
 
 class PatientService(EntityService[Patient]):
@@ -42,7 +42,7 @@ class PatientService(EntityService[Patient]):
             )
 
         created = Patient(
-            hash=auth.hash(data.password),
+            hash=security.hash(data.password),
             email=data.email,
             username=data.username,
         )

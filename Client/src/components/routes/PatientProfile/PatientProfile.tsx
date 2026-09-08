@@ -1,20 +1,19 @@
-import { useFetchProfile, useRemoveAccount } from "@/hooks/use-auth";
-import ProfileShell from "./ProfileShell";
+import { useDeleteAccount, useFetchProfile } from "@/hooks/use-auth";
+import ProfileShell from "../../ProfileShell";
 import { AnimatePresence, motion } from "motion/react";
-import Button from "./ui/Button";
+import Button from "../../ui/Button";
 import { ChevronRight, Delete, Settings } from "lucide-react";
-import { Stack } from "./ui/Stack";
+import { Stack } from "../../ui/Stack";
 import { useCallback, useRef, useState } from "react";
 import { createStagger } from "@/utils/motion-variants";
-import Divider from "./ui/Divider";
+import Divider from "../../ui/Divider";
 import { fromISO } from "@/utils/utils";
-import Badge from "./ui/Badge";
+import Badge from "../../ui/Badge";
 import { Link } from "react-router-dom";
 import { useUnbookingMutation } from "@/features/booking/use-booking";
 import useModalStore from "@/stores/modal-store";
 import { toast } from "sonner";
 import type { APIError, ProfileResponse } from "@/types/http";
-import SearchBar from "./ui/SearchBar";
 import { logout } from "@/stores/auth-store";
 
 const personal = {
@@ -65,7 +64,7 @@ export function PatientProfile() {
   } = useFetchProfile<"patient">("patient");
   const { mutateAsync: unBook, isPending } = useUnbookingMutation();
 
-  const remove = useRemoveAccount("patient");
+  const { mutate: remove } = useDeleteAccount();
 
   const setTimer = useCallback(function () {
     timerRef.current = setTimeout(function () {
@@ -100,9 +99,9 @@ export function PatientProfile() {
             }}
             onMouseLeave={setTimer}
             onClick={function () {
-              openModal("confirmation", {
-                resolve() {
-                  remove.mutate(profile?.id!, {
+              openModal("confirmation-modal", {
+                onResolve() {
+                  remove(profile?.id!, {
                     onSuccess() {
                       toast("You account was successfully deleted !", {
                         description() {
@@ -231,7 +230,7 @@ export function PatientProfile() {
                             <Button
                               loading={isPending}
                               onClick={function () {
-                                openModal("confirmation", {
+                                openModal("confirmation-modal", {
                                   tagline: (
                                     <span>
                                       <p className="leading-1.2 mb-3">
@@ -250,7 +249,7 @@ export function PatientProfile() {
                                       </Badge>
                                     </span>
                                   ),
-                                  async resolve() {
+                                  onResolve: async function () {
                                     unBook(
                                       {
                                         appointmentId: appointment.id,
@@ -267,9 +266,9 @@ export function PatientProfile() {
                                           const resolved =
                                             error as unknown as APIError;
 
-                                          toast(resolved.type, {
+                                          toast(resolved.code, {
                                             description() {
-                                              return resolved.msg;
+                                              return resolved.message;
                                             },
                                           });
                                         },

@@ -29,7 +29,7 @@ async def get_current_user(
     return (await AuthService.get_current_user(
         session=session,
         user_id=identity.id,
-        role=identity.role.value,
+        role=str(identity.role),
     ))
 
 

@@ -14,7 +14,7 @@ import "@fontsource/pt-sans/400";
 import "@fontsource/pt-sans/700";
 import "@fontsource/pt-sans/400-italic";
 import router from "./components/router.tsx";
-import { queryClient } from "./core/query-client.ts";
+import queryClient from "./core/query-client.ts";
 
 // container
 createRoot(document.getElementById("root")!).render(
@@ -28,11 +28,13 @@ createRoot(document.getElementById("root")!).render(
         }}
         position="top-center"
         swipeDirections={["right", "left"]}
-        closeButton
+        closeButton={true}
         duration={2000}
+        richColors={true}
         visibleToasts={2}
       />
       <RouterProvider router={router} />
+      <ReactQueryDevtools />
     </QueryClientProvider>
   </StrictMode>,
 );

@@ -1,3 +1,4 @@
+import type { MapperProps, Modal } from "@/components/modals/modal-mapper";
 import { create } from "zustand";
 
 type Position = "top" | "bottom" | "center" | "left";
@@ -9,23 +10,26 @@ type ModalProps = {
 };
 
 type ModalState = {
-  currModal: string | null;
+  currModal: Modal | null;
   modalProps: ModalProps;
 };
 
 type ModalActions = {
   closeModal: () => void;
-  openModal: (modal: string, options?: ModalProps) => void;
+  openModal: <K extends Modal>(
+    modal: K,
+    options?: ModalProps & MapperProps[K],
+  ) => void;
 };
 
 const useModalStore = create<ModalState & ModalActions>((set) => ({
   currModal: null,
   modalProps: {},
 
-  openModal(modal, options = {}) {
+  openModal(modal, options) {
     set({
       currModal: modal,
-      modalProps: options,
+      modalProps: { ...(options || {}) },
     });
   },
 

@@ -98,6 +98,7 @@ function DirectoryFilter() {
         </Button>
 
         <Button
+          data-tooltip="sort"
           onClick={function () {
             setShowSorter(function (p) {
               return !p;
@@ -133,6 +134,7 @@ function DirectoryFilter() {
                     onClick={function () {
                       form.reset(
                         {
+                          ...fields,
                           sortColumn: null,
                           sortOrder: undefined,
                         },
@@ -234,7 +236,6 @@ function DirectoryFilter() {
             </p>
 
             <Stack
-              orientation="H"
               gap={10}
               style={{
                 flexWrap: "wrap",

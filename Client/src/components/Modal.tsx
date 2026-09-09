@@ -6,10 +6,9 @@ import useModalStore from "../stores/modal-store";
 import useInjectModalHandlers from "../hooks/use-modal-handlers";
 
 import Overlay from "./ui/Overlay";
-import MODALS from "./modals/modal-mapper";
+import MODAL_MAPPINGS from "./modals/modal-mapper";
 import getModalConfig from "../utils/modal-styles";
 import { useLocation } from "react-router-dom";
-import { toast } from "sonner";
 
 function Modal() {
   // Inject modal handlers for modal closers
@@ -38,28 +37,30 @@ function Modal() {
   const portal = document.getElementById("portal");
   if (!portal) return null;
 
-  const ModalElement = currModal ? MODALS[currModal] : null;
+  const ModalElement = currModal ? MODAL_MAPPINGS[currModal] : null;
 
-  return createPortal(
-    <AnimatePresence mode="wait">
+  return (
+    <AnimatePresence>
       {!!ModalElement && (
         <Overlay viewOverlay={modalProps.viewOverlay ?? true}>
-          <motion.div
-            style={{
-              overscrollBehavior: "contain",
-            }}
-            id="modal"
-            key={currModal}
-            variants={variants}
-            {...{ ...variants }}
-            className={stylesConfig}
-          >
-            <ModalElement {...modalProps} />
-          </motion.div>
+          {createPortal(
+            <motion.div
+              style={{
+                overscrollBehavior: "contain",
+              }}
+              id="modal"
+              key={currModal}
+              variants={variants}
+              {...{ ...variants }}
+              className={stylesConfig}
+            >
+              <ModalElement {...modalProps} />
+            </motion.div>,
+            portal,
+          )}
         </Overlay>
       )}
-    </AnimatePresence>,
-    portal,
+    </AnimatePresence>
   );
 }
 

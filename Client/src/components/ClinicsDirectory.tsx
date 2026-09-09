@@ -1,6 +1,6 @@
 import { useGetAll } from "@/hooks/use-clinics";
 
-import Card from "./Card";
+import CardFlippable from "./lib/CardFlippable";
 import Spinner from "./ui/Spinner";
 import Ratings from "./Ratings";
 import { Link, useOutletContext } from "react-router-dom";
@@ -34,7 +34,7 @@ function ClinicsDirectory() {
 
   return clinics.map(function (clinic) {
     return (
-      <Card
+      <CardFlippable
         key={clinic.id}
         entity={clinic}
         CardFront={

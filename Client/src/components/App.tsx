@@ -10,7 +10,7 @@ export default function App() {
     function globalSearch(ev: KeyboardEvent) {
       if (ev.ctrlKey && ev.key.toLowerCase() === "k") {
         ev.preventDefault();
-        openModal("search");
+        openModal("search-bar");
       }
     }
 

@@ -1,6 +1,13 @@
 import { DateTime, type DateTimeUnit } from "luxon";
 import { WEEKDAYS } from "./constants";
 
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 function getPreviousMonthDays(dt: DateTime<true>): DateTime[] {
   /**
    * currMonthStartday gives us a weekday 1 - 7 => 1 - Monday and 7 - Sunday
@@ -119,4 +126,8 @@ export function paginate<T extends unknown>(
   const limit = Math.min(itemCount, start + max);
 
   return list.slice(start, limit);
+}
+
+export function sort<T>(items: Array<T> = [], fn: (a: T, b: T) => number) {
+  return items.sort(fn);
 }

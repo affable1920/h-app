@@ -138,17 +138,18 @@
     color: white;
     padding: 4px;
     position: absolute;
-    bottom: 100%; /* Position above the element */
+    bottom: 110%; /* Position above the element */
     visibility: hidden;
     pointer-events: none;
     background: var(--color-layout-raised);
     font-size: var(--text-xs);
     border-radius: var(--radius-md);
-    transition: opacity 0.2s ease-in-out;
+    transition: opacity 200ms ease-out;
     width: max-content;
   }
 
-  [data-tooltip]:hover::after {
+  [data-tooltip]:hover::after,
+  [data-tooltip]:focus::after {
     content: attr(data-tooltip); /* Accesses the attribute's value */
     /* Add styling for the tooltip box (position, background, etc.) */
     opacity: 1;

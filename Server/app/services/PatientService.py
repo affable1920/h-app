@@ -35,7 +35,11 @@ class PatientService(EntityService[Patient]):
     #
 
     @classmethod
-    async def create(cls, session: AsyncSession, data: PatientCreate) -> Patient:
+    async def create(
+        cls,
+        session: AsyncSession,
+        data: PatientCreate
+    ) -> Patient:
         if await cls.email_exists(session, data.email):
             raise AlreadyInUseException(
                 identifier="email"
@@ -48,9 +52,6 @@ class PatientService(EntityService[Patient]):
         )
 
         session.add(created)
+        await session.flush()
 
-        # flush returns instance with its generated id.
-        await session.flush([created])
-
-        await session.refresh(created)
         return created

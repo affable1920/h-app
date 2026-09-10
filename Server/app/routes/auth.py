@@ -7,7 +7,7 @@ from app.features.auth.dependencies import get_current_user, require_patient
 from app.features.auth.service import AuthService
 
 from app.services import MailService
-from app.core.exceptions import AlreadyInUseException
+from app.core.exceptions import AlreadyInUseException, EntityNotFoundException
 
 from app.database.models import Doctor, Patient
 from app.database.entry_async import get_db
@@ -43,31 +43,14 @@ async def register_pt(
         )
 
     except AlreadyInUseException as e:
-        logger.info(e)
+        logger.exception(e)
         raise HTTPException(
-            400,
+            409,
             detail={
                 "code": "already_in_use",
                 "message": "The email is already registered with another acoount.",
-                "detail": str(e)
             }
         )
-
-    except Exception as e:
-        logger.exception(e)
-        raise HTTPException(
-            500,
-            detail={
-                "code": "failed_login_error",
-                "message": "Your account was successfully created but we couldn't log you in. "
-                "Please login manually."
-            }
-        )
-
-    await session.commit()
-    logger.info(
-        "Patient sucessfully created and committed to database."
-    )
 
     response.headers["x-auth-token"] = token
     return UserResponse.model_validate(created)
@@ -108,21 +91,10 @@ async def register_dr(
     except AlreadyInUseException as e:
         logger.exception(e)
         raise HTTPException(
-            400,
+            409,
             detail={
                 "code": "already_in_use",
                 "message": e.message,
-            }
-        )
-
-    except Exception as e:
-        logger.exception(e)
-        raise HTTPException(
-            500,
-            detail={
-                "code": "failed_login_error",
-                "message": "Your account was successfully created but we couldn't log you in. "
-                "Please login manually."
             }
         )
 
@@ -165,7 +137,7 @@ async def login_dr(
     ]
 )
 async def me(
-    current_user=Depends(get_current_user)
+    current_user: Doctor | Patient = Depends(get_current_user)
 ):
     if isinstance(current_user, Doctor):
         return DrProfileResponse.model_validate(
@@ -173,15 +145,23 @@ async def me(
             by_name=True
         )
 
-    return PatientProfileResponse.model_validate(
+    elif isinstance(
         current_user,
-        by_name=True
+        Patient
+    ):
+        return PatientProfileResponse.model_validate(
+            current_user,
+            by_name=True
+        )
+
+    raise EntityNotFoundException(
+        "user"
     )
 
 
 #
 
-@router.delete("/")
+@router.delete("")
 async def remove_account(
     session: AsyncSession = Depends(get_db),
     patient: Patient = Depends(require_patient)
@@ -205,7 +185,8 @@ async def edit(
         raise HTTPException(
             400,
             detail={
-                "msg": f"Bad request. You can only edit the following fields: {ALLOWED_FIELDS}"
+                "code": "unauthorized_error",
+                "message": f"Bad request. You can only edit the following fields: {ALLOWED_FIELDS}"
             }
         )
 

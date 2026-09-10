@@ -1,7 +1,7 @@
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import BackgroundTasks, HTTPException, APIRouter, Depends, HTTPException
+from fastapi import BackgroundTasks, APIRouter, Depends, HTTPException
 # grep -r "from sqlalchemy.orm import Session" app
 from app.core.exceptions import ConflictError, EntityNotFoundException
 from app.database.models import Patient
@@ -90,6 +90,7 @@ async def cancel_booking(
         patient=user
     )
 
+    await session.commit()
     background_tasks.add_task(
         lambda: MailService.send_mail(
             recipient=user.email,

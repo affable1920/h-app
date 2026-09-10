@@ -10,14 +10,18 @@ from app.schemas.enums import AppointmentStatus, UserRoleV2
 from app.schemas.models import ClinicHttpMinimal, DoctorHttpFull, Slot, DoctorHttpMinimal
 
 
-class AppointmentConfirmation(FromORM, IDMixin, Aliased):
+class AppointmentConfirmation(
+    FromORM, IDMixin, Aliased
+):
     patient_id: IDSerialized
     scheduled_date: datetime
     created_at: datetime
     status: AppointmentStatus
 
 
-class AppointmentResponse(AppointmentConfirmation, Aliased):
+class AppointmentResponse(
+    AppointmentConfirmation, Aliased
+):
     clinic_id: IDSerialized
     doctor_id: IDSerialized
     slot_id: IDSerialized
@@ -36,7 +40,9 @@ class PaginatedResponse(Aliased, Generic[T]):
     has_next: bool | None = None
 
 
-class PatientProfileResponse(FromORM, IDMixin, Aliased):
+class PatientProfileResponse(
+    FromORM, IDMixin, Aliased
+):
     name: str | None = None
     email: EmailStr
     username: str | None = None
@@ -53,7 +59,9 @@ class PatientProfileResponse(FromORM, IDMixin, Aliased):
 
 #
 
-class DrProfileResponse(DoctorHttpFull, Aliased):
+class DrProfileResponse(
+    DoctorHttpFull, Aliased
+):
     college_studied: str | None = None
     graduation_year: int | None = None
     bio: str | None = ""
@@ -69,12 +77,16 @@ class AuthHdrPayload(Aliased):
 
 
 #
-class UserResponse(IDMixin, FromORM, Aliased):
+class UserResponse(
+    IDMixin, FromORM, Aliased
+):
     email: EmailStr
     name: str | None = None
     username: str | None = None
 
 
-class ScheduleResponse(IDMixin, FromORM, Aliased):
+class ScheduleResponse(
+    IDMixin, FromORM, Aliased
+):
     weekdays: list[int]
     max_slots: int | Literal[False] = False

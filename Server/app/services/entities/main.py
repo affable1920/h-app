@@ -154,10 +154,15 @@ class EntityService(Generic[T], ABC):
     #
 
     @classmethod
-    async def get(cls, session: AsyncSession, identKey: str = "id", identVal: str = "") -> T | None:
+    async def get(
+        cls,
+        session: AsyncSession,
+        ident_key: str = "id",
+        ident_val: str = ""
+    ) -> T | None:
         stmt = (select(cls.entity)
                 .options(*cls.load_options_full())
-                .where(getattr(cls.entity, identKey) == identVal
+                .where(getattr(cls.entity, ident_key) == ident_val
                        ))
 
         return await session.scalar(stmt)

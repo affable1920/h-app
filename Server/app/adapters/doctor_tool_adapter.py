@@ -103,8 +103,9 @@ class DoctorToolAdapter:
 
         if name:
             result = await DoctorService.get(
-                session=self.session, identKey="name",
-                identVal=name
+                session=self.session,
+                ident_key="name",
+                ident_val=name
             )
 
         if result is None:

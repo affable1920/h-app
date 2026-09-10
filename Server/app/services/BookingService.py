@@ -103,9 +103,11 @@ class BookingService:
 
 #
 
+
     @classmethod
     async def cancel_booking(
-        cls, session: AsyncSession,
+        cls,
+        session: AsyncSession,
         booking_id: str,
         patient: Patient
     ):
@@ -127,10 +129,10 @@ class BookingService:
                 identifier=str(booking_id),
             )
 
-        logger.info(f"Resetting appointment to default state ...")
+        logger.info(
+            f"Resetting appointment to default state ..."
+        )
 
         result.slot.is_booked = False
         result.status = AppointmentStatus.CANCELLED
-
-        await session.commit()
         logger.info("Appointment successfully cancelled ..")

@@ -76,7 +76,6 @@ async def edit_schedule(
             detail={
                 "code": "not_found",
                 "message": "The schedule you are trying to edit does not exist.",
-                "detail": str(e)
             }
         )
 
@@ -108,9 +107,8 @@ async def remove_schedule(
     except ScheduleHasAppointments as e:
         raise HTTPException(
             409,
-            detail=ErrorHttp(
-                message=e.message,
-                code=e.code,
-                status=e.status_code or 409
-            ).model_dump(mode="json")
+            detail={
+                "message": e.message,
+                "code": e.code,
+            }
         )

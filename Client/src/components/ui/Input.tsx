@@ -65,13 +65,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
 
         <input
+          spellCheck={props.spellCheck ?? false}
           id={id ?? props.name}
           ref={ref}
-          {...props}
           className={inputStyles}
+          {...props}
         />
 
-        <span className="inline-flex absolute right-2.5 bottom-1/2">
+        <span
+          className={`inline-flex absolute right-2.5 text-text-teritiary
+            hover:text-text-normal transition-colors duration-200 cursor-pointer
+            ${label ? "bottom-0 -translate-y-11/12" : "bottom-1/2"}`}
+        >
           {icon && icon}
         </span>
         {error && (

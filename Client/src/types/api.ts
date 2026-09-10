@@ -79,8 +79,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Profile */
-        get: operations["profile"];
+        /** Me */
+        get: operations["me"];
         put?: never;
         post?: never;
         delete?: never;
@@ -89,7 +89,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/{id}": {
+    "/auth": {
         parameters: {
             query?: never;
             header?: never;
@@ -157,7 +157,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/doctors/onboard": {
+    "/doctors/edit": {
         parameters: {
             query?: never;
             header?: never;
@@ -165,9 +165,9 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
-        /** Create */
-        post: operations["create"];
+        /** Edit Doctor */
+        put: operations["edit_doctor"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -277,6 +277,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/schedules/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Schedule */
+        post: operations["create_schedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/schedules/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edit Schedule */
+        put: operations["edit_schedule"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/schedules/{schedule_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Schedule */
+        delete: operations["remove_schedule"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ping": {
         parameters: {
             query?: never;
@@ -360,53 +411,20 @@ export interface components {
             /** Content */
             content: string;
         };
-        /** Body_create_doctors_onboard_post */
-        Body_create_doctors_onboard_post: {
-            /** Name */
-            name: string;
-            /**
-             * Gender
-             * @enum {string}
-             */
-            gender: "male" | "female";
-            /** Degree */
-            degree: string;
-            /** Medical College */
-            medical_college: string;
-            /** Graduation Year */
-            graduation_year: number;
-            /** License Number */
-            license_number: string;
-            /** Primary Specialization */
-            primary_specialization: string;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** Password */
-            password: string;
-            /**
-             * Experience
-             * @default 0
-             */
-            experience: number | null;
-            /**
-             * Secondary Focus Areas
-             * @default []
-             */
-            secondary_focus_areas: string[] | string;
-            /** Bio */
-            bio?: string | null;
-            /** Phone */
-            phone?: string | null;
-            /** Profile */
-            profile?: string | null;
-        };
         /** Body_edit_auth_edit_put */
         Body_edit_auth_edit_put: {
             /** Nw */
             nw: string;
+        };
+        /** Body_edit_doctor_doctors_edit_put */
+        Body_edit_doctor_doctors_edit_put: {
+            /** Val */
+            val: string;
+        };
+        /** Body_edit_schedule_schedules__id__put */
+        Body_edit_schedule_schedules__id__put: {
+            /** Val */
+            val: unknown;
         };
         /** Body_register_dr_auth_register_doctor_post */
         Body_register_dr_auth_register_doctor_post: {
@@ -519,6 +537,53 @@ export interface components {
             readonly rating: number;
             /** Reviewcount */
             readonly reviewCount: number;
+        };
+        /** CreateSchedule */
+        CreateSchedule: {
+            /**
+             * Every
+             * @enum {string}
+             */
+            every: "week" | "month";
+            /**
+             * Weekdays
+             * @description Weekdays as integers representing the iso weekday format.Monday == 1, Sunday == 7
+             */
+            weekdays: number[];
+            /**
+             * Starttime
+             * Format: time
+             */
+            startTime: string;
+            /**
+             * Endtime
+             * Format: time
+             */
+            endTime: string;
+            /** Location */
+            location: string;
+            /** Baseslotduration */
+            baseSlotDuration: number;
+            /**
+             * Maxslots
+             * @default false
+             */
+            maxSlots: number | false;
+            /**
+             * Autorepeat
+             * @default true
+             */
+            autoRepeat: boolean;
+            /**
+             * Setactive
+             * @default true
+             */
+            setActive: boolean;
+            /**
+             * Allowonlineconsultations
+             * @default false
+             */
+            allowOnlineConsultations: boolean | null;
         };
         /** DoctorHttpFull */
         DoctorHttpFull: {
@@ -685,7 +750,7 @@ export interface components {
          * Mode
          * @enum {string}
          */
-        Mode: "online" | "in person";
+        Mode: "online" | "in person" | "hybrid";
         /** PaginatedResponse[ClinicHttpMinimal] */
         PaginatedResponse_ClinicHttpMinimal_: {
             /** Entities */
@@ -787,11 +852,21 @@ export interface components {
             /** Doctor Id */
             doctor_id: string;
             clinic?: components["schemas"]["ClinicHttpMinimal"] | null;
+        };
+        /** ScheduleResponse */
+        ScheduleResponse: {
             /**
-             * Slots
-             * @default []
+             * Id
+             * @description the unique identifier of the record
              */
-            slots: components["schemas"]["Slot"][];
+            id: string;
+            /** Weekdays */
+            weekdays: number[];
+            /**
+             * Maxslots
+             * @default false
+             */
+            maxSlots: number | false;
         };
         /** Slot */
         Slot: {
@@ -993,7 +1068,7 @@ export interface operations {
             };
         };
     };
-    profile: {
+    me: {
         parameters: {
             query?: never;
             header?: never;
@@ -1143,16 +1218,18 @@ export interface operations {
             };
         };
     };
-    create: {
+    edit_doctor: {
         parameters: {
-            query?: never;
+            query: {
+                q: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "multipart/form-data": components["schemas"]["Body_create_doctors_onboard_post"];
+                "application/json": components["schemas"]["Body_edit_doctor_doctors_edit_put"];
             };
         };
         responses: {
@@ -1162,7 +1239,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DoctorHttpMinimal"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -1384,6 +1461,108 @@ export interface operations {
                 content: {
                     "application/json": unknown;
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_schedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSchedule"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_schedule: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Body_edit_schedule_schedules__id__put"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_schedule: {
+        parameters: {
+            query?: {
+                /** @description Confirm deletion of schedule by setting this to true. */
+                confirm?: boolean;
+            };
+            header?: never;
+            path: {
+                schedule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

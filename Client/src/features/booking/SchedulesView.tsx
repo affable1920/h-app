@@ -7,23 +7,25 @@ import { motion } from "motion/react";
 import { ScheduleItem } from "./ScheduleItem";
 import Button from "@/components/ui/Button";
 import { useDoctor } from "@/hooks/use-doctors";
+import type { APIError } from "@/types/http";
 
 function SchedulesView() {
   const path = useLocation().pathname;
   const id = path.split("/").filter(Boolean).at(-2);
 
-  const { data: doctor, isPending, isError, refetch } = useDoctor(id!);
+  const { data: doctor, isPending, isError, refetch, error } = useDoctor(id!);
 
   if (isPending) {
     return <Spinner />;
   }
 
-  if (isError || !doctor) {
+  if (isError) {
+    const exc = error as unknown as APIError;
+
     return (
       <div>
-        An <Code>UNEXPECTED ERROR</Code> occurred.
-        <br />
-        Please try after sometime.{" "}
+        {exc.code} <br />
+        <Code>{exc.message}</Code>
         <Button
           onClick={function () {
             refetch();

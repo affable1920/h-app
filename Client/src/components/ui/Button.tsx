@@ -1,18 +1,9 @@
-import { useMemo } from "react";
 import { motion } from "motion/react";
-
 import Spinner from "./Spinner";
 import { getClassConfig } from "../../utils/button-styles";
 import type { ButtonProps } from "@/types/ui";
 
 function Button<NeedsMotion extends true>(props: ButtonProps<NeedsMotion>) {
-  const classConfig = useMemo(
-    function () {
-      return getClassConfig(props);
-    },
-    [{ ...props }],
-  );
-
   const {
     children,
     disabled = false,
@@ -31,8 +22,9 @@ function Button<NeedsMotion extends true>(props: ButtonProps<NeedsMotion>) {
     return (
       <motion.button
         type={type}
+        tabIndex={0}
         disabled={disabled || loading}
-        className={`${classConfig} ${className}`}
+        className={getClassConfig(props)}
         {...rest}
       >
         {startIcon && startIcon}
@@ -46,8 +38,9 @@ function Button<NeedsMotion extends true>(props: ButtonProps<NeedsMotion>) {
   return (
     <button
       type={type}
+      tabIndex={0}
       disabled={disabled || loading}
-      className={`${classConfig} ${className}`}
+      className={getClassConfig(props)}
       {...rest}
     >
       {startIcon && startIcon}

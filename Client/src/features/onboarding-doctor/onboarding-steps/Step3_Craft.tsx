@@ -86,7 +86,7 @@ export function Step3_Craft() {
               group-hover/primary:opacity-100 text-blue-500! hover:text-blue-400!"
               variant="icon"
               onClick={function () {
-                openModal("picker", {
+                openModal("picker-modal", {
                   name: "primary_specialization",
                   items: SPECIALIZATIONS.sort(sortFn),
                   onSelect: ps.onChange,

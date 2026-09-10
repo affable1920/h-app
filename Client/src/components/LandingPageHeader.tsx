@@ -78,7 +78,7 @@ function Header() {
           </nav>
           {user ? (
             <Link to="/view">
-              <Button color="brand" border={false}>
+              <Button color="white" border={false}>
                 Get Started
               </Button>
             </Link>

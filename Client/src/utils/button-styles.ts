@@ -1,12 +1,15 @@
 import type { Size, Color, Variant, ButtonProps } from "@/types/ui";
+import { cn } from "./utils";
 
 const sizes: Record<Size, string> = {
+  xs: "px-3 py-1 [&>svg]:size-2 text-xs",
   sm: "px-4 py-2 [&>svg]:size-3 text-sm",
   md: "px-6 py-3 [&>svg]:size-4",
   lg: "px-8 py-4 [&>svg]:size-4 text-lg",
 };
 
 const iconSizes: Record<Size, string> = {
+  xs: "[&>svg]:size-2",
   sm: "[&>svg]:size-3",
   md: "[&>svg]:size-4",
   lg: "[&>svg]:size-5",
@@ -44,30 +47,29 @@ const variantStyles: Record<Variant, string> = {
   icon: `p-0`,
 };
 
-export function getClassConfig({ ...props }: ButtonProps): string {
+export function getClassConfig({
+  color = "primary",
+  variant = "contained",
+  size = "sm",
+  border = true,
+  bg,
+  disabled,
+  className,
+}: ButtonProps): string {
   const base = `font-semibold select-none cursor-pointer transition-colors duration-200 capitalize inline-flex 
   items-center justify-center rounded-md disabled:opacity-60 disabled:pointer-events-none gap-2 
   focus:outline-none`;
 
-  const {
-    border = true,
-    variant = "contained",
-    size,
-    className = "",
-    color = "primary",
-  } = props;
   const variantStyle = variantStyles[variant];
-
-  let sizeStyle =
-    variant === "icon" ? iconSizes[size ?? "md"] : sizes[size ?? "sm"];
+  const sizeStyle = variant === "icon" ? iconSizes[size] : sizes[size];
 
   let colorStyle = "";
   let borderStyle = "";
 
   if (variant === "icon") {
-    colorStyle = props.bg
+    colorStyle = bg
       ? `p-2 rounded-md shadow-sm shadow-black/20 ${colors[color]}`
-      : `text-text-secondary ${props.disabled ? "text-text-teritiary" : ""}`;
+      : `text-text-secondary ${disabled ? "text-text-teritiary" : ""}`;
   }
 
   if (variant === "contained") {
@@ -75,15 +77,12 @@ export function getClassConfig({ ...props }: ButtonProps): string {
     borderStyle = borderStyles[color];
   }
 
-  return [
+  return cn(
     base,
     variantStyle,
     colorStyle,
     sizeStyle,
     border && borderStyle,
     className,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .trim();
+  );
 }

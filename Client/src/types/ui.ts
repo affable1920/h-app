@@ -18,12 +18,10 @@ export const COLORS = [
   "warning",
   "success",
 ] as const;
-
-export const SIZES = ["sm", "md", "lg"] as const;
+export const SIZES = ["xs", "sm", "md", "lg"] as const;
 export const VARIANTS = ["ghost", "contained", "icon"] as const;
 
 export type Size = (typeof SIZES)[number];
-
 export type Color = (typeof COLORS)[number];
 export type Variant = (typeof VARIANTS)[number];
 
@@ -46,13 +44,13 @@ export type ButtonProps<NeedsMotion extends true = true> =
 
 interface BaseBadgeProps {
   full?: boolean;
-  color?: Color | "secondary";
+  color?: Color;
   content?: ReactNode;
   current?: boolean;
   disabled?: boolean;
   selected?: boolean;
   size?: Size;
-  rounded?: false | "sm" | "md" | "lg";
+  rounded?: false | "sm" | "md" | "lg" | "full";
 }
 
 export type BadgeProps<T extends ElementType = "button"> = BaseBadgeProps & {

@@ -1,41 +1,87 @@
 import { type InputHTMLAttributes } from "react";
-import { ImageUp, Upload } from "lucide-react";
-import type { UseFormRegisterReturn } from "react-hook-form";
+import { Stack } from "./ui/Stack";
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   src?: string;
   clear?: () => void;
-  register: UseFormRegisterReturn;
+  error?: string;
 }
+const accent = "#4f6ef7";
 
-const UploadButton = ({ src, register }: Props) => {
+function UploadButton({ src, error }: Props) {
   return (
-    <div className="flex gap-4 justify-between items-end">
-      <label
-        className="w-18 h-18 shrink-0 text-gray-400 hover:text-gray-300 bg-gray-700
-          rounded-full cursor-pointer overflow-hidden relative inline-flex items-center 
-          justify-center"
+    <Stack align="center" gap="md" className="p-5 rounded-xl bg-layout-raised">
+      <Stack
+        justify="center"
+        align="center"
+        orientation="V"
+        style={{
+          overflow: "hidden",
+          flexShrink: 0,
+        }}
       >
-        {src ? (
-          <img src={src} alt="preview" className="w-full h-full object-cover" />
-        ) : (
-          <ImageUp size={"40%"} />
-        )}
-        <input
-          type="file"
-          accept="image/*"
-          {...register}
-          style={{ display: "none" }}
-        />
+        <div
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: "50%",
+            cursor: "pointer",
+            overflow: "hidden",
+            flexShrink: 0,
+            fontSize: 28,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {src ? <img src={src} className="size-full object-cover" /> : "👨🏻‍⚕️"}
+        </div>
 
-        {src && (
-          <div className="fixed text-white text-xs" style={{ display: "none" }}>
-            <Upload size={12} />
-          </div>
-        )}
-      </label>
-    </div>
+        {error && <div className="text-red-400 text-[10px]">{error}</div>}
+      </Stack>
+
+      <div>
+        <div
+          className="font-bold text-text-normal"
+          style={{
+            fontSize: 14,
+          }}
+        >
+          Profile Photo
+        </div>
+        <div
+          style={{
+            color: "var(--color-text-teritiary)",
+            fontSize: 12,
+            marginBottom: 4,
+            lineHeight: 1.25,
+            fontWeight: 600,
+          }}
+        >
+          A clear headshot works best.
+          <br /> PNG or JPG, <strong>max 1 MB</strong>.
+        </div>
+        <label
+          style={{
+            display: "inline-flex",
+            marginTop: 4,
+            padding: "5px 14px",
+            background: accent,
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+        >
+          Upload Photo
+          <input type="file" accept="image/*" style={{ display: "none" }} />
+        </label>
+      </div>
+    </Stack>
   );
-};
+}
 
 export default UploadButton;

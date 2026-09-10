@@ -29,7 +29,7 @@ type ScheduleState = {
 export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
   const openModal = useModalStore((s) => s.openModal);
 
-  const { id, slots, clinic, ...rest } = schedule;
+  const { id, slots = [], clinic, ...rest } = schedule;
   const [params, setParams] = useSearchParams();
 
   const dtParam = fromISO(params.get("date") ?? "");

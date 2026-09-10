@@ -106,9 +106,9 @@ function ScheduleModal({
       onError(error) {
         const resolved = error as unknown as APIError;
 
-        toast.error(resolved.type, {
+        toast.error(resolved.code, {
           description() {
-            return resolved.msg;
+            return resolved.message;
           },
           duration: 4000,
         });

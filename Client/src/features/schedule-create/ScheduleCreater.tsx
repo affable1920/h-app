@@ -89,7 +89,7 @@ function ScheduleCreater({ doctor }: { doctor: Doctor }) {
     [every],
   );
 
-  const navigateForward = async function () {
+  async function navigateForward() {
     const ok = await form.trigger(
       getSteps(every)[step] as Array<keyof ScheduleCreate>,
       {
@@ -105,14 +105,14 @@ function ScheduleCreater({ doctor }: { doctor: Doctor }) {
     setStep(function (p) {
       return p + 1;
     });
-  };
+  }
 
-  const navigateBack = function () {
+  function navigateBack() {
     setDir(-1);
     setStep(function (p) {
       return p - 1;
     });
-  };
+  }
 
   const { mutateAsync: create } = useCreateSchedule();
   const { mutate: deleteSchedule } = useDeleteSchedule();
@@ -147,9 +147,9 @@ function ScheduleCreater({ doctor }: { doctor: Doctor }) {
         },
         onError(error) {
           const ex = error as APIError;
-          toast.error(ex.type, {
+          toast.error(ex.code, {
             description() {
-              return ex.msg;
+              return ex.message;
             },
           });
         },

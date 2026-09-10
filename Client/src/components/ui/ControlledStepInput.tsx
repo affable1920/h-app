@@ -9,12 +9,13 @@ interface ControlledInputProps extends Omit<
 > {
   label?: string;
   error?: string;
-  onChange: (val?: string) => void;
+  onChange: (val?: number) => void;
   onInvalid?: (reason: string) => void;
+  negative?: boolean;
 }
 
 export function ControlledStepInput({
-  min = 1,
+  min,
   max,
   step = 1,
   value,
@@ -23,12 +24,13 @@ export function ControlledStepInput({
   onInvalid,
   label,
   error,
+  negative = false,
   ...rest
 }: ControlledInputProps) {
-  const minValue = Number(min);
-  const maxValue = Number(max);
+  const minValue = !!min ? Number(min) : negative ? -Infinity : 0;
+  const maxValue = !!max ? Number(max) : Infinity;
   const stepValue = Number(step);
-  const currentValue = value === "" || value == null ? minValue : Number(value);
+  const currentValue = !value || value === "" ? minValue : Number(value);
 
   function stepDown() {
     if (currentValue === minValue) {
@@ -44,12 +46,12 @@ export function ControlledStepInput({
     }
 
     /** call onchange recieved from the parent on value update
-     *  the parent updates whatever form field or state it wants
+     * the parent updates whatever form field or state it wants
      * we don't care what that field is, it's in sync with out input's value
      * thus a [controlled input]
      * */
 
-    onChange(String(nxt));
+    onChange(nxt);
   }
 
   function stepUp() {
@@ -65,7 +67,7 @@ export function ControlledStepInput({
       return;
     }
 
-    onChange(String(nxt));
+    onChange(nxt);
   }
 
   function handleChange(ev: ChangeEvent<HTMLInputElement>) {
@@ -82,7 +84,7 @@ export function ControlledStepInput({
       return;
     }
 
-    onChange(raw);
+    onChange(Number(raw));
   }
 
   return (

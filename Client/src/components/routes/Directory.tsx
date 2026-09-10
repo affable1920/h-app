@@ -12,21 +12,28 @@ import useModalStore from "@/stores/modal-store";
 import { ArrowLeftRight, SlidersHorizontal } from "lucide-react";
 import SearchBar from "../ui/SearchBar";
 import { Stack } from "../ui/Stack";
-import { useFilterStore } from "@/stores/filter-store";
+import { FILTER_KEYS } from "@/types/utils";
 
 function Directory() {
   const navigate = useNavigate();
   const openModal = useModalStore((s) => s.openModal);
   const route = useLocation().pathname.split("/").at(-1) ?? "doctors";
 
-  const { getValues } = useFilterStore();
-
   const [params, setParams] = useSearchParams();
-  const [localSearch, setLocalSearch] = useState<string | null>(null);
   const [hasNext, setHasNext] = useState(false);
+  const [localSearch, setLocalSearch] = useState<string | null>(null);
 
   const page = params.get("page") ? Number(params.get("page")) : 1;
-  const activeFilterCount = Object.values(getValues()).filter(Boolean).length;
+
+  const activeFilterCount = Object.entries(Object.fromEntries(params.entries()))
+    .filter(function ([key, val]) {
+      return (
+        key !== "sortOrder" &&
+        Array.prototype.includes.call(FILTER_KEYS, key) &&
+        Boolean(val)
+      );
+    })
+    .filter(Boolean).length;
 
   useEffect(
     function () {
@@ -99,9 +106,11 @@ function Directory() {
           <Button
             variant="icon"
             bg={true}
+            data-tooltip="filters"
+            aria-label="filter-opener"
             className="relative"
             onClick={function () {
-              openModal("directoryFilter", {
+              openModal("directory-filter-modal", {
                 position: "left",
               });
             }}
@@ -129,6 +138,8 @@ function Directory() {
             className="self-stretch"
             variant="icon"
             bg={true}
+            aria-label="switch-view"
+            data-tooltip={`switch to ${route === "doctors" ? "clinics" : "doctors"}`}
             onClick={switchDirectory}
           >
             <ArrowLeftRight />
@@ -141,9 +152,9 @@ function Directory() {
       </section>
 
       <Pagination
-        onPageChange={handlePageChange}
         currentPage={page}
-        hasNext={hasNext ?? false}
+        hasNext={hasNext}
+        onPageChange={handlePageChange}
       />
     </section>
   );

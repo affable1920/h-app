@@ -130,7 +130,7 @@ function NavBar() {
                 label: "logout",
                 icon: LogOut,
                 onClick: function () {
-                  logout("/");
+                  logout("/auth");
                 },
               },
             ],

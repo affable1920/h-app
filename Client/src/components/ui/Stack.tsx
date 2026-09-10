@@ -1,22 +1,17 @@
 import { useBreakpoint } from "@/hooks/use-breakpoint";
-import { type HTMLAttributes, type ReactNode } from "react";
+import {
+  forwardRef,
+  type ComponentPropsWithoutRef,
+  type ForwardedRef,
+  type JSX,
+  type ReactNode,
+} from "react";
 
 const GAPSIZES = ["xs", "sm", "md", "lg"] as const;
 type GapSize = (typeof GAPSIZES)[number];
 
 type Breakpoint = "md" | "lg";
 type StackPosition = "start" | "center" | "end" | "stretch" | "between";
-
-export type StackProps = HTMLAttributes<HTMLElement> & {
-  [breakPoint in Breakpoint]?: Omit<StackProps, "children">;
-} & {
-  children: ReactNode;
-  gap?: GapSize | number;
-  reverse?: boolean;
-  justify?: StackPosition;
-  align?: StackPosition;
-  orientation?: "H" | "V";
-};
 
 const gaps: Record<GapSize, string> = {
   xs: "8px",
@@ -25,18 +20,49 @@ const gaps: Record<GapSize, string> = {
   lg: "48px",
 };
 
-export function Stack({ md, lg, children, ...rest }: StackProps) {
-  const tier = useBreakpoint();
-  const source =
-    tier === "lg" ? (lg ?? rest) : tier === "md" ? (md ?? rest) : rest;
+type LayoutProps = {
+  gap?: GapSize | number;
+  reverse?: boolean;
+  justify?: StackPosition;
+  align?: StackPosition;
+  orientation?: "H" | "V";
+};
 
+export type StackProps<TAs extends "div" | "span" = "div"> = {
+  as?: TAs;
+  children: ReactNode;
+} & LayoutProps &
+  Omit<ComponentPropsWithoutRef<TAs>, "children" | "as"> & {
+    [brk in Breakpoint]?: LayoutProps;
+  };
+
+// ============================================================================================
+// INNER COMPONENT WITH FORWARDREF ---
+const StackInner = forwardRef<any, StackProps<any>>(function (
+  { children, as, md, lg, ...rest },
+  ref,
+) {
+  const Component = as ?? "div";
+  const tier = useBreakpoint();
+
+  // Extract layout-only props which should be overridden per tier
   const {
-    orientation = "H",
-    reverse = false,
-    align = "stretch",
-    justify = "stretch",
-    gap = "xs",
-  } = source;
+    orientation: baseOrientation = "H",
+    reverse: baseReverse = false,
+    align: baseAlign = "stretch",
+    justify: baseJustify = "stretch",
+    gap: baseGap = "xs",
+    ...htmlAttributes
+  } = rest;
+
+  const breakpointOverride =
+    tier === "lg" ? (lg ?? md) : tier === "md" ? md : undefined;
+
+  const orientation = breakpointOverride?.orientation ?? baseOrientation;
+  const reverse = breakpointOverride?.reverse ?? baseReverse;
+  const align = breakpointOverride?.align ?? baseAlign;
+  const justify = breakpointOverride?.justify ?? baseJustify;
+  const gap = breakpointOverride?.gap ?? baseGap;
 
   const getOrientation =
     orientation === "H"
@@ -47,12 +73,15 @@ export function Stack({ md, lg, children, ...rest }: StackProps) {
         ? "column-reverse"
         : "column";
 
-  const calculatedGap = typeof gap === "number" ? `${gap}px` : gaps[gap];
+  const calculatedGap =
+    typeof gap === "number" ? `${gap}px` : gaps[gap as GapSize];
 
   return (
-    <article
-      {...rest}
+    <Component
+      {...htmlAttributes}
+      ref={ref}
       style={{
+        ...htmlAttributes.style,
         display: "flex",
         flexDirection: getOrientation,
         alignItems: orientation === "H" ? align : justify,
@@ -63,10 +92,19 @@ export function Stack({ md, lg, children, ...rest }: StackProps) {
               ? "space" + "-between"
               : justify
             : align,
-        ...rest.style,
       }}
     >
       {children}
-    </article>
+    </Component>
   );
-}
+});
+
+// ============================================================================================
+// STRICT TYPE CASTED EXPORT ---
+// This casting explicitly allows the 'as' prop to properly change the Ref's typings dynamically
+
+export const Stack = StackInner as <TAs extends "div" | "span">(
+  props: StackProps<TAs> & {
+    ref?: ForwardedRef<TAs extends "div" ? HTMLDivElement : HTMLSpanElement>;
+  },
+) => JSX.Element;

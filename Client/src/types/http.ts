@@ -31,8 +31,10 @@ export type PatientCreate =
 export type PatientLogin = components["schemas"]["PatientLogin"];
 export type DoctorLogin = components["schemas"]["DoctorLogin"];
 export type DoctorCreate =
-  components["schemas"]["Body_create_doctors_onboard_post"];
+  components["schemas"]["Body_register_dr_auth_register_doctor_post"];
 export type UserResponse = components["schemas"]["UserResponse"];
+export type ScheduleCreate = components["schemas"]["CreateSchedule"];
+export type ScheduleResponse = components["schemas"]["ScheduleResponse"];
 
 export type Role = "doctor" | "patient";
 
@@ -44,11 +46,11 @@ type ProfileResponseMap = {
 export type ProfileResponse<R extends Role> = ProfileResponseMap[R];
 
 export type APIError = {
-  msg: string;
-  type: string;
+  message: string;
+  code: string; // the code recieved from the server, e.g. "Internal_Server_Error"
   status: number;
   ctx?: any;
-  detail: any;
+  detail?: any;
 };
 
 // http utility functions

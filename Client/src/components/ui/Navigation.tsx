@@ -30,6 +30,8 @@ export const Navigation = memo(function Navigation({
         type="button"
         variant="icon"
         bg={true}
+        aria-label="backward"
+        data-tooltip="move backwards"
       >
         <ArrowLeft />
       </Button>
@@ -60,6 +62,8 @@ export const Navigation = memo(function Navigation({
       <div className="justify-self-end items-center flex gap-4 justify-end">
         {!stepIsFinal && (
           <Button
+            aria-label="forward"
+            data-tooltip="move forward"
             type="button"
             bg={true}
             variant="icon"
@@ -69,7 +73,13 @@ export const Navigation = memo(function Navigation({
           </Button>
         )}
         {stepIsFinal && (
-          <Button type="submit" bg={true} variant="icon">
+          <Button
+            aria-label="submit"
+            data-tooltip="submit"
+            type="submit"
+            bg={true}
+            variant="icon"
+          >
             <Check />
           </Button>
         )}

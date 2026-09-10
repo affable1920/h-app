@@ -92,8 +92,8 @@ export function TalkOverVideo() {
         />
       ) : callState === "ringing-outgoing" ? (
         <div
-          className="max-w-fit mx-auto overflow-x-hidden gap-1 flex flex-col
-h-[calc(100vh-40rem)] justify-center"
+          className="max-w-fit mx-auto overflow-x-hidden gap-1 flex flex-col 
+        h-[calc(100vh-40rem)] justify-center"
         >
           <p className="text-lg text-text">
             Calling Dr {doctor?.name.split(" ")[0]}

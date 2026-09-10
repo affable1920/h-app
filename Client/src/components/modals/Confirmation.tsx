@@ -1,19 +1,12 @@
-import { useEffect, useRef, type JSX } from "react";
+import { useEffect, useRef } from "react";
 import Button from "../ui/Button";
 import { ChevronRight, X } from "lucide-react";
 import { removeModal } from "@/stores/modal-store";
-
-interface ConfirmationProps {
-  resolve: () => void;
-  reject: () => void;
-  tagline: string | JSX.Element;
-  autoClose?: boolean;
-  timeout?: number;
-}
+import type { ConfirmationProps } from "./modal-mapper";
 
 function Confirmation({
-  resolve,
-  reject,
+  onResolve,
+  onReject,
   tagline = "",
   autoClose = false,
   timeout = 3000,
@@ -24,7 +17,7 @@ function Confirmation({
     function () {
       if (autoClose) {
         timerRef.current = setTimeout(function () {
-          removeModal();
+          handleReject();
         }, timeout);
       }
 
@@ -37,20 +30,24 @@ function Confirmation({
     [autoClose, timeout],
   );
 
+  function handleResolve() {
+    onResolve();
+    removeModal();
+  }
+
+  function handleReject() {
+    onReject?.();
+    removeModal();
+  }
+
   return (
     <div className="font-semibold py-6 px-8 space-y-8">
       <div className="text-center first-letter:capitalize">{tagline}</div>
       <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={function () {
-            reject?.();
-            removeModal();
-          }}
-        >
+        <Button variant="ghost" onClick={handleReject}>
           Decline <X strokeWidth={4} />
         </Button>
-        <Button onClick={resolve} color="white">
+        <Button onClick={handleResolve} color="white">
           Accept <ChevronRight strokeWidth={4} />
         </Button>
       </div>

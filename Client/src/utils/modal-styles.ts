@@ -104,7 +104,7 @@ const modalVariants: Record<Position, Record<string, Variant>> = {
 };
 
 export default function getModalConfig(pstn: Position = "center") {
-  const baseModal = `bg-layout shadow-lg shadow-black/40 scrollbar-hidden`;
+  const baseModal = `bg-layout shadow-lg shadow-black/40 scrollbar-hidden z-1000`;
   const variants = modalVariants[pstn];
 
   const stylesConfig = [baseModal, modalProperties[pstn]]

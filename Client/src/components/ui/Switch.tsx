@@ -11,6 +11,8 @@ interface Props extends HTMLAttributes<"article"> {
 const Switch = memo(function ({ label, isOn, toggle }: Props) {
   return (
     <Stack
+      role="button"
+      tabIndex={0}
       onClick={toggle}
       className="cursor-pointer"
       gap="xs"

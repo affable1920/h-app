@@ -1,50 +1,75 @@
 import { useEffect } from "react";
 
-function ProgressBar({ flag }: { flag: any }) {
+type ProgressBarProps = {
+  flag?: unknown;
+  label?: string;
+  maxProgress: number;
+  removeOnFinish?: boolean;
+};
+
+function ProgressBar({
+  maxProgress = 100,
+  label,
+  flag,
+  removeOnFinish = true,
+}: ProgressBarProps) {
   useEffect(
     function () {
-      progress();
+      const $ = (id: string) => document.getElementById(id);
+
+      let wrapper = $("progress-box") as HTMLDivElement,
+        lbl = $("progress-label") as HTMLDivElement,
+        bar = $("progress-bar") as HTMLDivElement,
+        progress = 0;
+
+      wrapper.style.display = "block";
+
+      const id = setInterval(function () {
+        progress += Math.random() + 12;
+        bar.style["width"] = `${progress}%`;
+
+        if (label) {
+          lbl.textContent = label;
+        }
+
+        if (progress >= maxProgress) {
+          bar.style["width"] = `${maxProgress}%`;
+          if (label) {
+            lbl.textContent = label;
+          }
+
+          clearInterval(id);
+
+          if (removeOnFinish) {
+            setTimeout(function () {
+              wrapper.style.display = "none";
+            }, 300);
+          }
+        }
+      }, 80);
+
+      return function () {
+        clearInterval(id);
+      };
     },
     [flag],
   );
 
-  function progress() {
-    const $ = (id: string) => document.getElementById(id);
-
-    let parent = $("prog") as HTMLDivElement,
-      lbl = $("prog-label") as HTMLDivElement,
-      bar = $("bar") as HTMLDivElement,
-      progress = 0;
-
-    parent.style.display = "block";
-
-    const id = setInterval(function () {
-      progress += Math.random() + 12;
-      bar.style.width = `${progress}%`;
-
-      lbl.textContent = `Uploading ... ${progress.toFixed(1)}%`;
-
-      if (progress >= 100) {
-        bar.style.width = `${progress}%`;
-        lbl.textContent = "File uploaded successfully";
-        clearInterval(id);
-
-        setTimeout(function () {
-          parent.style.display = "none";
-        }, 300);
-      }
-    }, 80);
-  }
-
   return (
-    <div
-      id="prog"
-      className="text-xs space-y-1 grow"
-      style={{ display: "none" }}
-    >
-      <div id="prog-label" className="leading-tight line-clamp-1 capitalize" />
-      <div id="bar" className="h-1.5 bg-black rounded-md" />
-    </div>
+    <>
+      <div
+        id="progress-box"
+        style={{ display: "none" }}
+        className="w-full bg-layout-raised overflow-hidden rounded-md shadow-sm shadow-black/50 
+        p-0.5 flex self-center"
+      >
+        <div
+          id="progress-bar"
+          className="h-0.5 bg-brand rounded-md w-0 transition-all duration-300 ease-in-out"
+        />
+      </div>
+      {label && <span id="progress-label" className="ml-2" />}{" "}
+    </>
   );
 }
 

@@ -1,7 +1,9 @@
-from typing import Any
+import logging
+from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.models import Doctor, Patient
 from app.features.auth import security
 from app.schemas.enums import UserRoleV2
 from app.services.PatientService import PatientService
@@ -11,6 +13,9 @@ from app.schemas.inputs import DoctorLogin, DrCreate, PatientCreate, PatientLogi
 from app.services.DrService import DoctorService
 
 
+logger = logging.getLogger(__name__)
+
+
 class AuthService:
     @classmethod
     async def login_doctor(
@@ -18,11 +23,13 @@ class AuthService:
         credentials: DoctorLogin,
         session: AsyncSession
     ):
-        assert credentials.email is not None
+        method_used = "id" if credentials.id else "email"
+        value = credentials.model_dump()[method_used]
 
-        db_user = await DoctorService.get_by_email(
+        db_user = await DoctorService.get(
             session=session,
-            email=credentials.email
+            ident_key=method_used,
+            ident_val=value
         )
 
         if db_user is None:
@@ -34,7 +41,9 @@ class AuthService:
             pwd=credentials.password,
             hash=db_user.hash
         ):
-            raise InvalidCredentialsError()
+            raise InvalidCredentialsError(
+                message="Invalid password.."
+            )
 
         token = security.create_access_token(
             id=str(db_user.id),
@@ -51,7 +60,7 @@ class AuthService:
         session: AsyncSession,
         user_id: str,
         role: str
-    ):
+    ) -> Optional[Doctor | Patient]:
         match role:
             case "doctor":
                 return await DoctorService.get_by_id(
@@ -66,9 +75,7 @@ class AuthService:
                 )
 
             case _:
-                raise EntityNotFoundException(
-                    ""
-                )
+                return None
 
     #
 
@@ -93,7 +100,7 @@ class AuthService:
             role=UserRoleV2.PATIENT
         )
 
-        return token
+        return token, db_user
 
     #
 
@@ -103,15 +110,16 @@ class AuthService:
         session: AsyncSession,
         payload: DrCreate
     ):
-        created = await DoctorService.create(
-            session=session,
-            data=payload
-        )
+        async with session.begin():
+            created = await DoctorService.create(
+                session=session,
+                data=payload
+            )
 
-        token = security.create_access_token(
-            id=str(created.id),
-            role=UserRoleV2.DOCTOR
-        )
+            token = security.create_access_token(
+                id=str(created.id),
+                role=UserRoleV2.DOCTOR
+            )
 
         return token, created
 
@@ -123,14 +131,17 @@ class AuthService:
         session: AsyncSession,
         payload: PatientCreate
     ):
-        created = await PatientService.create(
-            session=session,
-            data=payload
-        )
+        async with session.begin():
+            patient = await PatientService.create(
+                session=session, data=payload
+            )
 
-        token = security.create_access_token(
-            id=str(created.id),
-            role=UserRoleV2.PATIENT
-        )
+            token = security.create_access_token(
+                id=str(patient.id),
+                role=UserRoleV2.PATIENT
+            )
 
-        return token, created
+        logger.info(
+            "New Patient sucessfully created and committed to database"
+        )
+        return token, patient

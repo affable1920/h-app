@@ -70,7 +70,14 @@ def decode_access_token(token: str) -> AuthHdrPayload:
         return AuthHdrPayload.model_validate(decoded)
 
     except jwt.ExpiredSignatureError:
-        raise InvalidTokenError()
+        raise InvalidTokenError(
+            message="Session Expired",
+            context={
+                "headers": {
+                    "x-session-expire": "true"
+                }
+            },
+        )
 
     except (jwt.InvalidTokenError, jwt.PyJWTError):
         raise InvalidTokenError()

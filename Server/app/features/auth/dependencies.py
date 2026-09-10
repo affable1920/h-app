@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,7 +25,6 @@ async def get_current_user(
     """
 
     identity = security.decode_access_token(token)
-
     return (await AuthService.get_current_user(
         session=session,
         user_id=identity.id,

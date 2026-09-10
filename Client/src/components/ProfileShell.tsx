@@ -10,7 +10,9 @@ interface Props {
 }
 
 const ProfileShell = memo(function ({ isError, isPending, children }: Props) {
-  if (isError) {
+  if (isPending) return <Spinner />;
+
+  if (isError)
     return (
       <Stack orientation="V" justify="center">
         <h2 className="capitalize tracking-widest truncate">
@@ -18,9 +20,6 @@ const ProfileShell = memo(function ({ isError, isPending, children }: Props) {
         </h2>
       </Stack>
     );
-  }
-
-  if (isPending) return <Spinner loading />;
 
   return children;
 });

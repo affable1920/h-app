@@ -1,18 +1,23 @@
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
-import Card from "@components/Card";
+import CardFlippable from "@/components/lib/CardFlippable";
 import Spinner from "@/components/ui/Spinner";
-import { useGetAll } from "@/hooks/use-doctors";
 import DrCardFront from "./DrCardFront";
+import { useDoctors } from "@/hooks/use-doctors";
+import { keepPreviousData } from "@tanstack/react-query";
 
 function DoctorsDirectory() {
+  const [params] = useSearchParams();
   const setHasNext = useOutletContext<(hasNext: boolean) => void>();
 
   const {
     data: { entities: doctors = [], hasNext = true } = {},
     isFetching,
     isError,
-  } = useGetAll();
+  } = useDoctors(Object.fromEntries(params.entries()), {
+    refetchOnMount: false,
+    placeholderData: keepPreviousData,
+  });
 
   useEffect(
     function () {
@@ -31,7 +36,11 @@ function DoctorsDirectory() {
 
   return doctors.map(function (dr) {
     return (
-      <Card key={dr.id} entity={dr} CardFront={<DrCardFront doctor={dr} />} />
+      <CardFlippable
+        key={dr.id}
+        entity={dr}
+        CardFront={<DrCardFront doctor={dr} />}
+      />
     );
   });
 }

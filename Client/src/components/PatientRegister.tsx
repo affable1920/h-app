@@ -1,5 +1,4 @@
 import { memo } from "react";
-import { useSignup } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Button from "./ui/Button";
@@ -8,36 +7,35 @@ import { Stack } from "./ui/Stack";
 import { useForm } from "react-hook-form";
 import { type PatientCreate, PatientCreateSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type APIError } from "@/types/http";
+import { useSignup } from "@/hooks/use-auth";
+import type { APIError } from "@/types/http";
+
+const useRegister = useSignup(
+  {
+    route: "patient",
+  },
+  () => [["auth", "me"]],
+);
 
 export const PatientRegister = memo(function () {
-  const signup = useSignup();
-  const navigate = useNavigate();
-
+  const { mutateAsync: create, isPending } = useRegister();
   const form = useForm<PatientCreate>({
     resolver: zodResolver(PatientCreateSchema),
   });
+
+  const navigate = useNavigate();
 
   const {
     formState: { errors },
   } = form;
 
   async function submit(data: PatientCreate) {
-    await signup.mutateAsync(
-      {
-        route: "patient",
-        data,
-      },
-      {
-        onSuccess() {
-          toast.message("Successfully signed in");
-          navigate("/view/idx/doctors");
-        },
-        onError(error) {
-          toast.message((error as unknown as APIError)?.msg);
-        },
-      },
-    );
+    try {
+      await create(data);
+      navigate("/view/idx/doctors");
+    } catch (exc) {
+      toast.error((exc as unknown as APIError).message);
+    }
   }
 
   return (
@@ -72,7 +70,7 @@ export const PatientRegister = memo(function () {
               error={errors["username"]}
             />
           </Stack>
-          <Button type="submit" color="white" loading={signup.isPending}>
+          <Button type="submit" color="white" loading={isPending}>
             sign up
           </Button>
         </Stack>

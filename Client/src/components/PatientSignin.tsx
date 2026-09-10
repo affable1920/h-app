@@ -1,5 +1,4 @@
 import { type PatientSignin, PatientSigninSchema } from "@/schemas";
-import { type APIError } from "@/types/http";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Stack } from "./ui/Stack";
@@ -10,7 +9,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 export function PatientSignin() {
-  const signin = useSignin();
+  const { mutateAsync: signin, isPending } = useSignin();
   const navigate = useNavigate();
 
   const form = useForm<PatientSignin>({
@@ -20,7 +19,7 @@ export function PatientSignin() {
   const { errors } = form.formState;
 
   async function submit(data: PatientSignin) {
-    await signin.mutateAsync(
+    signin(
       { route: "patient", data },
       {
         onSuccess() {
@@ -31,23 +30,11 @@ export function PatientSignin() {
         },
 
         onError(ex) {
-          const msg = (ex as unknown as APIError).msg;
-
-          const field = msg.includes("email")
-            ? "email"
-            : msg.includes("password")
-              ? "password"
-              : "root";
-
-          form.setError(
-            field,
-            {
-              message: msg,
+          toast.error(ex.code, {
+            description() {
+              return ex.message;
             },
-            {
-              shouldFocus: true,
-            },
-          );
+          });
         },
       },
     );
@@ -80,7 +67,7 @@ export function PatientSignin() {
           type="submit"
           className="w-full"
           color="white"
-          loading={signin.isPending}
+          loading={isPending}
         >
           sign in
         </Button>

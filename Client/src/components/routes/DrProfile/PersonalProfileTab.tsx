@@ -1,4 +1,5 @@
 import { EditableField } from "@/components/lib/EditableField";
+import { useUpdateDoctor } from "@/hooks/use-doctors";
 import type { ProfileResponse } from "@/types/http";
 import { useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
@@ -6,7 +7,17 @@ import { useOutletContext } from "react-router-dom";
 export function PersonalProfileTab() {
   const doctor = useOutletContext<ProfileResponse<"doctor">>();
 
-  const handleSave = useCallback(function (key: string, val: unknown) {}, []);
+  const { mutateAsync: edit } = useUpdateDoctor();
+
+  const handleSave = useCallback(async function (key: string, val: unknown) {
+    return await edit({
+      id: doctor.id,
+      changes: {
+        q: key,
+        val: val,
+      },
+    });
+  }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 grow">

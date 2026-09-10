@@ -7,10 +7,10 @@ import { toast } from "sonner";
 import { STEPS } from "./onboarding-steps/hierarchy";
 import { Navigation } from "@/components/ui/Navigation";
 import { DoctorOnboardingSchema, type DoctorOnboarding } from "@/schemas";
-import { useSignup } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { Stack } from "@/components/ui/Stack";
 import useModalStore from "@/stores/modal-store";
+import { useCreateDoctor } from "@/hooks/use-doctors";
 
 const FIELDS: Array<Array<keyof DoctorOnboarding>> = [
   ["profile", "name", "gender"] as const,
@@ -23,11 +23,11 @@ const FIELDS: Array<Array<keyof DoctorOnboarding>> = [
   ] as const,
   ["primary_specialization", "secondary_focus_areas", "bio"] as const,
   ["email", "password", "phone"] as const,
-];
+] as const;
 
 export default function DrProfileSetup() {
   const navigate = useNavigate();
-  const signup = useSignup();
+  const { mutateAsync: create } = useCreateDoctor();
   const openModal = useModalStore((s) => s.openModal);
 
   const [step, setStep] = useState(0);
@@ -59,9 +59,6 @@ export default function DrProfileSetup() {
     async function () {
       const ok = !FIELDS[step] || (await form.trigger(FIELDS[step]));
 
-      console.log(ok);
-      console.log(form.formState.errors);
-
       if (!ok) {
         return;
       }
@@ -90,39 +87,21 @@ export default function DrProfileSetup() {
     }
 
     try {
-      signup.mutateAsync(
-        {
-          route: "doctor",
-          data: fd,
-          params: {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          },
-        },
-        {
-          onError(error) {
-            toast.message((error as unknown as APIError).msg);
-          },
+      await create(fd);
 
-          onSuccess() {
-            openModal("confirmation", {
-              tagline: "Complete your profile setup ..?",
-              resolve() {
-                navigate("/view/auth/me");
-              },
-              reject() {
-                navigate("/view/idx");
-              },
-              autoClose: true,
-              timeout: 5000,
-            });
-          },
+      openModal("confirmation-modal", {
+        tagline: "Complete your profile setup ..?",
+        onResolve() {
+          navigate("/view/auth/me");
         },
-      );
+        onReject() {
+          navigate("/view/idx/doctors");
+        },
+        autoClose: true,
+        timeout: 5000,
+      });
     } catch (exc) {
-      const { msg } = exc as APIError;
-      toast.message(msg);
+      toast.message((exc as unknown as APIError).message);
     }
   }
 

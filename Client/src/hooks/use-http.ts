@@ -42,13 +42,9 @@ export function createMutationHook<TVariables, TData>(
   mutationFn: (vars: TVariables) => Promise<TData>,
   // given the variables and the result, return the query keys to invalidate
   invalidateKeys: (vars: TVariables, data: TData) => Array<QueryKey>,
+  options?: Omit<UseMutationOptions<TData, APIError, TVariables>, "mutationFn">,
 ) {
-  return function useResourceMutation(
-    options?: Omit<
-      UseMutationOptions<TData, APIError, TVariables>,
-      "mutationFn"
-    >,
-  ) {
+  return function useResourceMutation() {
     return useMutation({
       mutationFn,
       onSuccess(data, vars, onMutateResult, context) {
@@ -57,8 +53,10 @@ export function createMutationHook<TVariables, TData>(
             queryKey: key,
           });
         });
+
         options?.onSuccess?.(data, vars, onMutateResult, context);
       },
+
       onError(error, ...rest) {
         options?.onError?.(error, ...rest);
       },

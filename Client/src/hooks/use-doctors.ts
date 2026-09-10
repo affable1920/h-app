@@ -5,14 +5,8 @@ import {
   createQueryHook,
   createQueryOptions,
 } from "./use-http";
-import type {
-  GetByIdResponse,
-  GetAllDrResponse,
-  UserResponse,
-  Role,
-  ProfileResponse,
-} from "@/types/http";
-import useAuthStore from "@/stores/auth-store";
+import type { GetByIdResponse, GetAllDrResponse } from "@/types/http";
+import { useSignup } from "./use-auth";
 
 const api = new APIClient("/doctors");
 
@@ -31,38 +25,24 @@ export const useDoctor = createQueryHook(
   (id: string) => api.get<GetByIdResponse>(id).then((res) => res.data),
 );
 
-export const useCreateDoctor = createMutationHook(
-  async function (vars: FormData) {
-    const setUser = useAuthStore((s) => s.setUser);
-    const saveToken = useAuthStore((s) => s.saveToken);
-
-    const response = await api.post<UserResponse, FormData>(`register`, vars, {
+export const useCreateDoctor = useSignup(
+  {
+    route: "doctor",
+    params: {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-    });
-
-    const { headers, data: user } = response;
-    const jwt = headers["x-auth-token"];
-
-    if (!jwt) {
-      throw new Error("Auto login failed. Please login manually.");
-    }
-
-    saveToken(jwt);
-    setUser(user);
-
-    return user;
+    },
   },
   () => [doctorKeys.lists()],
 );
 
 export const useUpdateDoctor = createMutationHook(
-  <R extends Role, K extends keyof ProfileResponse<R>>({
+  <K extends string>({
     changes,
   }: {
     id: string;
-    changes: { q: K; val: ProfileResponse<R>[K] };
+    changes: { q: K; val: unknown };
   }) =>
     api
       .put(

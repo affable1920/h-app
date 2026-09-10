@@ -7,7 +7,6 @@ import { Stack } from "./ui/Stack";
 import { useState, useCallback, forwardRef } from "react";
 import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import type { APIError } from "@/types/http";
 import { useLocation, useNavigate } from "react-router-dom";
 
 type MultiInputProps = {
@@ -62,7 +61,7 @@ const MultiInput = forwardRef<HTMLInputElement, MultiInputProps>(
 );
 
 export function DrSignin() {
-  const signin = useSignin();
+  const { mutateAsync: signin, isPending: isSigninPending } = useSignin();
   const navigate = useNavigate();
 
   const { state = {} } = useLocation();
@@ -76,12 +75,24 @@ export function DrSignin() {
     formState: { errors },
   } = form;
 
+  const changemethod = useCallback(function () {
+    setLoginMethod(function (p) {
+      const unreg = p === "App id" ? "id" : "email";
+      form.unregister(unreg);
+      return p === "email" ? "App id" : "email";
+    });
+  }, []);
+
   async function submit(data: DoctorLogin) {
-    await signin.mutateAsync(
+    await signin(
       { route: "doctor", data },
       {
         onError(error) {
-          toast.message((error as unknown as APIError).msg);
+          toast.error(error.code, {
+            description() {
+              return error.message;
+            },
+          });
         },
         onSuccess() {
           toast.message("You're signed in.");
@@ -90,14 +101,6 @@ export function DrSignin() {
       },
     );
   }
-
-  const changemethod = useCallback(function () {
-    setLoginMethod(function (p) {
-      const unreg = p === "App id" ? "id" : "email";
-      form.unregister(unreg);
-      return p === "email" ? "App id" : "email";
-    });
-  }, []);
 
   return (
     <form onSubmit={form.handleSubmit(submit)}>
@@ -123,7 +126,7 @@ export function DrSignin() {
         className="mt-6 w-full"
         color="white"
         type="submit"
-        loading={signin.isPending}
+        loading={isSigninPending}
       >
         sign in
       </Button>

@@ -30,7 +30,7 @@ const TABS = [
 
 export function DrProfile() {
   const { data: doctor, isError, isLoading } = useFetchProfile("doctor");
-  const { mutate: edit } = useUpdateDoctor();
+  const { mutateAsync: edit } = useUpdateDoctor();
 
   const progress = useMemo(
     function () {
@@ -47,11 +47,11 @@ export function DrProfile() {
     [doctor],
   );
 
-  const handleEdit = useCallback(function handleEdit(
+  const handleEdit = useCallback(async function handleEdit(
     field: string,
     val: unknown,
   ) {
-    return edit(
+    return await edit(
       {
         id: doctor?.id!,
         changes: {

@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, type QueryKey } from "@tanstack/react-query";
 import APIClient from "@/core/ApiClient";
 import type {
   PatientCreate,
@@ -13,79 +13,92 @@ import type { AxiosRequestConfig } from "axios";
 import { createMutationHook } from "./use-http";
 import { doctorKeys } from "./keys";
 
-type SignupContext =
+type SignupContext = {
+  params?: AxiosRequestConfig;
+} & (
   | { route: "doctor"; data: FormData }
-  | { route: "patient"; data: PatientCreate };
+  | { route: "patient"; data: PatientCreate }
+);
 
-type SigninContext =
+type SigninContext = { params?: AxiosRequestConfig } & (
   | { route: "doctor"; data: DoctorLogin }
-  | { route: "patient"; data: PatientLogin };
+  | { route: "patient"; data: PatientLogin }
+);
 
 const api = new APIClient("/auth");
 
-export function useSignup() {
-  const saveToken = useAuthStore((s) => s.saveToken);
-  const setUser = useAuthStore((s) => s.setUser);
-
-  return useMutation<
-    UserResponse,
-    Error,
-    SignupContext & { params?: AxiosRequestConfig }
-  >({
-    async mutationFn(context) {
-      const ep = "register/" + context.route;
-      const response = await api.post<UserResponse, SignupContext["data"]>(
-        ep,
-        context.data,
+export function useSignup<TVariables extends Omit<SignupContext, "data">>(
+  vars: TVariables,
+  invalidateKeys: (vars: TVariables) => Array<QueryKey>,
+  options?: Parameters<typeof createMutationHook>["2"],
+) {
+  return createMutationHook(
+    (payload: SignupContext["data"]) =>
+      api.post<UserResponse, SignupContext["data"]>(
+        `register/${vars.route}`,
+        payload,
         {
-          ...(context.params || {}),
+          ...(vars.params || {}),
         },
-      );
+      ),
+    () => [["auth", "me"], ...invalidateKeys(vars)],
+    {
+      onSuccess(data, ...rest) {
+        const { saveToken, setUser } = useAuthStore.getState();
+        const { headers, data: created } = data;
 
-      const jwt = response.headers["x-auth-token"];
+        const jwt = headers["x-auth-token"];
+
+        if (!jwt) {
+          throw new Error("login failed.");
+        }
+
+        setUser(created);
+        saveToken(jwt);
+
+        options?.onSuccess?.(data, ...rest);
+      },
+    },
+  );
+}
+
+export const useSignin = createMutationHook(
+  (vars: SigninContext) =>
+    api.post<UserResponse, SigninContext["data"]>(
+      `login/${vars.route}`,
+      vars.data,
+      {
+        ...(vars.params || {}),
+      },
+    ),
+  () => [["auth", "me"]],
+  {
+    onSuccess(data) {
+      const { saveToken, setUser } = useAuthStore.getState();
+      const { headers, data: loggedinUser } = data;
+
+      const jwt = headers["x-auth-token"];
+
       if (!jwt) {
-        throw new Error("no access token recieved on register...");
+        return;
       }
 
       saveToken(jwt);
-      setUser(response.data);
-      return response.data;
+      setUser(loggedinUser);
     },
-  });
+  },
+);
+
+export function useFetchProfile<R extends Role>(role: R) {
+  return useQuery(fetchProfileOptions<R>(role));
 }
 
-export function useSignin() {
-  const saveToken = useAuthStore((s) => s.saveToken);
-  const setUser = useAuthStore((s) => s.setUser);
+export const useDeleteAccount = createMutationHook(
+  () => api.delete(""),
+  (id: string) => [doctorKeys.detail(id), doctorKeys.lists()],
+);
 
-  return useMutation<
-    UserResponse,
-    Error,
-    SigninContext & { params?: AxiosRequestConfig }
-  >({
-    async mutationFn(context) {
-      const ep = "login/" + context.route;
-      const response = await api.post<UserResponse, SigninContext["data"]>(
-        ep,
-        context.data,
-        {
-          ...(context.params || {}),
-        },
-      );
-
-      const jwt = response.headers["x-auth-token"];
-
-      if (!jwt) {
-        throw new Error("Login failed.");
-      }
-
-      saveToken(jwt);
-      setUser(response.data);
-      return response.data;
-    },
-  });
-}
-
+// ============================================================
 export function fetchProfileOptions<R extends Role>(role: R) {
   return queryOptions({
     queryKey: ["auth", "me", role],
@@ -97,12 +110,3 @@ export function fetchProfileOptions<R extends Role>(role: R) {
     retry: 2,
   });
 }
-
-export function useFetchProfile<R extends Role>(role: R) {
-  return useQuery(fetchProfileOptions<R>(role));
-}
-
-export const useDeleteAccount = createMutationHook(
-  () => api.delete(""),
-  (id: string) => [doctorKeys.detail(id), doctorKeys.lists()],
-);

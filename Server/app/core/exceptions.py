@@ -24,11 +24,11 @@ class EntityNotFoundException(AppException):
     def __init__(
             self,
             entity_name: str,
-            identifier: str | None = None,
             **context
     ) -> None:
-        self.message = f"The requested {entity_name} {f"with id {identifier}" if identifier else ''}"
-        " could not be found."
+        self.message = (
+            f"The requested {entity_name} could not be found."
+        )
         super().__init__(self.message, **context)
 
 #
@@ -82,8 +82,23 @@ class ConflictError(AppException):
 class InvalidCredentialsError(AppException):
     status_code = 401
 
+    def __init__(
+            self,
+            message: str | None = None,
+            **context
+    ) -> None:
+        super().__init__(message, **context)
+
 
 #
 
 class InvalidTokenError(AppException):
     status_code = 401
+    code = "INVALID_TOKEN"
+
+    def __init__(
+            self,
+            message: str | None = None,
+            **context
+    ) -> None:
+        super().__init__(message, **context)

@@ -8,14 +8,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from app.core.exceptions import AppException
+from app.core.exceptions import AppException, InvalidTokenError
 from app.routes import schedules
 from app.scripts.openapi_spec import generate_openapi_spec
 from app.features.chatbot import chat
 from app.core.config import settings
 from app.routes import auth, doctors, bookings, clinics
 from app.features.calling import ws_route
-from app.core.exception_handlers import application_error_handler, unhandled_error_handler
+from app.core.exception_handlers import (
+    application_error_handler,
+    invalid_token_handler,
+    unhandled_error_handler
+)
 
 
 #
@@ -65,6 +69,10 @@ def _application_error_handler(request, exc):
     return application_error_handler(request, exc)
 
 
+def _invalid_token_error_handler(request, exc):
+    return invalid_token_handler(request, exc)
+
+
 app.add_exception_handler(
     AppException,
     _application_error_handler
@@ -73,6 +81,11 @@ app.add_exception_handler(
 app.add_exception_handler(
     Exception,
     unhandled_error_handler
+)
+
+app.add_exception_handler(
+    InvalidTokenError,
+    _invalid_token_error_handler
 )
 
 

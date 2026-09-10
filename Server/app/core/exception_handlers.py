@@ -4,7 +4,7 @@ from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from .exceptions import AppException
+from .exceptions import AppException, InvalidTokenError
 
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,9 @@ def resolve_error_status_code(
 
 # ===================================================================================================================
 
-def unhandled_error_handler(request: Request, exc: Exception):
+def unhandled_error_handler(
+        request: Request, exc: Exception
+) -> JSONResponse:
     rqst_id = getattr(request.state, "request_id", uuid4())
 
     logger.exception("Unhandled exception", extra={
@@ -41,14 +43,13 @@ def unhandled_error_handler(request: Request, exc: Exception):
         "context": exc
     })
 
-    error = ErrorHttp(
-        message="An internal server error occurred.",
-        code="Internal_Server_Error",
-        status=500,
-    )
-
     return JSONResponse(
-        content=error.model_dump(),
+        content={
+            "detail": {
+                "message": "An internal server error ocurred.",
+                "code": "internal_server_error",
+            }
+        },
         status_code=500
     )
 
@@ -72,14 +73,13 @@ def application_error_handler(
         **exc.context
     })
 
-    error = ErrorHttp(
-        message=msg,
-        code=code,
-        status=status_code,
-    )
-
     return JSONResponse(
-        content=error.model_dump(),
+        content={
+            "detail": {
+                "message": msg,
+                "code": code
+            }
+        },
         status_code=status_code
     )
 
@@ -88,7 +88,7 @@ def application_error_handler(
 
 def validation_error_handler(
         request: Request, exc: RequestValidationError
-):
+) -> JSONResponse:
     logger.exception(
         "Request Validation error",
         extra={
@@ -100,13 +100,39 @@ def validation_error_handler(
         }
     )
 
-    error_http = ErrorHttp(
-        message="Invalid Request Data.",
-        code="VALIDATION_ERROR",
-        status=422
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": {
+                "message": "Recieved invalid request data.",
+                "code": "validation_error"
+            }
+        }
+    )
+
+
+# ===================================================================================================================
+
+def invalid_token_handler(
+        request: Request, exc: InvalidTokenError
+) -> JSONResponse:
+    logger.exception(
+        "Invalid token",
+        extra={
+            "path": request.url.path,
+            "request_id": getattr(
+                request.state, "request_id", uuid4()
+            ),
+        }
     )
 
     return JSONResponse(
-        status_code=422,
-        content=error_http.model_dump()
+        content={
+            "detail": {
+                "message": "Invalid or expired token",
+                "code": "invalid_token"
+            }
+        },
+        status_code=401,
+        headers=exc.context["headers"] or {}
     )

@@ -6,14 +6,9 @@ import type {
   AxiosRequestConfig,
 } from "axios";
 
-import {
-  isPydanticError,
-  type APIError,
-  type PydanticValidationError,
-} from "@/types/http";
+import { type APIError, type PydanticValidationError } from "@/types/http";
 import useAuthStore, { logout } from "@/stores/auth-store";
 import { config } from "@/core/config";
-import { toast } from "sonner";
 
 const CONFIG: Record<number, string> = {
   400: "Bad Request",
@@ -23,13 +18,6 @@ const CONFIG: Record<number, string> = {
   422: "Invalid data",
   500: "Internal Server Error",
 } as const;
-
-const serverDownError: APIError = {
-  status: 500,
-  type: "Internal Server Error",
-  msg: "No response from the server!",
-  detail: "The server is likely down, Please try after sometime!",
-};
 
 class APIClient {
   private baseUrl: string = config.api_url;
@@ -50,89 +38,60 @@ class APIClient {
         const token = useAuthStore.getState().token;
 
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          config.headers["Authorization"] = `Bearer ${token}`;
         }
+
         return config;
       },
       function (error) {
-        console.log("request error", error);
         return Promise.reject(error);
       },
     );
 
-    this.instance.interceptors.response.use(
-      function (response) {
-        return response;
-      },
-      (error) => {
-        /*
-        Our api client has no idea what an error is about. Keep it that way, but rather minimalize 
-        errors here in a structured, regular and predictable order for the components|hooks to handle
-        */
-
-        console.log("Api client \n", error);
-
-        if (error.request && !error.response) {
-          return Promise.reject(serverDownError);
-        }
-
-        const { status, response } = error as AxiosError;
-
-        if (
-          status === 401 &&
-          response?.headers?.["x-session-expire"] === "true"
-        ) {
-          toast.info("Your session has expired. Please login again.");
-
-          logout();
-          return;
-        }
-
-        return Promise.reject(this.normalizeErrors(error));
-      },
-    );
+    this.instance.interceptors.response.use(function (response) {
+      return response;
+    }, this.onResponseError.bind(this));
   }
 
-  private formatValidationMsg(error: PydanticValidationError) {
-    if (Array.isArray(error) && !!error.length) {
-      const field = error[0]?.loc.slice(1).join(".");
-      return `${field}: ${field} ${error[0]?.msg
-        .split(" ")
-        .slice(1)
-        .join(" ")
-        .trim()}`;
+  private onResponseError(this: APIClient, error: AxiosError) {
+    const { request, response } = error;
+
+    if (!response && request) {
+      const sde = {
+        message: "Recieved no response from the server.",
+        code: "server_down",
+        status: 500,
+      };
+
+      return Promise.reject(sde);
     }
+
+    const { headers } = response as AxiosResponse;
+
+    if (headers["x-session-expire"] == "true") {
+      logout("/auth");
+    }
+
+    return Promise.reject(this.normalizeErrors(response!));
   }
 
-  private normalizeErrors(error: AxiosError): APIError {
-    const { status, response } = error;
-
-    const expired =
-      (response?.headers?.["x-session-expire"] as string) === "true";
-
-    if (expired) {
+  private normalizeErrors(response: AxiosResponse): APIError {
+    if (response.status === 422) {
       return {
-        msg: "Your session has expired! please login again",
-        status: 401,
-        type: "session-expiry",
+        message: "Invalid input.",
+        code: "validation_error",
+        status: 422,
         detail: response,
       };
     }
 
-    if (status === 422 && isPydanticError((response?.data as any).detail)) {
-      return {
-        msg: this.formatValidationMsg((response?.data as any).detail) as string,
-        status,
-        detail: response,
-        type: CONFIG[status] as string,
-      };
-    }
+    const { code, message, status } = (response.data as any).detail;
 
     return {
+      code,
+      message,
+      status: status,
       detail: response,
-      status: status as number,
-      msg: (response?.data as any).detail?.["msg"],
-      type: CONFIG[status as number] ?? (response?.statusText as string),
     };
   }
 
@@ -140,11 +99,11 @@ class APIClient {
     return this.endpoint + (path ? `/${path}` : "");
   }
 
-  async get<T>(
+  async get<TData>(
     path?: string,
     config?: AxiosRequestConfig,
-  ): Promise<AxiosResponse<T>> {
-    return await this.instance.get<T>(this.getSlug(path), config);
+  ): Promise<AxiosResponse<TData>> {
+    return await this.instance.get<TData>(this.getSlug(path), config);
   }
 
   async post<TResponse, TBody>(
@@ -163,8 +122,8 @@ class APIClient {
     return await this.instance.put(this.getSlug(path), data, config);
   }
 
-  async delete(path: string, config?: AxiosRequestConfig) {
-    await this.instance.delete(this.getSlug(path), config);
+  async delete<TEntity = unknown>(path: string, config?: AxiosRequestConfig) {
+    await this.instance.delete<TEntity>(this.getSlug(path), config);
   }
 }
 

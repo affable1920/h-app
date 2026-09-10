@@ -262,7 +262,7 @@ class Appointment(TimeStampMixin, Base):
 
     status: Mapped[AppointmentStatus] = mapped_column(
         sa.Enum(
-            enums=AppointmentStatus,
+            AppointmentStatus,
             name="appointment_status"
         ),
         server_default=sa.text("'ACTIVE'"),

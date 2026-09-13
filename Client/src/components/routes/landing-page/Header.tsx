@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import MobileNavigationItem from "./MobileNavigationItem";
+import MobileNavigationItem from "../../MobileNavigationItem";
 import {
   Stethoscope,
   Menu,
@@ -10,12 +10,12 @@ import {
   Minimize2,
   Home,
 } from "lucide-react";
-import Button from "./ui/Button";
+import Button from "../../ui/Button";
 import useAuthStore from "@/stores/auth-store";
 import { Link, useNavigate } from "react-router-dom";
 import { createStagger } from "@/utils/motion-variants";
 
-function Header() {
+function LandingPageHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -62,33 +62,25 @@ function Header() {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 p-6 px-8 shadow-md rounded-none 
-      shadow-black/25 bg-background border-b border-border-strong md:px-12"
+      className="fixed top-0 left-0 right-0 z-50 h-18 px-8 shadow-md rounded-none 
+      shadow-black/30 bg-background border-b border-border"
     >
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
-        <Button variant="icon">
+      <div className="flex items-center justify-between max-w-7xl mx-auto h-full">
+        <Button variant="icon" size="md">
           <Stethoscope />
         </Button>
 
-        <div className="md:flex items-center gap-12 hidden">
-          <nav className="space-x-8 font-semibold [&>a]:hover:text-text [&>a]:transition-colors">
+        <div className="hidden lg:flex items-center gap-12 xl:gap-16">
+          <nav className="space-x-12 font-semibold [&>a]:hover:text-text text-sm [&>a]:transition-colors">
             <a href="#features">Features</a>
             <a href="#steps">How it works</a>
             <a href="#pricing">Pricing</a>
           </nav>
-          {user ? (
-            <Link to="/view">
-              <Button color="white" border={false}>
-                Get Started
-              </Button>
-            </Link>
-          ) : (
-            <Link to="/auth">
-              <Button color="brand" border={false}>
-                Sign in
-              </Button>
-            </Link>
-          )}
+          <Link className="shrink-0" to={user ? "/view" : "/auth"}>
+            <Button color={user ? "white" : "brand"} border={false}>
+              {user ? "Get Started" : "Sign in"}
+            </Button>
+          </Link>
         </div>
 
         <Button
@@ -100,7 +92,8 @@ function Header() {
               return !p;
             });
           }}
-          className="md:hidden"
+          size="md"
+          className="lg:hidden"
           variant="icon"
         >
           {isMobileMenuOpen ? <Minimize2 /> : <Menu />}
@@ -115,7 +108,7 @@ function Header() {
             initial={"initial"}
             animate={"animate"}
             exit="exit"
-            className="md:hidden absolute top-full left-0 right-0 p-6 px-8
+            className="lg:hidden absolute top-full left-0 right-0 p-6 px-8
              shadow-md shadow-black/25 border-b flex flex-col gap-8 border-border-strong bg-background"
           >
             {navLinks.map(function (item) {
@@ -125,29 +118,16 @@ function Header() {
                 </motion.article>
               );
             })}
-            {user ? (
-              <Link to="/view">
-                <Button
-                  color="brand"
-                  border={false}
-                  className="w-full"
-                  size="md"
-                >
-                  Get Started
-                </Button>
-              </Link>
-            ) : (
-              <Link to="/auth">
-                <Button
-                  color="brand"
-                  border={false}
-                  className="w-full"
-                  size="md"
-                >
-                  Sign in
-                </Button>
-              </Link>
-            )}
+            <Link className="shrink-0" to={user ? "/view" : "/auth"}>
+              <Button
+                size="md"
+                className="w-full"
+                color={user ? "white" : "brand"}
+                border={false}
+              >
+                {user ? "Get Started" : "Sign in"}
+              </Button>
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>
@@ -155,4 +135,4 @@ function Header() {
   );
 }
 
-export default Header;
+export default LandingPageHeader;

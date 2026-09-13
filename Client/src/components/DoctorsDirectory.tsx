@@ -23,7 +23,7 @@ function DoctorsDirectory() {
     function () {
       setHasNext(hasNext ?? false);
     },
-    [hasNext],
+    [hasNext, setHasNext],
   );
 
   if (isFetching) {

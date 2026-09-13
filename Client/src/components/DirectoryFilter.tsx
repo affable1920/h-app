@@ -1,5 +1,5 @@
 import useModalStore from "@/stores/modal-store";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Button from "./ui/Button";
 import SelectFilter from "./ui/SelectFilter";
@@ -39,19 +39,9 @@ function DirectoryFilter() {
   const closeModal = useModalStore((s) => s.closeModal);
   const [showSorter, setShowSorter] = useState(false);
 
-  const { setValue, resetField, getValues, control, ...form } =
-    useFilterStore();
+  const { setValue, getValues, control, ...form } = useFilterStore();
 
   const so = form.watch("sortColumn");
-
-  useEffect(
-    function () {
-      if (so) {
-        setShowSorter(true);
-      }
-    },
-    [so],
-  );
 
   const fields = form.watch();
 

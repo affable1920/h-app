@@ -10,14 +10,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignup } from "@/hooks/use-auth";
 import type { APIError } from "@/types/http";
 
-const useRegister = useSignup(
-  {
-    route: "patient",
-  },
-  () => [["auth", "me"]],
-);
-
 export const PatientRegister = memo(function () {
+  const useRegister = useSignup(
+    {
+      route: "patient",
+    },
+    () => [["auth", "me"]],
+  );
+
   const { mutateAsync: create, isPending } = useRegister();
   const form = useForm<PatientCreate>({
     resolver: zodResolver(PatientCreateSchema),

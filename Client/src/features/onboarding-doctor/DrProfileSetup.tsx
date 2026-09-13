@@ -45,15 +45,12 @@ export default function DrProfileSetup() {
     reValidateMode: "onChange",
   });
 
-  const goBack = useCallback(
-    function () {
-      setDirection("prev");
-      setStep(function (p) {
-        return p - 1;
-      });
-    },
-    [step],
-  );
+  const goBack = useCallback(function () {
+    setDirection("prev");
+    setStep(function (p) {
+      return p - 1;
+    });
+  }, []);
 
   const goForward = useCallback(
     async function () {
@@ -68,7 +65,7 @@ export default function DrProfileSetup() {
         return p + 1;
       });
     },
-    [step],
+    [form, step],
   );
 
   async function onSubmit(formData: DoctorOnboarding) {

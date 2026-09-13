@@ -3,7 +3,7 @@ import type { Status, Doctor } from "@/types/http";
 import { CalendarFold, PhoneOutgoing, Waypoints } from "lucide-react";
 
 type DrActionName = "consult" | "schedule" | "message";
-type ActionHandler = (doctor: Doctor, ...args: any[]) => void;
+type ActionHandler = (doctor: Doctor, ...args: unknown[]) => void;
 type ActionConfig = DrCTA & { handler: ActionHandler };
 
 type DrCTA = {
@@ -13,7 +13,7 @@ type DrCTA = {
   icon?: ElementType;
 };
 
-const map: { [K in DrActionName]: any } = {
+const map: { [K in DrActionName]: ElementType } = {
   message: Waypoints,
   consult: PhoneOutgoing,
   schedule: CalendarFold,

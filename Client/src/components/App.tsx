@@ -6,20 +6,23 @@ import useModalStore from "@/stores/modal-store";
 export default function App() {
   const openModal = useModalStore((s) => s.openModal);
 
-  useEffect(function () {
-    function globalSearch(ev: KeyboardEvent) {
-      if (ev.ctrlKey && ev.key.toLowerCase() === "k") {
-        ev.preventDefault();
-        openModal("search-bar");
+  useEffect(
+    function () {
+      function globalSearch(ev: KeyboardEvent) {
+        if (ev.ctrlKey && ev.key.toLowerCase() === "k") {
+          ev.preventDefault();
+          openModal("search-bar");
+        }
       }
-    }
 
-    window.addEventListener("keydown", globalSearch);
+      window.addEventListener("keydown", globalSearch);
 
-    return function () {
-      window.removeEventListener("keydown", globalSearch);
-    };
-  }, []);
+      return function () {
+        window.removeEventListener("keydown", globalSearch);
+      };
+    },
+    [openModal],
+  );
 
   return (
     <>

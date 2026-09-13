@@ -11,9 +11,9 @@ export function DrSchedulesTab() {
   const openModal = useModalStore((s) => s.openModal);
 
   return (
-    <section className="mt-10">
-      <header className="flex items-center justify-between">
-        <h2 className="text-lg text-text-normal">Schedules</h2>
+    <section>
+      <Stack justify="between" align="center">
+        <h2 className="text-md text-text-normal">Schedules</h2>
         <Stack>
           <Button
             onClick={function () {
@@ -30,7 +30,7 @@ export function DrSchedulesTab() {
             <Plus />
           </Button>
         </Stack>
-      </header>
+      </Stack>
       <section className="mt-4">
         <Stack gap="sm" orientation="V" md={{ orientation: "H", gap: "md" }}>
           {doctor.schedules.map(function (s) {

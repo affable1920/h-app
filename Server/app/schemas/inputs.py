@@ -1,10 +1,9 @@
 from datetime import datetime, time
 from typing import Annotated, Literal, Self
-from uuid import UUID
 
 from fastapi import File, Form, UploadFile
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
-from app.schemas.Base import Aliased, FromORM, IDSerialized, snake_to_camel
+from app.schemas.Base import Aliased, FromORM, IDSerialized
 
 
 class PatientCreate(BaseModel):

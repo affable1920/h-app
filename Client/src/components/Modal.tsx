@@ -31,7 +31,7 @@ function Modal() {
     function () {
       closeModal();
     },
-    [route],
+    [route, closeModal],
   );
 
   const portal = document.getElementById("portal");

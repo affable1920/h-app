@@ -1,22 +1,9 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ElementType,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MobileNavVariants } from "@/utils/motion-variants";
 import { ChevronDown } from "lucide-react";
 import { AnimatePresence, motion, stagger, type Variant } from "motion/react";
-import { useLocation, useNavigate } from "react-router-dom";
-
-export type MobileNavItem = {
-  label: string;
-  icon: ElementType;
-  onClick?: () => void;
-  route?: string;
-  children?: Array<MobileNavItem>;
-};
+import { useLocation } from "react-router-dom";
+import type { MobileNavItem } from "@/types/utils";
 
 const tabChildrenVariants: Record<string, Variant> = {
   hidden: { x: -20, opacity: 0 },
@@ -38,32 +25,30 @@ const tabChildrenVariants: Record<string, Variant> = {
   },
 };
 
-export function NavigationItem({ label, children }: MobileNavItem) {
+export function DesktopNavigationItem({ label, children }: MobileNavItem) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const navigate = useNavigate();
 
   const [isExpanded, setIsExpanded] = useState(false);
   const location = useLocation();
 
-  function handleClickInside(this: MobileNavItem) {
-    this.onClick ? this.onClick() : navigate(this.route ?? "");
-  }
-
-  const setTimer = useCallback(
-    function () {
-      timerRef.current = setTimeout(function () {
-        setIsExpanded(false);
-      }, 120);
-    },
-    [isExpanded],
-  );
+  const setTimer = useCallback(function () {
+    timerRef.current = setTimeout(function () {
+      setIsExpanded(false);
+    }, 120);
+  }, []);
 
   useEffect(
     function () {
-      setIsExpanded(false);
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
+      const frame = requestAnimationFrame(function () {
+        setIsExpanded(false);
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+        }
+      });
+
+      return function () {
+        cancelAnimationFrame(frame);
+      };
     },
     [location.pathname],
   );
@@ -135,7 +120,7 @@ export function NavigationItem({ label, children }: MobileNavItem) {
                 {children?.map(function (child) {
                   return (
                     <motion.button
-                      onClick={handleClickInside.bind(child)}
+                      onClick={child.onclick}
                       variants={tabChildrenVariants}
                       className="capitalize cursor-pointer flex items-center gap-2 
                       p-2 px-6 pl-4 text-left rounded-md hover:text-text w-full 
@@ -157,4 +142,4 @@ export function NavigationItem({ label, children }: MobileNavItem) {
   );
 }
 
-export default NavigationItem;
+export default DesktopNavigationItem;

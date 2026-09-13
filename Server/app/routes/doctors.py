@@ -14,10 +14,6 @@ from app.services.DrService import DoctorService
 
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/doctors")
-
-
-logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix="/doctors",
     tags=["Doctors"],
@@ -27,7 +23,8 @@ router = APIRouter(
 ALLOWED_FIELDS = {
     "name",
     "phone",
-    "profile"
+    "profile",
+    "email"
 }
 
 
@@ -66,7 +63,7 @@ async def get_doctor(
 
     return doctor
 
-#
+# ================================================================================================
 
 
 @router.put("/edit")
@@ -85,9 +82,18 @@ async def edit_doctor(
             }
         )
 
-    setattr(doctor, q, val)
+    if q == "email" and doctor.email_verified:
+        raise HTTPException(
+            409,
+            detail={
+                "code": "unauthorized_error",
+                "message": "You cannot change your email address as your email is already verified."
+            }
+        )
 
+    setattr(doctor, q, val)
     await session.commit()
+
     await session.refresh(doctor)
 
 

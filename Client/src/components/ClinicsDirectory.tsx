@@ -21,7 +21,7 @@ function ClinicsDirectory() {
     function () {
       setHasNext(hasNext ?? false);
     },
-    [hasNext],
+    [hasNext, setHasNext],
   );
 
   if (isFetching) {

@@ -27,7 +27,7 @@ export function useGetAll() {
   });
 }
 
-export function getById(id: string) {
+export function useGetById(id: string) {
   return useQuery({
     queryKey: ["clinic", id],
     async queryFn() {

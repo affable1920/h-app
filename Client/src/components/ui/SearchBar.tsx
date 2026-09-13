@@ -16,7 +16,6 @@ const SearchBar = memo(function ({
   clearable = false,
   onClear,
   placeholder = "search ...",
-  grow = false,
   label,
   ...rest
 }: SearchBarProps) {

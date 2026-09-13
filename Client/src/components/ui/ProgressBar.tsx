@@ -17,10 +17,11 @@ function ProgressBar({
     function () {
       const $ = (id: string) => document.getElementById(id);
 
-      let wrapper = $("progress-box") as HTMLDivElement,
+      const wrapper = $("progress-box") as HTMLDivElement,
         lbl = $("progress-label") as HTMLDivElement,
-        bar = $("progress-bar") as HTMLDivElement,
-        progress = 0;
+        bar = $("progress-bar") as HTMLDivElement;
+
+      let progress = 0;
 
       wrapper.style.display = "block";
 
@@ -52,7 +53,7 @@ function ProgressBar({
         clearInterval(id);
       };
     },
-    [flag],
+    [flag, label, maxProgress, removeOnFinish],
   );
 
   return (

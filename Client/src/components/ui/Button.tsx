@@ -30,7 +30,7 @@ function Button<NeedsMotion extends true>(props: ButtonProps<NeedsMotion>) {
         {startIcon && startIcon}
         {children}
         {endIcon && endIcon}
-        {loading && <Spinner />}
+        {loading && <Spinner size={props.size ?? "sm"} />}
       </motion.button>
     );
   }
@@ -46,7 +46,7 @@ function Button<NeedsMotion extends true>(props: ButtonProps<NeedsMotion>) {
       {startIcon && startIcon}
       {children}
       {endIcon && endIcon}
-      {loading && <Spinner />}
+      {loading && <Spinner size={props.size ?? "sm"} />}
     </button>
   );
 }

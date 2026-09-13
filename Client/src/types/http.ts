@@ -49,18 +49,6 @@ export type APIError = {
   message: string;
   code: string; // the code recieved from the server, e.g. "Internal_Server_Error"
   status: number;
-  ctx?: any;
-  detail?: any;
+  ctx?: unknown;
+  detail?: unknown;
 };
-
-// http utility functions
-export function isPydanticError(error: any): error is PydanticValidationError {
-  return (
-    error &&
-    Array.isArray(error) &&
-    error.length > 0 &&
-    "loc" in error[0] &&
-    "msg" in error[0] &&
-    "type" in error[0]
-  );
-}

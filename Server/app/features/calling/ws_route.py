@@ -40,8 +40,9 @@ async def ws_endpoint(ws: WebSocket):
     session = await get_db().__anext__()
     from app.services.DrService import DoctorService
 
-    db_user = DoctorService.get_by_id(
-        session=session, id=user_id
+    db_user = await DoctorService.get_by_id(
+        session=session,
+        id=user_id
     )
 
     if not db_user:

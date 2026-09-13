@@ -3,6 +3,7 @@ from typing import Generic, Literal, Self, Sequence, TypeVar
 from pydantic import (
     ConfigDict,
     EmailStr,
+    Field,
     model_validator,
 )
 from app.schemas.Base import Aliased, FromORM, IDMixin, IDSerialized
@@ -46,13 +47,15 @@ class PatientProfileResponse(
     name: str | None = None
     email: EmailStr
     username: str | None = None
-    appointments: list[AppointmentResponse] = []
+    appointments: list[AppointmentResponse] = Field(
+        default_factory=list
+    )
 
     @model_validator(mode="after")
     def validate_identity(self) -> Self:
         if not self.name and not self.username:
             raise ValueError(
-                "Missing email or username. Atleast one is required."
+                "Missing email and username. Atleast one is required."
             )
         return self
 
@@ -60,12 +63,15 @@ class PatientProfileResponse(
 #
 
 class DrProfileResponse(
-    DoctorHttpFull, Aliased
+    DoctorHttpFull,
+    Aliased
 ):
     college_studied: str | None = None
     graduation_year: int | None = None
     bio: str | None = ""
     license_number: str
+    email: EmailStr
+    email_verified: bool | None = False
 
 
 class AuthHdrPayload(Aliased):
@@ -73,7 +79,9 @@ class AuthHdrPayload(Aliased):
     exp: float
     iat: float
     role: UserRoleV2
-    model_config = ConfigDict(use_enum_values=True)
+    model_config = ConfigDict(
+        use_enum_values=True
+    )
 
 
 #

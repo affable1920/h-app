@@ -13,7 +13,7 @@ export const DrProfileRoute: RouteObject = {
       async lazy() {
         const { DrSchedulesTab } = await import("./DrSchedulesTab");
         return {
-          Component: DrSchedulesTab,
+          element: <DrSchedulesTab />,
         };
       },
     },

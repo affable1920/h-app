@@ -62,7 +62,7 @@ export function useSearchPaginate<T>(
       const sorted = sortFn ? searched.sort(sortFn) : searched;
       return paginate(sorted, state.iteration, max);
     },
-    [items, state.query, sortFn, filterFn, state.iteration],
+    [items, state.query, sortFn, filterFn, state.iteration, max],
   );
 
   const maxIterCount = Math.ceil(items.length / max);

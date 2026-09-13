@@ -14,6 +14,7 @@ console.log(
 );
 
 const DIR_NAME = import.meta.dirname;
+console.log(DIR_NAME);
 
 const https: CommonServerOptions["https"] = !useHttps
   ? undefined
@@ -73,11 +74,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(DIR_NAME, "./src"),
+      "@core": path.resolve(DIR_NAME, "./src/core"),
       "@hooks": path.resolve(DIR_NAME, "./src/hooks"),
       "@stores": path.resolve(DIR_NAME, "./src/stores"),
       "@services": path.resolve(DIR_NAME, "./src/services"),
       "@components": path.resolve(DIR_NAME, "./src/components"),
       "@routes": path.resolve(DIR_NAME, "./src/components/routes"),
+      "@features": path.resolve(DIR_NAME, "./src/features"),
     },
   },
 });

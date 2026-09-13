@@ -27,8 +27,8 @@ export function ControlledStepInput({
   negative = false,
   ...rest
 }: ControlledInputProps) {
-  const minValue = !!min ? Number(min) : negative ? -Infinity : 0;
-  const maxValue = !!max ? Number(max) : Infinity;
+  const minValue = min ? Number(min) : negative ? -Infinity : 0;
+  const maxValue = max ? Number(max) : Infinity;
   const stepValue = Number(step);
   const currentValue = !value || value === "" ? minValue : Number(value);
 

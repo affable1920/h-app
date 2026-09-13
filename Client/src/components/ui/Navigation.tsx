@@ -10,7 +10,7 @@ interface Props {
   navigateBack: () => void;
   showPillUi?: boolean;
   stepCount: number;
-  submitFn?: (data?: any) => void | Promise<void>;
+  submitFn?: (data?: unknown) => void | Promise<void>;
 }
 
 export const Navigation = memo(function Navigation({

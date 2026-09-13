@@ -37,18 +37,27 @@ function Directory() {
 
   useEffect(
     function () {
-      setLocalSearch(params.get("searchQuery"));
+      const frame = requestAnimationFrame(function () {
+        setLocalSearch(params.get("searchQuery"));
+      });
+
+      return function () {
+        cancelAnimationFrame(frame);
+      };
     },
-    [params.get("searchQuery")],
+    [params],
   );
 
-  const setPage = useCallback(function (pg: number) {
-    setParams(function (prev) {
-      const next = new URLSearchParams(prev);
-      next.set("page", String(pg));
-      return next;
-    });
-  }, []);
+  const setPage = useCallback(
+    function (pg: number) {
+      setParams(function (prev) {
+        const next = new URLSearchParams(prev);
+        next.set("page", String(pg));
+        return next;
+      });
+    },
+    [setParams],
+  );
 
   const setSearchQuery = useRef(
     debounce(function (sq: string) {
@@ -64,19 +73,25 @@ function Directory() {
     }, 350),
   ).current;
 
-  const handleSearch = useCallback(function (val: string) {
-    setLocalSearch(val);
-    setSearchQuery(val);
-  }, []);
+  const handleSearch = useCallback(
+    function (val: string) {
+      setLocalSearch(val);
+      setSearchQuery(val);
+    },
+    [setSearchQuery],
+  );
 
-  const clearSearch = useCallback(function () {
-    setLocalSearch("");
-    setParams(function (prev) {
-      const next = new URLSearchParams(prev);
-      next.delete("searchQuery");
-      return next;
-    });
-  }, []);
+  const clearSearch = useCallback(
+    function () {
+      setLocalSearch("");
+      setParams(function (prev) {
+        const next = new URLSearchParams(prev);
+        next.delete("searchQuery");
+        return next;
+      });
+    },
+    [setParams],
+  );
 
   const handlePageChange = useCallback(
     function (direction: "next" | "previous") {
@@ -91,7 +106,7 @@ function Directory() {
       const nextPage = direction === "next" ? page + 1 : page - 1;
       setPage(nextPage);
     },
-    [page, hasNext],
+    [page, hasNext, setPage],
   );
 
   function switchDirectory() {

@@ -8,12 +8,11 @@ import {
 } from "@/utils/motion-variants";
 import { ArrowRight, ChevronRight, MapPinCheckInside } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Badge from "@components/ui/Badge";
 import useModalStore from "@/stores/modal-store";
 import { useSearchParams } from "react-router-dom";
 import Button from "@components/ui/Button";
-import type { DateTimeUnit } from "luxon";
 
 type ScheduleProps = {
   schedule: Schedule;
@@ -29,7 +28,7 @@ type ScheduleState = {
 export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
   const openModal = useModalStore((s) => s.openModal);
 
-  const { id, slots = [], clinic, ...rest } = schedule;
+  const { slots = [], clinic, ...rest } = schedule;
   const [params, setParams] = useSearchParams();
 
   const dtParam = fromISO(params.get("date") ?? "");
@@ -54,54 +53,53 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
         });
       }
     },
-    [clearDtParam],
+    [clearDtParam, setParams],
   );
 
   useEffect(
     function () {
-      if (schedule.weekdays.includes(dtParam?.weekday)) {
-        setIsExpanded(true);
-      }
+      const frame = requestAnimationFrame(function () {
+        if (schedule.weekdays.includes(dtParam?.weekday)) {
+          setIsExpanded(true);
+        }
+      });
+
+      return function () {
+        cancelAnimationFrame(frame);
+      };
     },
-    [dtParam],
+    [dtParam?.weekday, schedule.weekdays],
   );
 
   const slotsFiltered = useMemo(
     function () {
-      return slots.filter(function (slot) {
-        const slotDatetime = fromISO(slot.slot_datetime);
-
-        const checkA = ["month", "day"].every(function (unit) {
-          return slotDatetime.hasSame(dtParam, unit as DateTimeUnit);
-        });
-
-        // const checkB = slotDatetime.weekday === scheduleState.weekday;
-
-        return checkA;
+      return slots.filter(function (slot: Slot) {
+        const dt = fromISO(slot.slot_datetime);
+        return dt.weekday === dtParam.weekday;
       });
     },
     [dtParam, slots],
   );
 
-  const showSlots = isExpanded && !!slotsFiltered.length;
+  const showSlots = isExpanded && slotsFiltered.length > 0;
 
   const allBooked = useMemo(
     function () {
-      return slotsFiltered.every(function (slot) {
+      return slotsFiltered.every(function (slot: Slot) {
         return slot.is_booked;
       });
     },
     [slotsFiltered],
   );
 
-  const update = useCallback(function <K extends keyof ScheduleState>(
+  const update = function <K extends keyof ScheduleState>(
     key: K,
     val: ScheduleState[K],
   ) {
     setScheduleState(function (prev) {
       return { ...prev, [key]: prev[key] === val ? null : val };
     });
-  }, []);
+  };
 
   return (
     <motion.article
@@ -113,11 +111,13 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
           onClick={function () {
             setIsExpanded((p) => !p);
           }}
+          role="button"
           className="flex cursor-pointer items-center justify-between"
         >
-          <h2 className="text-text-secondary">{clinic?.name}</h2>
+          <h2 className="text-text-secondary min-w-0 flex-1">{clinic?.name}</h2>
 
           <motion.button
+            className="shrink-0"
             initial={false}
             style={{
               cursor: "pointer",
@@ -157,7 +157,7 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
               >
                 {[...new Set(rest.weekdays)]
                   .sort((a, b) => a - b)
-                  .map((wkday) => {
+                  .map(function (wkday) {
                     return (
                       <motion.button
                         key={wkday}
@@ -180,8 +180,9 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
                           selected={
                             (scheduleState.weekday || dtParam.weekday) === wkday
                           }
-                          content={getWeekday(wkday).slice(0, 3)}
-                        />
+                        >
+                          {getWeekday(wkday).slice(0, 3)}
+                        </Badge>
                       </motion.button>
                     );
                   })}
@@ -209,7 +210,7 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
                 exit="exit"
                 className="flex flex-wrap gap-4 justify-center my-6"
               >
-                {slotsFiltered.map(function (slot) {
+                {slotsFiltered.map(function (slot: Slot) {
                   return (
                     <motion.button
                       variants={createStagger().children}
@@ -244,7 +245,7 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
 
       <AnimatePresence>
         {scheduleState.slot &&
-          new Set(slotsFiltered.map((slot) => slot.id)).has(
+          new Set(slotsFiltered.map((slot: Slot) => slot.id)).has(
             scheduleState.slot.id,
           ) && (
             <motion.div

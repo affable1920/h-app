@@ -1,34 +1,32 @@
-import logging
 import smtplib
 import ssl
-
-from app.core.config import settings
 from pydantic import EmailStr
-
-#
-
-logger = logging.getLogger(__name__)
+from email.message import EmailMessage
+from app.core.config import settings
 
 
-def send_mail(recipient: EmailStr, msg: str):
+def send_mail(
+        recipient: EmailStr,
+        body: tuple[str, str]
+):
     from_ = "affableshamik98@gmail.com"
     port = 465
 
-    context = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
+    context = ssl.create_default_context(
+        purpose=ssl.Purpose.SERVER_AUTH
+    )
+
+    message = EmailMessage()
+
+    message["From"] = from_
+    message["To"] = recipient
+    message["Subject"] = body[0]
+    message.set_content(body[1])
 
     with smtplib.SMTP_SSL(
-        host="smtp.gmail.com", port=port, context=context
+        host="smtp.gmail.com",
+        port=port,
+        context=context
     ) as server:
-
-        logger.info(f"gmail_password -> {settings.gmail_password}")
-
-        try:
-            server.login(from_, settings.gmail_password)
-            server.sendmail(
-                from_addr=from_,
-                to_addrs=recipient,
-                msg=msg
-            )
-        except smtplib.SMTPAuthenticationError as e:
-            logger.debug(e)
-            pass
+        server.login(from_, settings.gmail_password)
+        server.send_message(message)

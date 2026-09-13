@@ -10,17 +10,16 @@
     "skipLibCheck": true,
     "types": [],
     "experimentalDecorators": true,
-    "ignoreDeprecations": "6.0",
-
-    "baseUrl": "./src",
 
     "paths": {
-      "@/*": ["./*"],
-      "@hooks/*": ["./hooks/*"],
-      "@stores/*": ["./stores/*"],
-      "@services/*": ["./services/*"],
-      "@components/*": ["./components/*"],
-      "@routes/*": ["./components/routes/*"]
+      "@/*": ["./src/*"],
+      "@core/*": ["./src/core/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@stores/*": ["./src/stores/*"],
+      "@services/*": ["./src/services/*"],
+      "@components/*": ["./src/components/*"],
+      "@routes/*": ["./src/components/routes/*"],
+      "@features/*": ["./src/features/*"]
     },
 
     /* Bundler mode */

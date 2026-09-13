@@ -6,18 +6,9 @@ import type {
   AxiosRequestConfig,
 } from "axios";
 
-import { type APIError, type PydanticValidationError } from "@/types/http";
-import useAuthStore, { logout } from "@/stores/auth-store";
-import { config } from "@/core/config";
-
-const CONFIG: Record<number, string> = {
-  400: "Bad Request",
-  401: "Not authenticated",
-  403: "Unauthorized",
-  404: "Resource Not Found",
-  422: "Invalid data",
-  500: "Internal Server Error",
-} as const;
+import { type APIError } from "@/types/http";
+import useAuthStore, { logout } from "@stores/auth-store";
+import { config } from "@core/config";
 
 class APIClient {
   private baseUrl: string = config.api_url;
@@ -85,12 +76,12 @@ class APIClient {
       };
     }
 
-    const { code, message, status } = (response.data as any).detail;
+    const { code, message } = (response.data as any).detail;
 
     return {
       code,
       message,
-      status: status,
+      status: response.status,
       detail: response,
     };
   }
@@ -108,7 +99,7 @@ class APIClient {
 
   async post<TResponse, TBody>(
     path: string = "",
-    data: TBody,
+    data?: TBody,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<TResponse>> {
     return await this.instance.post<TResponse>(

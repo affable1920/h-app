@@ -69,7 +69,7 @@ async def book(
     background_tasks.add_task(
         lambda: MailService.send_mail(
             recipient=pt.email,
-            msg=mail
+            body=mail
         )
     )
 
@@ -94,6 +94,6 @@ async def cancel_booking(
     background_tasks.add_task(
         lambda: MailService.send_mail(
             recipient=user.email,
-            msg="Your appointment has been cancelled."
+            body="Your appointment has been cancelled."
         )
     )

@@ -18,14 +18,6 @@ function useChat() {
   const [conversation, setConversation] = useState<Conversation>([]);
   const [streaming, setStreaming] = useState(false);
 
-  useEffect(function () {
-    // fetch history once, on first render (if any)
-    getHistory();
-  }, []);
-
-  const streamDoneRef = useRef(false);
-  const controllerRef = useRef<AbortController>(null);
-
   async function getHistory() {
     try {
       const response = await api.get<Conversation>();
@@ -35,6 +27,17 @@ function useChat() {
       throw ex;
     }
   }
+
+  useEffect(function () {
+    // fetch history once, on first render (if any)
+    const frame = requestAnimationFrame(getHistory);
+    return function () {
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  const streamDoneRef = useRef(false);
+  const controllerRef = useRef<AbortController>(null);
 
   function rollback(role: ChatRequest["role"] = "user") {
     setConversation(function (prev) {

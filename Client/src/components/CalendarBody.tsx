@@ -14,12 +14,12 @@ import Badge from "./ui/Badge";
 import { motion } from "motion/react";
 
 interface CalendarBodyProps {
-  monthInView: DateTime;
+  monthInView: DateTime<true>;
   schedules: Schedule[];
   direction?: "right" | "left";
 }
 
-const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
+function CalendarBody({ schedules, monthInView }: CalendarBodyProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const dtParam = DateTime.fromISO(searchParams.get("date") ?? "");
 
@@ -44,15 +44,18 @@ const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
     [monthInView],
   );
 
-  const allScheduleDays = useMemo(function () {
-    const days = [];
+  const allScheduleDays = useMemo(
+    function () {
+      const days = [];
 
-    for (let schedule of schedules) {
-      days.push(schedule.weekdays);
-    }
+      for (const schedule of schedules) {
+        days.push(schedule.weekdays);
+      }
 
-    return [...new Set(days.flat())].sort((a, b) => a - b);
-  }, []);
+      return [...new Set(days.flat())].sort((a, b) => a - b);
+    },
+    [schedules],
+  );
 
   function isWkdayToday(day: (typeof WEEKDAYS)[number]) {
     const now = DateTime.local();
@@ -66,28 +69,30 @@ const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
   return (
     <motion.div className={`flex flex-col gap-6`}>
       <div className="grid gap-4 justify-items-center grid-cols-7">
-        {WEEKDAYS.map((day) => (
-          <h2
-            key={day}
-            className={`font-black underline-offset-4 capitalize  ${
-              isWkdayToday(day)
-                ? "text-text-secondary underline"
-                : "text-text-secondary/80"
-            }`}
-          >
-            {day.slice(0, 3)}
-          </h2>
-        ))}
+        {WEEKDAYS.map((day) => {
+          return (
+            <h2
+              key={day}
+              className={`font-black underline-offset-4 capitalize  ${
+                isWkdayToday(day)
+                  ? "text-text-secondary underline"
+                  : "text-text-secondary/80"
+              }`}
+            >
+              {day.slice(0, 3)}
+            </h2>
+          );
+        })}
       </div>
 
       <div className="grid gap-4 grid-cols-7 gap-y-6 justify-items-center">
-        {calendar.map((dt) => {
+        {calendar.map(function (dt) {
           return (
             <Badge
               className="size-10 max-w-12 max-h-12"
               content={dt.day.toString()}
               onClick={function () {
-                updateDate(dt);
+                updateDate(dt as DateTime<true>);
               }}
               current={isDateToday(dt)}
               key={dt.toISO()}
@@ -101,7 +106,7 @@ const CalendarBody = ({ schedules, monthInView }: CalendarBodyProps) => {
       </div>
     </motion.div>
   );
-};
+}
 
 export default CalendarBody;
 CalendarBody.displayName = "CalendarBody";

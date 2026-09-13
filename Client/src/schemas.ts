@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { WEEKDAYS } from "@/utils/constants";
 
 export const PatientCreateSchema = z.object({
   username: z.string().min(4, "Please enter a valid username"),
@@ -94,10 +93,10 @@ const weeklySchema = z.object({
   every: z.literal("week", "A repeating time frame is required."),
 });
 
-const monthlySchema = z.object({
-  dates: z.array(z.number().min(1).max(31)),
-  every: z.literal("month", "A repeating time frame is required."),
-});
+// const monthlySchema = z.object({
+//   dates: z.array(z.number().min(1).max(31)),
+//   every: z.literal("month", "A repeating time frame is required."),
+// });
 
 const stepTwoCommons = z.object({
   baseSlotDuration: z.number().min(5, "Minimum duration is 10 minutes"),
@@ -112,12 +111,15 @@ const stepTwoCommons = z.object({
   location: z
     .string("A valid location or a clinic name is required")
     .min(8, "A valid location or a clinic name is required"),
-  maxSlots: z.union([z.number(), z.literal(false)]).optional().default(false),
+  maxSlots: z
+    .union([z.number(), z.literal(false)])
+    .optional()
+    .default(false),
   allowOnlineConsultations: z.boolean(),
 });
 
 const stepTwoA = weeklySchema.extend(stepTwoCommons.shape);
-const stepTwoB = monthlySchema.extend(stepTwoCommons.shape);
+// const stepTwoB = monthlySchema.extend(stepTwoCommons.shape);
 
 export const ScheduleCreateSchema = stepTwoA;
 export type ScheduleCreate = z.infer<typeof ScheduleCreateSchema>;

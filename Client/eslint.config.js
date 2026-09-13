@@ -11,10 +11,13 @@ export default tseslint.config([
   globalIgnores(["dist"]),
   {
     files: ["**/*.{ts,tsx}"],
+    plugins: {
+      "react-hooks": reactHooks,
+    },
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
-      reactHooks.configs["recommended-latest"],
+      reactHooks.configs.flat["recommended-latest"],
       reactRefresh.configs.vite,
     ],
     languageOptions: {
@@ -22,7 +25,7 @@ export default tseslint.config([
       globals: globals.browser,
       parserOptions: {
         project: ["./tsconfig.app.json", "./tsconfig.node.json"],
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {

@@ -101,7 +101,7 @@ export function PatientProfile() {
             onClick={function () {
               openModal("confirmation-modal", {
                 onResolve() {
-                  remove(profile?.id!, {
+                  remove(profile?.id as string, {
                     onSuccess() {
                       toast("You account was successfully deleted !", {
                         description() {

@@ -115,7 +115,7 @@ export function datesAreEqual(dtA: DateTime, dtB: DateTime) {
   return areEqual;
 }
 
-export function paginate<T extends unknown>(
+export function paginate<T>(
   list: Array<T> = [],
   iter: number = 1,
   max: number = 5,

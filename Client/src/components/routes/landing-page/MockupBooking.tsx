@@ -3,7 +3,7 @@ import { MapPin, PhoneOutgoing, CalendarFoldIcon } from "lucide-react";
 import { motion, useAnimate } from "motion/react";
 
 function MockupBooking() {
-  const [scope, animate] = useAnimate();
+  const [scope] = useAnimate();
 
   async function sequence() {}
 

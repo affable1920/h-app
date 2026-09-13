@@ -9,8 +9,7 @@ export type Weekday = (typeof WEEKDAYS)[number];
 export type MobileNavItem = {
   label: string;
   icon: ElementType;
-  onClick?: () => void;
-  route?: string;
+  onclick?: () => void;
   children?: Array<MobileNavItem>;
 };
 

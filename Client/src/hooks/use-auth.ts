@@ -110,3 +110,8 @@ export function fetchProfileOptions<R extends Role>(role: R) {
     retry: 2,
   });
 }
+
+export const useRequestEmailVerification = createMutationHook(
+  () => api.post<string, null>("request-email-verify").then((res) => res.data),
+  () => [["auth", "me"]],
+);

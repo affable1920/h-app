@@ -19,7 +19,6 @@ import { MapPinCheckInside } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useSignup } from "@/hooks/use-auth";
 import { PatientCreateSchema } from "@/schemas";
 import { fromISO } from "@/utils/utils";
 import Badge from "@/components/ui/Badge";
@@ -54,8 +53,6 @@ function ScheduleModal({
 
   const book = useBookingMutation();
   const { mutate: unBook } = useUnbookingMutation();
-
-  const signup = useSignup();
 
   async function confirmSlot() {
     if (!slot) {
@@ -114,10 +111,6 @@ function ScheduleModal({
         });
       },
     });
-  }
-
-  async function confirmOnboarding(data: PatientCreate) {
-    await signup.mutateAsync({ data, route: "patient" });
   }
 
   const [mode, setMode] = useState<"login" | "register">("login");

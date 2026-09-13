@@ -157,7 +157,7 @@ function Chat() {
         className="flex flex-col gap-14 grow overflow-y-scroll relative text-md"
         style={{ scrollbarWidth: "none", scrollBehavior: "smooth" }}
       >
-        {!!conversation.length ? (
+        {conversation.length ? (
           <>
             {conversation.map((response, i) => {
               const isUser = response.role === "user";

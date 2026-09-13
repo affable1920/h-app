@@ -75,13 +75,16 @@ export function DrSignin() {
     formState: { errors },
   } = form;
 
-  const changemethod = useCallback(function () {
-    setLoginMethod(function (p) {
-      const unreg = p === "App id" ? "id" : "email";
-      form.unregister(unreg);
-      return p === "email" ? "App id" : "email";
-    });
-  }, []);
+  const changemethod = useCallback(
+    function () {
+      setLoginMethod(function (p) {
+        const unreg = p === "App id" ? "id" : "email";
+        form.unregister(unreg);
+        return p === "email" ? "App id" : "email";
+      });
+    },
+    [form],
+  );
 
   async function submit(data: DoctorLogin) {
     await signin(

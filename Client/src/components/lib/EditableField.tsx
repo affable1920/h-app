@@ -89,22 +89,21 @@ export const EditableField = memo(function EditableField({
         translate="no"
         role="textbox"
         enterKeyHint="enter"
-        aria-multiline="false"
         onInput={function (ev) {
           const value = ev.currentTarget.textContent?.trim();
           setIsDirty(value !== initialValue.trim());
         }}
         defaultValue={initialValue}
-        className="text-md flex items-center gap-2 capitalize text-text-normal group-hover/name:text-text
-        group-hover/name:cursor-pointer font-semibold outline-none focus:ring-2 hover:cursor-text
-        focus:ring-blue-400/20 rounded-md w-fit focus:ring-offset-2 focus:ring-offset-blue-400/15
-        py-1"
+        className="flex items-center gap-2 text-text-normal group-hover/name:text-text
+        group-hover/name:cursor-pointer font-semibold outline-none hover:cursor-text rounded-md 
+        focus:ring-2 focus:ring-blue-400/25 py-0.5 min-w-0 truncate  
+        leading-tight"
         onKeyDown={handleKeyDown}
       >
         {initialValue}
       </div>
 
-      <Stack className="min-w-18" align="center">
+      <Stack align="center">
         {!isEditing ? (
           <Button
             data-tooltip={`Edit your ${name}`}

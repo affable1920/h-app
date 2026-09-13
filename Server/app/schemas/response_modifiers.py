@@ -48,7 +48,10 @@ class DrRouteFilters(BaseFilters):
         )
     ] = None
 
-    experience: int | None = Field(default=None, gt=0)
+    experience: int | None = Field(
+        gt=0,
+        default=None
+    )
     fee: int | None = None
     gender: Gender | None = None
 

@@ -123,6 +123,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/request-email-verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request */
+        post: operations["request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/verify-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Email Verification */
+        get: operations["email_verification"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/doctors": {
         parameters: {
             query?: never;
@@ -729,6 +763,16 @@ export interface components {
             bio: string | null;
             /** Licensenumber */
             licenseNumber: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /**
+             * Emailverified
+             * @default false
+             */
+            emailVerified: boolean | null;
             /** Reviewcount */
             readonly reviewCount: number;
             /** Rating */
@@ -852,6 +896,8 @@ export interface components {
             /** Doctor Id */
             doctor_id: string;
             clinic?: components["schemas"]["ClinicHttpMinimal"] | null;
+            /** Slots */
+            slots: components["schemas"]["Slot"][];
         };
         /** ScheduleResponse */
         ScheduleResponse: {
@@ -1122,6 +1168,57 @@ export interface operations {
                 "application/json": components["schemas"]["Body_edit_auth_edit_put"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    email_verification: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {

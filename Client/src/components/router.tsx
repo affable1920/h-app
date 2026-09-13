@@ -4,7 +4,6 @@ import {
   Navigate,
   Outlet,
   redirect,
-  useLoaderData,
   type LoaderFunctionArgs,
   type MiddlewareFunction,
 } from "react-router-dom";
@@ -16,19 +15,18 @@ import Directory from "@routes/Directory";
 
 import SignIn from "@/components/routes/SignIn";
 import Register from "@/components/routes/Register";
-import LandingPageBody from "@/components/routes/LandingPage";
+import LandingPage from "@/components/routes/LandingPage";
 import App from "@/components/App";
 import Spinner from "./ui/Spinner";
 import useAuthStore from "@/stores/auth-store";
 import { CallProvider } from "@/features/call/components/CallProvider";
 import queryClient from "@/core/query-client";
-import type { Doctor } from "@/types/http";
-import { Stack } from "./ui/Stack";
 import { doctorOptions } from "@/hooks/use-doctors";
 import { PageLayout } from "./routes/PageLayout";
 import { DrProfileRoute } from "./routes/DrProfile/DrProfileRoute";
 import { PatientProfile } from "./routes/PatientProfile/PatientProfile";
 import ProfileSwitcher from "./routes/ProfileSwitcher";
+import { DoctorDetails } from "./routes/DoctorDetails";
 
 const Chat = lazy(function () {
   return import("@routes/Chat");
@@ -67,7 +65,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: LandingPageBody,
+        Component: LandingPage,
       },
 
       {
@@ -114,37 +112,19 @@ const router = createBrowserRouter([
 
           {
             path: "doctor/:id",
-            loader: loaderDoctor,
             children: [
               {
                 index: true,
-                Component: function () {
-                  const dr = useLoaderData<Doctor>();
-
-                  if (!dr) {
-                    return;
-                  }
-
-                  return (
-                    <PageLayout>
-                      <Stack orientation="V" gap="sm">
-                        {Object.entries(dr).map(function ([key, val]) {
-                          return typeof val === "string" && key != "id" ? (
-                            <Stack gap="md">
-                              <span className="capitalize text-blue-400">
-                                {key}
-                              </span>
-                              <span className="capitalize">{val}</span>
-                            </Stack>
-                          ) : null;
-                        })}
-                      </Stack>
-                    </PageLayout>
-                  );
-                },
+                loader: loaderDoctor,
+                element: (
+                  <PageLayout>
+                    <DoctorDetails />
+                  </PageLayout>
+                ),
               },
               {
                 path: "consult",
+                loader: loaderDoctor,
                 lazy: async function () {
                   const { TalkOverVideo } =
                     await import("@/features/call/components/TalkOverVideo");
@@ -159,6 +139,7 @@ const router = createBrowserRouter([
               },
               {
                 path: "schedule",
+                loader: loaderDoctor,
                 element: (
                   <PageLayout>
                     <SchedulesView />
@@ -179,8 +160,8 @@ const router = createBrowserRouter([
 
           {
             path: "auth/me",
-            middleware: [authMiddleware],
             Component: ProfileSwitcher,
+            middleware: [authMiddleware],
             children: [
               {
                 ...DrProfileRoute,

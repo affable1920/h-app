@@ -47,30 +47,30 @@ export function DrProfile() {
     [doctor],
   );
 
-  const handleEdit = useCallback(async function handleEdit(
-    field: string,
-    val: unknown,
-  ) {
-    return await edit(
-      {
-        id: doctor?.id!,
-        changes: {
-          q: field,
-          val,
+  const handleEdit = useCallback(
+    async function handleEdit(field: string, val: unknown) {
+      return await edit(
+        {
+          id: doctor?.id as string,
+          changes: {
+            q: field,
+            val,
+          },
         },
-      },
-      {
-        onError(error) {
-          toast.error(error.code, {
-            description() {
-              return error.message;
-            },
-            className: "capitalize",
-          });
+        {
+          onError(error) {
+            toast.error(error.code, {
+              description() {
+                return error.message;
+              },
+              className: "capitalize",
+            });
+          },
         },
-      },
-    );
-  }, []);
+      );
+    },
+    [edit, doctor?.id],
+  );
 
   if (!doctor) {
     return null;
@@ -79,7 +79,7 @@ export function DrProfile() {
   return (
     <ProfileShell isError={isError} isPending={isLoading}>
       <PageLayout>
-        <div className="bg-layout/20 border border-border-strong/40 rounded-xl shadow-md shadow-black/20 p-4">
+        <div className="bg-layout/20 border border-border/80 rounded-xl shadow-md shadow-black/60 p-4 md:p-6">
           <Stack gap="sm" align="center">
             <Avatar
               name="image"
@@ -90,7 +90,7 @@ export function DrProfile() {
             />
             <div className="flex-1 flex flex-col gap-2">
               <div>
-                <h1 className="font-bold text-text-normal text-md">
+                <h1 className="font-semibold text-text-normal text-md capitalize">
                   Dr. {doctor.name}
                 </h1>
                 <p className="text-sm mt-0.5 text-text-normal">
@@ -138,9 +138,9 @@ export function DrProfile() {
           </nav>
         </div>
 
-        <Stack className="mt-8">
+        <div className="mt-12">
           <Outlet context={doctor} />
-        </Stack>
+        </div>
       </PageLayout>
     </ProfileShell>
   );

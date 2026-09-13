@@ -1,11 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  type NavigateOptions,
-} from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import Button from "@/components/ui/Button";
 import {
@@ -28,7 +23,7 @@ import useAuthStore, { logout } from "@/stores/auth-store";
 import type { MobileNavItem } from "@/types/utils";
 import MobileNavigationItem from "./MobileNavigationItem";
 import Divider from "./ui/Divider";
-import NavigationItem from "./NavigationItem";
+import DesktopNavigationItem from "./DesktopNavigationItem";
 
 function NavBar() {
   const { pathname = "" } = useLocation();
@@ -37,16 +32,15 @@ function NavBar() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
 
-  const moveTo = useCallback(
-    function (href: string, options?: NavigateOptions) {
-      navigate(href, { ...options });
-    },
-    [navigate],
-  );
-
   useEffect(
     function () {
-      setShowMobileMenu(false);
+      const frame = requestAnimationFrame(function () {
+        setShowMobileMenu(false);
+      });
+
+      return function () {
+        cancelAnimationFrame(frame);
+      };
     },
     [pathname],
   );
@@ -57,17 +51,17 @@ function NavBar() {
     function () {
       const navbar = ref?.current as HTMLElement;
 
-      const handleMouseDown = (e: MouseEvent) => {
+      function handleMouseDown(e: MouseEvent) {
         if (showMobileMenu && !navbar?.contains(e.target as Node)) {
           setShowMobileMenu(false);
         }
-      };
+      }
 
-      const handleKeydown = (e: KeyboardEvent) => {
+      function handleKeydown(e: KeyboardEvent) {
         if (showMobileMenu && e.key == "Escape") {
           setShowMobileMenu(false);
         }
-      };
+      }
 
       document.addEventListener("keydown", handleKeydown);
       document.addEventListener("mousedown", handleMouseDown);
@@ -84,7 +78,7 @@ function NavBar() {
     {
       label: "Home",
       icon: Home,
-      onClick() {
+      onclick() {
         navigate("/view");
       },
     },
@@ -95,7 +89,9 @@ function NavBar() {
         {
           label: "doctor",
           icon: Stethoscope,
-          route: "/view/idx/doctors",
+          onclick() {
+            navigate("/view/idx/doctors");
+          },
         },
         {
           label: "hospital",
@@ -104,12 +100,16 @@ function NavBar() {
         {
           label: "pharmacy",
           icon: Syringe,
-          route: "/view/idx/clinics",
+          onclick() {
+            navigate("/view/idx/clinics");
+          },
         },
         {
           label: "ask assistant (Pro Plan)",
           icon: Bot,
-          route: "chat",
+          onclick() {
+            navigate("chat");
+          },
         },
       ],
     },
@@ -119,17 +119,22 @@ function NavBar() {
             label: "Account",
             icon: Settings,
             children: [
-              { label: "profile", icon: User, route: "/view/auth/me" },
+              {
+                label: "profile",
+                icon: User,
+                onclick() {
+                  navigate("/view/auth/me");
+                },
+              },
               { label: "messages", icon: Mail },
               {
                 label: "DND (Do Not Disturb)",
                 icon: BellOff,
-                onClick: function () {},
               },
               {
                 label: "logout",
                 icon: LogOut,
-                onClick: function () {
+                onclick: function () {
                   logout("/auth");
                 },
               },
@@ -141,24 +146,28 @@ function NavBar() {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 p-6 px-8 shadow-md rounded-none 
-      shadow-black/25 bg-background border-b border-border-strong md:px-12"
+      className="fixed top-0 left-0 right-0 z-50 h-18 px-8 shadow-md rounded-none 
+      shadow-black/25 bg-background border-b border-border-strong"
     >
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+      <div className="flex items-center justify-between max-w-7xl mx-auto h-full">
         <Button
           variant="icon"
           aria-label="icon"
+          size="md"
           onClick={function () {
-            moveTo("/");
+            navigate("/");
           }}
         >
           <Stethoscope />
         </Button>
 
-        <div className="hidden md:flex items-center gap-12">
-          <nav className="space-x-18 font-semibold [&>a]:hover:text-accent [&>a]:transition-colors md:flex md:items-center">
+        <div className="hidden md:flex items-center gap-12 md:text-sm">
+          <nav
+            className="space-x-18 font-semibold [&>a]:hover:text-accent [&>a]:transition-colors 
+          md:flex md:items-center"
+          >
             {navLinks.map(function (navItem) {
-              return <NavigationItem key={navItem.label} {...navItem} />;
+              return <DesktopNavigationItem key={navItem.label} {...navItem} />;
             })}
           </nav>
 
@@ -174,10 +183,11 @@ function NavBar() {
           )}
         </div>
 
-        <div className="flex items-center gap-4 md:hidden">
+        <div className="flex items-center gap-6 md:hidden">
           <Button
-            className="italic text-sm"
+            className="italic "
             variant="icon"
+            size="md"
             onClick={function () {
               const ev = new KeyboardEvent("keydown", {
                 ctrlKey: true,
@@ -192,6 +202,7 @@ function NavBar() {
 
           <Button
             variant="icon"
+            size="md"
             className="md:hidden"
             onClick={function () {
               setShowMobileMenu(function (p) {

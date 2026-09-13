@@ -2,7 +2,6 @@ import Input from "@/components/ui/Input";
 import { useFormContext } from "react-hook-form";
 import { Stack } from "@/components/ui/Stack";
 import { type DoctorOnboarding } from "@/schemas";
-import { Facebook, Github } from "lucide-react";
 import Button from "@/components/ui/Button";
 
 export function Step4_Auth() {

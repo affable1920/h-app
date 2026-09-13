@@ -134,5 +134,5 @@ def invalid_token_handler(
             }
         },
         status_code=401,
-        headers=exc.context["headers"] or {}
+        headers=exc.context.get("headers") or {}
     )

@@ -37,7 +37,7 @@ const schema = z.object({
 
 function seedFromParams(searchParams: URLSearchParams): FilterState {
   function getNumberParam(key: FilterKey) {
-    return !!searchParams.get(key) ? Number(searchParams.get(key)) : null;
+    return searchParams.get(key) ? Number(searchParams.get(key)) : null;
   }
 
   const sortOrderParam = searchParams.get("sortOrder") ?? undefined;

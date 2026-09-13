@@ -1,6 +1,5 @@
 
-from datetime import datetime
-from sqlite3 import Time
+from datetime import datetime, time
 from statistics import mean
 from typing import Annotated
 
@@ -82,8 +81,11 @@ class DoctorHttpMinimal(FromORM, IDMixin, Aliased):
 class ClinicHttpMinimal(FromORM, IDMixin, Aliased):
     name: str
     location: str | None = None
-    reviews: list[Review] = Field(default=[], exclude=True)
-    facilities: list[str] = []
+    reviews: list[Review] = Field(
+        default_factory=list,
+        exclude=True
+    )
+    facilities: list[str] = Field(default_factory=list)
 
     @computed_field
     def rating(self) -> float:
@@ -98,18 +100,21 @@ class ClinicHttpMinimal(FromORM, IDMixin, Aliased):
 class ClinicHttpFull(ClinicHttpMinimal, Aliased):
     owner: str | None = None
     pincode: int | None = None
-    contacts: list[int] = []
+    contacts: list[int] = Field(default_factory=list)
 
 
 class Schedule(FromORM, IDMixin):
-    start_time: Time
-    end_time: Time
+    start_time: time
+    end_time: time
     is_active: bool
-    weekdays: list[int] = []
+    weekdays: list[int] = Field(default_factory=list)
     base_slot_duration: int | None = 20
     clinic_id: IDSerialized
     doctor_id: IDSerialized
     clinic: ClinicHttpMinimal | None = None
+    slots: list[Slot] = Field(
+        default_factory=list
+    )
 
 #
 
@@ -119,6 +124,10 @@ class DoctorHttpFull(DoctorHttpMinimal):
     gender: Gender
     consults_online: bool = False
     booking_enabled: bool = False
-    secondary_focus_areas: list[str] = []
+    secondary_focus_areas: list[str] = Field(
+        default_factory=list
+    )
     last_updated: datetime | None = None
-    schedules: list[Schedule] = []
+    schedules: list[Schedule] = Field(
+        default_factory=list
+    )

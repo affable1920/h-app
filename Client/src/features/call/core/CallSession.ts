@@ -29,7 +29,6 @@ import router from "@/components/router";
 export default class CallSession extends EventEmitter<CallSessionEvents> {
   private client: WebRTC;
   #state: CallSessionState = "idle";
-  #controller = new AbortController();
 
   private localStream: MediaStream | null = null;
   private remoteStream: MediaStream | null = null;

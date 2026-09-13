@@ -3,9 +3,9 @@ import { cn } from "./utils";
 
 const sizes: Record<Size, string> = {
   xs: "px-3 py-1 [&>svg]:size-2 text-xs",
-  sm: "px-4 py-2 [&>svg]:size-3 text-sm",
-  md: "px-6 py-3 [&>svg]:size-4",
-  lg: "px-8 py-4 [&>svg]:size-4 text-lg",
+  sm: "px-4 py-1.5 [&>svg]:size-3 text-sm",
+  md: "px-6 py-2.5 [&>svg]:size-4",
+  lg: "px-8 py-3.5 [&>svg]:size-4 text-lg",
 };
 
 const iconSizes: Record<Size, string> = {
@@ -56,7 +56,7 @@ export function getClassConfig({
   disabled,
   className,
 }: ButtonProps): string {
-  const base = `font-semibold select-none cursor-pointer transition-colors duration-200 capitalize inline-flex 
+  const base = `font-semibold select-none cursor-pointer transition-all duration-200 capitalize inline-flex 
   items-center justify-center rounded-md disabled:opacity-60 disabled:pointer-events-none gap-2 
   focus:outline-none`;
 

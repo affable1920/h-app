@@ -18,22 +18,19 @@ type StepProps = {
   onClear?: (msg?: string) => void;
 } & InputHTMLAttributes<HTMLInputElement>;
 
-const StepInput = forwardRef<HTMLInputElement, StepProps>(function (
-  {
-    label,
-    icon,
-    min = 0,
-    max,
-    step = 1,
-    onStepDown,
-    onStepUp,
-    error,
-    onChange,
-    onClear,
-    ...rest
-  },
-  ref,
-) {
+const StepInput = forwardRef<HTMLInputElement, StepProps>(function ({
+  label,
+  icon,
+  min = 0,
+  max,
+  step = 1,
+  onStepDown,
+  onStepUp,
+  error,
+  onChange,
+  onClear,
+  ...rest
+}) {
   const maxValue = Number(max);
   const stepValue = Number(step);
   const minValue = Number(min);

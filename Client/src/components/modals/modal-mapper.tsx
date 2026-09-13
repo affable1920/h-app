@@ -29,12 +29,12 @@ export type MapperProps = {
     context: unknown;
   };
   "confirmation-modal": ConfirmationProps;
-  "directory-filter-modal": {};
-  "doctor-profile-setup-modal": {};
+  "directory-filter-modal": object;
+  "doctor-profile-setup-modal": object;
   "picker-modal": {
-    items: Array<any>;
-    onSelect?: (item: any) => void;
-    selected?: any;
+    items: Array<unknown>;
+    onSelect?: (item: unknown) => void;
+    selected?: unknown;
   };
   "schedule-creater-modal": {
     doctor: Doctor;

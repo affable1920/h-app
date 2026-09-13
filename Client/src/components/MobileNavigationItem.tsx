@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { AnimatePresence, motion, type Variant } from "motion/react";
 import type { MobileNavItem } from "@/types/utils";
-import { useNavigate } from "react-router-dom";
 import { MobileNavVariants } from "@/utils/motion-variants";
 
 const tabChildrenVariants: Record<string, Variant> = {
@@ -22,35 +21,30 @@ const tabChildrenVariants: Record<string, Variant> = {
   },
 };
 
-const EMPTY = Object.create(null);
-
 function MobileNavigationItem({
   label,
   icon: Icon,
   children,
-  onClick,
+  onclick,
 }: MobileNavItem) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const hasChildren = !!children?.length;
-
-  function handleClick() {
-    hasChildren ? setIsExpanded.call(EMPTY, (p) => !p) : onClick?.();
-  }
-
-  const navigate = useNavigate();
-
-  function handleClickInside(this: MobileNavItem) {
-    this.onClick ? this.onClick() : navigate(this.route ?? "");
-  }
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <div key={label}>
       <motion.button
-        onClick={handleClick}
+        onClick={function () {
+          if (hasChildren) {
+            setIsExpanded((p) => !p);
+            return;
+          }
+
+          onclick?.();
+        }}
         className={`cursor-pointer flex items-center justify-between w-full font-semibold 
           capitalize hover:text-text-normal ${isExpanded ? "text-text" : ""}`}
       >
-        <span className="inline-flex items-center gap-2">
+        <span className="inline-flex items-center gap-2 m-0">
           <span className="md:hidden">
             <Icon size={14} />
           </span>
@@ -92,7 +86,7 @@ function MobileNavigationItem({
               <div className="mt-6 space-y-6">
                 {children?.map((child) => (
                   <motion.button
-                    onClick={handleClickInside.bind(child)}
+                    onClick={child.onclick}
                     variants={tabChildrenVariants}
                     className="capitalize cursor-pointer flex items-center gap-2 px-6 hover:bg-layout p-2 rounded-md 
                     hover:text-text w-full transition-colors duration-200"

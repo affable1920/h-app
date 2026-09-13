@@ -41,7 +41,7 @@ function SchedulesView() {
         <h2 className="text-lg">Dr. {doctor.name}</h2>
       </header>
 
-      {!!doctor.schedules.length ? (
+      {(doctor.schedules ?? []).length ? (
         <section className="flex flex-col md:flex-row gap-12 mt-10">
           <motion.section
             key={`${doctor.id}-schedule-view`}

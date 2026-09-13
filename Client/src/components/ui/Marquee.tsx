@@ -1,5 +1,5 @@
 import { motion, useAnimationControls } from "framer-motion";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 const items = [
   "🫀 Cardiology",
@@ -22,21 +22,31 @@ export function Marquee({ direction = "rtl", speed = 25 }: MarqueeProps) {
   const doubled = [...items, ...items];
   const controls = useAnimationControls();
 
-  function start() {
-    controls.start({
-      x: direction === "rtl" ? ["0%", "-50%"] : ["0%", "50%"],
+  const start = useCallback(
+    function start() {
+      controls.start({
+        x: direction === "rtl" ? ["0%", "-50%"] : ["0%", "50%"],
 
-      transition: {
-        duration: speed,
-        ease: "linear",
-        repeat: Infinity,
-      },
-    });
-  }
+        transition: {
+          duration: speed,
+          ease: "linear",
+          repeat: Infinity,
+        },
+      });
+    },
+    [controls, direction, speed],
+  );
 
-  useEffect(function () {
-    start();
-  }, []);
+  useEffect(
+    function () {
+      start();
+
+      return function () {
+        controls.stop();
+      };
+    },
+    [start, controls],
+  );
 
   return (
     <div

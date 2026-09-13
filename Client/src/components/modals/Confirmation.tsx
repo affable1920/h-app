@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Button from "../ui/Button";
 import { ChevronRight, X } from "lucide-react";
 import { removeModal } from "@/stores/modal-store";
@@ -12,6 +12,16 @@ function Confirmation({
   timeout = 3000,
 }: ConfirmationProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleReject = useMemo(
+    function () {
+      return function () {
+        onReject?.();
+        removeModal();
+      };
+    },
+    [onReject],
+  );
 
   useEffect(
     function () {
@@ -27,16 +37,11 @@ function Confirmation({
         }
       };
     },
-    [autoClose, timeout],
+    [autoClose, timeout, handleReject],
   );
 
   function handleResolve() {
     onResolve();
-    removeModal();
-  }
-
-  function handleReject() {
-    onReject?.();
     removeModal();
   }
 

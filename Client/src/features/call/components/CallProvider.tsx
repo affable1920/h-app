@@ -11,17 +11,29 @@ export function CallProvider({ children }: { children: ReactNode }) {
 
   const [session, setSession] = useState<CallSession | null>(null);
 
-  useEffect(function () {
-    console.log("creating a (Call Session) app-level singleton...");
+  useEffect(
+    function () {
+      console.log("creating a (Call Session) app-level singleton...");
 
-    if (!user || !token) {
-      console.log("Not authenticated, not creating the Call Session instance");
-      return;
-    }
+      if (!user || !token) {
+        console.log(
+          "Not authenticated, not creating the Call Session instance",
+        );
+        return;
+      }
 
-    signalingClient.connect(token);
-    setSession(new CallSession({ id: user.id, token }));
-  }, []);
+      signalingClient.connect(token);
+
+      const frame = requestAnimationFrame(function () {
+        setSession(new CallSession({ id: user.id, token }));
+      });
+
+      return function () {
+        cancelAnimationFrame(frame);
+      };
+    },
+    [user, token],
+  );
 
   useEffect(
     function () {
@@ -30,7 +42,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
       }
     },
 
-    [session],
+    [session, token, user],
   );
 
   return (

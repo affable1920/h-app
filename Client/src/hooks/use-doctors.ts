@@ -25,17 +25,19 @@ export const useDoctor = createQueryHook(
   (id: string) => api.get<GetByIdResponse>(id).then((res) => res.data),
 );
 
-export const useCreateDoctor = useSignup(
-  {
-    route: "doctor",
-    params: {
-      headers: {
-        "Content-Type": "multipart/form-data",
+export function useCreateDoctor() {
+  return useSignup(
+    {
+      route: "doctor",
+      params: {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       },
     },
-  },
-  () => [doctorKeys.lists()],
-);
+    () => [doctorKeys.lists()],
+  );
+}
 
 export const useUpdateDoctor = createMutationHook(
   <K extends string>({

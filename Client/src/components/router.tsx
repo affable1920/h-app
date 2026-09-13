@@ -167,7 +167,7 @@ const router = createBrowserRouter([
                 ...DrProfileRoute,
               },
               {
-                Component: PatientProfile,
+                element: <PatientProfile />,
               },
             ],
           },

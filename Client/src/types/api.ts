@@ -403,6 +403,8 @@ export interface components {
              */
             createdAt: string;
             status: components["schemas"]["AppointmentStatus"];
+            /** Carejourneyid */
+            careJourneyId?: string | null;
         };
         /** AppointmentResponse */
         AppointmentResponse: {
@@ -424,6 +426,8 @@ export interface components {
              */
             createdAt: string;
             status: components["schemas"]["AppointmentStatus"];
+            /** Carejourneyid */
+            careJourneyId?: string | null;
             /** Clinicid */
             clinicId: string;
             /** Doctorid */
@@ -532,20 +536,14 @@ export interface components {
             name: string;
             /** Location */
             location?: string | null;
-            /**
-             * Facilities
-             * @default []
-             */
-            facilities: string[];
+            /** Facilities */
+            facilities?: string[];
             /** Owner */
             owner?: string | null;
             /** Pincode */
             pincode?: number | null;
-            /**
-             * Contacts
-             * @default []
-             */
-            contacts: number[];
+            /** Contacts */
+            contacts?: number[];
             /** Rating */
             readonly rating: number;
             /** Reviewcount */
@@ -562,11 +560,8 @@ export interface components {
             name: string;
             /** Location */
             location?: string | null;
-            /**
-             * Facilities
-             * @default []
-             */
-            facilities: string[];
+            /** Facilities */
+            facilities?: string[];
             /** Rating */
             readonly rating: number;
             /** Reviewcount */
@@ -652,18 +647,12 @@ export interface components {
              * @default false
              */
             bookingEnabled: boolean;
-            /**
-             * Secondaryfocusareas
-             * @default []
-             */
-            secondaryFocusAreas: string[];
+            /** Secondaryfocusareas */
+            secondaryFocusAreas?: string[];
             /** Lastupdated */
             lastUpdated?: string | null;
-            /**
-             * Schedules
-             * @default []
-             */
-            schedules: components["schemas"]["Schedule"][];
+            /** Schedules */
+            schedules?: components["schemas"]["Schedule"][];
             /** Reviewcount */
             readonly reviewCount: number;
             /** Rating */
@@ -740,18 +729,12 @@ export interface components {
              * @default false
              */
             bookingEnabled: boolean;
-            /**
-             * Secondaryfocusareas
-             * @default []
-             */
-            secondaryFocusAreas: string[];
+            /** Secondaryfocusareas */
+            secondaryFocusAreas?: string[];
             /** Lastupdated */
             lastUpdated?: string | null;
-            /**
-             * Schedules
-             * @default []
-             */
-            schedules: components["schemas"]["Schedule"][];
+            /** Schedules */
+            schedules?: components["schemas"]["Schedule"][];
             /** Collegestudied */
             collegeStudied?: string | null;
             /** Graduationyear */
@@ -851,11 +834,8 @@ export interface components {
             email: string;
             /** Username */
             username?: string | null;
-            /**
-             * Appointments
-             * @default []
-             */
-            appointments: components["schemas"]["AppointmentResponse"][];
+            /** Appointments */
+            appointments?: components["schemas"]["AppointmentResponse"][];
         };
         /**
          * Role
@@ -881,11 +861,8 @@ export interface components {
             end_time: string;
             /** Is Active */
             is_active: boolean;
-            /**
-             * Weekdays
-             * @default []
-             */
-            weekdays: number[];
+            /** Weekdays */
+            weekdays?: number[];
             /**
              * Base Slot Duration
              * @default 20
@@ -897,7 +874,7 @@ export interface components {
             doctor_id: string;
             clinic?: components["schemas"]["ClinicHttpMinimal"] | null;
             /** Slots */
-            slots: components["schemas"]["Slot"][];
+            slots?: components["schemas"]["Slot"][];
         };
         /** ScheduleResponse */
         ScheduleResponse: {

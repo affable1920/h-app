@@ -54,9 +54,6 @@ async def book(
         )
 
     mail = f"""
-        Subject: Appointment Confirmation!
-
-
         Hi {pt.username},
 
         Your appointment with Dr {created.doctor.name} is succesffuly scheduled at {created.clinic.name}
@@ -69,7 +66,7 @@ async def book(
     background_tasks.add_task(
         lambda: MailService.send_mail(
             recipient=pt.email,
-            body=mail
+            body=("Appointment Confirmation!", mail)
         )
     )
 
@@ -94,6 +91,9 @@ async def cancel_booking(
     background_tasks.add_task(
         lambda: MailService.send_mail(
             recipient=user.email,
-            body="Your appointment has been cancelled."
+            body=(
+                "Appointment Cancellation.",
+                "Your appointment was sucessfully cancelled !"
+            )
         )
     )

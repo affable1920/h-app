@@ -15,6 +15,7 @@ import useModalStore from "@/stores/modal-store";
 import { toast } from "sonner";
 import type { APIError, ProfileResponse } from "@/types/http";
 import { logout } from "@/stores/auth-store";
+import { PageLayout } from "../PageLayout";
 
 const personal = {
   fields: ["username"] as const,
@@ -74,224 +75,227 @@ export function PatientProfile() {
 
   return (
     <ProfileShell isError={isError} isPending={isLoading}>
-      <Stack justify="end" align="center" orientation="V">
-        <Button
-          onMouseEnter={function () {
-            setShowSettings(true);
-          }}
-          onMouseLeave={setTimer}
-          bg={true}
-          color="secondary"
-          variant="icon"
-        >
-          <Settings />
-        </Button>
-
-        {showSettings && (
+      <PageLayout>
+        <Stack justify="end" align="center" orientation="V">
           <Button
-            className="absolute"
             onMouseEnter={function () {
-              if (timerRef.current) {
-                clearTimeout(timerRef.current);
-                timerRef.current = null;
-              }
               setShowSettings(true);
             }}
             onMouseLeave={setTimer}
-            onClick={function () {
-              openModal("confirmation-modal", {
-                onResolve() {
-                  remove(profile?.id as string, {
-                    onSuccess() {
-                      toast("You account was successfully deleted !", {
-                        description() {
-                          return "logging out ...";
-                        },
-                      });
-                      logout("/");
-                    },
-                    onError(ex) {
-                      console.log(ex);
-                      toast.error("Account deletion failed !");
-                    },
-                    onSettled() {
-                      closeModal();
-                    },
-                  });
-                },
-                tagline: (
-                  <>
-                    Are you sure you want to delete your account ?<br />
-                    This action can not be undone!
-                  </>
-                ),
-              });
-            }}
+            bg={true}
+            color="secondary"
+            variant="icon"
           >
-            Delete account <Delete />
+            <Settings />
           </Button>
-        )}
-      </Stack>
 
-      <section className="space-y-6 mt-6">
-        {sections.map(function (section) {
-          return section.markup(profile!);
-        })}
-
-        <Divider />
-
-        <section className="space-y-4">
-          <header>
-            <h2 className="italic text-text-secondary">Patient Profile</h2>
-          </header>
-
-          {!!(profile?.appointments ?? []).length && (
-            <motion.button
-              animate={{ color: show ? "var(--color-text-normal)" : "" }}
-              className="cursor-pointer flex items-center gap-2 text-text-secondary 
-              hover:text-text-normal transition-colors duration-200"
+          {showSettings && (
+            <Button
+              className="absolute"
+              onMouseEnter={function () {
+                if (timerRef.current) {
+                  clearTimeout(timerRef.current);
+                  timerRef.current = null;
+                }
+                setShowSettings(true);
+              }}
+              onMouseLeave={setTimer}
               onClick={function () {
-                setShow(function (p) {
-                  return !p;
+                openModal("confirmation-modal", {
+                  onResolve() {
+                    remove(profile?.id as string, {
+                      onSuccess() {
+                        toast("You account was successfully deleted !", {
+                          description() {
+                            return "logging out ...";
+                          },
+                        });
+                        logout("/");
+                      },
+                      onError(ex) {
+                        console.log(ex);
+                        toast.error("Account deletion failed !");
+                      },
+                      onSettled() {
+                        closeModal();
+                      },
+                    });
+                  },
+                  tagline: (
+                    <>
+                      Are you sure you want to delete your account ?<br />
+                      This action can not be undone!
+                    </>
+                  ),
                 });
               }}
             >
-              Your Appointments
-              <motion.i
-                animate={{
-                  rotate: show ? 90 : 0,
-                  transition: {
-                    duration: 0.125,
-                    ease: "circOut",
-                  },
+              Delete account <Delete />
+            </Button>
+          )}
+        </Stack>
+
+        <section className="space-y-6 mt-6">
+          {sections.map(function (section) {
+            return section.markup(profile!);
+          })}
+
+          <Divider />
+
+          <section className="space-y-4">
+            <header>
+              <h2 className="italic text-text-secondary">Patient Profile</h2>
+            </header>
+
+            {!!(profile?.appointments ?? []).length && (
+              <motion.button
+                animate={{ color: show ? "var(--color-text-normal)" : "" }}
+                className="cursor-pointer flex items-center gap-2 text-text-secondary 
+              hover:text-text-normal transition-colors duration-200"
+                onClick={function () {
+                  setShow(function (p) {
+                    return !p;
+                  });
                 }}
               >
-                <ChevronRight strokeWidth={4} size={10} />
-              </motion.i>
-            </motion.button>
-          )}
+                Your Appointments
+                <motion.i
+                  animate={{
+                    rotate: show ? 90 : 0,
+                    transition: {
+                      duration: 0.125,
+                      ease: "circOut",
+                    },
+                  }}
+                >
+                  <ChevronRight strokeWidth={4} size={10} />
+                </motion.i>
+              </motion.button>
+            )}
 
-          <AnimatePresence>
-            {show && (
-              <motion.section
-                variants={createStagger({ exitDelay: true }).parent}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="flex flex-col gap-6 py-6"
-              >
-                {profile?.appointments
-                  .sort(function (a) {
-                    return a.status === "active" ? -1 : 1;
-                  })
-                  .map(function (appointment) {
-                    return (
-                      <motion.div
-                        key={appointment.id}
-                        className="flex flex-col justify-between bg-layout p-4 rounded-lg shadow-black/20 shadow-md border-2 border-border"
-                        variants={createStagger().children}
-                      >
-                        <Stack style={{ gap: "4px" }} orientation="V">
-                          <Stack justify="between">
-                            <Link
-                              to={`/view/doctor/${appointment.doctorId}`}
-                              className="text-text-normal hover:text-blue-400 transition-colors
+            <AnimatePresence>
+              {show && (
+                <motion.section
+                  variants={createStagger({ exitDelay: true }).parent}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="flex flex-col gap-6 py-6"
+                >
+                  {profile?.appointments
+                    .sort(function (a) {
+                      return a.status === "active" ? -1 : 1;
+                    })
+                    .map(function (appointment) {
+                      return (
+                        <motion.div
+                          key={appointment.id}
+                          className="flex flex-col justify-between bg-layout p-4 pt-2 rounded-lg 
+                          shadow-black/20 shadow-md border-2 border-border"
+                          variants={createStagger().children}
+                        >
+                          <Stack style={{ gap: "4px" }} orientation="V">
+                            <Stack justify="between">
+                              <Link
+                                to={`/view/doctor/${appointment.doctorId}`}
+                                className="text-text-normal hover:text-blue-400 transition-colors
                                 duration-150"
-                            >
-                              Dr. {appointment.doctor.name}
-                            </Link>
+                              >
+                                Dr. {appointment.doctor.name}
+                              </Link>
 
-                            <p className="text-sm">
-                              {fromISO(appointment.scheduledDate).toFormat(
-                                "dd LLL yyyy",
-                              )}
-                            </p>
+                              <p className="text-sm">
+                                {fromISO(appointment.scheduledDate).toFormat(
+                                  "dd LLL yyyy",
+                                )}
+                              </p>
+                            </Stack>
+
+                            <Link to={`/view/clinic/${appointment.clinicId}`}>
+                              {appointment.clinic.name}
+                            </Link>
                           </Stack>
 
-                          <Link to={`/view/clinic/${appointment.clinicId}`}>
-                            {appointment.clinic.name}
-                          </Link>
-                        </Stack>
-
-                        <div className="flex self-end gap-1">
-                          <Badge
-                            className="capitalize font-semibold scale-90 cursor-default!"
-                            color={
-                              appointment.status === "active"
-                                ? "indicator"
-                                : "secondary"
-                            }
-                            disabled={appointment.status !== "active"}
-                          >
-                            {appointment.status}
-                          </Badge>
-
-                          {appointment.status === "active" && (
-                            <Button
-                              loading={isPending}
-                              onClick={function () {
-                                openModal("confirmation-modal", {
-                                  tagline: (
-                                    <span>
-                                      <p className="leading-1.2 mb-3">
-                                        Are you sure you want to cancel your
-                                        appointment ?
-                                      </p>
-                                      <Badge
-                                        color="danger"
-                                        style={{
-                                          fontWeight: 800,
-                                          color: "white",
-                                          fontFamily: "monospace",
-                                        }}
-                                      >
-                                        This step can not be undone !
-                                      </Badge>
-                                    </span>
-                                  ),
-                                  onResolve: async function () {
-                                    unBook(
-                                      {
-                                        appointmentId: appointment.id,
-                                        doctorId: appointment.doctorId,
-                                      },
-                                      {
-                                        onSuccess() {
-                                          toast.message(
-                                            "Appointment successfully cancelled.",
-                                          );
-                                          closeModal();
-                                        },
-                                        onError(error) {
-                                          const resolved =
-                                            error as unknown as APIError;
-
-                                          toast(resolved.code, {
-                                            description() {
-                                              return resolved.message;
-                                            },
-                                          });
-                                        },
-                                      },
-                                    );
-                                  },
-                                  reject: closeModal,
-                                });
-                              }}
-                              color="brand"
+                          <div className="flex self-end gap-1">
+                            <Badge
+                              className="capitalize font-semibold scale-90 cursor-default!"
+                              color={
+                                appointment.status === "active"
+                                  ? "indicator"
+                                  : "secondary"
+                              }
+                              disabled={appointment.status !== "active"}
                             >
-                              Cancel
-                            </Button>
-                          )}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-              </motion.section>
-            )}
-          </AnimatePresence>
+                              {appointment.status}
+                            </Badge>
+
+                            {appointment.status === "active" && (
+                              <Button
+                                loading={isPending}
+                                onClick={function () {
+                                  openModal("confirmation-modal", {
+                                    tagline: (
+                                      <span>
+                                        <p className="leading-1.2 mb-3">
+                                          Are you sure you want to cancel your
+                                          appointment ?
+                                        </p>
+                                        <Badge
+                                          color="danger"
+                                          style={{
+                                            fontWeight: 800,
+                                            color: "white",
+                                            fontFamily: "monospace",
+                                          }}
+                                        >
+                                          This step can not be undone !
+                                        </Badge>
+                                      </span>
+                                    ),
+                                    onResolve: async function () {
+                                      unBook(
+                                        {
+                                          appointmentId: appointment.id,
+                                          doctorId: appointment.doctorId,
+                                        },
+                                        {
+                                          onSuccess() {
+                                            toast.message(
+                                              "Appointment successfully cancelled.",
+                                            );
+                                            closeModal();
+                                          },
+                                          onError(error) {
+                                            const resolved =
+                                              error as unknown as APIError;
+
+                                            toast(resolved.code, {
+                                              description() {
+                                                return resolved.message;
+                                              },
+                                            });
+                                          },
+                                        },
+                                      );
+                                    },
+                                    reject: closeModal,
+                                  });
+                                }}
+                                color="brand"
+                              >
+                                Cancel
+                              </Button>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                </motion.section>
+              )}
+            </AnimatePresence>
+          </section>
         </section>
-      </section>
+      </PageLayout>
     </ProfileShell>
   );
 }

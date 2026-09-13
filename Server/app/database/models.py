@@ -10,6 +10,7 @@ from app.database.entry_async import Base
 from app.schemas.enums import AppointmentStatus, Gender, Mode, ReviewableEntity, Status, UserRoleV2
 
 PrimaryKey = Annotated[UUID, mapped_column(
+    sa.UUID(as_uuid=True),
     primary_key=True,
     server_default=sa.text("gen_random_uuid()")
 )]
@@ -290,9 +291,10 @@ class Appointment(TimeStampMixin, Base):
     clinic_id: Mapped[UUID] = mapped_column(sa.ForeignKey("clinic.id"))
     clinic: Mapped["Clinic"] = relationship()
 
-    """
-    Add consultation link, a sql text type for online consultations later
-    """
+    care_journey_id: Mapped[sa.UUID | None] = mapped_column(
+        sa.ForeignKey("care_journey.id")
+    )
+    care_journey: Mapped["CareJourney | None"] = relationship()
 
     __table_args__ = (
         sa.Index(
@@ -361,4 +363,17 @@ class EmailVerificationToken(Base):
     used_at: Mapped[Optional[datetime]] = mapped_column(
         sa.DateTime(timezone=True),
         nullable=True
+    )
+
+
+class CareJourney(
+    TimeStampMixin,
+    Base
+):
+    __tablename__ = "care_journey"
+
+    id: Mapped[PrimaryKey]
+    patient_id: Mapped[sa.UUID] = mapped_column(
+        sa.ForeignKey("patient.id"),
+        nullable=False
     )

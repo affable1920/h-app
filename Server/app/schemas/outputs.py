@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime
 from typing import Generic, Literal, Self, Sequence, TypeVar
 from pydantic import (
     ConfigDict,
@@ -12,16 +12,20 @@ from app.schemas.models import ClinicHttpMinimal, DoctorHttpFull, Slot, DoctorHt
 
 
 class AppointmentConfirmation(
-    FromORM, IDMixin, Aliased
+    FromORM,
+    IDMixin,
+    Aliased
 ):
     patient_id: IDSerialized
     scheduled_date: datetime
     created_at: datetime
     status: AppointmentStatus
+    care_journey_id: IDSerialized | None = None
 
 
 class AppointmentResponse(
-    AppointmentConfirmation, Aliased
+    AppointmentConfirmation,
+    Aliased
 ):
     clinic_id: IDSerialized
     doctor_id: IDSerialized

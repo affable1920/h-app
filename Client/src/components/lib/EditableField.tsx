@@ -9,7 +9,7 @@ interface EditableFieldProps {
   name: string;
 }
 
-export const EditableField = memo(function EditableField({
+export const EditableField = memo(function ({
   name,
   initialValue,
   onSave,
@@ -144,3 +144,5 @@ export const EditableField = memo(function EditableField({
     </Stack>
   );
 });
+
+EditableField.displayName = "EditableField";

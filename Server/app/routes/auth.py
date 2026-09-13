@@ -6,7 +6,6 @@ from fastapi import APIRouter, BackgroundTasks, Body, Depends, HTTPException, Qu
 from app.features.auth.dependencies import get_current_user, require_patient
 from app.features.auth.service import AuthService
 
-from app.services import MailService
 from app.core.exceptions import AlreadyInUseException, EntityNotFoundException
 
 from app.database.models import Doctor, Patient
@@ -30,10 +29,14 @@ router = APIRouter(prefix="/auth")
 logger = logging.getLogger(__name__)
 
 
-@router.post("/register/patient", response_model=PatientProfileResponse)
+@router.post(
+    "/register/patient",
+    response_model=PatientProfileResponse
+)
 async def register_pt(
     user: PatientCreate,
     response: Response,
+    background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_db)
 ):
     try:
@@ -51,6 +54,13 @@ async def register_pt(
                 "message": "The email is already registered with another acoount.",
             }
         )
+
+    background_tasks.add_task(
+        lambda: AuthService.ask_for_verify(
+            session=session,
+            user=created,
+        )
+    )
 
     response.headers["x-auth-token"] = token
     return UserResponse.model_validate(created)
@@ -89,7 +99,6 @@ async def register_dr(
         )
 
     except AlreadyInUseException as e:
-        logger.exception(e)
         raise HTTPException(
             409,
             detail={
@@ -98,16 +107,14 @@ async def register_dr(
             }
         )
 
-    response.headers["x-auth-token"] = token
     background_tasks.add_task(
-        lambda: MailService.send_mail(
-            recipient=created.email,
-            msg=(
-                f"You account has been sucessfully created."
-                f"Welcome Onboard Dr {created.name} "
-            )
+        lambda: AuthService.ask_for_verify(
+            session=session,
+            user=created,
         )
     )
+
+    response.headers["x-auth-token"] = token
     return UserResponse.model_validate(created)
 
 #
@@ -171,7 +178,7 @@ async def remove_account(
     return "Account deleted sucessfully"
 
 
-ALLOWED_FIELDS = {"name", "email", "phone"}
+ALLOWED_FIELDS = {"name", "phone", "email"}
 
 
 @router.put("/edit")
@@ -179,7 +186,9 @@ async def edit(
     nw: str = Body(embed=True),
     q: str = Query(),
     session: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user: Doctor | Patient = Depends(
+        get_current_user
+    )
 ):
     if q not in ALLOWED_FIELDS:
         raise HTTPException(
@@ -190,7 +199,52 @@ async def edit(
             }
         )
 
+    if q == "email" and current_user.email_verified:
+        raise HTTPException(
+            409,
+            detail={
+                "code": "unauthorized_error",
+                "message": "You cannot change your email address as your email is already verified."
+            }
+        )
+
     setattr(current_user, q, nw)
 
     await session.commit()
     await session.refresh(current_user)
+
+
+#
+
+@router.post("/request-email-verify")
+async def request(
+    session: AsyncSession = Depends(get_db),
+    current_user: Doctor | Patient = Depends(
+        get_current_user
+    )
+):
+    if current_user.email_verified:
+        return "Your email is already verified."
+
+    await AuthService.ask_for_verify(
+        session=session,
+        user=current_user
+    )
+
+    return (
+        "An email containing a verification link has been sent to you email address"
+        "Please click on the link to verify your email."
+        "The link expires after 5 minutes.."
+    )
+
+
+# The verification endpoint
+@router.get("/verify-email")
+async def email_verification(
+    token: str = Query(...),
+    session: AsyncSession = Depends(get_db),
+):
+    await AuthService.verify_email(
+        session=session,
+        link=token
+    )

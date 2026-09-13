@@ -7,10 +7,11 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from app.database.entry_async import Base
-from app.schemas.enums import AppointmentStatus, Gender, Mode, ReviewableEntity, Status
+from app.schemas.enums import AppointmentStatus, Gender, Mode, ReviewableEntity, Status, UserRoleV2
 
 PrimaryKey = Annotated[UUID, mapped_column(
-    primary_key=True, server_default=sa.text("gen_random_uuid()")
+    primary_key=True,
+    server_default=sa.text("gen_random_uuid()")
 )]
 
 
@@ -90,6 +91,7 @@ class Patient(TimeStampMixin, Base):
     username: Mapped[str] = mapped_column(nullable=False)
     hash: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(unique=True, nullable=False, index=True)
+    email_verified: Mapped[Optional[bool]] = mapped_column()
 
     appointments: Mapped[list["Appointment"]] = relationship(
         back_populates="patient",
@@ -117,6 +119,7 @@ class Doctor(RatingMixin, TimeStampMixin, Base):
 
     phone: Mapped[Optional[str]] = mapped_column(sa.String(length=10))
     image: Mapped[Optional[str]] = mapped_column(sa.Text)
+    email_verified: Mapped[Optional[bool]] = mapped_column()
 
     experience: Mapped[Optional[int]] = mapped_column()
     verified: Mapped[bool] = mapped_column(server_default="False")
@@ -320,4 +323,42 @@ class Review(TimeStampMixin, Base):
         sa.Index(
             "ix_review_entity_entity_id", "entity", "entity_id"
         )
+    )
+
+
+class EmailVerificationToken(Base):
+    __tablename__ = "email_verification_token"
+
+    id: Mapped[PrimaryKey] = mapped_column()
+    user_id: Mapped[UUID] = mapped_column(
+        nullable=False,
+        index=True
+    )
+
+    user_role: Mapped[UserRoleV2] = mapped_column(
+        sa.Enum(
+            UserRoleV2,
+            name="user_role",
+        ),
+        nullable=False,
+    )
+
+    hash: Mapped[str] = mapped_column(
+        nullable=False,
+        unique=True
+    )
+
+    exp: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
+        nullable=False
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
+        server_default=sa.func.now()
+    )
+
+    used_at: Mapped[Optional[datetime]] = mapped_column(
+        sa.DateTime(timezone=True),
+        nullable=True
     )

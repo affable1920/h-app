@@ -1,3 +1,5 @@
+import hashlib
+
 import jwt
 
 from passlib.context import CryptContext
@@ -83,3 +85,7 @@ def decode_access_token(token: str) -> AuthHdrPayload:
         raise InvalidTokenError()
 
 #
+
+
+def hash_verification_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()

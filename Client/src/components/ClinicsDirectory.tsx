@@ -1,21 +1,24 @@
-import { useGetAll } from "@/hooks/use-clinics";
-
+import { useGetClinics } from "@/hooks/use-clinics";
 import CardFlippable from "./lib/CardFlippable";
 import Spinner from "./ui/Spinner";
 import Ratings from "./Ratings";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useOutletContext, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { Stack } from "./ui/Stack";
 import Button from "./ui/Button";
+import { keepPreviousData } from "@tanstack/react-query";
 
 function ClinicsDirectory() {
   const setHasNext = useOutletContext<(hasNext: boolean) => void>();
+  const [params] = useSearchParams();
 
   const {
     data: { entities: clinics = [], hasNext = false } = {},
     isFetching,
     isError,
-  } = useGetAll();
+  } = useGetClinics(Object.fromEntries(params.entries()), {
+    placeholderData: keepPreviousData,
+  });
 
   useEffect(
     function () {

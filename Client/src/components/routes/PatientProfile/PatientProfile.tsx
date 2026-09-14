@@ -10,7 +10,7 @@ import Divider from "../../ui/Divider";
 import { fromISO } from "@/utils/utils";
 import Badge from "../../ui/Badge";
 import { Link } from "react-router-dom";
-import { useUnbookingMutation } from "@/features/booking/use-booking";
+import { useCancelBooking } from "@/features/booking/use-booking";
 import useModalStore from "@/stores/modal-store";
 import { toast } from "sonner";
 import type { APIError, ProfileResponse } from "@/types/http";
@@ -63,9 +63,10 @@ export function PatientProfile() {
     isError,
     isLoading,
   } = useFetchProfile<"patient">("patient");
-  const { mutateAsync: unBook, isPending } = useUnbookingMutation();
 
-  const { mutate: remove } = useDeleteAccount();
+  const { mutateAsync: cancelBooking, isPending: cancellingIsPending } =
+    useCancelBooking();
+  const { mutate: removeAccount } = useDeleteAccount();
 
   const setTimer = useCallback(function () {
     timerRef.current = setTimeout(function () {
@@ -103,7 +104,7 @@ export function PatientProfile() {
               onClick={function () {
                 openModal("confirmation-modal", {
                   onResolve() {
-                    remove(profile?.id as string, {
+                    removeAccount(profile?.id as string, {
                       onSuccess() {
                         toast("You account was successfully deleted !", {
                           description() {
@@ -257,7 +258,7 @@ export function PatientProfile() {
 
                               {appointment.status === "active" && (
                                 <Button
-                                  loading={isPending}
+                                  loading={cancellingIsPending}
                                   onClick={function () {
                                     openModal("confirmation-modal", {
                                       tagline: (
@@ -279,7 +280,7 @@ export function PatientProfile() {
                                         </span>
                                       ),
                                       onResolve: async function () {
-                                        unBook(
+                                        cancelBooking(
                                           {
                                             appointmentId: appointment.id,
                                             doctorId: appointment.doctorId,

@@ -1,8 +1,8 @@
 import Button from "@/components/ui/Button";
 import type { APIError, Clinic, Doctor, Slot } from "@/types/http";
 import {
-  useBookingMutation,
-  useUnbookingMutation,
+  useCancelBooking,
+  useCreateBooking,
 } from "@/features/booking/use-booking";
 import { toast } from "sonner";
 import useModalStore from "@/stores/modal-store";
@@ -36,8 +36,8 @@ function ScheduleModal({
   const closeModal = useModalStore((s) => s.closeModal);
   const reasonRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const book = useBookingMutation();
-  const cancelBooking = useUnbookingMutation();
+  const { mutateAsync: book, isPending: bookingIsPending } = useCreateBooking();
+  const { mutate: cancelBooking } = useCancelBooking();
 
   async function confirmSlot(ev: SubmitEvent<HTMLFormElement>) {
     ev.preventDefault();
@@ -57,55 +57,42 @@ function ScheduleModal({
         typeof reason === "string" && reason.trim() ? reason.trim() : undefined,
     };
 
-    const createdAppointment = await book.mutateAsync(payload, {
-      onSuccess() {
-        toast.info("Slot booked successfully !", {
-          action: {
-            label: "Undo",
-            onClick() {
-              cancelBooking.mutate(
-                {
-                  appointmentId: createdAppointment.id,
-                  doctorId: doctor.id,
+    try {
+      const model = await book(payload);
+
+      toast.info("Slot booked sucessfully!", {
+        duration: 4000,
+        closeButton: true,
+        action: {
+          label: "Undo",
+          onClick() {
+            cancelBooking(
+              {
+                appointmentId: model.id,
+                doctorId: doctor.id,
+              },
+              {
+                onSuccess() {
+                  toast.info("Your slot was sucessfully cancelled!");
                 },
-                {
-                  onSuccess() {
-                    toast("Appointment cancelled!");
-                  },
-                  onError() {
-                    toast.info("Your appointment could not be cancelled.", {
-                      description() {
-                        return "Please try after sometime.";
-                      },
-                    });
-                  },
+                onError() {
+                  toast.info("Your slot could not be cancelled!", {
+                    description: "Please try after sometime.",
+                  });
                 },
-              );
-            },
+              },
+            );
           },
+        },
+      });
 
-          duration: 4000,
-          closeButton: true,
-        });
-
-        if (onSuccess) {
-          onSuccess();
-        }
-
-        closeModal();
-      },
-
-      onError(error) {
-        const resolved = error as unknown as APIError;
-
-        toast.error(resolved.code, {
-          description() {
-            return resolved.message;
-          },
-          duration: 4000,
-        });
-      },
-    });
+      onSuccess?.();
+    } catch (exc) {
+      const ex = exc as unknown as APIError;
+      toast.error(ex.code, {
+        description: ex.message,
+      });
+    }
   }
 
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -180,12 +167,16 @@ function ScheduleModal({
                     cancel
                   </Button>
 
-                  <Button type="submit" color="white" loading={book.isPending}>
+                  <Button
+                    type="submit"
+                    color="white"
+                    loading={bookingIsPending}
+                  >
                     Book
                   </Button>
                 </Stack>
 
-                <Badge disabled={book.isPending} rounded="md" color="brand">
+                <Badge disabled={bookingIsPending} rounded="md" color="brand">
                   Review or Edit
                 </Badge>
               </Stack>

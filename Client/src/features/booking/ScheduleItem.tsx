@@ -59,7 +59,7 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
   useEffect(
     function () {
       const frame = requestAnimationFrame(function () {
-        if (schedule.weekdays.includes(dtParam?.weekday)) {
+        if ((schedule.weekdays ?? []).includes(dtParam?.weekday)) {
           setIsExpanded(true);
         }
       });

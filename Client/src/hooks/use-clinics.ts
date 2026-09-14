@@ -1,38 +1,23 @@
 import APIClient from "@/core/ApiClient";
 import type { Clinic, GetAllClinicsResponse } from "@/types/http";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { createQueryHook } from "./use-http";
+import { clinicKeys, type ClinicFilters } from "./keys";
 
 const api = new APIClient("/clinics");
 
-export function useGetAll() {
-  const [params] = useSearchParams();
-  const queryParams = Object.fromEntries(params.entries());
+export const useGetClinics = createQueryHook(
+  (params: ClinicFilters) => clinicKeys.list(params),
+  (params) =>
+    api
+      .get<GetAllClinicsResponse>(undefined, {
+        params: {
+          ...params,
+        },
+      })
+      .then((res) => res.data),
+);
 
-  const route = useLocation().pathname.split("/").at(-1) ?? "clinics";
-
-  return useQuery({
-    queryKey: ["clinics", { ...queryParams }],
-    async queryFn() {
-      const response = await api.get<GetAllClinicsResponse>(undefined, {
-        params: { ...queryParams },
-      });
-
-      return response.data;
-    },
-
-    placeholderData: keepPreviousData,
-    enabled: route === "clinics",
-    staleTime: 30 * 60 * 1000,
-  });
-}
-
-export function useGetById(id: string) {
-  return useQuery({
-    queryKey: ["clinic", id],
-    async queryFn() {
-      const response = await api.get<Clinic>(id);
-      return response.data;
-    },
-  });
-}
+export const useGetClinic = createQueryHook(
+  (vars) => clinicKeys.detail(vars.id),
+  (vars: { id: string }) => api.get<Clinic>(vars.id).then((res) => res.data),
+);

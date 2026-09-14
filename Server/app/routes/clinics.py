@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("", response_model=PaginatedResponse[ClinicHttpMinimal])
-async def get_all(
+async def get_clinics(
     pagination_params: PaginationParams = Depends(),
     filter_params: ClinicRouteFilters = Depends(),
     session: AsyncSession = Depends(get_db),
@@ -39,7 +39,7 @@ async def get_all(
 
 
 @router.get("/{id}", response_model=Optional[ClinicHttpFull])
-async def get_one(
+async def get_clinic(
     id: str,
     session: AsyncSession = Depends(get_db)
 ):

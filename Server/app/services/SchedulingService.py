@@ -16,7 +16,9 @@ logger = logging.getLogger(__name__)
 
 class ScheduleService:
     @staticmethod
-    def get_datetime_from_wkday(wkday: int = Field(ge=0, le=7)) -> datetime:
+    def get_datetime_from_wkday(
+        wkday: int = Field(ge=0, le=7)
+    ) -> datetime:
         today = datetime.today()
 
         """
@@ -50,7 +52,8 @@ class ScheduleService:
         duration: int, dt: datetime,
         start_time: time, end_time: time,
         schedule_id: str,
-        max_count: int | None = None, allow_online_mode: bool = False
+        max_count: int | None = None,
+        allow_online_mode: bool = False
     ):
         """
         This staticmethod is responsible for generating schedules for a single date.

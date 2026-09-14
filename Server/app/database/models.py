@@ -115,7 +115,11 @@ class Doctor(RatingMixin, TimeStampMixin, Base):
     id: Mapped[PrimaryKey]
 
     name: Mapped[str] = mapped_column(index=True, nullable=False)
-    email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
+    email: Mapped[str] = mapped_column(
+        unique=True,
+        index=True,
+        nullable=False
+    )
     hash: Mapped[str] = mapped_column(nullable=False)
 
     phone: Mapped[Optional[str]] = mapped_column(sa.String(length=10))

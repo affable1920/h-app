@@ -2,20 +2,28 @@
 from datetime import datetime, time
 from statistics import mean
 from typing import Annotated
+from uuid import UUID
 
-from pydantic import ConfigDict, EmailStr, Field, computed_field
+from pydantic import ConfigDict, Field, computed_field
 
-from app.schemas.Base import Aliased, FromORM, IDMixin, IDSerialized
-from app.schemas.enums import Gender, Mode, ReviewableEntity, Status, UserRoleV2
+from app.schemas.types import Email
+from app.schemas.Base import Aliased, FromORM, IDMixin
+from app.schemas.enums import (
+    Gender,
+    Mode,
+    ReviewableEntity,
+    Status,
+    UserRoleV2
+)
 
 
 class Review(IDMixin, FromORM):
     rating: float = Field(le=5.0)
     comment: str | None = None
     entity: ReviewableEntity
-    entity_id: IDSerialized
+    entity_id: UUID
     appointment_id: str | None = None
-    patient_id: IDSerialized
+    patient_id: UUID
 
     model_config = ConfigDict(
         use_enum_values=True
@@ -29,7 +37,7 @@ class Slot(FromORM, IDMixin):
     is_booked: bool = False
     mode: Mode | None = None
     slot_datetime: datetime
-    schedule_id: IDSerialized
+    schedule_id: UUID
 
 
 #
@@ -37,7 +45,7 @@ class Slot(FromORM, IDMixin):
 
 class User(FromORM, IDMixin):
     username: str
-    email: EmailStr
+    email: Email
     name: str | None = None
     role: UserRoleV2
 
@@ -109,8 +117,8 @@ class Schedule(FromORM, IDMixin):
     is_active: bool
     weekdays: list[int] = Field(default_factory=list)
     base_slot_duration: int | None = 20
-    clinic_id: IDSerialized
-    doctor_id: IDSerialized
+    clinic_id: UUID
+    doctor_id: UUID
     clinic: ClinicHttpMinimal | None = None
     slots: list[Slot] = Field(
         default_factory=list

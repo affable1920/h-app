@@ -107,7 +107,10 @@ class WS_Service:
             """
 
             if target_ws.client_state == WebSocketState.CONNECTED:
-                await target_ws.close(code=code, reason=reason)
+                await target_ws.close(
+                    code=code,
+                    reason=reason
+                )
                 logger.info(
                     f"\nClient #{id} found active. Was uccessfully closed.")
 
@@ -134,7 +137,7 @@ class WS_Service:
         for id, socket in cls.active_conns.items():
             try:
                 if socket.client_state == WebSocketState.CONNECTED:
-                    await socket.send_json(msg.model_dump_json(by_alias=True))
+                    await socket.send_json(msg.model_dump(by_alias=True))
 
                 else:
                     continue
@@ -163,11 +166,11 @@ class WS_Service:
 
         if target_ws is None:
             logger.info("Target socket conn not active")
-            await ws.send_json(offline_msg.model_dump_json(by_alias=True))
+            await ws.send_json(offline_msg.model_dump(by_alias=True))
             return
 
         logger.info("target socket online. Sending offer to target ...")
-        await target_ws.send_json(msg.model_dump_json(by_alias=True))
+        await target_ws.send_json(msg.model_dump(by_alias=True))
 
     #
 
@@ -188,11 +191,11 @@ class WS_Service:
 
         if target_ws is None:
             logger.info("Target seems to be offline. Aborting ...")
-            await ws.send_json(offline_msg.model_dump_json(by_alias=True))
+            await ws.send_json(offline_msg.model_dump(by_alias=True))
             return
 
         logger.info("Sending answer to target ...")
-        await target_ws.send_json(msg.model_dump_json(by_alias=True))
+        await target_ws.send_json(msg.model_dump(by_alias=True))
 
     #
 
@@ -215,23 +218,26 @@ class WS_Service:
             logger.info(
                 "Target socket seems to be offline. Aborting ice candidate send ..."
             )
-            await ws.send_json(offline_msg.model_dump_json(by_alias=True))
+            await ws.send_json(offline_msg.model_dump(by_alias=True))
             return
 
         logger.info("Sending ice candidate to target ...")
-        await target_ws.send_json(msg.model_dump_json(by_alias=True))
+        await target_ws.send_json(msg.model_dump(by_alias=True))
 
     #
 
     @classmethod
     async def send_msg(cls, reciever: WebSocket, msg: WS_Message | str):
         if isinstance(msg, WS_Message):
-            await reciever.send_json(msg.model_dump_json(by_alias=True))
+            await reciever.send_json(
+                msg.model_dump(by_alias=True)
+            )
+            return
 
         assert type(msg) is str, (
             f"""
             Message received inside send_msg is neither of the required type
-            not a string
+            nor a string
             """
         )
         await reciever.send_text(msg)

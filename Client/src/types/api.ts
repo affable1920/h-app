@@ -689,12 +689,12 @@ export interface components {
         };
         /** DoctorLogin */
         DoctorLogin: {
+            /** Id */
+            id?: string | null;
             /** Email */
             email?: string | null;
             /** Password */
             password: string;
-            /** Id */
-            id?: string | null;
         };
         /** DrProfileResponse */
         DrProfileResponse: {
@@ -798,8 +798,6 @@ export interface components {
         };
         /** PatientCreate */
         PatientCreate: {
-            /** Username */
-            username: string;
             /**
              * Email
              * Format: email
@@ -807,6 +805,8 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+            /** Username */
+            username: string;
         };
         /** PatientLogin */
         PatientLogin: {

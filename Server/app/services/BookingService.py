@@ -1,6 +1,6 @@
 import logging
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import ConflictError, EntityNotFoundException
 from app.schemas.inputs import BookingRequestData
@@ -17,7 +17,7 @@ class BookingService:
         slot_id: str,
         session: AsyncSession
     ):
-        load_options = selectinload(Slot.schedule)
+        load_options = joinedload(Slot.schedule)
 
         return (
             await session.scalar(

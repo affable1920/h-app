@@ -1,14 +1,21 @@
 from datetime import datetime
 from typing import Generic, Literal, Self, Sequence, TypeVar
+from uuid import UUID
 from pydantic import (
     ConfigDict,
     EmailStr,
     Field,
     model_validator,
 )
-from app.schemas.Base import Aliased, FromORM, IDMixin, IDSerialized
+from app.schemas.types import Email
+from app.schemas.Base import Aliased,  FromORM, IDMixin
 from app.schemas.enums import AppointmentStatus, UserRoleV2
-from app.schemas.models import ClinicHttpMinimal, DoctorHttpFull, Slot, DoctorHttpMinimal
+from app.schemas.models import (
+    ClinicHttpMinimal,
+    DoctorHttpFull,
+    Slot,
+    DoctorHttpMinimal
+)
 
 
 class AppointmentConfirmation(
@@ -16,20 +23,20 @@ class AppointmentConfirmation(
     IDMixin,
     Aliased
 ):
-    patient_id: IDSerialized
+    patient_id: UUID
     scheduled_date: datetime
     created_at: datetime
     status: AppointmentStatus
-    care_journey_id: IDSerialized | None = None
+    care_journey_id: UUID | None = None
 
 
 class AppointmentResponse(
     AppointmentConfirmation,
     Aliased
 ):
-    clinic_id: IDSerialized
-    doctor_id: IDSerialized
-    slot_id: IDSerialized
+    clinic_id: UUID
+    doctor_id: UUID
+    slot_id: UUID
     slot: Slot
     doctor: DoctorHttpMinimal
     clinic: ClinicHttpMinimal
@@ -49,7 +56,7 @@ class PatientProfileResponse(
     FromORM, IDMixin, Aliased
 ):
     name: str | None = None
-    email: EmailStr
+    email: Email
     username: str | None = None
     appointments: list[AppointmentResponse] = Field(
         default_factory=list

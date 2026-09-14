@@ -1,26 +1,28 @@
 from datetime import datetime, time
 from typing import Annotated, Literal, Self
+from uuid import UUID
 
 from fastapi import File, Form, UploadFile
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
-from app.schemas.Base import Aliased, FromORM, IDSerialized
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+from app.schemas.Base import Aliased, FromORM
+from app.schemas.types import Username, Password, Email, LoginPassword
 
 
 class PatientCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
+    email: Email
+    password: Password
+    username: Username
 
 
 class PatientLogin(BaseModel):
-    email: EmailStr
-    password: str
+    email: Email
+    password: LoginPassword
 
 
 class DoctorLogin(BaseModel):
-    email: str | None = None
-    password: str
     id: str | None = None
+    email: Email | None = None
+    password: LoginPassword
 
     @model_validator(mode="after")
     def validate_user(self) -> Self:
@@ -33,8 +35,8 @@ class DoctorLogin(BaseModel):
 
 class BookingRequestData(FromORM, Aliased):
     scheduled_date: Annotated[datetime, Field(alias="date")]
-    doctor_id: IDSerialized
-    slot_id: IDSerialized
+    doctor_id: UUID
+    slot_id: UUID
 
 
 class DrCreate(Aliased):
@@ -52,7 +54,7 @@ class DrCreate(Aliased):
     secondary_focus_areas: Annotated[list[str] | str, Form(...)] = []
     bio: Annotated[str | None, Form(...)] = None
 
-    email: Annotated[EmailStr, Form(...)]
+    email: Annotated[Email, Form(...)]
     password: Annotated[str, Form(...)]
     phone: Annotated[str | None, Form(max_length=10)] = None
 
@@ -63,19 +65,33 @@ class DrCreate(Aliased):
 
 def get_dr_onboarding(
     name: Annotated[str, Form(...)],
-    gender: Annotated[Literal["male", "female"], Form(...)],
+    gender: Annotated[
+        Literal["male", "female"], Form(...)
+    ],
     degree: Annotated[str, Form(...)],
     medical_college: Annotated[str, Form(...)],
     graduation_year: Annotated[int, Form(...)],
     license_number: Annotated[str, Form(...)],
-    primary_specialization: Annotated[str, Form(...)],
-    email: Annotated[EmailStr, Form(...)],
+    primary_specialization: Annotated[
+        str, Form(...)
+    ],
+    email: Annotated[Email, Form(...)],
     password: Annotated[str, Form(...)],
-    experience: Annotated[int | None, Form(...)] = 0,
-    secondary_focus_areas: Annotated[list[str] | str, Form(...)] = [],
-    bio: Annotated[str | None, Form(...)] = None,
-    phone: Annotated[str | None, Form(...)] = None,
-    profile: Annotated[UploadFile | None, File(...)] = None
+    experience: Annotated[
+        int | None, Form(...)
+    ] = 0,
+    secondary_focus_areas: Annotated[
+        list[str] | str, Form(...)
+    ] = [],
+    bio: Annotated[
+        str | None, Form(...)
+    ] = None,
+    phone: Annotated[
+        str | None, Form(...)
+    ] = None,
+    profile: Annotated[
+        UploadFile | None, File(...)
+    ] = None
 ) -> DrCreate:
     return DrCreate(
         name=name,
@@ -97,7 +113,10 @@ def get_dr_onboarding(
 
 class CreateSchedule(FromORM, Aliased):
     orientation: Literal["week", "month"] = Field(
-        alias="every"
+        alias="every",
+        description=(
+            "The recurring pattern of the Schedule to create"
+        )
     )
     weekdays: list[int] = Field(
         min_length=1,

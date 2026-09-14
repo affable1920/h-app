@@ -1,29 +1,17 @@
 import Button from "@/components/ui/Button";
-
-import type {
-  APIError,
-  Clinic,
-  Doctor,
-  PatientCreate,
-  Slot,
-} from "@/types/http";
+import type { APIError, Clinic, Doctor, Slot } from "@/types/http";
 import {
   useBookingMutation,
   useUnbookingMutation,
 } from "@/features/booking/use-booking";
 import { toast } from "sonner";
 import useModalStore from "@/stores/modal-store";
-
 import useAuthStore from "@/stores/auth-store";
 import { MapPinCheckInside } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import { PatientCreateSchema } from "@/schemas";
 import { fromISO } from "@/utils/utils";
 import Badge from "@/components/ui/Badge";
 import { Stack } from "@/components/ui/Stack";
-import { useState } from "react";
+import { useRef, useState, type SubmitEvent } from "react";
 import { PatientSignin } from "@/components/PatientSignin";
 import { PatientRegister } from "@/components/PatientRegister";
 
@@ -40,49 +28,56 @@ function ScheduleModal({
   clinic,
   onSuccess,
 }: ScheduleModalProps) {
+  const slotDatetimeISO = fromISO(slot.slot_datetime);
+  const fullDate = slotDatetimeISO.toFormat("dd LLL yyyy -");
+
   const user = useAuthStore((s) => s.user);
 
-  const form = useForm<PatientCreate>({
-    resolver: zodResolver(PatientCreateSchema),
-  });
-
-  const slotDatetimeISO = fromISO(slot.slot_datetime);
-  const fullDate = slotDatetimeISO.toFormat("dd LLL - yyyy");
-
   const closeModal = useModalStore((s) => s.closeModal);
+  const reasonRef = useRef<HTMLTextAreaElement | null>(null);
 
   const book = useBookingMutation();
-  const { mutate: unBook } = useUnbookingMutation();
+  const cancelBooking = useUnbookingMutation();
 
-  async function confirmSlot() {
+  async function confirmSlot(ev: SubmitEvent<HTMLFormElement>) {
+    ev.preventDefault();
+
+    const formData = new FormData(ev.currentTarget);
+    const reason = formData.get("reasonForVisit");
+
     if (!slot) {
       return;
     }
 
-    const appointment = {
+    const payload = {
       slotId: slot.id,
       date: slot.slot_datetime,
       doctorId: doctor.id,
+      reasonForVisit:
+        typeof reason === "string" && reason.trim() ? reason.trim() : undefined,
     };
 
-    const createdAppointment = await book.mutateAsync(appointment, {
+    const createdAppointment = await book.mutateAsync(payload, {
       onSuccess() {
         toast.info("Slot booked successfully !", {
-          description() {
-            return "Slots are confirmed within 30 minutes. You can edit or cancel your slot till then";
-          },
-
           action: {
             label: "Undo",
             onClick() {
-              unBook(
+              cancelBooking.mutate(
                 {
                   appointmentId: createdAppointment.id,
                   doctorId: doctor.id,
                 },
                 {
                   onSuccess() {
-                    toast("Appointment successfully cancelled.");
+                    toast("Appointment cancelled!");
+                  },
+                  onError() {
+                    toast.info("Your appointment could not be cancelled.", {
+                      description() {
+                        return "Please try after sometime.";
+                      },
+                    });
                   },
                 },
               );
@@ -120,60 +115,80 @@ function ScheduleModal({
   }
 
   return (
-    <section className="p-3">
+    <section className="p-6">
       <header
-        className="bg-layout-raised p-3 rounded-sm min-h-fit flex flex-col gap-1 shadow-sm 
-      shadow-black/20 border-2 border-border"
+        className="bg-layout-raised p-3 rounded-md space-y-6 shadow-md shadow-black/10 
+        border border-border"
       >
-        <h3 className="text-text-secondary">Dr. {doctor.name}</h3>
+        <Stack justify="between" align="start">
+          <div className="space-y-1">
+            <h3 className="text-text text-md">Dr. {doctor.name}</h3>
+            <h3 className="text-xs">( {doctor.primarySpecialization} )</h3>
+          </div>
+        </Stack>
 
-        <div className="self-end justify-self-end flex flex-col gap-1 items-end text-sm font-semibold">
-          <p className="capitalize underline">{slotDatetimeISO.weekdayShort}</p>
-
-          <span className="flex items-center gap-4">
-            {fullDate && <p>{fullDate}</p>}
-            <p className="text-text">
-              {slotDatetimeISO.toISOTime()?.split("+")[1]}
-            </p>
-          </span>
-        </div>
-      </header>
-
-      <section className="mt-4 flex flex-col gap-8 px-3">
-        <div className="flex flex-col text-sm gap-1">
-          <div className="flex items-center gap-2">
-            <h2 className="line-clamp-1 text-text-secondary">{clinic?.name}</h2>
+        <Stack orientation="V" gap={2} justify="end">
+          <Stack className="min-w-0 shrink" align="center">
+            <h2 className="text-sm text-text-secondary">{clinic?.name}</h2>
 
             <Button variant="icon" data-tooltip="Get exact location !">
-              <MapPinCheckInside className={"size-3!"} />
+              <MapPinCheckInside />
             </Button>
-          </div>
-        </div>
+          </Stack>
 
+          <Stack className="text-sm font-semibold">
+            {fullDate && <span className="font-semibold">{fullDate}</span>}
+            <span>{slotDatetimeISO.weekdayShort}</span> -
+            <span>{slotDatetimeISO.toISOTime()?.split("+")[1]}</span>
+          </Stack>
+        </Stack>
+      </header>
+
+      <section className="mt-6">
         {user ? (
-          <form
-            onSubmit={form.handleSubmit(confirmSlot)}
-            className="flex flex-col gap-6"
-          >
-            <Stack orientation="V">
-              <Stack align="center" justify="between">
-                <Button type="button" onClick={closeModal}>
-                  cancel
-                </Button>
-
-                <Button
-                  onClick={confirmSlot}
-                  type="submit"
-                  color="white"
-                  loading={book.isPending}
+          <form onSubmit={confirmSlot}>
+            <Stack orientation="V" gap="md">
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="reasonForVisit"
+                  className="capitalize px-1 text-text inline-flex items-center m-0 gap-1"
                 >
-                  Confirm Slot
-                </Button>
-              </Stack>
+                  What brings you in?
+                  <strong className="text-xs text-text-normal italic font-normal">
+                    (optional)
+                  </strong>
+                </label>
+                <textarea
+                  ref={reasonRef}
+                  maxLength={1000}
+                  aria-multiline="true"
+                  spellCheck="false"
+                  style={{
+                    minHeight: 80,
+                    lineHeight: 1.4,
+                  }}
+                  id="reasonForVisit"
+                  name="reasonForVisit"
+                  className={`placeholder:italic border border-border-vivid p-2
+          rounded-md focus:ring-1 focus:ring-brand/20 placeholder:text-sm focus:ring-offset-2 
+          focus:ring-offset-brand/10 outline-none text-sm`}
+                />
+              </div>
+              <Stack orientation="V" gap={12}>
+                <Stack align="center" justify="between">
+                  <Button type="button" onClick={closeModal}>
+                    cancel
+                  </Button>
 
-              <Badge disabled={book.isPending} color="brand">
-                Review or Edit
-              </Badge>
+                  <Button type="submit" color="white" loading={book.isPending}>
+                    Book
+                  </Button>
+                </Stack>
+
+                <Badge disabled={book.isPending} rounded="md" color="brand">
+                  Review or Edit
+                </Badge>
+              </Stack>
             </Stack>
           </form>
         ) : (

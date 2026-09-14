@@ -7,6 +7,7 @@ import Button from "./ui/Button";
 import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import type { APIError } from "@/types/http";
 
 export function PatientSignin() {
   const { mutateAsync: signin, isPending } = useSignin();
@@ -19,25 +20,24 @@ export function PatientSignin() {
   const { errors } = form.formState;
 
   async function submit(data: PatientSignin) {
-    signin(
-      { route: "patient", data },
-      {
-        onSuccess() {
-          toast.message("Account successfully created.");
-          navigate("/view/idx/doctors", {
-            replace: true,
-          });
-        },
+    try {
+      signin({
+        route: "patient",
+        data,
+      });
 
-        onError(ex) {
-          toast.error(ex.code, {
-            description() {
-              return ex.message;
-            },
-          });
+      toast.message("Account successfully created.");
+      navigate("/view/idx/doctors", {
+        replace: true,
+      });
+    } catch (exc) {
+      const ex = exc as unknown as APIError;
+      toast.error(ex.code, {
+        description() {
+          return ex.message;
         },
-      },
-    );
+      });
+    }
   }
 
   return (

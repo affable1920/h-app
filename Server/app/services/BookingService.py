@@ -48,17 +48,17 @@ class BookingService:
         cls,
         user: Patient,
         session: AsyncSession,
-        data: BookingRequestData,
+        payload: BookingRequestData,
     ) -> Appointment:
         slot = await cls.find_slot_by_id(
-            slot_id=str(data.slot_id),
+            slot_id=str(payload.slot_id),
             session=session
         )
 
         if slot is None:
             raise EntityNotFoundException(
                 entity_name="Slot",
-                identifier=str(data.slot_id),
+                identifier=str(payload.slot_id),
             )
 
         schedule = slot.schedule
@@ -74,12 +74,12 @@ class BookingService:
                 "Schedule is inactive."
             ),
             (
-                schedule.doctor_id == data.doctor_id,
+                schedule.doctor_id == payload.doctor_id,
                 "Requested slot does not belong to the requested doctor.",
                 "Doctor mismatch between schedule and client data."
             ),
             (
-                data.scheduled_date.isoweekday() in set(schedule.weekdays),
+                payload.scheduled_date.isoweekday() in set(schedule.weekdays),
                 "The doctor has no schedule on the requested date and weekday.",
                 "Date requested by patient was not part of the doctor's schedule."
             ),
@@ -90,14 +90,17 @@ class BookingService:
                 logger.info(log_message)
                 raise ConflictError(message)
 
-        care_journey = CareJourney(patient_id=user.id)
+        care_journey = CareJourney(
+            patient_id=user.id,
+            reason_for_visit=payload.reason_for_visit
+        )
 
         slot.is_booked = True
         created_appointment = Appointment(
             slot_id=slot.id,
             scheduled_date=slot.slot_datetime,
             patient_id=user.id,
-            doctor_id=data.doctor_id,
+            doctor_id=payload.doctor_id,
             clinic_id=schedule.clinic_id,
             # Assign the relationship directly since we don't flush and care
             # journey won't have it's id generated

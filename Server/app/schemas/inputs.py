@@ -34,9 +34,18 @@ class DoctorLogin(BaseModel):
 
 
 class BookingRequestData(FromORM, Aliased):
-    scheduled_date: Annotated[datetime, Field(alias="date")]
+    scheduled_date: Annotated[
+        datetime,
+        Field(alias="date")
+    ]
     doctor_id: UUID
     slot_id: UUID
+    reason_for_visit: Annotated[
+        str | None,
+        Field(
+            max_length=1000
+        )
+    ] = None
 
 
 class DrCreate(Aliased):

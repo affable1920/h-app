@@ -387,10 +387,14 @@ export interface components {
         AppointmentConfirmation: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
-            /** Patientid */
+            /**
+             * Patientid
+             * Format: uuid
+             */
             patientId: string;
             /**
              * Scheduleddate
@@ -403,17 +407,20 @@ export interface components {
              */
             createdAt: string;
             status: components["schemas"]["AppointmentStatus"];
-            /** Carejourneyid */
-            careJourneyId?: string | null;
+            careJourney?: components["schemas"]["CareJourneyResponse"] | null;
         };
         /** AppointmentResponse */
         AppointmentResponse: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
-            /** Patientid */
+            /**
+             * Patientid
+             * Format: uuid
+             */
             patientId: string;
             /**
              * Scheduleddate
@@ -426,13 +433,21 @@ export interface components {
              */
             createdAt: string;
             status: components["schemas"]["AppointmentStatus"];
-            /** Carejourneyid */
-            careJourneyId?: string | null;
-            /** Clinicid */
+            careJourney?: components["schemas"]["CareJourneyResponse"] | null;
+            /**
+             * Clinicid
+             * Format: uuid
+             */
             clinicId: string;
-            /** Doctorid */
+            /**
+             * Doctorid
+             * Format: uuid
+             */
             doctorId: string;
-            /** Slotid */
+            /**
+             * Slotid
+             * Format: uuid
+             */
             slotId: string;
             slot: components["schemas"]["Slot"];
             doctor: components["schemas"]["DoctorHttpMinimal"];
@@ -524,11 +539,25 @@ export interface components {
              * Format: uuid
              */
             slotId: string;
+            /** Reasonforvisit */
+            reasonForVisit?: string | null;
+        };
+        /** CareJourneyResponse */
+        CareJourneyResponse: {
+            /**
+             * Id
+             * Format: uuid
+             * @description the unique identifier of the record
+             */
+            id: string;
+            /** Reasonforvisit */
+            reasonForVisit?: string | null;
         };
         /** ClinicHttpFull */
         ClinicHttpFull: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
@@ -553,6 +582,7 @@ export interface components {
         ClinicHttpMinimal: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
@@ -571,6 +601,7 @@ export interface components {
         CreateSchedule: {
             /**
              * Every
+             * @description The recurring pattern of the Schedule to create
              * @enum {string}
              */
             every: "week" | "month";
@@ -618,6 +649,7 @@ export interface components {
         DoctorHttpFull: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
@@ -664,6 +696,7 @@ export interface components {
         DoctorHttpMinimal: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
@@ -700,6 +733,7 @@ export interface components {
         DrProfileResponse: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
@@ -822,6 +856,7 @@ export interface components {
         PatientProfileResponse: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
@@ -846,6 +881,7 @@ export interface components {
         Schedule: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
@@ -868,9 +904,15 @@ export interface components {
              * @default 20
              */
             base_slot_duration: number | null;
-            /** Clinic Id */
+            /**
+             * Clinic Id
+             * Format: uuid
+             */
             clinic_id: string;
-            /** Doctor Id */
+            /**
+             * Doctor Id
+             * Format: uuid
+             */
             doctor_id: string;
             clinic?: components["schemas"]["ClinicHttpMinimal"] | null;
             /** Slots */
@@ -880,6 +922,7 @@ export interface components {
         ScheduleResponse: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
@@ -895,6 +938,7 @@ export interface components {
         Slot: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;
@@ -911,7 +955,10 @@ export interface components {
              * Format: date-time
              */
             slot_datetime: string;
-            /** Schedule Id */
+            /**
+             * Schedule Id
+             * Format: uuid
+             */
             schedule_id: string;
         };
         /**
@@ -928,6 +975,7 @@ export interface components {
         UserResponse: {
             /**
              * Id
+             * Format: uuid
              * @description the unique identifier of the record
              */
             id: string;

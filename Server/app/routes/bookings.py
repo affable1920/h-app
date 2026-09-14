@@ -32,7 +32,7 @@ async def book(
         created = await BookingService.create_booking(
             session=session,
             user=pt,
-            data=data
+            payload=data
         )
 
     except EntityNotFoundException as e:

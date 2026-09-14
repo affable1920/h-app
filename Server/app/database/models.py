@@ -381,3 +381,8 @@ class CareJourney(
         sa.ForeignKey("patient.id"),
         nullable=False
     )
+
+    reason_for_visit: Mapped[Optional[str]] = mapped_column(
+        sa.Text,
+        nullable=True
+    )

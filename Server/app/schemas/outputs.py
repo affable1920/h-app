@@ -18,6 +18,12 @@ from app.schemas.models import (
 )
 
 
+class CareJourneyResponse(
+    FromORM, IDMixin, Aliased
+):
+    reason_for_visit: str | None = None
+
+
 class AppointmentConfirmation(
     FromORM,
     IDMixin,
@@ -27,7 +33,7 @@ class AppointmentConfirmation(
     scheduled_date: datetime
     created_at: datetime
     status: AppointmentStatus
-    care_journey_id: UUID | None = None
+    care_journey: CareJourneyResponse | None = None
 
 
 class AppointmentResponse(

@@ -18,6 +18,7 @@ class PatientService(EntityService[Patient]):
 
         return [
             appointments,
+            appointments.joinedload(Appointment.care_journey),
             appointments.joinedload(Appointment.clinic)
             .selectinload(Clinic.reviews),
             appointments.joinedload(Appointment.doctor)

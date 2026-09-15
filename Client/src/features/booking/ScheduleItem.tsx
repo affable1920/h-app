@@ -106,7 +106,7 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
       className="bg-layout"
       variants={ClinicViewVariants.articleVariants}
     >
-      <header className="space-y-1 mb-4">
+      <header className="space-y-0.5 mb-4">
         <div
           onClick={function () {
             setIsExpanded((p) => !p);

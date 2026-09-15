@@ -1,7 +1,7 @@
 import { type components, type operations, type paths } from "./api";
 
 export type BookingRequestData = components["schemas"]["BookingRequestData"];
-export type Appointment = components["schemas"]["AppointmentResponse"];
+export type Appointment = components["schemas"]["AppointmentConfirmation"];
 
 export type GetAllDrResponse =
   paths["/doctors"]["get"]["responses"]["200"]["content"]["application/json"];
@@ -35,6 +35,11 @@ export type DoctorCreate =
 export type UserResponse = components["schemas"]["UserResponse"];
 export type ScheduleCreate = components["schemas"]["CreateSchedule"];
 export type ScheduleResponse = components["schemas"]["ScheduleResponse"];
+
+export type AppointmentPatientResponse =
+  components["schemas"]["AppointmentPatientResponse"];
+export type AppointmentDoctorResponse =
+  components["schemas"]["AppointmentDoctorResponse"];
 
 export type Role = "doctor" | "patient";
 

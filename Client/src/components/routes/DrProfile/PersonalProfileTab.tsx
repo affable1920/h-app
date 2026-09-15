@@ -81,7 +81,7 @@ export function PersonalProfileTab() {
                 >
                   Email Address
                 </span>
-                <div className="flex py-0.5 truncate font-semibold text-text-normal">
+                <div className="flex py-0.5 truncate min-w-0 font-semibold text-text-normal">
                   {doctor.email}
                 </div>
               </div>

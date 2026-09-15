@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.ClinicService import ClinicService
@@ -17,7 +18,10 @@ router = APIRouter(
 logger = logging.getLogger(__name__)
 
 
-@router.get("", response_model=PaginatedResponse[ClinicHttpMinimal])
+@router.get(
+    "",
+    response_model=PaginatedResponse[ClinicHttpMinimal]
+)
 async def get_clinics(
     pagination_params: PaginationParams = Depends(),
     filter_params: ClinicRouteFilters = Depends(),
@@ -38,13 +42,15 @@ async def get_clinics(
     return response
 
 
-@router.get("/{id}", response_model=Optional[ClinicHttpFull])
+@router.get(
+    "/{clinic_id}",
+    response_model=Optional[ClinicHttpFull]
+)
 async def get_clinic(
-    id: str,
+    clinic_id: UUID,
     session: AsyncSession = Depends(get_db)
 ):
-    clinic = await ClinicService.get_by_id(
-        id=id, session=session
+    return await ClinicService.get_by_id(
+        entity_id=clinic_id,
+        session=session
     )
-
-    return clinic

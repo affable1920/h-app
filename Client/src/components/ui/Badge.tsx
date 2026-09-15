@@ -3,10 +3,10 @@ import type { Size, Color, BadgeProps } from "@/types/ui";
 import { cn } from "@/utils/utils";
 
 const sizes: Record<Size, string> = {
-  xs: "text-[8px]",
-  sm: "text-xs",
-  md: "text-sm",
-  lg: "text-md",
+  xs: "px-1 py-1 text-[7.5px]",
+  sm: "px-2 py-1 text-xs",
+  md: "px-3 py-2 text-sm",
+  lg: "px-4 py-2 text-md",
 };
 
 const colors: Record<Color, string> = {

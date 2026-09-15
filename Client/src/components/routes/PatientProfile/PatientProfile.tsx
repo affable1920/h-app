@@ -199,12 +199,14 @@ export function PatientProfile() {
                             <Stack orientation="V" gap={2}>
                               <Link
                                 className="font-semibold transition-colors duration-200"
-                                to={`/view/doctor/${appointment.doctorId}`}
+                                to={`/view/doctor/${appointment.doctor.id}`}
                               >
                                 Dr. {appointment.doctor.name}
                               </Link>
 
-                              <Link to={`/view/clinic/${appointment.clinicId}`}>
+                              <Link
+                                to={`/view/clinic/${appointment.clinic.id}`}
+                              >
                                 {appointment.clinic.name}
                               </Link>
                             </Stack>
@@ -283,7 +285,7 @@ export function PatientProfile() {
                                         cancelBooking(
                                           {
                                             appointmentId: appointment.id,
-                                            doctorId: appointment.doctorId,
+                                            doctorId: appointment.doctor.id,
                                           },
                                           {
                                             onSuccess() {

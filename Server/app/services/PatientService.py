@@ -13,6 +13,10 @@ class PatientService(EntityService[Patient]):
     entity = Patient
 
     @classmethod
+    def load_options(cls) -> list[_AbstractLoad]:
+        return []
+
+    @classmethod
     def load_options_full(cls) -> list[_AbstractLoad]:
         appointments = selectinload(Patient.appointments)
 
@@ -28,7 +32,11 @@ class PatientService(EntityService[Patient]):
     #
 
     @classmethod
-    async def get_by_email(cls, session: AsyncSession, email: str) -> Patient | None:
+    async def get_by_email(
+        cls,
+        session: AsyncSession,
+        email: str
+    ) -> Patient | None:
         stmt = select(Patient).where(Patient.email == email)
         stmt = stmt.options(*cls.load_options_full())
         return await session.scalar(stmt)
@@ -41,7 +49,9 @@ class PatientService(EntityService[Patient]):
         session: AsyncSession,
         data: PatientCreate
     ) -> Patient:
-        if await cls.email_exists(session, data.email):
+        if (
+            await cls.email_exists(session, data.email)
+        ):
             raise AlreadyInUseException(
                 identifier="email"
             )

@@ -5,7 +5,11 @@ import {
   createQueryHook,
   createQueryOptions,
 } from "./use-http";
-import type { GetByIdResponse, GetAllDrResponse } from "@/types/http";
+import type {
+  GetDoctorResponse,
+  GetAllDoctorsResponse,
+  GetDoctorAppointmentsResponse,
+} from "@/types/doctor-api";
 import { useSignup } from "./use-auth";
 
 const api = new APIClient("/doctors");
@@ -14,7 +18,7 @@ export const useDoctors = createQueryHook(
   (filters: DoctorFilters) => doctorKeys.list(filters),
   (filters: DoctorFilters) =>
     api
-      .get<GetAllDrResponse>(undefined, {
+      .get<GetAllDoctorsResponse>(undefined, {
         params: filters,
       })
       .then((res) => res.data),
@@ -22,7 +26,7 @@ export const useDoctors = createQueryHook(
 
 export const useDoctor = createQueryHook(
   (id: string) => doctorKeys.detail(id),
-  (id: string) => api.get<GetByIdResponse>(id).then((res) => res.data),
+  (id: string) => api.get<GetDoctorResponse>(id).then((res) => res.data),
 );
 
 export function useCreateDoctor() {
@@ -65,5 +69,13 @@ export const useUpdateDoctor = createMutationHook(
 
 export const doctorOptions = createQueryOptions(
   (id: string) => doctorKeys.detail(id),
-  (id) => api.get<GetByIdResponse>(id).then((res) => res.data),
+  (id) => api.get<GetDoctorResponse>(id).then((res) => res.data),
+);
+
+export const useGetDoctorAppointments = createQueryHook(
+  (vars: { id: string }) => doctorKeys.detail(vars.id),
+  () =>
+    api
+      .get<GetDoctorAppointmentsResponse>(`me/appointments`)
+      .then((res) => res.data),
 );

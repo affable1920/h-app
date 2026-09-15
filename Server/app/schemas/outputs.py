@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Generic, Literal, Self, Sequence, TypeVar
-from uuid import UUID
 from pydantic import (
     ConfigDict,
     EmailStr,
@@ -29,25 +28,23 @@ class AppointmentConfirmation(
     IDMixin,
     Aliased
 ):
-    patient_id: UUID
     scheduled_date: datetime
     created_at: datetime
     status: AppointmentStatus
     care_journey: CareJourneyResponse | None = None
 
 
-class AppointmentResponse(
+class AppointmentPatientResponse(
     AppointmentConfirmation,
     Aliased
 ):
-    clinic_id: UUID
-    doctor_id: UUID
-    slot_id: UUID
     slot: Slot
     doctor: DoctorHttpMinimal
     clinic: ClinicHttpMinimal
 
 
+# =============
+#  Generic Response
 T = TypeVar("T")
 
 
@@ -64,7 +61,8 @@ class PatientProfileResponse(
     name: str | None = None
     email: Email
     username: str | None = None
-    appointments: list[AppointmentResponse] = Field(
+    email_verified: bool | None = False
+    appointments: list[AppointmentPatientResponse] = Field(
         default_factory=list
     )
 
@@ -115,3 +113,12 @@ class ScheduleResponse(
 ):
     weekdays: list[int]
     max_slots: int | Literal[False] = False
+
+
+class AppointmentDoctorResponse(
+    AppointmentPatientResponse,
+    FromORM,
+    IDMixin,
+    Aliased,
+):
+    patient: UserResponse

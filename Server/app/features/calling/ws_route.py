@@ -42,7 +42,7 @@ async def ws_endpoint(ws: WebSocket):
 
     db_user = await DoctorService.get_by_id(
         session=session,
-        id=user_id
+        entity_id=user_id
     )
 
     if not db_user:

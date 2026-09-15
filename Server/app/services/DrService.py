@@ -1,9 +1,10 @@
 import base64
 import logging
-from typing import Tuple
+from typing import Sequence, Tuple
+from uuid import UUID
 
-from sqlalchemy import Select, or_
-from sqlalchemy.orm import selectinload
+from sqlalchemy import Select, func, or_, select
+from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.auth import security
@@ -11,10 +12,11 @@ from app.core.exceptions import AlreadyInUseException
 from app.scripts.one_off import compress
 from app.schemas.inputs import DrCreate
 from app.services.entities.main import EntityService
-from app.database.models import Clinic, Doctor, Schedule
-from app.schemas.response_modifiers import DrRouteFilters
+from app.database.models import Appointment, Clinic, Doctor, Schedule
+from app.schemas.response_modifiers import DrRouteFilters, PaginationParams
 from app.services.PatientService import PatientService
 from app.features.auth import security
+
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +107,11 @@ class DoctorService(EntityService[Doctor]):
     #
 
     @classmethod
-    async def create(cls, session: AsyncSession, data: DrCreate) -> Doctor:
+    async def create(
+        cls,
+        session: AsyncSession,
+        data: DrCreate
+    ) -> Doctor:
         if (
                 await cls.email_exists(session, email=data.email)) \
                 or await PatientService.email_exists(session, email=data.email
@@ -168,3 +174,39 @@ class DoctorService(EntityService[Doctor]):
         ]
 
         return slots[:min(len(slots), max)]
+
+    #
+
+    @classmethod
+    async def get_appointments(
+            cls,
+            session: AsyncSession,
+            doctor_id: UUID,
+            pagination_params: PaginationParams | None = None
+    ) -> tuple[int, Sequence[Appointment]]:
+        stmt = (
+            select(Appointment)
+            .options(
+                joinedload(Appointment.patient),
+                joinedload(Appointment.care_journey),
+                joinedload(Appointment.clinic),
+                joinedload(Appointment.doctor)
+            )
+            .where(Appointment.doctor_id == doctor_id)
+            .order_by(
+                Appointment.scheduled_date.asc(),
+                Appointment.id.asc()
+            )
+        )
+
+        count = await session.scalar(
+            select(func.count()).select_from(
+                stmt.subquery()
+            )
+        ) or 0
+
+        if pagination_params is not None:
+            stmt = cls.paginate(stmt, pagination_params)
+
+        objs = (await session.scalars(stmt)).all()
+        return count, objs

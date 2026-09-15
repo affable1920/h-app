@@ -2,6 +2,7 @@ import logging
 import secrets
 from typing import Optional
 from datetime import datetime, timedelta, timezone
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,20 +36,20 @@ class AuthService:
     @staticmethod
     async def get_current_user(
         session: AsyncSession,
-        user_id: str,
+        user_id: UUID,
         role: str
     ) -> Optional[Doctor | Patient]:
         match role:
             case "doctor":
                 return await DoctorService.get_by_id(
                     session=session,
-                    id=user_id
+                    entity_id=user_id
                 )
 
             case "patient":
                 return await PatientService.get_by_id(
                     session=session,
-                    id=user_id
+                    entity_id=user_id
                 )
 
             case _:
@@ -179,13 +180,13 @@ class AuthService:
         if role == UserRoleV2.PATIENT:
             user = await PatientService.get_by_id(
                 session=session,
-                id=str(user_id)
+                entity_id=user_id
             )
 
         elif role == UserRoleV2.DOCTOR:
             user = await DoctorService.get_by_id(
                 session=session,
-                id=str(user_id)
+                entity_id=user_id
             )
 
         if user is None:
@@ -319,4 +320,5 @@ class AuthService:
         logger.info(
             "New Patient sucessfully created and committed to database"
         )
+
         return token, patient

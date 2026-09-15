@@ -21,12 +21,12 @@ export function PatientSignin() {
 
   async function submit(data: PatientSignin) {
     try {
-      signin({
+      await signin({
         route: "patient",
         data,
       });
 
-      toast.message("Account successfully created.");
+      toast.message("logged in.");
       navigate("/view/idx/doctors", {
         replace: true,
       });

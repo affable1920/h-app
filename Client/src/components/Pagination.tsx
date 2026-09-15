@@ -18,26 +18,28 @@ const Pagination = memo(function ({
       {currentPage > 1 && (
         <Button
           bg={true}
-          size="md"
           variant="icon"
+          data-tooltip="back"
+          aria-label="go-back"
           onClick={function () {
             onPageChange("previous");
           }}
         >
-          <ChevronLeft />
+          <ChevronLeft strokeWidth={4} />
         </Button>
       )}
 
       {hasNext && (
         <Button
-          size="md"
           variant="icon"
           bg={true}
+          data-tooltip="next"
+          aria-label="go-forward"
           onClick={function () {
             onPageChange("next");
           }}
         >
-          <ChevronRight />
+          <ChevronRight strokeWidth={4} />
         </Button>
       )}
     </article>

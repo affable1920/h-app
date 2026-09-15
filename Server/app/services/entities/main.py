@@ -2,6 +2,7 @@ import math
 import logging
 from abc import ABC, abstractmethod
 from typing import ClassVar, Generic, Sequence, Tuple, Type, TypeVar
+from uuid import UUID
 from sqlalchemy import Select, exists, func, literal, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
@@ -81,7 +82,11 @@ class EntityService(Generic[T], ABC):
     #
 
     @staticmethod
-    def create_pg_response(objs: Sequence[T], count: int, pagination: PaginationParams) -> PaginatedResponse:
+    def create_pg_response(
+        objs: Sequence[T],
+        count: int,
+        pagination: PaginationParams
+    ) -> PaginatedResponse:
         last_page = math.ceil(count / pagination.max)
         has_next = pagination.page < last_page
 
@@ -130,11 +135,15 @@ class EntityService(Generic[T], ABC):
     #
 
     @classmethod
-    async def get_by_id(cls, session: AsyncSession, id: str) -> T | None:
+    async def get_by_id(
+        cls,
+        session: AsyncSession,
+        entity_id: UUID
+    ) -> T | None:
         stmt = (
             select(cls.entity)
             .options(*cls.load_options_full())
-            .where(getattr(cls.entity, 'id') == id)
+            .where(getattr(cls.entity, 'id') == entity_id)
         )
 
         result = await session.scalar(stmt)

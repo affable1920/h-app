@@ -1,11 +1,13 @@
 import logging
 from typing import Optional
+from uuid import UUID
 from fastapi import Body, Depends, APIRouter, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.services.entities.main import EntityService
 from app.database.models import Doctor
 from app.features.auth.dependencies import require_doctor
-from app.schemas.outputs import PaginatedResponse
+from app.schemas.outputs import AppointmentDoctorResponse, PaginatedResponse
 from app.schemas.response_modifiers import DrRouteFilters, PaginationParams, SortParams
 from app.schemas.models import DoctorHttpFull, DoctorHttpMinimal
 from app.schemas.response_modifiers import DrRouteFilters, PaginationParams, SortParams
@@ -51,17 +53,15 @@ async def get_doctors(
     return response
 
 
-@router.get("/{id}", response_model=Optional[DoctorHttpFull])
+@router.get("/{doctor_id}", response_model=Optional[DoctorHttpFull])
 async def get_doctor(
-    id: str,
+    doctor_id: UUID,
     session: AsyncSession = Depends(get_db)
 ):
-    doctor = await DoctorService.get_by_id(
-        id=id,
+    return await DoctorService.get_by_id(
+        entity_id=doctor_id,
         session=session
     )
-
-    return doctor
 
 # ================================================================================================
 
@@ -98,3 +98,25 @@ async def edit_doctor(
 
 
 # ================================================================================================
+
+
+@router.get(
+    "/me/appointments",
+    response_model=PaginatedResponse[AppointmentDoctorResponse]
+)
+async def get_doctor_appointments(
+    doctor: Doctor = Depends(require_doctor),
+    session: AsyncSession = Depends(get_db),
+    pagination_params: PaginationParams = Depends()
+):
+    count, objs = await DoctorService.get_appointments(
+        session=session,
+        doctor_id=doctor.id,
+        pagination_params=pagination_params
+    )
+
+    return EntityService.create_pg_response(
+        objs=objs,
+        count=count,
+        pagination=pagination_params
+    )

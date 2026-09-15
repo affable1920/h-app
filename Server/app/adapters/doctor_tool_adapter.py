@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 from app.database.models import Doctor
 from app.schemas.for_tool_calls import DrMinimal
 from app.schemas.enums import Gender
@@ -93,12 +94,17 @@ class DoctorToolAdapter:
 
     #
 
-    async def get_drprofile_single(self, id: str | None = None, name: str | None = None):
+    async def get_drprofile_single(
+            self,
+            doctor_id: UUID | None = None,
+            name: str | None = None
+    ):
         result = None
 
-        if id:
+        if doctor_id:
             result = await DoctorService.get_by_id(
-                session=self.session, id=id
+                session=self.session,
+                entity_id=doctor_id
             )
 
         if name:

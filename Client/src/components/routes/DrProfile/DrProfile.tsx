@@ -19,8 +19,8 @@ const TABS = [
     route: "schedules",
   },
   {
-    label: "Settings",
-    route: "settings",
+    label: "Appointments",
+    route: "appointments",
   },
   {
     label: "Preferences",

@@ -11,15 +11,15 @@ import { useDeleteSchedule, useUpdateSchedule } from "@/hooks/use-schedules";
 import { toast } from "sonner";
 import useModalStore from "@/stores/modal-store";
 import Badge from "./ui/Badge";
+import Card from "./ui/Card";
 
 export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
+  const navigate = useNavigate();
   const openModal = useModalStore((s) => s.openModal);
   const [showOptions, setShowOptions] = useState(false);
 
   const { mutateAsync: remove } = useDeleteSchedule();
   const { mutateAsync: update } = useUpdateSchedule();
-
-  const navigate = useNavigate();
 
   const startTime = fromISO(schedule.start_time).toISOTime({
     precision: "minutes",
@@ -33,7 +33,7 @@ export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
     includeOffset: false,
   });
 
-  const wkdays = schedule.weekdays.length;
+  const wkdays = schedule.weekdays?.length ?? 0;
 
   async function handleDelete() {
     openModal("confirmation-modal", {
@@ -163,14 +163,30 @@ export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
       className="flex items-center"
       key={schedule.id}
     >
-      <div className="grow relative group/schedule">
+      <Card className="relative group/schedule self-stretch grow border-border">
+        <Card.Header>
+          <Stack justify="between" align="start">
+            <Stack orientation="V" gap={2}>
+              <Link to={`/view/idx/clinics/${schedule.clinic?.id}`}>
+                <Card.Title>{schedule.clinic?.name}</Card.Title>
+              </Link>
+
+              <Card.Description>{schedule.clinic?.location}</Card.Description>
+            </Stack>
+
+            <Badge
+              size="xs"
+              full={false}
+              className="font-semibold p-1! tracking-wide cursor-default!"
+              color={schedule.is_active ? "indicator" : "secondary"}
+              content={schedule.is_active ? "Active" : "Deactivated"}
+            />
+          </Stack>
+        </Card.Header>
+
         <Button
-          whileHover={{
-            scaleX: 1.4,
-          }}
-          needsMotion={true}
-          className="absolute opacity-0 z-999 duration-200 right-0 top-1/2 group-hover/schedule:opacity-100 
-          -translate-y-1/2 transition-opacity"
+          className="absolute opacity-0 z-999 right-0 top-1/2 group-hover/schedule:opacity-100 
+          -translate-y-1/2 transition-all duration-200 hover:text-text"
           variant="icon"
           size="sm"
           data-tooltip="options"
@@ -181,54 +197,13 @@ export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
         >
           <SquareChevronRight />
         </Button>
-
-        <section className="relative p-4 shadow-md shadow-black/40 bg-layout rounded-xl grow">
-          <Badge
-            size="xs"
-            className="absolute right-2 top-2 z-1 font-semibold p-1! tracking-wide cursor-default!"
-            full={false}
-            color={schedule.is_active ? "indicator" : "secondary"}
-            content={schedule.is_active ? "Active" : "Deactivated"}
-          />
-          <Stack orientation="V" gap="sm">
-            <Stack className="cursor-pointer">
-              <Link to={`/view/idx/clinics/${schedule.clinic_id}`}>
-                <h1 className="text-md">{schedule.clinic?.name}</h1>
-              </Link>
-            </Stack>
-
-            <Stack
-              align="center"
-              justify="between"
-              gap={"sm"}
-              className="text-text-normal"
-            >
-              <span>{schedule.clinic?.location}</span>
-              <Stack as="span" align="center">
-                <span>
-                  ( {startTime} - {endTime} )
-                </span>
-                {wkdays === 7 ? (
-                  <span>Mon - Sun</span>
-                ) : (
-                  <span
-                    className="font-bold text-layout bg-white rounded-full inline-block w-4 h-4 
-            text-center text-sm"
-                  >
-                    {wkdays}
-                  </span>
-                )}
-              </Stack>
-            </Stack>
-          </Stack>
-        </section>
-      </div>
+      </Card>
 
       <AnimatePresence mode="wait">
         {showOptions && (
           <motion.div
-            className="rounded-xl border-2 border-border bg-layout shadow-md shadow-black/40 flex flex-col 
-            self-stretch justify-between p-3"
+            className="flex flex-col bg-layout/20 border border-border-strong rounded-xl p-4 md:p-6 
+            space-y-4 shadow-md shadow-black/40"
             key="options"
             layout
             initial={{ width: 0, x: 20, opacity: 0 }}

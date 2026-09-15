@@ -174,7 +174,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/doctors/{id}": {
+    "/doctors/{doctor_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -201,6 +201,23 @@ export interface paths {
         get?: never;
         /** Edit Doctor */
         put: operations["edit_doctor"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctors/me/appointments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Doctor Appointments */
+        get: operations["get_appointments"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -249,8 +266,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get All */
-        get: operations["get_all"];
+        /** Get Clinics */
+        get: operations["get_clinics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -259,15 +276,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/clinics/{id}": {
+    "/clinics/{clinic_id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get One */
-        get: operations["get_one"];
+        /** Get Clinic */
+        get: operations["get_clinic"];
         put?: never;
         post?: never;
         delete?: never;
@@ -409,8 +426,8 @@ export interface components {
             status: components["schemas"]["AppointmentStatus"];
             careJourney?: components["schemas"]["CareJourneyResponse"] | null;
         };
-        /** AppointmentResponse */
-        AppointmentResponse: {
+        /** AppointmentDoctorResponse */
+        AppointmentDoctorResponse: {
             /**
              * Id
              * Format: uuid
@@ -434,21 +451,36 @@ export interface components {
             createdAt: string;
             status: components["schemas"]["AppointmentStatus"];
             careJourney?: components["schemas"]["CareJourneyResponse"] | null;
+            slot: components["schemas"]["Slot"];
+            doctor: components["schemas"]["DoctorHttpMinimal"];
+            clinic: components["schemas"]["ClinicHttpMinimal"];
+            patient: components["schemas"]["UserResponse"];
+        };
+        /** AppointmentPatientResponse */
+        AppointmentPatientResponse: {
             /**
-             * Clinicid
+             * Id
+             * Format: uuid
+             * @description the unique identifier of the record
+             */
+            id: string;
+            /**
+             * Patientid
              * Format: uuid
              */
-            clinicId: string;
+            patientId: string;
             /**
-             * Doctorid
-             * Format: uuid
+             * Scheduleddate
+             * Format: date-time
              */
-            doctorId: string;
+            scheduledDate: string;
             /**
-             * Slotid
-             * Format: uuid
+             * Createdat
+             * Format: date-time
              */
-            slotId: string;
+            createdAt: string;
+            status: components["schemas"]["AppointmentStatus"];
+            careJourney?: components["schemas"]["CareJourneyResponse"] | null;
             slot: components["schemas"]["Slot"];
             doctor: components["schemas"]["DoctorHttpMinimal"];
             clinic: components["schemas"]["ClinicHttpMinimal"];
@@ -812,6 +844,15 @@ export interface components {
          * @enum {string}
          */
         Mode: "online" | "in person" | "hybrid";
+        /** PaginatedResponse[AppointmentDoctorResponse] */
+        PaginatedResponse_AppointmentDoctorResponse_: {
+            /** Entities */
+            entities: components["schemas"]["AppointmentDoctorResponse"][];
+            /** Count */
+            count: number;
+            /** Hasnext */
+            hasNext?: boolean | null;
+        };
         /** PaginatedResponse[ClinicHttpMinimal] */
         PaginatedResponse_ClinicHttpMinimal_: {
             /** Entities */
@@ -870,7 +911,7 @@ export interface components {
             /** Username */
             username?: string | null;
             /** Appointments */
-            appointments?: components["schemas"]["AppointmentResponse"][];
+            appointments?: components["schemas"]["AppointmentPatientResponse"][];
         };
         /**
          * Role
@@ -1314,7 +1355,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                doctor_id: string;
             };
             cookie?: never;
         };
@@ -1362,6 +1403,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_appointments: {
+        parameters: {
+            query?: {
+                page?: number;
+                max?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_AppointmentDoctorResponse_"];
                 };
             };
             /** @description Validation Error */
@@ -1439,7 +1512,7 @@ export interface operations {
             };
         };
     };
-    get_all: {
+    get_clinics: {
         parameters: {
             query?: {
                 page?: number;
@@ -1478,12 +1551,12 @@ export interface operations {
             };
         };
     };
-    get_one: {
+    get_clinic: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                clinic_id: string;
             };
             cookie?: never;
         };

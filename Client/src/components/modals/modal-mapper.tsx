@@ -7,6 +7,7 @@ import ScheduleCreater from "@/features/schedule-create/ScheduleCreater";
 import { Picker } from "../ui/Picker";
 import type { Clinic, Doctor, Slot } from "@/types/http";
 import type { ReactNode } from "react";
+import InformationModal from "./InformationModal";
 
 export type ConfirmationProps = {
   tagline: ReactNode;
@@ -39,6 +40,9 @@ export type MapperProps = {
   "schedule-creater-modal": {
     doctor: Doctor;
   };
+  "information-modal": {
+    children: ReactNode;
+  };
 };
 
 export type Modal = keyof MapperProps;
@@ -51,6 +55,7 @@ const MODAL_MAPPINGS: Record<Modal, React.ElementType> = {
   "directory-filter-modal": DirectoryFilter,
   "doctor-profile-setup-modal": DrProfileSetup,
   "picker-modal": Picker,
+  "information-modal": InformationModal,
 };
 
 export default MODAL_MAPPINGS;

@@ -19,7 +19,7 @@ function SchedulesView() {
     return <Spinner />;
   }
 
-  if (isError) {
+  if (isError || !doctor) {
     const exc = error as unknown as APIError;
 
     return (
@@ -53,7 +53,7 @@ function SchedulesView() {
             className="flex flex-1 flex-col gap-10 shadow-md rounded-xl border-2 border-border p-6 bg-layout
            shadow-black/20"
           >
-            {doctor.schedules.map(function (schedule) {
+            {(doctor.schedules ?? []).map(function (schedule) {
               return (
                 <ScheduleItem
                   doctor={doctor}
@@ -63,7 +63,7 @@ function SchedulesView() {
               );
             })}
           </motion.section>
-          <Calendar schedules={doctor.schedules} />
+          <Calendar schedules={doctor.schedules ?? []} />
         </section>
       ) : (
         <div

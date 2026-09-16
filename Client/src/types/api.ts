@@ -409,11 +409,6 @@ export interface components {
              */
             id: string;
             /**
-             * Patientid
-             * Format: uuid
-             */
-            patientId: string;
-            /**
              * Scheduleddate
              * Format: date-time
              */
@@ -434,11 +429,6 @@ export interface components {
              * @description the unique identifier of the record
              */
             id: string;
-            /**
-             * Patientid
-             * Format: uuid
-             */
-            patientId: string;
             /**
              * Scheduleddate
              * Format: date-time
@@ -464,11 +454,6 @@ export interface components {
              * @description the unique identifier of the record
              */
             id: string;
-            /**
-             * Patientid
-             * Format: uuid
-             */
-            patientId: string;
             /**
              * Scheduleddate
              * Format: date-time
@@ -910,6 +895,11 @@ export interface components {
             email: string;
             /** Username */
             username?: string | null;
+            /**
+             * Emailverified
+             * @default false
+             */
+            emailVerified: boolean | null;
             /** Appointments */
             appointments?: components["schemas"]["AppointmentPatientResponse"][];
         };

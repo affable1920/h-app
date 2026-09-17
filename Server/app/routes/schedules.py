@@ -1,9 +1,9 @@
 import logging
+from uuid import UUID
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exception_handlers import ErrorHttp
 from app.core.exceptions import EntityNotFoundException, ScheduleHasAppointments
 from app.features.auth.dependencies import require_doctor
 from app.services.SchedulingService import schedule_service
@@ -12,7 +12,7 @@ from app.database.models import Doctor
 from app.database.entry_async import get_db
 
 from app.schemas.inputs import CreateSchedule
-from app.schemas.outputs import ScheduleResponse
+from app.schemas.outputs import DoctorScheduleResponse
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ router = APIRouter(
 
 @router.post(
     path="/create",
-    response_model=ScheduleResponse,
+    response_model=DoctorScheduleResponse,
     status_code=201
 )
 async def create_schedule(
@@ -44,18 +44,18 @@ async def create_schedule(
         )
 
     created = await schedule_service.create_schedule(
-        doctor_id=str(doctor.id),
+        doctor_id=doctor.id,
         session=session,
         payload=data
     )
 
     await session.commit()
-    return ScheduleResponse.model_validate(created)
+    return DoctorScheduleResponse.model_validate(created)
 
 
-@router.put("/{id}")
+@router.put("/{schedule_id}")
 async def edit_schedule(
-    id: str,
+    schedule_id: UUID,
     q: str,
     val=Body(embed=True),
     session: AsyncSession = Depends(get_db),
@@ -63,14 +63,14 @@ async def edit_schedule(
 ):
     try:
         await schedule_service.edit(
-            id=str(id),
-            doctor_id=str(doctor.id),
+            schedule_id=schedule_id,
+            doctor_id=doctor.id,
             session=session,
             field_name=q,
             val=val
         )
 
-    except EntityNotFoundException as e:
+    except EntityNotFoundException:
         raise HTTPException(
             404,
             detail={
@@ -88,7 +88,7 @@ async def edit_schedule(
     status_code=204
 )
 async def remove_schedule(
-    schedule_id: str,
+    schedule_id: UUID,
     confirm: bool = Query(
         False,
         description="Confirm deletion of schedule by setting this to true."
@@ -99,7 +99,7 @@ async def remove_schedule(
     try:
         await schedule_service.remove_schedule(
             schedule_id=schedule_id,
-            doctor_id=str(doctor.id),
+            doctor_id=doctor.id,
             session=session,
             confirm=confirm
         )

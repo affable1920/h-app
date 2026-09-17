@@ -5,11 +5,10 @@ import {
   useCreateBooking,
 } from "@/features/booking/use-booking";
 import { toast } from "sonner";
-import useModalStore from "@/stores/modal-store";
+import useModalStore, { removeModal } from "@/stores/modal-store";
 import useAuthStore from "@/stores/auth-store";
-import { MapPinCheckInside } from "lucide-react";
+import { Ban, CalendarFold, MapPinCheckInside } from "lucide-react";
 import { fromISO } from "@/utils/utils";
-import Badge from "@/components/ui/Badge";
 import { Stack } from "@/components/ui/Stack";
 import { useRef, useState, type SubmitEvent } from "react";
 import { PatientSignin } from "@/components/PatientSignin";
@@ -104,8 +103,8 @@ function ScheduleModal({
   return (
     <section className="p-6">
       <header
-        className="bg-layout-raised p-3 rounded-md space-y-6 shadow-md shadow-black/10 
-        border border-border"
+        className="bg-layout-raised/50 p-3 rounded-md space-y-6 shadow-sm shadow-black/5  
+        border border-border-strong"
       >
         <Stack justify="between" align="start">
           <div className="space-y-1">
@@ -163,7 +162,12 @@ function ScheduleModal({
               </div>
               <Stack orientation="V" gap={12}>
                 <Stack align="center" justify="between">
-                  <Button type="button" onClick={closeModal}>
+                  <Button
+                    type="button"
+                    endIcon={<Ban />}
+                    color="secondary"
+                    onClick={closeModal}
+                  >
                     cancel
                   </Button>
 
@@ -171,14 +175,19 @@ function ScheduleModal({
                     type="submit"
                     color="white"
                     loading={bookingIsPending}
+                    endIcon={<CalendarFold />}
                   >
                     Book
                   </Button>
                 </Stack>
 
-                <Badge disabled={bookingIsPending} rounded="md" color="brand">
+                <Button
+                  disabled={bookingIsPending}
+                  onClick={removeModal}
+                  color="indicator"
+                >
                   Review or Edit
-                </Badge>
+                </Button>
               </Stack>
             </Stack>
           </form>

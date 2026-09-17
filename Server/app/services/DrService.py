@@ -210,3 +210,35 @@ class DoctorService(EntityService[Doctor]):
 
         objs = (await session.scalars(stmt)).all()
         return count, objs
+
+    #
+
+    @classmethod
+    async def get_schedules(
+        cls,
+        session: AsyncSession,
+        doctor_id: UUID,
+        pagination_params: PaginationParams | None = None
+    ):
+        stmt = (
+            select(Schedule)
+            .options(
+                selectinload(Schedule.slots),
+                joinedload(Schedule.clinic)
+            )
+            .where(Schedule.doctor_id == doctor_id)
+        )
+
+        count = await (
+            session.scalar(
+                select(func.count()).select_from(
+                    stmt.subquery()
+                )
+            )
+        ) or 0
+
+        if pagination_params is not None:
+            stmt = cls.paginate(stmt, pagination_params)
+
+        objs = (await session.scalars(stmt)).all()
+        return count, objs

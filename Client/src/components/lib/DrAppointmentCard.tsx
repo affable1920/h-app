@@ -19,11 +19,11 @@ export function DrAppointmentCard({
       <Card.Header className="flex items-start justify-between">
         <Stack orientation="V">
           <Card.Title>
-            {appointment.patient.name ?? appointment.patient.username}
+            {appointment.patient?.name ?? appointment.patient?.username}
           </Card.Title>
 
-          <Stack orientation="V" gap={1}>
-            <h4 className="text-text-teritiary">Appointment Reason</h4>
+          <Stack orientation="V" gap={1} className="tracking-wider">
+            <h4 className="leading-[1.1] opacity-70">Appointment Reason</h4>
             <Card.Description className="text-sm">
               {appointment.careJourney?.reasonForVisit ?? "No Reason provided"}
             </Card.Description>

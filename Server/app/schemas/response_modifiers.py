@@ -13,7 +13,7 @@ class SortOrder(Enum):
 
 class PaginationParams(Aliased):
     page: int = Field(default=1, gt=0)
-    max: int = Field(default=10, gt=0, lt=25)
+    max: int = Field(default=10, gt=0)
 
     @property
     def offset(self):

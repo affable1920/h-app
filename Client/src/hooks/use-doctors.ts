@@ -7,6 +7,7 @@ import {
 } from "./use-http";
 import type {
   GetDoctorResponse,
+  GetDoctorSchedulesResponse,
   GetAllDoctorsResponse,
   GetDoctorAppointmentsResponse,
 } from "@/types/doctor-api";
@@ -78,4 +79,10 @@ export const useGetDoctorAppointments = createQueryHook(
     api
       .get<GetDoctorAppointmentsResponse>(`me/appointments`)
       .then((res) => res.data),
+);
+
+export const useGetDoctorSchedules = createQueryHook(
+  (vars: { id: string }) => doctorKeys.detail(vars.id),
+  () =>
+    api.get<GetDoctorSchedulesResponse>(`me/schedules`).then((res) => res.data),
 );

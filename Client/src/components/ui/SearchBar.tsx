@@ -1,6 +1,7 @@
 import { memo, type HTMLAttributes } from "react";
 import { X } from "lucide-react";
 import Input from "./Input";
+import type { Size } from "@/types/ui";
 
 interface SearchBarProps extends HTMLAttributes<HTMLInputElement> {
   val: string;
@@ -9,6 +10,7 @@ interface SearchBarProps extends HTMLAttributes<HTMLInputElement> {
   placeholder?: string;
   grow?: boolean;
   label?: string;
+  size?: Size;
 }
 
 const SearchBar = memo(function ({
@@ -17,10 +19,12 @@ const SearchBar = memo(function ({
   onClear,
   placeholder = "search ...",
   label,
+  size = "sm",
   ...rest
 }: SearchBarProps) {
   return (
     <Input
+      size={size}
       label={label}
       id={rest.id ?? "search-bar"}
       value={val}

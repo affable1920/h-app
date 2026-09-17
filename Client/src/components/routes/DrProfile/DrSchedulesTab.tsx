@@ -1,6 +1,8 @@
 import { ScheduleComponent } from "@/components/ScheduleComponent";
 import Button from "@/components/ui/Button";
+import Spinner from "@/components/ui/Spinner";
 import { Stack } from "@/components/ui/Stack";
+import { useGetDoctorSchedules } from "@/hooks/use-doctors";
 import useModalStore from "@/stores/modal-store";
 import type { ProfileResponse } from "@/types/http";
 import { Plus, Search } from "lucide-react";
@@ -9,6 +11,15 @@ import { useOutletContext } from "react-router-dom";
 export function DrSchedulesTab() {
   const doctor = useOutletContext<ProfileResponse<"doctor">>();
   const openModal = useModalStore((s) => s.openModal);
+
+  const { data: { entities: schedules = [] } = {}, isPending } =
+    useGetDoctorSchedules({
+      id: doctor.id,
+    });
+
+  if (isPending) {
+    return <Spinner />;
+  }
 
   return (
     <section>
@@ -33,8 +44,10 @@ export function DrSchedulesTab() {
       </Stack>
       <section className="mt-4">
         <Stack gap="sm" orientation="V" md={{ orientation: "H", gap: "md" }}>
-          {(doctor.schedules ?? []).map(function (s) {
-            return <ScheduleComponent key={s.id} schedule={s} />;
+          {schedules.map(function (s) {
+            return (
+              <ScheduleComponent key={s.id} doctor={doctor} schedule={s} />
+            );
           })}
         </Stack>
       </section>

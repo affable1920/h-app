@@ -9,15 +9,17 @@ import { useOutletContext } from "react-router-dom";
 export function DrAppointmentsTab() {
   const doctor = useOutletContext<ProfileResponse<"doctor">>();
 
-  const { data: { entities: appointments = [], hasNext } = {}, isPending } =
-    useGetDoctorAppointments(
-      {
-        id: doctor.id,
-      },
-      {
-        refetchOnMount: false,
-      },
-    );
+  const {
+    data: { entities: appointments = [], hasNext = false } = {},
+    isPending,
+  } = useGetDoctorAppointments(
+    {
+      id: doctor.id,
+    },
+    {
+      refetchOnMount: false,
+    },
+  );
 
   if (isPending) {
     return <Spinner />;
@@ -27,7 +29,9 @@ export function DrAppointmentsTab() {
     <section className="space-y-6">
       <Stack orientation="V" md={{ orientation: "H" }} gap={20}>
         {appointments.map(function (appointment) {
-          return <DrAppointmentCard appointment={appointment} />;
+          return (
+            <DrAppointmentCard key={appointment.id} appointment={appointment} />
+          );
         })}
       </Stack>
 

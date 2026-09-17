@@ -1,4 +1,4 @@
-import type { Schedule } from "@/types/http";
+import type { Doctor } from "@/types/http";
 import { Link, useNavigate } from "react-router-dom";
 import { Stack } from "./ui/Stack";
 import { Edit, SquareChevronRight, Trash2 } from "lucide-react";
@@ -6,34 +6,26 @@ import Button from "./ui/Button";
 import { AnimatePresence, motion } from "motion/react";
 import Switch from "./ui/Switch";
 import { useState } from "react";
-import { fromISO } from "@/utils/utils";
 import { useDeleteSchedule, useUpdateSchedule } from "@/hooks/use-schedules";
 import { toast } from "sonner";
 import useModalStore from "@/stores/modal-store";
 import Badge from "./ui/Badge";
 import Card from "./ui/Card";
+import type { GetDoctorSchedulesResponse } from "@/types/doctor-api";
 
-export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
+export function ScheduleComponent({
+  doctor,
+  schedule,
+}: {
+  doctor: Doctor;
+  schedule: GetDoctorSchedulesResponse;
+}) {
   const navigate = useNavigate();
   const openModal = useModalStore((s) => s.openModal);
   const [showOptions, setShowOptions] = useState(false);
 
   const { mutateAsync: remove } = useDeleteSchedule();
   const { mutateAsync: update } = useUpdateSchedule();
-
-  const startTime = fromISO(schedule.start_time).toISOTime({
-    precision: "minutes",
-    extendedZone: false,
-    includeOffset: false,
-  });
-
-  const endTime = fromISO(schedule.end_time).toISOTime({
-    precision: "minutes",
-    extendedZone: false,
-    includeOffset: false,
-  });
-
-  const wkdays = schedule.weekdays?.length ?? 0;
 
   async function handleDelete() {
     openModal("confirmation-modal", {
@@ -45,14 +37,14 @@ export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
       ),
       onResolve: async function () {
         await remove(
-          { id: schedule.id, doctorId: schedule.doctor_id },
+          { id: schedule.id, doctorId: doctor.id },
           {
             onSuccess() {
               toast.info("Schedule sucessfully deleted.");
             },
             onError(error) {
               if (error.code.toLowerCase() === "schedule_has_appointments") {
-                if (!schedule.is_active) {
+                if (!schedule.isActive) {
                   toast.info(error.message, {
                     description() {
                       return "Your schedule is already deactivated !";
@@ -80,7 +72,7 @@ export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
                   ),
                   onResolve: async function () {
                     await update({
-                      doctorId: schedule.doctor_id,
+                      doctorId: doctor.id,
                       id: schedule.id,
                       changes: {
                         q: "is_active",
@@ -109,7 +101,7 @@ export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
   }
 
   async function handleActivate() {
-    const intendedState = schedule.is_active ? "deactivate" : "activate";
+    const intendedState = schedule.isActive ? "deactivate" : "activate";
 
     if (intendedState === "deactivate") {
       try {
@@ -133,11 +125,11 @@ export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
 
     await update(
       {
-        doctorId: schedule.doctor_id,
+        doctorId: doctor.id,
         id: schedule.id,
         changes: {
           q: "is_active",
-          val: !schedule.is_active,
+          val: !schedule.isActive,
         },
       },
       {
@@ -178,8 +170,8 @@ export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
               size="xs"
               full={false}
               className="font-semibold p-1! tracking-wide cursor-default!"
-              color={schedule.is_active ? "indicator" : "secondary"}
-              content={schedule.is_active ? "Active" : "Deactivated"}
+              color={schedule.isActive ? "indicator" : "secondary"}
+              content={schedule.isActive ? "Active" : "Deactivated"}
             />
           </Stack>
         </Card.Header>
@@ -221,7 +213,7 @@ export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
               variant="icon"
               size="sm"
               onClick={function () {
-                navigate(`/view/doctor/${schedule.doctor_id}/schedule`);
+                navigate(`/view/doctor/${doctor.id}/schedule`);
               }}
             >
               <Edit />
@@ -237,9 +229,9 @@ export function ScheduleComponent({ schedule }: { schedule: Schedule }) {
             </Button>
             <Button
               variant="icon"
-              data-tooltip={schedule.is_active ? "deactivate" : "activate"}
+              data-tooltip={schedule.isActive ? "deactivate" : "activate"}
             >
-              <Switch isOn={schedule.is_active} toggle={handleActivate} />
+              <Switch isOn={schedule.isActive} toggle={handleActivate} />
             </Button>
           </motion.div>
         )}

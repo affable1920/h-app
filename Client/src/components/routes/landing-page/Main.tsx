@@ -190,7 +190,7 @@ export function LandingPageMain() {
             <article className="space-y-2">
               <motion.div
                 viewport={{ once: true }}
-                initial={{ opacity: 0, x: -50 }}
+                initial={{ opacity: 0, x: "-50px" }}
                 animate={{
                   opacity: 1,
                   x: 0,
@@ -212,7 +212,7 @@ export function LandingPageMain() {
                       animate={{
                         opacity: 1,
                         scale: [1, 0.75, 0.5, 0.75, 1],
-                        transition: { delay: 0.5 },
+                        transition: { delay: 0.59 },
                       }}
                       className="text-xl"
                     >
@@ -273,12 +273,12 @@ export function LandingPageMain() {
                   initial={
                     i % 2 === 0
                       ? {
-                          x: "-10%",
+                          x: "-70px",
                           filter: "blur(1px)",
                           opacity: 0,
                         }
                       : {
-                          x: "10%",
+                          x: "70px",
                           opacity: 0,
                           filter: "blur(1px)",
                         }

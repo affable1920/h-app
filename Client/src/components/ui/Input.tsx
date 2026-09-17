@@ -7,9 +7,10 @@ import {
 import type { FieldError } from "react-hook-form";
 import { Stack } from "./Stack";
 
-type Size = "sm" | "md" | "lg";
+type Size = "xs" | "sm" | "md" | "lg";
 
 const sizes: Record<Size, string> = {
+  xs: "py-1",
   sm: `py-2`,
   md: `py-3`,
   lg: `py-4`,
@@ -73,9 +74,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         />
 
         <span
-          className={`inline-flex absolute right-2.5 text-text-teritiary
-            hover:text-text-normal transition-colors duration-200 cursor-pointer
-            ${label ? "bottom-0 -translate-y-11/12" : "bottom-1/2"}`}
+          className={`inline-flex absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary
+            hover:text-text-normal transition-colors duration-200 cursor-pointer`}
+          data-tooltip={`Clear search`}
         >
           {icon && icon}
         </span>

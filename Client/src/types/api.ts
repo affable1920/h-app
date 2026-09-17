@@ -225,6 +225,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/doctors/me/schedules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Doctor Schedules */
+        get: operations["get_schedules"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/bookings": {
         parameters: {
             query?: never;
@@ -345,7 +362,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/schedules/{id}": {
+    "/schedules/{schedule_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -355,22 +372,6 @@ export interface paths {
         get?: never;
         /** Edit Schedule */
         put: operations["edit_schedule"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/schedules/{schedule_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
         post?: never;
         /** Remove Schedule */
         delete: operations["remove_schedule"];
@@ -491,8 +492,8 @@ export interface components {
             /** Val */
             val: string;
         };
-        /** Body_edit_schedule_schedules__id__put */
-        Body_edit_schedule_schedules__id__put: {
+        /** Body_edit_schedule_schedules__schedule_id__put */
+        Body_edit_schedule_schedules__schedule_id__put: {
             /** Val */
             val: unknown;
         };
@@ -746,6 +747,30 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** DoctorScheduleResponse */
+        DoctorScheduleResponse: {
+            /**
+             * Id
+             * Format: uuid
+             * @description the unique identifier of the record
+             */
+            id: string;
+            clinic: components["schemas"]["ClinicHttpMinimal"];
+            /** Weekdays */
+            weekdays: number[];
+            /** Isactive */
+            isActive: boolean;
+            /**
+             * Starttime
+             * Format: time
+             */
+            startTime: string;
+            /**
+             * Endtime
+             * Format: time
+             */
+            endTime: string;
+        };
         /** DrProfileResponse */
         DrProfileResponse: {
             /**
@@ -784,8 +809,6 @@ export interface components {
             secondaryFocusAreas?: string[];
             /** Lastupdated */
             lastUpdated?: string | null;
-            /** Schedules */
-            schedules?: components["schemas"]["Schedule"][];
             /** Collegestudied */
             collegeStudied?: string | null;
             /** Graduationyear */
@@ -851,6 +874,15 @@ export interface components {
         PaginatedResponse_DoctorHttpMinimal_: {
             /** Entities */
             entities: components["schemas"]["DoctorHttpMinimal"][];
+            /** Count */
+            count: number;
+            /** Hasnext */
+            hasNext?: boolean | null;
+        };
+        /** PaginatedResponse[DoctorScheduleResponse] */
+        PaginatedResponse_DoctorScheduleResponse_: {
+            /** Entities */
+            entities: components["schemas"]["DoctorScheduleResponse"][];
             /** Count */
             count: number;
             /** Hasnext */
@@ -949,22 +981,6 @@ export interface components {
             /** Slots */
             slots?: components["schemas"]["Slot"][];
         };
-        /** ScheduleResponse */
-        ScheduleResponse: {
-            /**
-             * Id
-             * Format: uuid
-             * @description the unique identifier of the record
-             */
-            id: string;
-            /** Weekdays */
-            weekdays: number[];
-            /**
-             * Maxslots
-             * @default false
-             */
-            maxSlots: number | false;
-        };
         /** Slot */
         Slot: {
             /**
@@ -1057,7 +1073,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PatientProfileResponse"];
+                    "application/json": components["schemas"]["UserResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1438,6 +1454,38 @@ export interface operations {
             };
         };
     };
+    get_schedules: {
+        parameters: {
+            query?: {
+                page?: number;
+                max?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_DoctorScheduleResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     book: {
         parameters: {
             query?: never;
@@ -1677,7 +1725,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ScheduleResponse"];
+                    "application/json": components["schemas"]["DoctorScheduleResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1698,13 +1746,13 @@ export interface operations {
             };
             header?: never;
             path: {
-                id: string;
+                schedule_id: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Body_edit_schedule_schedules__id__put"];
+                "application/json": components["schemas"]["Body_edit_schedule_schedules__schedule_id__put"];
             };
         };
         responses: {

@@ -1,8 +1,11 @@
 import logging
+import secrets
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, BackgroundTasks, Body, Depends, HTTPException, Query, Response
 
+from app.schemas.enums import UserRoleV2
+from app.services.MailService import MailService
 from app.features.auth.dependencies import get_current_user, require_patient
 from app.features.auth.service import AuthService
 
@@ -31,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 @router.post(
     "/register/patient",
-    response_model=PatientProfileResponse
+    response_model=UserResponse
 )
 async def register_pt(
     user: PatientCreate,
@@ -46,24 +49,33 @@ async def register_pt(
         )
 
     except AlreadyInUseException as e:
-        logger.exception(e)
         raise HTTPException(
             409,
             detail={
                 "code": "already_in_use",
-                "message": "The email is already registered with another acoount.",
+                "message": "The email provided is already registered with another account.",
             }
-        )
+        ) from e
+
+    raw_token = secrets.token_urlsafe(32)
+
+    verification_link = AuthService.create_verification_link_record(
+        created.id,
+        UserRoleV2.PATIENT,
+        raw_token
+    )
+
+    session.add(verification_link)
+    await session.commit()
 
     background_tasks.add_task(
-        lambda: AuthService.ask_for_verify(
-            session=session,
-            user=created,
-        )
+        MailService.send_verification_mail,
+        recipient=created.email,
+        verification_link=raw_token
     )
 
     response.headers["x-auth-token"] = token
-    return UserResponse.model_validate(created)
+    return created
 
 #
 
@@ -107,15 +119,24 @@ async def register_dr(
             }
         )
 
+    raw_token = secrets.token_urlsafe(32)
+    verification_link = AuthService.create_verification_link_record(
+        created.id,
+        UserRoleV2.DOCTOR,
+        raw_token
+    )
+
+    session.add(verification_link)
+    await session.commit()
+
     background_tasks.add_task(
-        lambda: AuthService.ask_for_verify(
-            session=session,
-            user=created,
-        )
+        MailService.send_verification_mail,
+        recipient=created.email,
+        verification_link=raw_token
     )
 
     response.headers["x-auth-token"] = token
-    return UserResponse.model_validate(created)
+    return created
 
 #
 
@@ -226,7 +247,7 @@ async def request(
     if current_user.email_verified:
         return "Your email is already verified."
 
-    await AuthService.ask_for_verify(
+    await AuthService.send_verification_mail(
         session=session,
         user=current_user
     )

@@ -147,10 +147,10 @@ function Directory() {
             }}
             val={localSearch ?? ""}
             onClear={clearSearch}
+            size="xs"
           />
 
           <Button
-            className="self-stretch"
             variant="icon"
             bg={true}
             aria-label="switch-view"

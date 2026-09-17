@@ -1,8 +1,5 @@
-from fastapi import Depends, HTTPException
 import jwt
-import sqlalchemy.orm
-
-from app.database.entry import get_db
+from fastapi import Depends, HTTPException
 from app.core.config import settings
 
 
@@ -19,7 +16,7 @@ def decode(token: str):
 
 #
 
-def get_usr(payload: dict = Depends(decode), session: sqlalchemy.orm.Session = Depends(get_db)):
+def get_usr(payload: dict = Depends(decode)):
     usr_id = payload.get("id")
 
     if usr_id is None:

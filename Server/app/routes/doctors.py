@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.entities.main import EntityService
 from app.database.models import Doctor
 from app.features.auth.dependencies import require_doctor
-from app.schemas.outputs import AppointmentDoctorResponse, PaginatedResponse
+from app.schemas.outputs import AppointmentDoctorResponse, DoctorScheduleResponse, PaginatedResponse
 from app.schemas.response_modifiers import DrRouteFilters, PaginationParams, SortParams
 from app.schemas.models import DoctorHttpFull, DoctorHttpMinimal
 from app.schemas.response_modifiers import DrRouteFilters, PaginationParams, SortParams
@@ -119,4 +119,27 @@ async def get_doctor_appointments(
         objs=objs,
         count=count,
         pagination=pagination_params
+    )
+
+
+# ================================================================================================
+@router.get(
+    "/me/schedules",
+    response_model=PaginatedResponse[DoctorScheduleResponse]
+)
+async def get_doctor_schedules(
+    doctor: Doctor = Depends(require_doctor),
+    session: AsyncSession = Depends(get_db),
+    pagination_params: PaginationParams = Depends()
+):
+    count, objs = await DoctorService.get_schedules(
+        session=session,
+        doctor_id=doctor.id,
+        pagination_params=pagination_params
+    )
+
+    return EntityService.create_pg_response(
+        objs,
+        count,
+        pagination_params
     )

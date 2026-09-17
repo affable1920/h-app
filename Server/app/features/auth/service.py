@@ -7,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.schemas.outputs import UserResponse
 from app.core.exceptions import (
     ConflictError,
     EntityNotFoundException,
@@ -24,7 +25,7 @@ from app.schemas.inputs import (
     PatientLogin
 )
 
-from app.services import MailService
+from app.services.MailService import MailService
 from app.services.PatientService import PatientService
 from app.services.DrService import DoctorService
 
@@ -75,7 +76,25 @@ class AuthService:
     #
 
     @staticmethod
-    async def ask_for_verify(
+    def create_verification_link_record(
+        user_id: UUID,
+        user_role: UserRoleV2,
+        token: str,
+        exp: int = 5,
+    ):
+        link = EmailVerificationToken(
+            user_id=user_id,
+            user_role=user_role,
+            hash=security.hash_verification_token(token),
+            exp=datetime.now(timezone.utc) + timedelta(minutes=exp)
+        )
+
+        return link
+
+    #
+
+    @staticmethod
+    async def send_verification_mail(
         session: AsyncSession,
         user: Patient | Doctor,
     ):
@@ -84,10 +103,6 @@ class AuthService:
                 user, Patient
             )
             else UserRoleV2.DOCTOR
-        )
-
-        logger.info(
-            f"Sending verification mail to {user.email}"
         )
 
         stmt = (
@@ -113,18 +128,16 @@ class AuthService:
             )
 
             await session.delete(token_record)
-            await session.commit()
 
         logger.info(
             f"Creating a new token for email verification for user {user} ..."
         )
 
         token = secrets.token_urlsafe(32)
-        link = EmailVerificationToken(
-            user_id=user.id,
-            user_role=role,
-            hash=security.hash_verification_token(token),
-            exp=(datetime.now(timezone.utc) + timedelta(minutes=5)),
+        link = AuthService.create_verification_link_record(
+            user.id,
+            role,
+            token
         )
 
         session.add(link)
@@ -132,10 +145,10 @@ class AuthService:
 
         MailService.send_mail(
             recipient=user.email,
-            body=(
+            content=(
                 "Email Verification",
-                "Click on the below link to verifiy your email.\n\n"
-                f"https://localhost:8000/auth/verify-email?token={token}\n\n"
+                "Confirm your email address using the link below\n\n"
+                f"{token}\n\n"
                 "The link is only valid for 5 minutes."
             )
         )
@@ -157,6 +170,7 @@ class AuthService:
                 "No token found stored for the user trying to verify their email "
                 "Rejecting the verification ..."
             )
+
             raise InvalidTokenError(message="Invalid token")
 
         if token_record.used_at is not None:
@@ -164,13 +178,17 @@ class AuthService:
                 "Token verification against the stored hash failed.. "
                 "Token already used"
             )
+
             raise InvalidTokenError(message="token already used..")
 
-        if token_record.exp < datetime.now():
+        if token_record.exp < datetime.now(timezone.utc):
             logger.info(
                 "Token has expired ..."
             )
-            raise InvalidTokenError(message="Token expired")
+
+            raise InvalidTokenError(
+                message="Token expired. Please request a new one!"
+            )
 
         user_id = token_record.user_id
         role = token_record.user_role
@@ -201,7 +219,7 @@ class AuthService:
         await session.commit()
         MailService.send_mail(
             recipient=user.email,
-            body=(
+            content=(
                 "Email Verification",
                 "Your email has been verified successfully ..."
             )
@@ -238,7 +256,7 @@ class AuthService:
             )
 
         token = security.create_access_token(
-            id=str(db_user.id),
+            id=db_user.id,
             role=UserRoleV2.DOCTOR
         )
 
@@ -271,7 +289,7 @@ class AuthService:
             )
 
         token = security.create_access_token(
-            id=str(db_user.id),
+            id=db_user.id,
             role=UserRoleV2.PATIENT
         )
 
@@ -291,12 +309,14 @@ class AuthService:
                 data=payload
             )
 
-            token = security.create_access_token(
-                id=str(created.id),
+            access_token = security.create_access_token(
+                id=created.id,
                 role=UserRoleV2.DOCTOR
             )
 
-        return token, created
+            response = UserResponse.model_validate(created)
+
+        return access_token, response
 
     #
 
@@ -312,13 +332,11 @@ class AuthService:
                 data=payload
             )
 
-            token = security.create_access_token(
-                id=str(patient.id),
+            access_token = security.create_access_token(
+                id=patient.id,
                 role=UserRoleV2.PATIENT
             )
 
-        logger.info(
-            "New Patient sucessfully created and committed to database"
-        )
+            response = UserResponse.model_validate(patient)
 
-        return token, patient
+        return access_token, response

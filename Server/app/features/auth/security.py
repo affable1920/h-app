@@ -1,4 +1,5 @@
 import hashlib
+from uuid import UUID
 
 import jwt
 
@@ -40,7 +41,7 @@ inside the auth header
 
 
 def create_access_token(
-        id: str,
+        id: UUID,
         role: UserRoleV2,
         exp_dur: timedelta = timedelta(days=2)
 ) -> str:
@@ -55,7 +56,7 @@ def create_access_token(
     )
 
     return jwt.encode(
-        payload=payload.model_dump(),
+        payload=payload.model_dump(mode="json"),
         key=settings.jwt_secret,
         algorithm="HS256"
     )

@@ -16,8 +16,8 @@ const CardFlippable = <T,>({ CardFront, CardBack }: CardProps<T>) => {
 
   return (
     <motion.article
-      className="rounded-md p-4 pb-3 font-semibold shadow-md bg-layout 
-    shadow-black/40 border-2 border-border-strong h-full min-h-32 relative"
+      className="rounded-xl p-4 pb-3 font-semibold shadow-md bg-layout/60 
+    shadow-black/50 border border-border-strong h-full min-h-32 relative"
       animate={{
         rotateY: isFlipped ? 180 : 0,
         transition: { duration: 0.25 },
@@ -51,6 +51,7 @@ const CardFlippable = <T,>({ CardFront, CardBack }: CardProps<T>) => {
 
       <motion.button
         onClick={handleFlip}
+        aria-label="button-flip"
         style={{
           scale: 0.8,
           opacity: 0.8,

@@ -59,10 +59,12 @@ class DoctorHttpMinimal(FromORM, IDMixin, Aliased):
 
     """
     exclude=True makes sure the properties are available for the computed field internally,
-    but is not serialized into JSOn for the response.
+    but is not serialized into JSON for the response.
     """
 
-    reviews: list[Review] = Field(default=[], exclude=True)
+    reviews: list[Review] = Field(
+        default_factory=list, exclude=True
+    )
     image: Annotated[str | None, Field(exclude=True)]
 
     @computed_field

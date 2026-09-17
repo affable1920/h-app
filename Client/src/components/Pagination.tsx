@@ -14,7 +14,7 @@ const Pagination = memo(function ({
   onPageChange,
 }: PaginationProps) {
   return (
-    <article className="flex self-end items-center gap-4">
+    <article className="flex self-end justify-end items-center gap-4">
       {currentPage > 1 && (
         <Button
           bg={true}

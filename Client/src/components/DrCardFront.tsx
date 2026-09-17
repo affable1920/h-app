@@ -31,18 +31,18 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
   );
 
   return (
-    <Stack orientation="V">
-      <Stack>
-        <div className="aspect-square rounded-md overflow-hidden max-w-20 mix-blend-difference">
+    <Stack orientation="V" gap="sm">
+      <Stack gap={10} align="start">
+        <div className="aspect-square rounded-xl overflow-hidden max-w-20 mix-blend-difference">
           <img
             className="h-full rounded-md cursor-pointer w-full object-cover"
             src={doctor?.imageUrl ?? (docImg as string)}
             alt={`Dr. ${doctor.name}`}
           />
         </div>
-        <Stack orientation="V" align="between">
-          <Stack orientation="V" className="gap-1!">
-            <Stack gap="xs" align="center">
+        <Stack orientation="V">
+          <Stack orientation="V" gap={2}>
+            <Stack gap={6} align="center">
               <Link to={`/view/doctor/${doctor.id}`}>
                 <h2 className="line-clamp-1 truncate capitalize text-text-normal">
                   Dr. {doctor.name}
@@ -54,7 +54,7 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
                 color={doctor.verified ? "green" : "red"}
               />
             </Stack>
-            <Stack gap="xs" align="center" className="text-[10px]">
+            <Stack align="center" className="text-[10px]">
               <h2 className="line-clamp-1 text-text-secondary">
                 {doctor.primarySpecialization}
               </h2>
@@ -73,10 +73,9 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
         </Stack>
       </Stack>
 
-      <Stack gap="xs" justify="end" align="end">
+      <Stack justify="end" align="end" gap={10}>
         {(actions || []).map(function (action) {
           const { name, label = "", icon: Icon } = action;
-
           return (
             <Button
               name={name}
@@ -84,7 +83,7 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
               {...(action.isPrimary
                 ? {
                     variant: "contained",
-                    color: "brand",
+                    color: "white",
                   }
                 : {
                     color: "secondary",

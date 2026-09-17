@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, time, timedelta
 from typing import Any
+from uuid import UUID
 
 from pydantic import Field
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -51,7 +52,7 @@ class ScheduleService:
     def generate_slots(
         duration: int, dt: datetime,
         start_time: time, end_time: time,
-        schedule_id: str,
+        schedule_id: UUID,
         max_count: int | None = None,
         allow_online_mode: bool = False
     ):
@@ -100,13 +101,14 @@ class ScheduleService:
 
     async def get_schedule(
             self,
-            schedule_id: str,
-            doctor_id: str,
+            schedule_id: UUID,
+            doctor_id: UUID,
             session: AsyncSession
     ) -> Schedule | None:
         stmt = (
             select(Schedule).where(
-                Schedule.id == schedule_id, Schedule.doctor_id == doctor_id
+                Schedule.id == schedule_id,
+                Schedule.doctor_id == doctor_id
             )
         )
         return await session.scalar(stmt)
@@ -115,7 +117,7 @@ class ScheduleService:
 
     async def create_schedule(
             self,
-            doctor_id: str,
+            doctor_id: UUID,
             session: AsyncSession,
             payload: CreateSchedule,
     ) -> Schedule:
@@ -145,7 +147,7 @@ class ScheduleService:
                     dt=dt, start_time=payload.start_time,
                     end_time=payload.end_time,
                     max_count=payload.max_slots,
-                    schedule_id=str(schedule.id)
+                    schedule_id=schedule.id
                 )
                 all_slots.extend(slots)
 
@@ -157,34 +159,33 @@ class ScheduleService:
 
     async def edit(
             self,
-            id: str,
-            doctor_id: str,
+            schedule_id: UUID,
+            doctor_id: UUID,
             session: AsyncSession,
             field_name: str,
             val: Any
     ):
         schedule = await self.get_schedule(
-            id,
-            doctor_id,
-            session
+            session=session,
+            schedule_id=schedule_id,
+            doctor_id=doctor_id,
         )
 
         if schedule is None:
             raise EntityNotFoundException(
                 entity_name="Schedule",
-                identifier=id
+                identifier=schedule_id
             )
 
         setattr(schedule, field_name, val)
         await session.commit()
-        await session.refresh(schedule, ["is_active"])
 
     #
 
     async def remove_schedule(
             self,
-            schedule_id: str,
-            doctor_id: str,
+            schedule_id: UUID,
+            doctor_id: UUID,
             session: AsyncSession,
             confirm: bool = False
     ):

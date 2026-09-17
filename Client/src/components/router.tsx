@@ -163,9 +163,7 @@ const router = createBrowserRouter([
             Component: ProfileSwitcher,
             middleware: [authMiddleware],
             children: [
-              {
-                ...DrProfileRoute,
-              },
+              DrProfileRoute,
               {
                 element: <PatientProfile />,
               },

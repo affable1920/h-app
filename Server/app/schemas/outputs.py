@@ -1,5 +1,6 @@
-from datetime import datetime
-from typing import Generic, Literal, Self, Sequence, TypeVar
+from datetime import datetime, time
+from typing import Generic, Self, Sequence, TypeVar
+from uuid import UUID
 from pydantic import (
     ConfigDict,
     EmailStr,
@@ -12,9 +13,18 @@ from app.schemas.enums import AppointmentStatus, UserRoleV2
 from app.schemas.models import (
     ClinicHttpMinimal,
     DoctorHttpFull,
+    Schedule,
     Slot,
     DoctorHttpMinimal
 )
+
+
+class UserResponse(
+    IDMixin, FromORM, Aliased
+):
+    email: EmailStr
+    name: str | None = None
+    username: str | None = None
 
 
 class CareJourneyResponse(
@@ -41,6 +51,17 @@ class AppointmentPatientResponse(
     slot: Slot
     doctor: DoctorHttpMinimal
     clinic: ClinicHttpMinimal
+
+
+class AppointmentDoctorResponse(
+    AppointmentConfirmation,
+    FromORM,
+    IDMixin,
+    Aliased,
+):
+    slot: Slot
+    clinic: ClinicHttpMinimal
+    patient: UserResponse
 
 
 # =============
@@ -87,10 +108,11 @@ class DrProfileResponse(
     license_number: str
     email: EmailStr
     email_verified: bool | None = False
+    schedules: list[Schedule] = Field(exclude=True)
 
 
 class AuthHdrPayload(Aliased):
-    id: str
+    id: UUID
     exp: float
     iat: float
     role: UserRoleV2
@@ -100,25 +122,15 @@ class AuthHdrPayload(Aliased):
 
 
 #
-class UserResponse(
-    IDMixin, FromORM, Aliased
-):
-    email: EmailStr
-    name: str | None = None
-    username: str | None = None
 
 
-class ScheduleResponse(
-    IDMixin, FromORM, Aliased
-):
-    weekdays: list[int]
-    max_slots: int | Literal[False] = False
-
-
-class AppointmentDoctorResponse(
-    AppointmentPatientResponse,
-    FromORM,
+class DoctorScheduleResponse(
     IDMixin,
-    Aliased,
+    FromORM,
+    Aliased
 ):
-    patient: UserResponse
+    clinic: ClinicHttpMinimal
+    weekdays: list[int]
+    is_active: bool
+    start_time: time
+    end_time: time

@@ -214,7 +214,7 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
                   return (
                     <motion.button
                       variants={createStagger().children}
-                      className="flex-1"
+                      className="grow"
                       key={slot.id}
                       onClick={function () {
                         update("slot", slot);
@@ -223,6 +223,7 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
                     >
                       <Badge
                         as="span"
+                        className="p-2"
                         selected={slot.id === scheduleState.slot?.id}
                         disabled={slot.is_booked}
                       >
@@ -259,7 +260,7 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
             >
               <motion.span
                 style={{ zIndex: 0 }}
-                initial={{ opacity: 0, x: 30 }}
+                initial={{ opacity: 0, x: "30px" }}
                 animate={{
                   opacity: 1,
                   x: 0,
@@ -267,7 +268,7 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
                 }}
                 exit={{
                   opacity: 0,
-                  x: 20,
+                  x: "20px",
                   transition: { ease: "linear", duration: 0.1 },
                 }}
               >
@@ -288,9 +289,9 @@ export function ScheduleItem({ schedule, doctor }: ScheduleProps) {
                       },
                     });
                   }}
+                  endIcon={<ChevronRight strokeWidth={4} />}
                 >
                   book slot
-                  <ChevronRight />
                 </Button>
               </motion.span>
             </motion.div>

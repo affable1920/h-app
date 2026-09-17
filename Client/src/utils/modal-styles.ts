@@ -5,8 +5,8 @@ export type Position = "top" | "bottom" | "center" | "left";
 const modalProperties: Record<Position, string> = {
   top: `fixed inset-0 w-full h-full max-h-52 rounded-b-md border-2 border-border-strong rounded-md`,
   bottom: `fixed bottom-0 min-h-48 left-0 w-full rounded-t-md`,
-  center: `absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md 
-  lg:max-w-lg border-2 border-border rounded-lg`,
+  center: `fixed left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-full max-w-[400px] 
+  lg:max-w-lg border-2 border-border rounded-xl`,
   left: `absolute inset-0 max-w-72`,
 };
 

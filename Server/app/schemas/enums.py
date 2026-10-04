@@ -45,3 +45,9 @@ class AppointmentStatus(str, enum.Enum):
 class Gender(str, enum.Enum):
     MALE = "male"
     FEMALE = "female"
+
+
+class ScheduleKind(str, enum.Enum):
+    ONE_OFF = "one-off"
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"

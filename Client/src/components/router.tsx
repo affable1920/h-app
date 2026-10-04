@@ -31,8 +31,8 @@ import { DoctorDetails } from "./routes/DoctorDetails";
 const Chat = lazy(function () {
   return import("@routes/Chat");
 });
-const SchedulesView = lazy(function () {
-  return import("@/features/booking/SchedulesView");
+const DoctorSchedulesPage = lazy(function () {
+  return import("@/features/availability/routes/DoctorAvailabilityPage");
 });
 const ClinicsDirectory = lazy(function () {
   return import("@components/ClinicsDirectory");
@@ -142,7 +142,7 @@ const router = createBrowserRouter([
                 loader: loaderDoctor,
                 element: (
                   <PageLayout>
-                    <SchedulesView />
+                    <DoctorSchedulesPage />
                   </PageLayout>
                 ),
               },

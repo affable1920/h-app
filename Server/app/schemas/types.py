@@ -38,7 +38,7 @@ Password = Annotated[
 ]
 
 
-# A login password type to support login for earlier accounts
+# A password type to support login for earlier accounts where min_length was only 6
 LoginPassword = Annotated[
     str,
     StringConstraints(

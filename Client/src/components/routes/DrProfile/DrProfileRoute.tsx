@@ -1,6 +1,5 @@
 import type { RouteObject } from "react-router-dom";
 import { PersonalProfileTab } from "./PersonalProfileTab";
-import { DrAppointmentsTab } from "./DrAppointmentsTab";
 
 export const DrProfileRoute: RouteObject = {
   children: [
@@ -10,21 +9,27 @@ export const DrProfileRoute: RouteObject = {
       element: <PersonalProfileTab />,
     },
     {
-      path: "schedules",
-      async lazy() {
-        const { DrSchedulesTab } = await import("./DrSchedulesTab");
-        return {
-          element: <DrSchedulesTab />,
-        };
-      },
-    },
-    {
-      path: "appointments",
-      async lazy() {
-        return {
-          element: <DrAppointmentsTab />,
-        };
-      },
+      path: "idx",
+      children: [
+        {
+          path: "schedules",
+          async lazy() {
+            const { DrSchedulesTab } = await import("./DrSchedulesTab");
+            return {
+              element: <DrSchedulesTab />,
+            };
+          },
+        },
+        {
+          path: "appointments",
+          async lazy() {
+            const { DrAppointmentsTab } = await import("./DrAppointmentsTab");
+            return {
+              element: <DrAppointmentsTab />,
+            };
+          },
+        },
+      ],
     },
     {
       path: "preferences",

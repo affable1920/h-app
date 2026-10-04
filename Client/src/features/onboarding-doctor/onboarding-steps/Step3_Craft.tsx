@@ -1,5 +1,5 @@
 import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
+import InputElement from "@/components/ui/Input";
 import SearchBar from "@/components/ui/SearchBar";
 import { Stack } from "@/components/ui/Stack";
 import { useSearchPaginate } from "@/hooks/use-search-paginate";
@@ -156,7 +156,7 @@ export function Step3_Craft() {
         </Stack>
       </Stack>
 
-      <Input
+      <InputElement
         size="sm"
         label="Secondary areas of focus"
         defaultValue={"dermatology, cardiology"}

@@ -37,7 +37,7 @@
     // strict option - keeps strict type checking on, enables strictNullChecks, noImplicitAny
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true

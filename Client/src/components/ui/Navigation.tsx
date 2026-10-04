@@ -3,35 +3,48 @@ import { motion } from "motion/react";
 import Button from "./Button";
 import { memo } from "react";
 import { Stack } from "./Stack";
+import { cn } from "@/utils/utils";
 
 interface Props {
   currentStep: number;
-  navigateForward: () => void;
-  navigateBack: () => void;
+  onForward: () => void;
+  onBack: () => void;
   showPillUi?: boolean;
   stepCount: number;
-  submitFn?: (data?: unknown) => void | Promise<void>;
+  className?: string;
+  isSubmitting?: boolean;
+  labelForwardBtn?: string;
+  labelBackwardBtn?: string;
+  labelSubmitBtn?: string;
+  submitFn?: () => void;
 }
 
 export const Navigation = memo(function Navigation({
   currentStep,
   stepCount,
   showPillUi = false,
-  navigateForward,
-  navigateBack,
+  onForward,
+  onBack,
+  className,
+  isSubmitting = false,
+  labelBackwardBtn,
+  labelForwardBtn,
+  labelSubmitBtn,
+  submitFn,
 }: Props) {
   const stepIsFinal = currentStep === stepCount - 1;
 
   return (
-    <Stack justify="between" align="center" className="mt-8">
+    <Stack justify="between" align="end" className={cn("mt-8", className)}>
       <Button
         disabled={currentStep === 0}
-        onClick={navigateBack}
+        onClick={onBack}
         type="button"
         variant="icon"
         bg={true}
-        aria-label="backward"
-        data-tooltip="move backwards"
+        color="secondary"
+        aria-label={labelBackwardBtn ?? "backward"}
+        data-tooltip={labelBackwardBtn ?? "move backwards"}
       >
         <ArrowLeft />
       </Button>
@@ -46,10 +59,10 @@ export const Navigation = memo(function Navigation({
                 layout
                 initial={{ height: "4px" }}
                 animate={{
-                  width: s === currentStep ? "28px" : "16px",
+                  width: s === currentStep ? "24px" : "18px",
                   background:
                     s === currentStep
-                      ? "var(--color-brand)"
+                      ? "var(--color-indicator)"
                       : "var(--color-border-vivid)",
                 }}
                 key={s}
@@ -59,28 +72,32 @@ export const Navigation = memo(function Navigation({
           })}
         </div>
       )}
-      <div className="justify-self-end items-center flex gap-4 justify-end">
+      <div className="justify-self-end items-end self-end flex gap-4 justify-end">
         {!stepIsFinal && (
           <Button
-            aria-label="forward"
-            data-tooltip="move forward"
+            aria-label={labelForwardBtn ?? "forward"}
+            data-tooltip={labelForwardBtn ?? "move forward"}
             type="button"
             bg={true}
             variant="icon"
-            onClick={navigateForward}
+            color="secondary"
+            onClick={onForward}
           >
             <ArrowRight />
           </Button>
         )}
         {stepIsFinal && (
           <Button
-            aria-label="submit"
-            data-tooltip="submit"
+            aria-label={labelSubmitBtn ?? "submit"}
+            data-tooltip={labelSubmitBtn ?? "submit"}
             type="submit"
             bg={true}
+            disabled={isSubmitting}
+            color="secondary"
+            onClick={submitFn}
             variant="icon"
           >
-            <Check />
+            {isSubmitting ? "..." : <Check />}
           </Button>
         )}
       </div>

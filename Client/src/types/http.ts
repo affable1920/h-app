@@ -34,7 +34,8 @@ export type DoctorCreate =
   components["schemas"]["Body_register_dr_auth_register_doctor_post"];
 export type UserResponse = components["schemas"]["UserResponse"];
 export type ScheduleCreate = components["schemas"]["CreateSchedule"];
-export type ScheduleResponse = components["schemas"]["ScheduleResponse"];
+export type ScheduleResponse =
+  operations["create_schedule"]["responses"]["201"]["content"]["application/json"];
 
 export type AppointmentPatientResponse =
   components["schemas"]["AppointmentPatientResponse"];

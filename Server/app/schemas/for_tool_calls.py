@@ -1,8 +1,8 @@
-from app.schemas.Base import FromORM, IDMixin
+from app.schemas.base import EntityResponse
 from app.schemas.enums import Gender
 
 
-class DrMinimal(FromORM, IDMixin):
+class DrMinimal(EntityResponse):
     """
     A minimal dr object model to be sent to the client in the ai-model's response
     """

@@ -2,7 +2,7 @@ import { type PatientSignin, PatientSigninSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Stack } from "./ui/Stack";
-import Input from "./ui/Input";
+import { Input } from "./ui/Input";
 import Button from "./ui/Button";
 import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -43,21 +43,25 @@ export function PatientSignin() {
   return (
     <form onSubmit={form.handleSubmit(submit)}>
       <Stack gap="md" orientation="V">
-        <Input
-          {...form.register("email")}
-          type="email"
-          id="email"
-          label="email"
-          error={errors["email"]}
-          autoFocus
-        />
-        <Input
-          label="password"
-          type="password"
-          error={errors["password"]}
-          {...form.register("password")}
-          id="password"
-        />
+        <Input.Group error={errors["email"]?.message}>
+          <Input.Label htmlFor="email">email</Input.Label>
+          <Input.Element
+            id="email"
+            autoFocus
+            type="email"
+            {...form.register("email")}
+          />
+        </Input.Group>
+
+        <Input.Group error={errors["password"]?.message}>
+          <Input.Label htmlFor="password">password</Input.Label>
+          <Input.Element
+            id="password"
+            autoFocus
+            type="password"
+            {...form.register("password")}
+          />
+        </Input.Group>
       </Stack>
       <Stack orientation="V" className="mt-4">
         <div className="text-red-400 text-center">

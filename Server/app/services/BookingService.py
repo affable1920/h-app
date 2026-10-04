@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import ConflictError, EntityNotFoundException
-from app.schemas.inputs import BookingRequestData
+from app.schemas.appointment import BookingRequestData
 from app.schemas.enums import AppointmentStatus
 from app.database.models import Appointment, CareJourney, Patient, Slot
 
@@ -70,18 +70,13 @@ class BookingService:
             ),
             (
                 schedule.is_active,
-                "This schedule is no longer active.",
+                "The doctor is not currently accepting new consultation requests on this schedule.",
                 "Schedule is inactive."
             ),
             (
                 schedule.doctor_id == payload.doctor_id,
                 "Requested slot does not belong to the requested doctor.",
                 "Doctor mismatch between schedule and client data."
-            ),
-            (
-                payload.scheduled_date.isoweekday() in set(schedule.weekdays),
-                "The doctor has no schedule on the requested date and weekday.",
-                "Date requested by patient was not part of the doctor's schedule."
             ),
         ]
 

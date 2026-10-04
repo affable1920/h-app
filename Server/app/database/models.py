@@ -1,13 +1,21 @@
 from uuid import UUID
-from datetime import datetime, time
-from typing import Annotated, ClassVar, Optional, Protocol
+from datetime import date, datetime, time
+from typing import Annotated, ClassVar, Protocol
 
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from app.database.entry_async import Base
-from app.schemas.enums import AppointmentStatus, Gender, Mode, ReviewableEntity, Status, UserRoleV2
+from app.schemas.enums import (
+    AppointmentStatus,
+    Gender,
+    Mode,
+    ReviewableEntity,
+    ScheduleKind,
+    Status,
+    UserRoleV2,
+)
 
 PrimaryKey = Annotated[UUID, mapped_column(
     sa.UUID(as_uuid=True),
@@ -17,17 +25,21 @@ PrimaryKey = Annotated[UUID, mapped_column(
 
 
 class Reviewable(Protocol):
+    __reviewable_entity__: ClassVar[ReviewableEntity]
+
     id: PrimaryKey
     reviews: list["Review"]
-    __reviewable_entity__: ClassVar[ReviewableEntity]
 
 
 class TimeStampMixin:
     created_at: Mapped[datetime] = mapped_column(
-        sa.DateTime(timezone=True), server_default=sa.func.now()
+        sa.DateTime(timezone=True),
+        server_default=sa.func.now()
     )
-    last_updated: Mapped[Optional[datetime]] = mapped_column(
-        server_onupdate=sa.func.now(), server_default=sa.func.now()
+
+    last_updated: Mapped[datetime | None] = mapped_column(
+        server_onupdate=sa.func.now(),
+        server_default=sa.func.now()
     )
 
 
@@ -84,15 +96,28 @@ class RatingMixin:
         )
 
 
-class Patient(TimeStampMixin, Base):
+class Patient(
+    TimeStampMixin,
+    Base
+):
     __tablename__ = "patient"
 
     id: Mapped[PrimaryKey]
 
-    username: Mapped[str] = mapped_column(nullable=False)
-    hash: Mapped[str] = mapped_column(nullable=False)
-    email: Mapped[str] = mapped_column(unique=True, nullable=False, index=True)
-    email_verified: Mapped[Optional[bool]] = mapped_column()
+    username: Mapped[str] = mapped_column(
+        index=True,
+    )
+
+    hash: Mapped[str] = mapped_column()
+
+    email: Mapped[str] = mapped_column(
+        unique=True,
+        index=True
+    )
+
+    email_verified: Mapped[bool] = mapped_column(
+        server_default=sa.text("false")
+    )
 
     appointments: Mapped[list["Appointment"]] = relationship(
         back_populates="patient",
@@ -108,51 +133,81 @@ junction = sa.Table(
 )
 
 
-class Doctor(RatingMixin, TimeStampMixin, Base):
+class Doctor(
+    RatingMixin,
+    TimeStampMixin,
+    Base
+):
     __tablename__ = "doctor"
     __reviewable_entity__ = ReviewableEntity.DOCTOR
 
     id: Mapped[PrimaryKey]
 
-    name: Mapped[str] = mapped_column(index=True, nullable=False)
+    name: Mapped[str] = mapped_column(
+        index=True,
+    )
+
     email: Mapped[str] = mapped_column(
         unique=True,
         index=True,
-        nullable=False
     )
-    hash: Mapped[str] = mapped_column(nullable=False)
 
-    phone: Mapped[Optional[str]] = mapped_column(sa.String(length=10))
-    image: Mapped[Optional[str]] = mapped_column(sa.Text)
-    email_verified: Mapped[Optional[bool]] = mapped_column()
+    hash: Mapped[str]
 
-    experience: Mapped[Optional[int]] = mapped_column()
-    verified: Mapped[bool] = mapped_column(server_default="False")
+    phone: Mapped[str | None] = mapped_column(
+        sa.String(length=10)
+    )
+
+    image: Mapped[str | None] = mapped_column(sa.Text)
+    email_verified: Mapped[bool] = mapped_column(
+        server_default=sa.false()
+    )
+
+    experience: Mapped[int | None] = mapped_column(index=True)
+
+    verified: Mapped[bool] = mapped_column(
+        server_default=sa.false(),
+        index=True
+    )
 
     primary_specialization: Mapped[str] = mapped_column(
-        nullable=False, index=True
-    )
-    secondary_focus_areas: Mapped[Optional[list[str]]] = mapped_column(
-        sa.JSON, server_default="[]"
+        index=True,
+        nullable=False
     )
 
-    fee: Mapped[Optional[int]] = mapped_column()
-    credentials: Mapped[str] = mapped_column(nullable=False)
-    documents: Mapped[Optional[str]] = mapped_column(sa.Text)
-    consults_online: Mapped[Optional[bool]] = mapped_column(default=True)
-    status: Mapped[Optional[Status]] = mapped_column(
+    secondary_focus_areas: Mapped[list[str] | None] = mapped_column(
+        sa.JSON,
+        server_default="[]"
+    )
+
+    fee: Mapped[int | None] = mapped_column(index=True)
+    credentials: Mapped[str]
+
+    documents: Mapped[str | None] = mapped_column(sa.Text)
+    consults_online: Mapped[bool | None] = mapped_column(
+        server_default=sa.true()
+    )
+
+    status: Mapped[Status] = mapped_column(
         sa.Enum(Status, name="doctor_availability_status"),
         default=Status.UNKNOWN,
         server_default=sa.text("'UNKNOWN'")
     )
 
     gender: Mapped[Gender] = mapped_column(
-        sa.Enum(Gender, name="gender"), nullable=False
+        sa.Enum(Gender, name="gender"),
     )
-    college_studied: Mapped[Optional[str]] = mapped_column(server_default="NA")
-    license_number: Mapped[str] = mapped_column(nullable=False, unique=True)
-    graduation_year: Mapped[Optional[int]] = mapped_column()
-    bio: Mapped[Optional[str]] = mapped_column(sa.Text)
+
+    college_studied: Mapped[str] = mapped_column(
+        server_default="NA"
+    )
+
+    license_number: Mapped[str] = mapped_column(
+        unique=True
+    )
+
+    graduation_year: Mapped[int | None]
+    bio: Mapped[str | None] = mapped_column(sa.Text)
 
     """
     A dr has One to many relationship with schedules
@@ -162,11 +217,15 @@ class Doctor(RatingMixin, TimeStampMixin, Base):
     """
 
     clinics: Mapped[list["Clinic"]] = relationship(
-        back_populates="doctors", secondary=junction
+        back_populates="doctors",
+        secondary=junction
     )
+
     schedules: Mapped[list["Schedule"]] = relationship(
-        back_populates="doctor", cascade="all, delete-orphan"
+        back_populates="doctor",
+        cascade="all, delete-orphan"
     )
+
     reviews: Mapped[list["Review"]] = relationship(
         primaryjoin="and_(Review.entity=='DOCTOR', foreign(Review.entity_id)==Doctor.id)",
         viewonly=True,
@@ -177,63 +236,150 @@ class Doctor(RatingMixin, TimeStampMixin, Base):
         return f"{self.__class__.__name__}(name={self.name})"
 
 
-class Clinic(RatingMixin, Base):
+class Clinic(
+    TimeStampMixin,
+    RatingMixin,
+    Base
+):
     __tablename__ = "clinic"
     __reviewable_entity__ = ReviewableEntity.CLINIC
 
     id: Mapped[PrimaryKey]
-    name: Mapped[str] = mapped_column(nullable=False, unique=True, index=True)
-    owner: Mapped[Optional[str]] = mapped_column()
-    pincode: Mapped[Optional[str]] = mapped_column()
-    location: Mapped[str] = mapped_column(sa.VARCHAR, nullable=False)
 
-    whatsapp: Mapped[Optional[str]] = mapped_column(sa.String(length=10))
-    contact_numbers: Mapped[list[str]] = mapped_column(
-        sa.ARRAY(sa.String(length=10)), server_default="{}"
+    name: Mapped[str] = mapped_column(
+        unique=True,
+        index=True
     )
 
-    facilities: Mapped[Optional[list[str]]] = mapped_column(
-        sa.JSON, server_default="[]")
-    specializations: Mapped[Optional[list[str]]] = mapped_column(
-        sa.JSON, server_default="[]"
+    owner: Mapped[str | None]
+    pincode: Mapped[str | None] = mapped_column(
+        sa.String(6)
+    )
+
+    location: Mapped[str] = mapped_column(
+        sa.VARCHAR,
+    )
+
+    whatsapp: Mapped[str | None] = mapped_column(
+        sa.String(length=10)
+    )
+
+    contact_numbers: Mapped[list[str]] = mapped_column(
+        sa.ARRAY(
+            sa.String(length=10)
+        ),
+        server_default="{}"
+    )
+
+    facilities: Mapped[list[str] | None] = mapped_column(
+        sa.JSON,
+        server_default="[]"
+    )
+
+    specializations: Mapped[list[str] | None] = mapped_column(
+        sa.JSON,
+        server_default="[]"
     )
 
     doctors: Mapped[list["Doctor"]] = relationship(
-        back_populates="clinics", secondary=junction
+        back_populates="clinics",
+        secondary=junction
     )
+
     reviews: Mapped[list["Review"]] = relationship(
         primaryjoin="and_(Review.entity=='CLINIC', foreign(Review.entity_id)==Clinic.id)",
         viewonly=True
     )
 
 
-class Schedule(Base):
+class Schedule(
+    TimeStampMixin,
+    Base
+):
     __tablename__ = "schedule"
 
     id: Mapped[PrimaryKey]
-    weekdays: Mapped[list[int]] = mapped_column(
-        sa.ARRAY(sa.Integer), server_default="{}"
+
+    recurrence_kind: Mapped[ScheduleKind] = mapped_column(
+        sa.Enum(ScheduleKind, name="schedule_kind"),
+        index=True
     )
 
-    is_active: Mapped[bool] = mapped_column(server_default="True")
+    timezone: Mapped[str] = mapped_column(
+        sa.String(64),
+        nullable=False,
+        server_default=sa.text("'Asia/Kolkata'")
+    )
 
-    start_time: Mapped[time] = mapped_column(sa.Time, nullable=False)
-    end_time: Mapped[time] = mapped_column(sa.Time, nullable=True)
+    starts_on: Mapped[date] = mapped_column(
+        sa.Date,
+    )
 
-    base_slot_duration: Mapped[int] = mapped_column(nullable=False, default=20)
-    doctor_id: Mapped[str] = mapped_column(sa.ForeignKey("doctor.id"))
-    clinic_id: Mapped[str] = mapped_column(sa.ForeignKey("clinic.id"))
+    ends_on: Mapped[date | None] = mapped_column(
+        sa.Date,
+    )
+
+    interval: Mapped[int] = mapped_column(
+        server_default="1"
+    )
+
+    weekdays: Mapped[list[int] | None] = mapped_column(
+        sa.ARRAY(sa.Integer)
+    )
+
+    month_days: Mapped[list[int] | None] = mapped_column(
+        sa.ARRAY(sa.Integer)
+    )
+
+    start_time: Mapped[time] = mapped_column(sa.Time)
+    end_time: Mapped[time] = mapped_column(sa.Time)
+
+    base_slot_duration: Mapped[int]
+
+    is_active: Mapped[bool] = mapped_column(
+        server_default=sa.true()
+    )
+
+    allow_online_consultations: Mapped[bool] = mapped_column(
+        server_default=sa.false()
+    )
+
+    max_slots: Mapped[int | None]
+    doctor_id: Mapped[UUID] = mapped_column(
+        sa.ForeignKey("doctor.id"),
+        nullable=False
+    )
+
+    clinic_id: Mapped[UUID] = mapped_column(
+        sa.ForeignKey("clinic.id"),
+        nullable=False
+    )
 
     clinic: Mapped["Clinic"] = relationship()
     doctor: Mapped["Doctor"] = relationship(back_populates="schedules")
+
     slots: Mapped[list["Slot"]] = relationship(
-        back_populates="schedule", cascade="all, delete-orphan"
+        back_populates="schedule",
+        cascade="all, delete-orphan"
     )
 
     __table_args__ = (
         sa.CheckConstraint(
-            sqltext="start_time < end_time", name="chk_schedule_timing"
+            sqltext="start_time < end_time",
+            name="chk_schedule_timing"
         ),
+        sa.CheckConstraint(
+            sqltext="base_slot_duration >= 5",
+            name="chk_schedule_slot_duration"
+        ),
+        sa.CheckConstraint(
+            sqltext="ends_on IS NULL OR ends_on >= starts_on",
+            name="chk_schedule_date_range"
+        ),
+        sa.CheckConstraint(
+            sqltext="interval >= 1",
+            name="check_schedule_interval"
+        )
     )
 
     def __repr__(self) -> str:
@@ -241,29 +387,60 @@ class Schedule(Base):
         return f"{self.__class__.__name__}(id={self.id})"
 
 
-class Slot(TimeStampMixin, Base):
+class Slot(
+    TimeStampMixin,
+    Base
+):
     __tablename__ = "slot"
 
     id: Mapped[PrimaryKey]
-    is_booked: Mapped[bool] = mapped_column(default=False)
-    duration: Mapped[Optional[int]] = mapped_column()
+
     slot_datetime: Mapped[datetime] = mapped_column(
-        sa.DateTime(timezone=True), nullable=False
-    )
-    mode: Mapped[Optional[Mode]] = mapped_column(
-        sa.Enum(Mode, name="consultation_mode"),
-        server_default=sa.text("'IN_PERSON'")
+        sa.DateTime(timezone=True),
+        index=True
     )
 
-    # window: Mapped[str] = mapped_column(sa.String, nullable=False)
-    schedule_id: Mapped[UUID] = mapped_column(sa.ForeignKey("schedule.id"))
+    duration: Mapped[int]
+
+    is_booked: Mapped[bool] = mapped_column(
+        server_default=sa.false(),
+    )
+
+    mode: Mapped[Mode] = mapped_column(
+        sa.Enum(Mode, name="consultation_mode"),
+    )
+
+    schedule_id: Mapped[UUID] = mapped_column(
+        sa.ForeignKey("schedule.id"),
+        nullable=False
+    )
+
     schedule: Mapped[Schedule] = relationship(back_populates="slots")
 
+    __table_args__ = (
+        sa.UniqueConstraint(
+            "schedule_id",
+            "slot_datetime",
+            name="uq_schedule_datetime"
+        ),
+        sa.CheckConstraint(
+            sqltext="duration >= 5",
+            name="check_slot_duration"
+        )
+    )
 
-class Appointment(TimeStampMixin, Base):
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(id={self.id})"
+
+
+class Appointment(
+    TimeStampMixin,
+    Base
+):
     __tablename__ = "appointment"
 
     id: Mapped[PrimaryKey]
+
     scheduled_date: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True)
     )
@@ -277,7 +454,8 @@ class Appointment(TimeStampMixin, Base):
     )
 
     patient_id: Mapped[UUID] = mapped_column(
-        sa.ForeignKey("patient.id")
+        sa.ForeignKey("patient.id"),
+        nullable=False
     )
 
     patient: Mapped[Patient] = relationship(
@@ -290,14 +468,23 @@ class Appointment(TimeStampMixin, Base):
     )
 
     slot: Mapped[Slot] = relationship(lazy="immediate")
-    doctor_id: Mapped[UUID] = mapped_column(sa.ForeignKey("doctor.id"))
-    doctor: Mapped["Doctor"] = relationship()
-    clinic_id: Mapped[UUID] = mapped_column(sa.ForeignKey("clinic.id"))
-    clinic: Mapped["Clinic"] = relationship()
 
-    care_journey_id: Mapped[sa.UUID | None] = mapped_column(
+    doctor_id: Mapped[UUID] = mapped_column(
+        sa.ForeignKey("doctor.id"),
+        nullable=False
+    )
+
+    doctor: Mapped["Doctor"] = relationship()
+    clinic_id: Mapped[UUID] = mapped_column(
+        sa.ForeignKey("clinic.id"),
+        nullable=False
+    )
+
+    clinic: Mapped["Clinic"] = relationship()
+    care_journey_id: Mapped[UUID | None] = mapped_column(
         sa.ForeignKey("care_journey.id")
     )
+
     care_journey: Mapped["CareJourney | None"] = relationship()
 
     __table_args__ = (
@@ -310,19 +497,32 @@ class Appointment(TimeStampMixin, Base):
     )
 
 
-class Review(TimeStampMixin, Base):
+class Review(
+    TimeStampMixin,
+    Base
+):
     __tablename__ = "review"
 
-    id: Mapped[PrimaryKey] = mapped_column()
-    rating: Mapped[int] = mapped_column()
-    comment: Mapped[Optional[str]] = mapped_column(sa.Text)
-    entity: Mapped[ReviewableEntity] = mapped_column(sa.Enum(
-        ReviewableEntity, name="reviewable_entity"), nullable=False
-    )
-    entity_id: Mapped[UUID] = mapped_column(nullable=False)
+    id: Mapped[PrimaryKey]
+    rating: Mapped[int]
 
-    patient_id: Mapped[UUID] = mapped_column(sa.ForeignKey("patient.id"))
-    appointment_id: Mapped[UUID] = mapped_column(nullable=True)
+    comment: Mapped[str | None] = mapped_column(sa.Text)
+
+    entity_id: Mapped[UUID]
+    entity: Mapped[ReviewableEntity] = mapped_column(
+        sa.Enum(
+            ReviewableEntity, name="reviewable_entity"
+        ),
+        nullable=False
+    )
+
+    patient_id: Mapped[UUID] = mapped_column(
+        sa.ForeignKey("patient.id"),
+    )
+
+    appointment_id: Mapped[UUID | None] = mapped_column(
+        nullable=True
+    )
 
     __table_args__ = (
         sa.CheckConstraint("rating >= 0 AND rating <= 5", "chk_review_rating"),
@@ -336,8 +536,8 @@ class EmailVerificationToken(Base):
     __tablename__ = "email_verification_token"
 
     id: Mapped[PrimaryKey] = mapped_column()
+
     user_id: Mapped[UUID] = mapped_column(
-        nullable=False,
         index=True
     )
 
@@ -346,17 +546,15 @@ class EmailVerificationToken(Base):
             UserRoleV2,
             name="user_role",
         ),
-        nullable=False,
     )
 
     hash: Mapped[str] = mapped_column(
-        nullable=False,
-        unique=True
+        unique=True,
+        index=True
     )
 
     exp: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True),
-        nullable=False
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -364,7 +562,7 @@ class EmailVerificationToken(Base):
         server_default=sa.func.now()
     )
 
-    used_at: Mapped[Optional[datetime]] = mapped_column(
+    used_at: Mapped[datetime | None] = mapped_column(
         sa.DateTime(timezone=True),
         nullable=True
     )
@@ -377,12 +575,12 @@ class CareJourney(
     __tablename__ = "care_journey"
 
     id: Mapped[PrimaryKey]
-    patient_id: Mapped[sa.UUID] = mapped_column(
+
+    patient_id: Mapped[UUID] = mapped_column(
         sa.ForeignKey("patient.id"),
         nullable=False
     )
 
-    reason_for_visit: Mapped[Optional[str]] = mapped_column(
+    reason_for_visit: Mapped[str | None] = mapped_column(
         sa.Text,
-        nullable=True
     )

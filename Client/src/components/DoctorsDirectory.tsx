@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import CardFlippable from "@/components/lib/CardFlippable";
 import Spinner from "@/components/ui/Spinner";
 import DrCardFront from "./DrCardFront";
-import { useDoctors } from "@/hooks/use-doctors";
+import { useGetDoctors } from "@/hooks/use-doctors";
 import { keepPreviousData } from "@tanstack/react-query";
 
 function DoctorsDirectory() {
@@ -14,7 +14,7 @@ function DoctorsDirectory() {
     data: { entities: doctors = [], hasNext = true } = {},
     isFetching,
     isError,
-  } = useDoctors(Object.fromEntries(params.entries()), {
+  } = useGetDoctors(Object.fromEntries(params.entries()), {
     refetchOnMount: false,
     placeholderData: keepPreviousData,
   });

@@ -1,26 +1,41 @@
 import logging
 from typing import Optional
 from uuid import UUID
-from fastapi import Body, Depends, APIRouter, HTTPException, Query
+
+from fastapi import (
+    Body,
+    Depends,
+    APIRouter,
+    HTTPException,
+    Query
+)
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.schemas.outputs import (
+    AppointmentDoctorResponse,
+    PaginatedResponse
+)
 
 from app.services.entities.main import EntityService
 from app.database.models import Doctor
+
 from app.features.auth.dependencies import require_doctor
-from app.schemas.outputs import AppointmentDoctorResponse, DoctorScheduleResponse, PaginatedResponse
-from app.schemas.response_modifiers import DrRouteFilters, PaginationParams, SortParams
+from app.schemas.schedule import DoctorScheduleResponse
+
+from app.schemas.response_modifiers import (
+    DrRouteFilters,
+    PaginationParams,
+    SortParams
+)
+
 from app.schemas.models import DoctorHttpFull, DoctorHttpMinimal
-from app.schemas.response_modifiers import DrRouteFilters, PaginationParams, SortParams
+
 from app.database.entry_async import get_db
 from app.services.DrService import DoctorService
 
 
 logger = logging.getLogger(__name__)
-router = APIRouter(
-    prefix="/doctors",
-    tags=["Doctors"],
-    dependencies=[Depends(get_db)]
-)
 
 ALLOWED_FIELDS = {
     "name",
@@ -28,6 +43,12 @@ ALLOWED_FIELDS = {
     "profile",
     "email"
 }
+
+router = APIRouter(
+    prefix="/doctors",
+    tags=["Doctors"],
+    dependencies=[Depends(get_db)]
+)
 
 
 @router.get("", response_model=PaginatedResponse[DoctorHttpMinimal])
@@ -37,7 +58,7 @@ async def get_doctors(
     sort: SortParams = Depends(),
     session: AsyncSession = Depends(get_db),
 ):
-    count, objects = await DoctorService.get_all(
+    count, obj = await DoctorService.get_all(
         session,
         pagination=pagination_params,
         filters=filters,
@@ -45,7 +66,7 @@ async def get_doctors(
     )
 
     response = DoctorService.create_pg_response(
-        objs=objects,
+        objs=obj,
         count=count,
         pagination=pagination_params
     )
@@ -62,8 +83,6 @@ async def get_doctor(
         entity_id=doctor_id,
         session=session
     )
-
-# ================================================================================================
 
 
 @router.put("/edit")
@@ -95,9 +114,6 @@ async def edit_doctor(
     await session.commit()
 
     await session.refresh(doctor)
-
-
-# ================================================================================================
 
 
 @router.get(

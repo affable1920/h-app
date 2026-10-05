@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime
 from typing import Generic, Self, Sequence, TypeVar
 from uuid import UUID
 from pydantic import (
@@ -64,8 +64,6 @@ class AppointmentDoctorResponse(
     patient: UserResponse
 
 
-# =============
-#  Generic Response
 T = TypeVar("T")
 
 
@@ -96,8 +94,6 @@ class PatientProfileResponse(
         return self
 
 
-#
-
 class DrProfileResponse(
     DoctorHttpFull,
     Aliased
@@ -119,18 +115,3 @@ class AuthHdrPayload(Aliased):
     model_config = ConfigDict(
         use_enum_values=True
     )
-
-
-#
-
-
-class DoctorScheduleResponse(
-    IDMixin,
-    FromORM,
-    Aliased
-):
-    clinic: ClinicHttpMinimal
-    weekdays: list[int]
-    is_active: bool
-    start_time: time
-    end_time: time

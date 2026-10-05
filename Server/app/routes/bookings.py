@@ -2,12 +2,10 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import BackgroundTasks, APIRouter, Depends, HTTPException
-# grep -r "from sqlalchemy.orm import Session" app
 from app.core.exceptions import ConflictError, EntityNotFoundException
 from app.database.models import Patient
 from app.services import MailService
-from app.schemas.outputs import AppointmentConfirmation
-from app.schemas.inputs import BookingRequestData
+from app.schemas.appointment import AppointmentConfirmation, BookingRequestData
 from app.services.BookingService import BookingService
 from app.database.entry_async import get_db
 from app.features.auth.dependencies import require_patient
@@ -18,6 +16,7 @@ router = APIRouter(
     tags=["bookings"],
     dependencies=[Depends(require_patient)]
 )
+
 logger = logging.getLogger(__name__)
 
 
@@ -74,7 +73,7 @@ async def book(
 
 
 #
-@router.delete("/cancel/{booking_id}")
+@router.delete("/{booking_id}")
 async def cancel_booking(
     booking_id: str,
     background_tasks: BackgroundTasks,

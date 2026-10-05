@@ -1,7 +1,7 @@
 import enum
 from typing import Any
 from pydantic import BaseModel, ConfigDict
-from app.schemas.Base import snake_to_camel
+from app.schemas.base import snake_to_camel
 
 
 class MsgType(str, enum.Enum):

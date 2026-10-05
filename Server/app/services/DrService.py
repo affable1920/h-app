@@ -10,10 +10,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.features.auth import security
 from app.core.exceptions import AlreadyInUseException
 from app.scripts.one_off import compress
-from app.schemas.inputs import DrCreate
+from app.schemas.doctor import DrCreate
 from app.services.entities.main import EntityService
 from app.database.models import Appointment, Clinic, Doctor, Schedule
-from app.schemas.response_modifiers import DrRouteFilters, PaginationParams
+from app.schemas.pagination import DrRouteFilters, PaginationParams
 from app.services.PatientService import PatientService
 from app.features.auth import security
 
@@ -157,8 +157,7 @@ class DoctorService(EntityService[Doctor]):
 
     @staticmethod
     def get_available_wkdays(doctor: Doctor) -> set[int]:
-        all_wkdays = [s.weekdays for s in doctor.schedules]
-        return set().union(*all_wkdays)
+        return set()
 
     #
 
@@ -190,11 +189,10 @@ class DoctorService(EntityService[Doctor]):
                 joinedload(Appointment.patient),
                 joinedload(Appointment.care_journey),
                 joinedload(Appointment.clinic),
-                joinedload(Appointment.doctor)
             )
             .where(Appointment.doctor_id == doctor_id)
             .order_by(
-                Appointment.scheduled_date.asc(),
+                Appointment.scheduled_date.desc(),
                 Appointment.id.asc()
             )
         )
@@ -224,9 +222,42 @@ class DoctorService(EntityService[Doctor]):
             select(Schedule)
             .options(
                 selectinload(Schedule.slots),
-                joinedload(Schedule.clinic)
+                joinedload(Schedule.clinic).selectinload(Clinic.reviews)
             )
             .where(Schedule.doctor_id == doctor_id)
+            .order_by(Schedule.is_active.desc())
+        )
+
+        count = await (
+            session.scalar(
+                select(func.count()).select_from(
+                    stmt.subquery()
+                )
+            )
+        ) or 0
+
+        if pagination_params is not None:
+            stmt = cls.paginate(stmt, pagination_params)
+
+        objs = (await session.scalars(stmt)).all()
+        return count, objs
+
+    #
+
+    @classmethod
+    async def get_clinics(
+        cls,
+        session: AsyncSession,
+        doctor_id: UUID,
+        pagination_params: PaginationParams | None = None
+    ):
+        stmt = (
+            select(Clinic)
+            .select_from(Doctor)
+            .join(Doctor.clinics)
+            .where(Doctor.id == doctor_id)
+            .options(selectinload(Clinic.reviews))
+            .order_by(Clinic.name, Clinic.id)
         )
 
         count = await (

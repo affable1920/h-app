@@ -4,7 +4,7 @@ from typing import Annotated, Any, Literal, Protocol, Self
 
 from pydantic import Field, model_validator
 
-from app.schemas.Base import StrictRequest
+from app.schemas.base import StrictRequest
 from app.schemas.enums import ScheduleKind
 
 
@@ -57,6 +57,8 @@ Recurrence = Annotated[
     Field(discriminator="kind"),
 ]
 
+# pydantic constructs one model after looking at the kind discriminator property and only validates
+# against that model ..
 
 class FlatRecurrenceSource(Protocol):
     """Attributes required to project a flat persistence record to the API."""
@@ -69,10 +71,7 @@ class FlatRecurrenceSource(Protocol):
     month_days: list[int] | None
 
 
-def _read(
-        source: FlatRecurrenceSource | Mapping[str, Any],
-        field: str
-) -> Any:
+def _read(source: FlatRecurrenceSource | Mapping[str, Any], field: str) -> Any:
     if isinstance(source, Mapping):
         return source[field]
     return getattr(source, field)
@@ -84,24 +83,16 @@ def recurrence_from_flat(
     """Build the nested API recurrence from flat ORM/database attributes."""
 
     raw_kind = _read(source, "recurrence_kind")
-    kind = (
-        raw_kind
-        if isinstance(raw_kind, ScheduleKind)
-        else ScheduleKind(raw_kind)
-    )
-
+    kind = raw_kind if isinstance(
+        raw_kind, ScheduleKind) else ScheduleKind(raw_kind)
     starts_on = _read(source, "starts_on")
 
     match kind:
         case ScheduleKind.ONE_OFF:
-            return OneOffRecurrence(
-                kind="one-off",
-                date=starts_on
-            )
+            return OneOffRecurrence(kind="one-off", date=starts_on)
 
         case ScheduleKind.WEEKLY:
             weekdays = _read(source, "weekdays")
-
             if not weekdays:
                 raise ValueError(
                     "A weekly schedule must contain at least one weekday."
@@ -117,7 +108,6 @@ def recurrence_from_flat(
 
         case ScheduleKind.MONTHLY:
             month_days = _read(source, "month_days")
-
             if not month_days:
                 raise ValueError(
                     "A monthly schedule must contain at least one month day."

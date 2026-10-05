@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from app.core.exceptions import InvalidTokenError
 from app.core.config import settings
 from app.schemas.enums import UserRoleV2
-from app.schemas.outputs import AuthHdrPayload
+from app.schemas.auth import AuthHdrPayload
 
 
 # Passwords

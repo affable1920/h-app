@@ -2,10 +2,18 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.strategy_options import _AbstractLoad
+
 from app.core.exceptions import AlreadyInUseException
 from app.services.entities.main import EntityService
-from app.database.models import Appointment, Clinic, Doctor, Patient
-from app.schemas.inputs import PatientCreate
+
+from app.database.models import (
+    Appointment,
+    Clinic,
+    Doctor,
+    Patient
+)
+
+from app.schemas.patient import PatientCreate
 from app.features.auth import security
 
 

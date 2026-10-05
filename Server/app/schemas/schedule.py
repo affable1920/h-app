@@ -1,22 +1,13 @@
-from datetime import time
+from datetime import datetime, time
 from typing import Annotated, Any, Literal, Self
 from uuid import UUID
 
 from pydantic import Field, field_validator, model_validator
 
-from app.schemas.models import ClinicHttpMinimal
-from app.schemas.Base import (
-    Aliased,
-    FromORM,
-    IDMixin,
-    StrictRequest,
-)
-
-from app.schemas.recurrence import (
-    Recurrence,
-    recurrence_to_flat,
-    with_recurrence,
-)
+from app.schemas.base import EntityResponse, StrictRequest
+from app.schemas.clinic import ClinicHttpMinimal
+from app.schemas.enums import Mode
+from app.schemas.recurrence import Recurrence, recurrence_to_flat, with_recurrence
 
 
 class CreateSchedule(StrictRequest):
@@ -61,11 +52,15 @@ class CreateSchedule(StrictRequest):
         return recurrence_to_flat(self.recurrence)
 
 
-class ScheduleResponseBase(
-    IDMixin,
-    Aliased,
-    FromORM
-):
+class Slot(EntityResponse):
+    duration: int
+    is_booked: bool = False
+    mode: Mode | None = None
+    slot_datetime: datetime
+    schedule_id: UUID
+
+
+class ScheduleResponseBase(EntityResponse):
     timezone: str
     start_time: time
     end_time: time
@@ -83,3 +78,11 @@ class ScheduleResponseBase(
 
 class DoctorScheduleResponse(ScheduleResponseBase):
     clinic: ClinicHttpMinimal
+
+
+class Schedule(DoctorScheduleResponse):
+    """Public schedule embedded in a doctor's details response."""
+
+    clinic_id: UUID
+    doctor_id: UUID
+    slots: list[Slot] = Field(default_factory=list)

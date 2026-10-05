@@ -1,41 +1,35 @@
 import logging
 from typing import Optional
 from uuid import UUID
-
-from fastapi import (
-    Body,
-    Depends,
-    APIRouter,
-    HTTPException,
-    Query
-)
-
+from fastapi import Body, Depends, APIRouter, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.outputs import (
-    AppointmentDoctorResponse,
-    PaginatedResponse
-)
-
+from app.core.exceptions import ConflictError, EntityNotFoundException
+from app.services.AppointmentService import AppointmentService
+from app.services.SchedulingService import ScheduleService
 from app.services.entities.main import EntityService
 from app.database.models import Doctor
-
 from app.features.auth.dependencies import require_doctor
-from app.schemas.schedule import DoctorScheduleResponse
-
-from app.schemas.response_modifiers import (
+from app.schemas.appointment import AppointmentDoctorResponse
+from app.schemas.clinic import DoctorClinicResponse
+from app.schemas.doctor import DoctorHttpFull, DoctorHttpMinimal
+from app.schemas.pagination import (
     DrRouteFilters,
+    PaginatedResponse,
     PaginationParams,
-    SortParams
+    SortParams,
 )
-
-from app.schemas.models import DoctorHttpFull, DoctorHttpMinimal
-
+from app.schemas.schedule import DoctorScheduleResponse
 from app.database.entry_async import get_db
 from app.services.DrService import DoctorService
 
 
 logger = logging.getLogger(__name__)
+router = APIRouter(
+    prefix="/doctors",
+    tags=["Doctors"],
+    dependencies=[Depends(get_db)]
+)
 
 ALLOWED_FIELDS = {
     "name",
@@ -43,12 +37,6 @@ ALLOWED_FIELDS = {
     "profile",
     "email"
 }
-
-router = APIRouter(
-    prefix="/doctors",
-    tags=["Doctors"],
-    dependencies=[Depends(get_db)]
-)
 
 
 @router.get("", response_model=PaginatedResponse[DoctorHttpMinimal])
@@ -58,7 +46,7 @@ async def get_doctors(
     sort: SortParams = Depends(),
     session: AsyncSession = Depends(get_db),
 ):
-    count, obj = await DoctorService.get_all(
+    count, objects = await DoctorService.get_all(
         session,
         pagination=pagination_params,
         filters=filters,
@@ -66,7 +54,7 @@ async def get_doctors(
     )
 
     response = DoctorService.create_pg_response(
-        objs=obj,
+        objs=objects,
         count=count,
         pagination=pagination_params
     )
@@ -74,7 +62,10 @@ async def get_doctors(
     return response
 
 
-@router.get("/{doctor_id}", response_model=Optional[DoctorHttpFull])
+@router.get(
+    "/{doctor_id}",
+    response_model=Optional[DoctorHttpFull]
+)
 async def get_doctor(
     doctor_id: UUID,
     session: AsyncSession = Depends(get_db)
@@ -84,8 +75,10 @@ async def get_doctor(
         session=session
     )
 
+# ================================================================================================
 
-@router.put("/edit")
+
+@router.put("/me")
 async def edit_doctor(
     q: str = Query(),
     val: str = Body(embed=True),
@@ -114,6 +107,9 @@ async def edit_doctor(
     await session.commit()
 
     await session.refresh(doctor)
+
+
+# ================================================================================================
 
 
 @router.get(
@@ -159,3 +155,97 @@ async def get_doctor_schedules(
         count,
         pagination_params
     )
+
+
+# ================================================================================================
+@router.put(
+    "/me/schedules/{schedule_id}",
+)
+async def toggle_schedule_activation(
+    schedule_id: UUID,
+    doctor: Doctor = Depends(require_doctor),
+    session: AsyncSession = Depends(get_db),
+):
+    sch = await ScheduleService.get_schedule_for_doctor(
+        schedule_id=schedule_id,
+        session=session,
+        doctor_id=doctor.id
+    )
+
+    if sch is None:
+        raise HTTPException(
+            404,
+            detail={
+                "code": "not_found",
+                "message": "The schedule you are trying to edit does not exist.",
+            }
+        )
+
+    await ScheduleService.edit_schedule(
+        schedule_id=schedule_id,
+        doctor_id=doctor.id,
+        session=session,
+        field_name="is_active",
+        val=not sch.is_active
+    )
+
+# ================================================================================================
+
+
+@router.get(
+    path="/me/clinics",
+    response_model=PaginatedResponse[DoctorClinicResponse]
+)
+async def get_doctor_clinics(
+    doctor: Doctor = Depends(require_doctor),
+    session: AsyncSession = Depends(get_db),
+    pagination_params: PaginationParams = Depends()
+):
+    count, objs = await DoctorService.get_clinics(
+        session=session,
+        doctor_id=doctor.id,
+        pagination_params=pagination_params
+    )
+
+    return EntityService.create_pg_response(
+        objs=objs,
+        count=count,
+        pagination=pagination_params
+    )
+
+
+# ================================================================================================
+@router.delete(
+    path="/me/appointments/{appointment_id}",
+)
+async def cancel_appointment(
+    appointment_id: UUID,
+    session: AsyncSession = Depends(get_db),
+    doctor: Doctor = Depends(require_doctor),
+):
+    try:
+        await AppointmentService.cancel_doctor_appointment(
+            session,
+            doctor.id,
+            appointment_id
+        )
+
+        await session.commit()
+
+    except EntityNotFoundException as e:
+        raise HTTPException(
+            404,
+            detail={
+                "code": "not_found",
+                "msg": "The requested doctor could not be found."
+            }
+        ) from e
+
+    except ConflictError as e:
+        raise HTTPException(
+            409,
+            detail={
+                "code": e.code,
+                "msg": e.message
+            }
+        )

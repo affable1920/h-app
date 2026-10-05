@@ -1,14 +1,14 @@
-import enum
+from enum import StrEnum
 from typing_extensions import deprecated
 
 
-class ReviewableEntity(enum.Enum):
+class ReviewableEntity(StrEnum):
     DOCTOR = "DOCTOR"
     CLINIC = "CLINIC"
 
 
-@deprecated("This enum is deprecated. Use UserRoleV2 instead")
-class UserRole(enum.Enum):
+@deprecated("This enum is deprecated. Use UserRoleV2 instead ..",)
+class UserRole(StrEnum):
     ADMIN = "admin"
     DOCTOR = "doctor"
     PATIENT = "patient"
@@ -16,38 +16,38 @@ class UserRole(enum.Enum):
     GUEST = "guest"
 
 
-class Mode(enum.Enum):
+class Mode(StrEnum):
     ONLINE = "online"
     IN_PERSON = "in person"
     HYBRID = "hybrid"
 
 
-class UserRoleV2(enum.Enum):
+class UserRoleV2(StrEnum):
     CLINIC_ADMIN = "clinic_admin"
     DOCTOR = "doctor"
     PATIENT = "patient"
 
 
-class Status(enum.Enum):
+class Status(StrEnum):
     AWAY = "away"
     AVAILABLE = "available"
     IN_PATIENT = "in_patient"
     UNKNOWN = "unknown"
 
 
-class AppointmentStatus(str, enum.Enum):
+class AppointmentStatus(StrEnum):
     ACTIVE = "active"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
     MISSED = "missed"
 
 
-class Gender(str, enum.Enum):
+class Gender(StrEnum):
     MALE = "male"
     FEMALE = "female"
 
 
-class ScheduleKind(str, enum.Enum):
+class ScheduleKind(StrEnum):
     ONE_OFF = "one-off"
     WEEKLY = "weekly"
     MONTHLY = "monthly"

@@ -14,18 +14,14 @@ from app.core.exceptions import AlreadyInUseException, EntityNotFoundException
 from app.database.models import Doctor, Patient
 from app.database.entry_async import get_db
 
-from app.schemas.inputs import (
+from app.schemas.doctor import (
     DoctorLogin,
     DrCreate,
-    PatientLogin,
-    PatientCreate,
-    get_dr_onboarding
-)
-from app.schemas.outputs import (
     DrProfileResponse,
-    PatientProfileResponse,
-    UserResponse
+    get_dr_onboarding,
 )
+from app.schemas.patient import PatientCreate, PatientLogin, PatientProfileResponse
+from app.schemas.user import UserResponse
 
 
 router = APIRouter(prefix="/auth")
@@ -161,7 +157,8 @@ async def login_dr(
 @router.get(
     path="/me",
     response_model=Optional[
-        DrProfileResponse | PatientProfileResponse
+        DrProfileResponse
+        | PatientProfileResponse
     ]
 )
 async def me(

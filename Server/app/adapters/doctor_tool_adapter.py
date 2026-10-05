@@ -3,7 +3,7 @@ from uuid import UUID
 from app.database.models import Doctor
 from app.schemas.for_tool_calls import DrMinimal
 from app.schemas.enums import Gender
-from app.schemas.response_modifiers import DrRouteFilters
+from app.schemas.pagination import DrRouteFilters
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.DrService import DoctorService
 

@@ -132,11 +132,12 @@ class ScheduleService:
             )
         )
 
-        schedule.slots = [
+        slots = [
             Slot(**values)
             for values in slot_values
         ]
 
+        session.add_all(slots)
         return schedule
 
     @classmethod

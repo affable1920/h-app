@@ -18,14 +18,14 @@ back a new function. Calling them is NOT bound by Rules of Hooks.
  */
 
 export function createQueryHook<TParams, TData>(
-  keyFn: (params: TParams) => QueryKey,
-  fetchFn: (params: TParams) => Promise<TData>,
+  keyFn: (params?: TParams) => QueryKey,
+  fetchFn: (params?: TParams) => Promise<TData>,
 ) {
   // RENDER TIME: the returned function is the HOOK, The only hook-call
   // boundary in the chain.
 
   return function useResourceQuery(
-    params: TParams,
+    params?: TParams,
     options?: Omit<UseQueryOptions<TData>, "queryKey" | "queryFn">,
   ) {
     return useQuery({

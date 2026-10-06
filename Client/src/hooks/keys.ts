@@ -1,21 +1,23 @@
 import type { operations } from "@/types/api";
+import type { PaginationParams } from "@/types/doctor-api";
 
 export type DoctorFilters = operations["get_doctors"]["parameters"]["query"];
-export type ClinicFilters = operations["get_all"]["parameters"]["query"];
+export type ClinicFilters = operations["get_clinics"]["parameters"]["query"];
 
 export const doctorKeys = {
   all: ["doctors"] as const, // all entities - no pagination, filtering or sorting
-  lists: () => [...doctorKeys.all, "list"] as const,
-  list: (filters: DoctorFilters) => [...doctorKeys.lists(), filters] as const,
-  details: () => [...doctorKeys.all, "detail"] as const,
-  detail: (id: string) => [...doctorKeys.details(), id] as const,
-  auth: () => ["auth", "me"],
+  list: (filters: DoctorFilters) => [...doctorKeys.all, filters] as const,
+  details: (id: string) => [...doctorKeys.all, id] as const,
+  auth: ["auth", "me"], // doctor profile
+  relations: (
+    rel: string,
+    filters?: PaginationParams, // doctor's relationships with basic pagination
+  ) => (filters ? (["me", rel, filters] as const) : (["me", rel] as const)),
+  relation: (rel: string, id: string) => [...doctorKeys.relations(rel), id], // a single doctor relationship record
 };
 
 export const clinicKeys = {
   all: ["clinics"] as const,
-  lists: () => [...clinicKeys.all, "list"] as const,
-  list: (filters: ClinicFilters) => [...clinicKeys.lists(), filters] as const,
-  details: () => [...clinicKeys.all, "detail"] as const,
-  detail: (id: string) => [...clinicKeys.details(), id] as const,
+  list: (filters: ClinicFilters) => [...clinicKeys.all, filters] as const,
+  details: (id: string) => [...clinicKeys.all, id] as const,
 };

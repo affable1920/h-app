@@ -191,7 +191,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/doctors/edit": {
+    "/doctors/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -242,6 +242,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/doctors/me/schedules/{schedule_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Toggle Schedule Activation */
+        put: operations["toggle_activation"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctors/me/clinics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Doctor Clinics */
+        get: operations["get_clinics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctors/me/appointments/{appointment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cancel Appointment */
+        delete: operations["cancel_appointment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/bookings": {
         parameters: {
             query?: never;
@@ -259,7 +310,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/bookings/cancel/{booking_id}": {
+    "/bookings/{booking_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -345,7 +396,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/schedules/create": {
+    "/schedules": {
         parameters: {
             query?: never;
             header?: never;
@@ -406,7 +457,7 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /**
@@ -427,7 +478,7 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /**
@@ -443,7 +494,6 @@ export interface components {
             status: components["schemas"]["AppointmentStatus"];
             careJourney?: components["schemas"]["CareJourneyResponse"] | null;
             slot: components["schemas"]["Slot"];
-            doctor: components["schemas"]["DoctorHttpMinimal"];
             clinic: components["schemas"]["ClinicHttpMinimal"];
             patient: components["schemas"]["UserResponse"];
         };
@@ -452,7 +502,7 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /**
@@ -468,8 +518,8 @@ export interface components {
             status: components["schemas"]["AppointmentStatus"];
             careJourney?: components["schemas"]["CareJourneyResponse"] | null;
             slot: components["schemas"]["Slot"];
-            doctor: components["schemas"]["DoctorHttpMinimal"];
             clinic: components["schemas"]["ClinicHttpMinimal"];
+            doctor: components["schemas"]["DoctorHttpMinimal"];
         };
         /**
          * AppointmentStatus
@@ -487,8 +537,8 @@ export interface components {
             /** Nw */
             nw: string;
         };
-        /** Body_edit_doctor_doctors_edit_put */
-        Body_edit_doctor_doctors_edit_put: {
+        /** Body_edit_doctor_doctors_me_put */
+        Body_edit_doctor_doctors_me_put: {
             /** Val */
             val: string;
         };
@@ -501,17 +551,9 @@ export interface components {
         Body_register_dr_auth_register_doctor_post: {
             /** Name */
             name: string;
-            /**
-             * Gender
-             * @enum {string}
-             */
-            gender: "male" | "female";
+            gender: components["schemas"]["Gender"];
             /** Degree */
             degree: string;
-            /** Medical College */
-            medical_college: string;
-            /** Graduation Year */
-            graduation_year: number;
             /** License Number */
             license_number: string;
             /** Primary Specialization */
@@ -524,6 +566,13 @@ export interface components {
             /** Password */
             password: string;
             /**
+             * Medical College
+             * @default NA
+             */
+            medical_college: string;
+            /** Graduation Year */
+            graduation_year?: number | null;
+            /**
              * Experience
              * @default 0
              */
@@ -532,7 +581,7 @@ export interface components {
              * Secondary Focus Areas
              * @default []
              */
-            secondary_focus_areas: string[] | string;
+            secondary_focus_areas: string[];
             /** Bio */
             bio?: string | null;
             /** Phone */
@@ -542,11 +591,6 @@ export interface components {
         };
         /** BookingRequestData */
         BookingRequestData: {
-            /**
-             * Date
-             * Format: date-time
-             */
-            date: string;
             /**
              * Doctorid
              * Format: uuid
@@ -565,7 +609,7 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /** Reasonforvisit */
@@ -576,21 +620,21 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /** Name */
             name: string;
             /** Location */
-            location?: string | null;
+            location: string;
             /** Facilities */
             facilities?: string[];
             /** Owner */
             owner?: string | null;
             /** Pincode */
-            pincode?: number | null;
+            pincode?: string | null;
             /** Contacts */
-            contacts?: number[];
+            contacts?: string[];
             /** Rating */
             readonly rating: number;
             /** Reviewcount */
@@ -601,13 +645,13 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /** Name */
             name: string;
             /** Location */
-            location?: string | null;
+            location: string;
             /** Facilities */
             facilities?: string[];
             /** Rating */
@@ -618,16 +662,16 @@ export interface components {
         /** CreateSchedule */
         CreateSchedule: {
             /**
-             * Every
-             * @description The recurring pattern of the Schedule to create
-             * @enum {string}
+             * Clinicid
+             * Format: uuid
              */
-            every: "week" | "month";
+            clinicId: string;
             /**
-             * Weekdays
-             * @description Weekdays as integers representing the iso weekday format.Monday == 1, Sunday == 7
+             * Timezone
+             * @default Asia/Kolkata
+             * @constant
              */
-            weekdays: number[];
+            timezone: "Asia/Kolkata";
             /**
              * Starttime
              * Format: time
@@ -638,37 +682,50 @@ export interface components {
              * Format: time
              */
             endTime: string;
-            /** Location */
-            location: string;
             /** Baseslotduration */
             baseSlotDuration: number;
+            /** Maxslots */
+            maxSlots?: number | null;
             /**
-             * Maxslots
-             * @default false
-             */
-            maxSlots: number | false;
-            /**
-             * Autorepeat
+             * Isactive
              * @default true
              */
-            autoRepeat: boolean;
-            /**
-             * Setactive
-             * @default true
-             */
-            setActive: boolean;
+            isActive: boolean;
             /**
              * Allowonlineconsultations
              * @default false
              */
-            allowOnlineConsultations: boolean | null;
+            allowOnlineConsultations: boolean;
+            /** Recurrence */
+            recurrence: components["schemas"]["OneOffRecurrence"] | components["schemas"]["WeeklyRecurrence"] | components["schemas"]["MonthlyRecurrence"];
+        };
+        /** DoctorClinicResponse */
+        DoctorClinicResponse: {
+            /**
+             * Id
+             * Format: uuid
+             * @description The unique identifier of the record.
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Location */
+            location: string;
+            /** Facilities */
+            facilities?: string[];
+            /** Contacts */
+            contacts?: string[];
+            /** Rating */
+            readonly rating: number;
+            /** Reviewcount */
+            readonly reviewCount: number;
         };
         /** DoctorHttpFull */
         DoctorHttpFull: {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /** Name */
@@ -715,7 +772,7 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /** Name */
@@ -752,14 +809,11 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
-            clinic: components["schemas"]["ClinicHttpMinimal"];
-            /** Weekdays */
-            weekdays: number[];
-            /** Isactive */
-            isActive: boolean;
+            /** Timezone */
+            timezone: string;
             /**
              * Starttime
              * Format: time
@@ -770,13 +824,24 @@ export interface components {
              * Format: time
              */
             endTime: string;
+            /** Baseslotduration */
+            baseSlotDuration: number;
+            /** Maxslots */
+            maxSlots?: number | null;
+            /** Isactive */
+            isActive: boolean;
+            /** Allowonlineconsultations */
+            allowOnlineConsultations: boolean;
+            /** Recurrence */
+            recurrence: components["schemas"]["OneOffRecurrence"] | components["schemas"]["WeeklyRecurrence"] | components["schemas"]["MonthlyRecurrence"];
+            clinic: components["schemas"]["ClinicHttpMinimal"];
         };
         /** DrProfileResponse */
         DrProfileResponse: {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /** Name */
@@ -809,15 +874,14 @@ export interface components {
             secondaryFocusAreas?: string[];
             /** Lastupdated */
             lastUpdated?: string | null;
+            /** Schedules */
+            schedules?: components["schemas"]["Schedule"][];
             /** Collegestudied */
             collegeStudied?: string | null;
             /** Graduationyear */
             graduationYear?: number | null;
-            /**
-             * Bio
-             * @default
-             */
-            bio: string | null;
+            /** Bio */
+            bio?: string | null;
             /** Licensenumber */
             licenseNumber: string;
             /**
@@ -829,7 +893,7 @@ export interface components {
              * Emailverified
              * @default false
              */
-            emailVerified: boolean | null;
+            emailVerified: boolean;
             /** Reviewcount */
             readonly reviewCount: number;
             /** Rating */
@@ -852,6 +916,42 @@ export interface components {
          * @enum {string}
          */
         Mode: "online" | "in person" | "hybrid";
+        /** MonthlyRecurrence */
+        MonthlyRecurrence: {
+            /**
+             * Startson
+             * Format: date
+             */
+            startsOn: string;
+            /** Endson */
+            endsOn?: string | null;
+            /**
+             * Interval
+             * @description Distance between occurrences: 1 means every week/month, 2 means every second week/month.
+             * @default 1
+             */
+            interval: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "monthly";
+            /** Monthdays */
+            monthDays: number[];
+        };
+        /** OneOffRecurrence */
+        OneOffRecurrence: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "one-off";
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+        };
         /** PaginatedResponse[AppointmentDoctorResponse] */
         PaginatedResponse_AppointmentDoctorResponse_: {
             /** Entities */
@@ -865,6 +965,15 @@ export interface components {
         PaginatedResponse_ClinicHttpMinimal_: {
             /** Entities */
             entities: components["schemas"]["ClinicHttpMinimal"][];
+            /** Count */
+            count: number;
+            /** Hasnext */
+            hasNext?: boolean | null;
+        };
+        /** PaginatedResponse[DoctorClinicResponse] */
+        PaginatedResponse_DoctorClinicResponse_: {
+            /** Entities */
+            entities: components["schemas"]["DoctorClinicResponse"][];
             /** Count */
             count: number;
             /** Hasnext */
@@ -915,23 +1024,21 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
-            /** Name */
-            name?: string | null;
             /**
              * Email
              * Format: email
              */
             email: string;
             /** Username */
-            username?: string | null;
+            username: string;
             /**
              * Emailverified
              * @default false
              */
-            emailVerified: boolean | null;
+            emailVerified: boolean;
             /** Appointments */
             appointments?: components["schemas"]["AppointmentPatientResponse"][];
         };
@@ -940,44 +1047,50 @@ export interface components {
          * @enum {string}
          */
         Role: "user" | "system" | "assistant" | "tool";
-        /** Schedule */
+        /**
+         * Schedule
+         * @description Public schedule embedded in a doctor's details response.
+         */
         Schedule: {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
+            /** Timezone */
+            timezone: string;
             /**
-             * Start Time
+             * Starttime
              * Format: time
              */
-            start_time: string;
+            startTime: string;
             /**
-             * End Time
+             * Endtime
              * Format: time
              */
-            end_time: string;
-            /** Is Active */
-            is_active: boolean;
-            /** Weekdays */
-            weekdays?: number[];
+            endTime: string;
+            /** Baseslotduration */
+            baseSlotDuration: number;
+            /** Maxslots */
+            maxSlots?: number | null;
+            /** Isactive */
+            isActive: boolean;
+            /** Allowonlineconsultations */
+            allowOnlineConsultations: boolean;
+            /** Recurrence */
+            recurrence: components["schemas"]["OneOffRecurrence"] | components["schemas"]["WeeklyRecurrence"] | components["schemas"]["MonthlyRecurrence"];
+            clinic: components["schemas"]["ClinicHttpMinimal"];
             /**
-             * Base Slot Duration
-             * @default 20
-             */
-            base_slot_duration: number | null;
-            /**
-             * Clinic Id
+             * Clinicid
              * Format: uuid
              */
-            clinic_id: string;
+            clinicId: string;
             /**
-             * Doctor Id
+             * Doctorid
              * Format: uuid
              */
-            doctor_id: string;
-            clinic?: components["schemas"]["ClinicHttpMinimal"] | null;
+            doctorId: string;
             /** Slots */
             slots?: components["schemas"]["Slot"][];
         };
@@ -986,27 +1099,27 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /** Duration */
             duration: number;
             /**
-             * Is Booked
+             * Isbooked
              * @default false
              */
-            is_booked: boolean;
+            isBooked: boolean;
             mode?: components["schemas"]["Mode"] | null;
             /**
-             * Slot Datetime
+             * Slotdatetime
              * Format: date-time
              */
-            slot_datetime: string;
+            slotDatetime: string;
             /**
-             * Schedule Id
+             * Scheduleid
              * Format: uuid
              */
-            schedule_id: string;
+            scheduleId: string;
         };
         /**
          * SortOrder
@@ -1023,7 +1136,7 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description the unique identifier of the record
+             * @description The unique identifier of the record.
              */
             id: string;
             /**
@@ -1044,6 +1157,29 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** WeeklyRecurrence */
+        WeeklyRecurrence: {
+            /**
+             * Startson
+             * Format: date
+             */
+            startsOn: string;
+            /** Endson */
+            endsOn?: string | null;
+            /**
+             * Interval
+             * @description Distance between occurrences: 1 means every week/month, 2 means every second week/month.
+             * @default 1
+             */
+            interval: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "weekly";
+            /** Weekdays */
+            weekdays: number[];
         };
     };
     responses: never;
@@ -1398,7 +1534,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Body_edit_doctor_doctors_edit_put"];
+                "application/json": components["schemas"]["Body_edit_doctor_doctors_me_put"];
             };
         };
         responses: {
@@ -1473,6 +1609,100 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResponse_DoctorScheduleResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    toggle_activation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schedule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_clinics: {
+        parameters: {
+            query?: {
+                page?: number;
+                max?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_DoctorClinicResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_appointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

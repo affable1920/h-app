@@ -95,13 +95,13 @@ export function useFetchProfile<R extends Role>(role: R) {
 
 export const useDeleteAccount = createMutationHook(
   () => api.delete(""),
-  (id: string) => [doctorKeys.detail(id), doctorKeys.lists()],
+  (id: string) => [doctorKeys.details(id), doctorKeys.all],
 );
 
 // ============================================================
 export function fetchProfileOptions<R extends Role>(role: R) {
   return queryOptions({
-    queryKey: ["auth", "me", role],
+    queryKey: ["auth", "me"],
     enabled: !!role,
     async queryFn() {
       const response = await api.get<ProfileResponse<R>>("me");

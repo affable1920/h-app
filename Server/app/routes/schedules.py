@@ -27,7 +27,7 @@ router = APIRouter(
 
 
 @router.post(
-    path="/create",
+    path="",
     response_model=DoctorScheduleResponse,
     status_code=201
 )

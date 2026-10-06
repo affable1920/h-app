@@ -1,8 +1,10 @@
-import type { ScheduleCreate } from "@/schemas";
 import type { ScheduleResponse } from "@/types/http";
-import { doctorKeys } from "./keys";
-import { createMutationHook } from "./use-http";
+import { doctorKeys } from "../../../hooks/keys";
+import { createMutationHook } from "../../../hooks/use-http";
 import APIClient from "@/core/ApiClient";
+
+import { type ScheduleCreate } from "@/features/doctor-scheduling/contract/create-schema";
+import { doctorScheduleKeys } from "./keys";
 
 const api = new APIClient("/schedules");
 
@@ -12,9 +14,9 @@ export const useCreateSchedule = createMutationHook<
 >(
   ({ payload }) =>
     api
-      .post<ScheduleResponse, ScheduleCreate>("create", payload)
+      .post<ScheduleResponse, ScheduleCreate>(undefined, payload)
       .then((res) => res.data),
-  (vars) => [doctorKeys.auth(), doctorKeys.detail(vars.doctorId)],
+  (vars) => [doctorScheduleKeys.all, doctorKeys.details(vars.doctorId)],
 );
 
 export const useUpdateSchedule = createMutationHook(
@@ -37,10 +39,10 @@ export const useUpdateSchedule = createMutationHook(
         },
       },
     ),
-  (vars) => [doctorKeys.detail(vars.doctorId), doctorKeys.auth()],
+  (vars) => [doctorKeys.details(vars.doctorId), doctorScheduleKeys.all],
 );
 
 export const useDeleteSchedule = createMutationHook(
   ({ id }: { id: string; doctorId: string }) => api.delete(id),
-  ({ doctorId }) => [doctorKeys.detail(doctorId), doctorKeys.auth()],
+  ({ doctorId }) => [doctorKeys.details(doctorId), doctorScheduleKeys.all],
 );

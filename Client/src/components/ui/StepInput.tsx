@@ -1,99 +1,75 @@
-import { Minus, Plus } from "lucide-react";
 import {
-  forwardRef,
-  useRef,
   type ChangeEvent,
-  type InputHTMLAttributes,
+  type ComponentPropsWithRef,
   type ReactNode,
 } from "react";
+import { forwardRef } from "react";
+import { Minus, Plus } from "lucide-react";
 import Button from "./Button";
 import { Stack } from "./Stack";
 
-type StepProps = {
+type NumberDraft = number | "";
+
+interface StepProps extends Omit<
+  ComponentPropsWithRef<"input">,
+  "min" | "max" | "step" | "onChange"
+> {
   label: string;
   icon?: ReactNode;
   error?: string;
-  onStepUp: (n: number) => void;
-  onStepDown: (n: number) => void;
-  onClear?: (msg?: string) => void;
-} & InputHTMLAttributes<HTMLInputElement>;
+  step: NumberDraft;
+  min?: number;
+  onChange: (next: NumberDraft) => void;
+  max?: number;
+}
 
-const StepInput = forwardRef<HTMLInputElement, StepProps>(function ({
-  label,
-  icon,
-  min = 0,
-  max,
-  step = 1,
-  onStepDown,
-  onStepUp,
-  error,
-  onChange,
-  onClear,
-  ...rest
-}) {
+const StepInput = forwardRef<HTMLInputElement, StepProps>(function (
+  {
+    label,
+    icon,
+    name,
+    id,
+    min = 0,
+    max,
+    step = 1,
+    error,
+    value = "",
+    onChange,
+    ...rest
+  },
+  ref,
+) {
+  const currentValue = Number(value);
   const maxValue = Number(max);
-  const stepValue = Number(step);
   const minValue = Number(min);
 
-  const stepRef = useRef<HTMLInputElement>(null);
+  function handleChange(ev: ChangeEvent<HTMLInputElement>) {
+    onChange(ev.target.valueAsNumber);
+  }
 
   function stepUp() {
-    const el = stepRef.current;
+    const current = Number(value);
+    const next = Math.min(current + Number(step), maxValue);
 
-    if (!el) {
-      return;
-    }
-
-    const nxt = el.valueAsNumber ?? 0 + stepValue;
-
-    if (nxt > maxValue) {
-      onClear?.("-");
-      return;
-    }
-
-    onStepUp(stepValue);
+    onChange(next);
   }
 
   function stepDown() {
-    const el = stepRef.current;
+    const current = Number(value);
+    const next = Math.max(current - Number(step), minValue);
 
-    if (!el) {
-      return;
-    }
-
-    const nxt = (el.valueAsNumber ?? 0) - stepValue;
-
-    if (nxt < minValue) {
-      onClear?.("-");
-      return;
-    }
-
-    onStepDown(stepValue);
-  }
-
-  function handleChange(ev: ChangeEvent<HTMLInputElement>) {
-    const raw = ev.target.value;
-    const name = ev.target.name || ev.target.id || "field";
-
-    if (raw.startsWith("-") || Number(raw) < minValue) {
-      onClear?.(name + " cannot be less than " + minValue);
-      return;
-    }
-
-    if (Number(raw) > maxValue) {
-      onClear?.(name + " cannot be greater than " + maxValue);
-      return;
-    }
-
-    onChange?.(ev);
+    onChange(next);
   }
 
   return (
     <Stack orientation="V">
       <Stack justify="center" align="center">
-        <p className={"form-label"}>{label}</p>
+        <label htmlFor={id} className={"form-label text-sm"}>
+          {label}
+        </label>
         {icon && icon}
       </Stack>
+
       <Stack align="center" justify="center" gap="sm">
         <Button
           variant="icon"
@@ -103,6 +79,7 @@ const StepInput = forwardRef<HTMLInputElement, StepProps>(function ({
           bg={true}
           size="sm"
           onClick={stepDown}
+          disabled={currentValue <= min}
         >
           <Minus />
         </Button>
@@ -112,8 +89,11 @@ const StepInput = forwardRef<HTMLInputElement, StepProps>(function ({
           min={min}
           max={max}
           step={step}
-          ref={stepRef}
+          ref={ref}
           onChange={handleChange}
+          value={value}
+          name={name}
+          id={id}
           className="bg-layout-raised shadow-sm shadow-black/15 rounded-md ring-2 ring-border-strong 
           outline-none p-2 text-center focus:ring-3 focus:ring-sky-500/20"
           {...rest}
@@ -121,15 +101,17 @@ const StepInput = forwardRef<HTMLInputElement, StepProps>(function ({
         <Button
           size="sm"
           id="inc"
+          onClick={stepUp}
           aria-label="increase"
           variant="icon"
           bg={true}
           color="secondary"
-          onClick={stepUp}
+          disabled={currentValue >= maxValue}
         >
           <Plus />
         </Button>
       </Stack>
+
       {error && (
         <span
           role="alert"

@@ -2,12 +2,13 @@ import { DrLoginSchema, type DoctorLogin } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type FieldError } from "react-hook-form";
 import Button from "./ui/Button";
-import Input from "./ui/Input";
+import { Input } from "./ui/Input";
 import { Stack } from "./ui/Stack";
 import { useState, useCallback, forwardRef } from "react";
 import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 
 type MultiInputProps = {
   methodA: string;
@@ -86,6 +87,8 @@ export function DrSignin() {
     [form],
   );
 
+  console.log(errors);
+
   async function submit(data: DoctorLogin) {
     await signin(
       { route: "doctor", data },
@@ -118,17 +121,21 @@ export function DrSignin() {
           })}
           error={errors[loginMethod !== "email" ? "id" : "email"]}
         />
-        <Input
-          label="password"
-          type="password"
-          {...form.register("password")}
-          id="password"
-        />
+        <Input.Group error={errors["password"]?.message}>
+          <Input.Label htmlFor="password">password</Input.Label>
+          <Input.Element
+            id="password"
+            type="password"
+            {...form.register("password")}
+          />
+        </Input.Group>
       </Stack>
+
       <Button
         className="mt-6 w-full"
         color="white"
         type="submit"
+        endIcon={<ChevronRight size={6} strokeWidth={4} />}
         loading={isSigninPending}
       >
         sign in

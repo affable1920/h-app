@@ -1,20 +1,20 @@
 import APIClient from "@/core/ApiClient";
-import type { Appointment, BookingRequestData } from "@/types/http";
 import { createMutationHook } from "@/hooks/use-http";
 import { doctorKeys } from "@/hooks/keys";
+import type { BookingResponse, BookingSchema } from "../contract/types";
 
 const api = new APIClient("/bookings");
 
 export const useCreateBooking = createMutationHook(
-  (data: BookingRequestData) =>
+  (data: BookingSchema) =>
     api
-      .post<Appointment, BookingRequestData>(undefined, data)
+      .post<BookingResponse, BookingSchema>(undefined, data)
       .then((res) => res.data),
-  (vars) => [doctorKeys.detail(vars.doctorId), ["auth", "me"]],
+  () => [["auth", "me"], doctorKeys.relations("appointments")],
 );
 
 export const useCancelBooking = createMutationHook(
   (vars: { appointmentId: string; doctorId: string }) =>
-    api.delete(`cancel/${vars.appointmentId}`),
-  (vars) => [doctorKeys.detail(vars.doctorId), ["auth", "me"]],
+    api.delete(vars.appointmentId),
+  () => [["auth", "me"], doctorKeys.relations("appointments")],
 );

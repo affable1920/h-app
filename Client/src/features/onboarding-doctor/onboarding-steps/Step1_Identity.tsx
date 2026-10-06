@@ -1,4 +1,4 @@
-import Input from "@/components/ui/Input";
+import { Input } from "@/components/ui/Input";
 import { Stack } from "@/components/ui/Stack";
 import type { DoctorOnboarding } from "@/schemas";
 import { useMemo, useEffect } from "react";
@@ -126,13 +126,10 @@ export function Step1_Identity() {
         </div>
       </Stack>
 
-      <Input
-        {...form.register("name")}
-        error={errors["name"]}
-        label="name"
-        id="name"
-        size="sm"
-      />
+      <Input.Group error={errors["name"]?.message}>
+        <Input.Label htmlFor="name">name</Input.Label>
+        <Input.Element {...form.register("name")} id="name" />
+      </Input.Group>
 
       <Stack gap="xs" orientation="V" className="px-1">
         <label htmlFor="gender" className="capitalize text-sm">

@@ -1,42 +1,43 @@
-import Button from "@/components/ui/Button";
-import type { APIError, Clinic, Doctor, Slot } from "@/types/http";
+import { useState, type SubmitEvent } from "react";
+import { toast } from "sonner";
+import { Ban, CalendarFold, MapPinCheckInside, X } from "lucide-react";
+
+import useModalStore, { removeModal } from "@/stores/modal-store";
+import useAuthStore from "@/stores/auth-store";
+
 import {
   useCancelBooking,
   useCreateBooking,
-} from "@/features/booking/use-booking";
-import { toast } from "sonner";
-import useModalStore, { removeModal } from "@/stores/modal-store";
-import useAuthStore from "@/stores/auth-store";
-import { Ban, CalendarFold, MapPinCheckInside } from "lucide-react";
-import { fromISO } from "@/utils/utils";
+} from "@/features/booking/api/mutations";
+
+import { fromISO } from "@/domain/scheduling/utils";
+import type { APIError, Clinic, Doctor, Slot } from "@/types/http";
+
+import Button from "@/components/ui/Button";
 import { Stack } from "@/components/ui/Stack";
-import { useRef, useState, type SubmitEvent } from "react";
 import { PatientSignin } from "@/components/PatientSignin";
 import { PatientRegister } from "@/components/PatientRegister";
 
-type ScheduleModalProps = {
+type BookingGateProps = {
   doctor: Doctor;
   slot: Slot;
   clinic: Clinic;
   onSuccess?: () => void;
 };
 
-function ScheduleModal({
-  doctor,
-  slot,
-  clinic,
-  onSuccess,
-}: ScheduleModalProps) {
-  const slotDatetimeISO = fromISO(slot.slot_datetime);
+function BookingGate({ doctor, slot, clinic, onSuccess }: BookingGateProps) {
+  const slotDatetimeISO = fromISO(slot.slotDatetime);
   const fullDate = slotDatetimeISO.toFormat("dd LLL yyyy -");
 
   const user = useAuthStore((s) => s.user);
+  const role = useAuthStore((s) => s.role);
 
   const closeModal = useModalStore((s) => s.closeModal);
-  const reasonRef = useRef<HTMLTextAreaElement | null>(null);
 
   const { mutateAsync: book, isPending: bookingIsPending } = useCreateBooking();
   const { mutate: cancelBooking } = useCancelBooking();
+
+  const [mode, setMode] = useState<"login" | "register">("login");
 
   async function confirmSlot(ev: SubmitEvent<HTMLFormElement>) {
     ev.preventDefault();
@@ -50,7 +51,6 @@ function ScheduleModal({
 
     const payload = {
       slotId: slot.id,
-      date: slot.slot_datetime,
       doctorId: doctor.id,
       reasonForVisit:
         typeof reason === "string" && reason.trim() ? reason.trim() : undefined,
@@ -86,6 +86,7 @@ function ScheduleModal({
       });
 
       onSuccess?.();
+      removeModal();
     } catch (exc) {
       const ex = exc as unknown as APIError;
       toast.error(ex.code, {
@@ -93,8 +94,6 @@ function ScheduleModal({
       });
     }
   }
-
-  const [mode, setMode] = useState<"login" | "register">("login");
 
   function showAuthForm() {
     return mode === "login" ? <PatientSignin /> : <PatientRegister />;
@@ -125,13 +124,13 @@ function ScheduleModal({
           <Stack className="text-sm font-semibold">
             {fullDate && <span className="font-semibold">{fullDate}</span>}
             <span>{slotDatetimeISO.weekdayShort}</span> -
-            <span>{slotDatetimeISO.toISOTime()?.split("+")[1]}</span>
+            <span>{slotDatetimeISO.toFormat("HH:mm")}</span>
           </Stack>
         </Stack>
       </header>
 
       <section className="mt-6">
-        {user ? (
+        {user && role === "patient" ? (
           <form onSubmit={confirmSlot}>
             <Stack orientation="V" gap="md">
               <div className="flex flex-col gap-2">
@@ -145,7 +144,6 @@ function ScheduleModal({
                   </strong>
                 </label>
                 <textarea
-                  ref={reasonRef}
                   maxLength={1000}
                   aria-multiline="true"
                   spellCheck="false"
@@ -191,12 +189,21 @@ function ScheduleModal({
               </Stack>
             </Stack>
           </form>
+        ) : role === "doctor" ? (
+          <div className="space-y-4 text-center">
+            <p className="text-text-normal">
+              Doctor accounts cannot book appointments{" "}
+            </p>
+            <Button endIcon={<X />} type="button" onClick={closeModal}>
+              Close
+            </Button>
+          </div>
         ) : (
           <>
             {showAuthForm()}
             <Button
               variant="icon"
-              className="hover:underline underline-offset-4"
+              className="hover:underline underline-offset-4 mt-4 text-sm w-full"
               onClick={function () {
                 setMode(function (p) {
                   return p === "login" ? "register" : "login";
@@ -214,4 +221,4 @@ function ScheduleModal({
   );
 }
 
-export default ScheduleModal;
+export default BookingGate;

@@ -1,9 +1,9 @@
 import DirectoryFilter from "@/components/DirectoryFilter";
-import ScheduleModal from "@/features/booking/ScheduleModal";
+import BookingGate from "@/features/booking/components/BookingGate";
 import Confirmation from "./Confirmation";
 import SearchBar from "../ui/SearchBar";
 import DrProfileSetup from "@/features/onboarding-doctor/DrProfileSetup";
-import ScheduleCreater from "@/features/schedule-create/ScheduleCreater";
+import ScheduleForm from "@/features/doctor-scheduling/form/ScheduleForm";
 import { Picker } from "../ui/Picker";
 import type { Clinic, Doctor, Slot } from "@/types/http";
 import type { ReactNode } from "react";
@@ -11,15 +11,17 @@ import InformationModal from "./InformationModal";
 
 export type ConfirmationProps = {
   tagline: ReactNode;
+  autoClose?: boolean;
+  timeout?: number;
+  children?: ReactNode;
+
   onResolve: () => void | Promise<void>;
   onReject?: () => void | Promise<void>;
   onSettled?: () => void | Promise<void>;
-  autoClose?: boolean;
-  timeout?: number;
 };
 
 export type MapperProps = {
-  "schedule-modal": {
+  "booking-gate": {
     doctor: Doctor;
     slot: Slot;
     clinic: Clinic;
@@ -48,10 +50,10 @@ export type MapperProps = {
 export type Modal = keyof MapperProps;
 
 const MODAL_MAPPINGS: Record<Modal, React.ElementType> = {
-  "schedule-modal": ScheduleModal,
+  "booking-gate": BookingGate,
   "search-bar": SearchBar,
   "confirmation-modal": Confirmation,
-  "schedule-creater-modal": ScheduleCreater,
+  "schedule-creater-modal": ScheduleForm,
   "directory-filter-modal": DirectoryFilter,
   "doctor-profile-setup-modal": DrProfileSetup,
   "picker-modal": Picker,

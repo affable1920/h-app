@@ -2,7 +2,7 @@ import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Button from "./ui/Button";
-import Input from "./ui/Input";
+import { Input } from "./ui/Input";
 import { Stack } from "./ui/Stack";
 import { useForm } from "react-hook-form";
 import { type PatientCreate, PatientCreateSchema } from "@/schemas";
@@ -46,29 +46,34 @@ export const PatientRegister = memo(function () {
       <form onSubmit={form.handleSubmit(submit)}>
         <Stack orientation="V" gap="md">
           <Stack orientation="V" gap="md">
-            <Input
-              id="email"
-              autoFocus
-              label="email"
-              type="email"
-              {...form.register("email")}
-              error={errors["email"]}
-            />
+            <Input.Group error={errors["email"]?.message}>
+              <Input.Label htmlFor="email">email</Input.Label>
+              <Input.Element
+                id="email"
+                autoFocus
+                type="email"
+                {...form.register("email")}
+              />
+            </Input.Group>
 
-            <Input
-              id="password"
-              type="password"
-              label="password"
-              {...form.register("password")}
-              error={errors["password"]}
-            />
+            <Input.Group error={errors["password"]?.message}>
+              <Input.Label htmlFor="password">password</Input.Label>
+              <Input.Element
+                id="password"
+                autoFocus
+                type="password"
+                {...form.register("password")}
+              />
+            </Input.Group>
 
-            <Input
-              id="username"
-              label="username"
-              {...form.register("username")}
-              error={errors["username"]}
-            />
+            <Input.Group error={errors["username"]?.message}>
+              <Input.Label htmlFor="username">username</Input.Label>
+              <Input.Element
+                id="username"
+                autoFocus
+                {...form.register("username")}
+              />
+            </Input.Group>
           </Stack>
           <Button type="submit" color="white" loading={isPending}>
             sign up

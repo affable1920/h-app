@@ -2,7 +2,6 @@ import useModalStore from "@/stores/modal-store";
 import { useMemo, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Button from "./ui/Button";
-import SelectFilter from "./ui/SelectFilter";
 import * as constants from "@/utils/constants";
 import { useSearchParams } from "react-router-dom";
 import { Stack } from "./ui/Stack";
@@ -22,7 +21,8 @@ import {
   EMPTY_FILTERS,
   type FilterState,
 } from "@stores/filter-store";
-import { ControlledStepInput } from "./ui/ControlledStepInput";
+import { Select } from "./ui/SelectApi";
+import StepInput from "./ui/StepInput";
 
 const labelStyle = "text-text-normal capitalize text-center";
 
@@ -186,36 +186,38 @@ function DirectoryFilter() {
           )}
         </AnimatePresence>
         <Stack gap="md" orientation="V">
-          <div>
-            {getValues("specialization") && (
-              <Badge
-                as="button"
-                className="max-w-fit capitalize mb-2"
-                selected={true}
-                onClick={function () {
-                  form.reset(
-                    {
-                      specialization: null,
-                    },
-                    {
-                      keepDefaultValues: true,
-                    },
-                  );
-                }}
-              >
-                {getValues("specialization")}
-              </Badge>
-            )}
-            <SelectFilter
-              label="filter by specialization"
-              options={constants.SPECIALIZATIONS}
-              onOptionSelect={function (option) {
-                setValue("specialization", option as string, {
-                  shouldDirty: true,
-                });
-              }}
-            />
-          </div>
+          <Controller
+            control={control}
+            name="specialization"
+            render={function ({ field, fieldState }) {
+              return (
+                <Stack orientation="V">
+                  {fieldState.error && (
+                    <span
+                      role="alert"
+                      className="text-red-400 text-sm px-1 first-letter:capitalize"
+                    >
+                      {fieldState.error.message}
+                    </span>
+                  )}
+
+                  <Select
+                    label="filter by specialization"
+                    options={constants.SPECIALIZATIONS.map((sp) => ({
+                      label: sp,
+                      value: sp,
+                    }))}
+                    onValueChange={function (option) {
+                      setValue("specialization", option as string, {
+                        shouldDirty: true,
+                      });
+                    }}
+                    selected={field.value ?? null}
+                  />
+                </Stack>
+              );
+            }}
+          />
 
           <Stack orientation="V">
             <p className={labelStyle}>
@@ -234,6 +236,7 @@ function DirectoryFilter() {
               {[2, 3, 4].map(function (rating) {
                 return (
                   <Badge
+                    key={rating}
                     full={false}
                     className="grow"
                     selected={rating === fields.minRating}
@@ -302,28 +305,19 @@ function DirectoryFilter() {
             control={control}
             render={function ({ field: { onChange, ...field }, fieldState }) {
               return (
-                <ControlledStepInput
+                <StepInput
                   label="min experience (years)"
                   id="experience"
                   placeholder="-"
-                  min="0"
-                  max="60"
-                  step="1"
+                  min={0}
+                  max={60}
+                  step={1}
                   onChange={function (e) {
-                    form.clearErrors(field.name);
                     onChange(e);
                   }}
                   onBlur={field.onBlur}
                   value={field.value ?? ""}
                   error={fieldState.error?.message}
-                  onInvalid={function (msg) {
-                    onChange(null);
-                    if (msg !== "-") {
-                      form.setError(field.name, {
-                        message: msg,
-                      });
-                    }
-                  }}
                 />
               );
             }}
@@ -334,29 +328,19 @@ function DirectoryFilter() {
             control={control}
             render={function ({ field: { onChange, ...field }, fieldState }) {
               return (
-                <ControlledStepInput
+                <StepInput
                   label="max fee"
                   id="fee"
                   placeholder="-"
-                  min="0"
-                  max="800"
-                  step="50"
+                  max={800}
+                  step={50}
                   name={field.name}
                   onChange={function (e) {
-                    form.clearErrors(field.name);
                     onChange(e);
                   }}
                   onBlur={field.onBlur}
                   value={field.value ?? ""}
                   error={fieldState.error?.message}
-                  onInvalid={function (msg) {
-                    onChange(null);
-                    if (msg !== "-") {
-                      form.setError(field.name, {
-                        message: msg,
-                      });
-                    }
-                  }}
                 />
               );
             }}
@@ -364,18 +348,20 @@ function DirectoryFilter() {
         </Stack>
       </Stack>
 
-      <Stack align="end" justify="end" className="px-6 [&_button]:scale-90">
+      <Stack align="center" justify="end" className="px-6 [&_button]:scale-90">
         {hasActiveFilters && (
           <Button
             onClick={function () {
               form.reset(EMPTY_FILTERS, { keepDefaultValues: true });
             }}
             color="indicator"
+            border={false}
           >
             Reset
           </Button>
         )}
         <Button
+          border={false}
           variant="ghost"
           className="shadow-sm shadow-black/20 border-border-vivid border-2"
           onClick={closeModal}
@@ -383,6 +369,7 @@ function DirectoryFilter() {
           Cancel
         </Button>
         <Button
+          border={false}
           disabled={!form.formState.isDirty}
           color="white"
           onClick={applyFiltersHttp}

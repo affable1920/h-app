@@ -4,6 +4,7 @@ from fastapi import (
     FastAPI,
 )
 
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -18,22 +19,22 @@ from app.features.calling import ws_route
 from app.core.exception_handlers import (
     application_error_handler,
     invalid_token_handler,
-    unhandled_error_handler
+    unhandled_error_handler,
+    validation_error_handler
 )
 
 
-#
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def root(app: FastAPI):
-    logger.info("Starting up")
+    logger.info("Starting up ...\n")
 
     app.openapi_schema = generate_openapi_spec(app=app)
 
     yield
-    logger.info("Shutting down")
+    logger.info("Shutting down ...\n")
 
 
 app = FastAPI(
@@ -48,7 +49,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=True,
-    allow_origins=settings.allowed_origins.split(","),
+    allow_origins=[*settings.allowed_origins.split(",")],
     expose_headers=["x-session-expire", "x-auth-token"],
 )
 
@@ -73,6 +74,10 @@ def _invalid_token_error_handler(request, exc):
     return invalid_token_handler(request, exc)
 
 
+def _validation_error_handler(request, exc):
+    return validation_error_handler(request, exc)
+
+
 app.add_exception_handler(
     AppException,
     _application_error_handler
@@ -86,6 +91,11 @@ app.add_exception_handler(
 app.add_exception_handler(
     InvalidTokenError,
     _invalid_token_error_handler
+)
+
+app.add_exception_handler(
+    RequestValidationError,
+    _validation_error_handler
 )
 
 

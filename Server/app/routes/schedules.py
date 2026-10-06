@@ -11,8 +11,10 @@ from app.services.SchedulingService import schedule_service
 from app.database.models import Doctor
 from app.database.entry_async import get_db
 
-from app.schemas.inputs import CreateSchedule
-from app.schemas.outputs import DoctorScheduleResponse
+from app.schemas.schedule import (
+    CreateSchedule,
+    DoctorScheduleResponse
+)
 
 
 logger = logging.getLogger(__name__)
@@ -25,7 +27,7 @@ router = APIRouter(
 
 
 @router.post(
-    path="/create",
+    path="",
     response_model=DoctorScheduleResponse,
     status_code=201
 )
@@ -34,15 +36,6 @@ async def create_schedule(
     doctor: Doctor = Depends(require_doctor),
     session: AsyncSession = Depends(get_db),
 ):
-    if data.orientation == "month":
-        raise HTTPException(
-            400,
-            detail={
-                "code": "feature_not_implemented!",
-                "message": "Creating schedules on a monthly basis is not supported yet."
-            }
-        )
-
     created = await schedule_service.create_schedule(
         doctor_id=doctor.id,
         session=session,
@@ -62,7 +55,7 @@ async def edit_schedule(
     doctor: Doctor = Depends(require_doctor)
 ):
     try:
-        await schedule_service.edit(
+        await schedule_service.edit_schedule(
             schedule_id=schedule_id,
             doctor_id=doctor.id,
             session=session,

@@ -4,7 +4,7 @@ from sqlalchemy import Select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.response_modifiers import ClinicRouteFilters
+from app.schemas.pagination import ClinicRouteFilters
 from app.services.entities.main import EntityService
 from app.database.models import Clinic
 

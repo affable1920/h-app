@@ -1,9 +1,12 @@
 import { memo, type HTMLAttributes } from "react";
 import { X } from "lucide-react";
-import Input from "./Input";
+import InputElement from "./Input";
 import type { Size } from "@/types/ui";
 
-interface SearchBarProps extends HTMLAttributes<HTMLInputElement> {
+interface SearchBarProps extends Omit<
+  HTMLAttributes<HTMLInputElement>,
+  "size"
+> {
   val: string;
   clearable?: boolean;
   onClear?: () => void;
@@ -11,6 +14,7 @@ interface SearchBarProps extends HTMLAttributes<HTMLInputElement> {
   grow?: boolean;
   label?: string;
   size?: Size;
+  disabled?: boolean;
 }
 
 const SearchBar = memo(function ({
@@ -20,12 +24,14 @@ const SearchBar = memo(function ({
   placeholder = "search ...",
   label,
   size = "sm",
+  disabled = false,
   ...rest
 }: SearchBarProps) {
   return (
-    <Input
+    <InputElement
       size={size}
       label={label}
+      disabled={disabled}
       id={rest.id ?? "search-bar"}
       value={val}
       placeholder={placeholder}

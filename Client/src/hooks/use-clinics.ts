@@ -18,6 +18,6 @@ export const useGetClinics = createQueryHook(
 );
 
 export const useGetClinic = createQueryHook(
-  (vars) => clinicKeys.detail(vars.id),
-  (vars: { id: string }) => api.get<Clinic>(vars.id).then((res) => res.data),
+  (id?: string) => clinicKeys.details(id!),
+  (id) => api.get<Clinic>(id).then((res) => res.data),
 );

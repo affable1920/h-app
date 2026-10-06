@@ -7,23 +7,25 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.outputs import UserResponse
+from app.schemas.user import UserResponse
 from app.core.exceptions import (
     ConflictError,
     EntityNotFoundException,
     InvalidCredentialsError,
     InvalidTokenError
 )
-from app.database.models import Doctor, EmailVerificationToken, Patient
+
+from app.database.models import (
+    Doctor,
+    EmailVerificationToken,
+    Patient
+)
+
 from app.features.auth import security
 
 from app.schemas.enums import UserRoleV2
-from app.schemas.inputs import (
-    DoctorLogin,
-    DrCreate,
-    PatientCreate,
-    PatientLogin
-)
+from app.schemas.doctor import DoctorLogin, DrCreate
+from app.schemas.patient import PatientCreate, PatientLogin
 
 from app.services.MailService import MailService
 from app.services.PatientService import PatientService
@@ -66,7 +68,8 @@ class AuthService:
         return await (
             session.scalar(
                 select(EmailVerificationToken).where(
-                    EmailVerificationToken.hash == security.hash_verification_token(
+                    EmailVerificationToken.hash
+                    == security.hash_verification_token(
                         token
                     )
                 )
@@ -86,7 +89,10 @@ class AuthService:
             user_id=user_id,
             user_role=user_role,
             hash=security.hash_verification_token(token),
-            exp=datetime.now(timezone.utc) + timedelta(minutes=exp)
+            exp=(
+                datetime.now(timezone.utc)
+                + timedelta(minutes=exp)
+            )
         )
 
         return link

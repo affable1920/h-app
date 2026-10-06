@@ -2,7 +2,7 @@ import enum
 from typing import Self
 
 from pydantic import ConfigDict, model_validator
-from app.schemas.Base import FromORM
+from app.schemas.base import ORMResponse
 
 
 class Role(str, enum.Enum):
@@ -12,7 +12,7 @@ class Role(str, enum.Enum):
     TOOL = "tool"
 
 
-class BaseChatMessage(FromORM):
+class BaseChatMessage(ORMResponse):
     role: Role
     content: str
 

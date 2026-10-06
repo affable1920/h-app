@@ -1,4 +1,4 @@
-import Input from "@/components/ui/Input";
+import { Input } from "@/components/ui/Input";
 import { useFormContext } from "react-hook-form";
 import { Stack } from "@/components/ui/Stack";
 import { type DoctorOnboarding } from "@/schemas";
@@ -12,27 +12,23 @@ export function Step4_Auth() {
 
   return (
     <Stack orientation="V" gap="md">
-      <Stack orientation="V" gap="sm">
-        <Input
-          label="email"
-          id="email"
-          type="email"
-          {...form.register("email")}
-          error={errors["email"]}
-        />
-        <Input
-          label="password"
-          id="password"
-          type="password"
-          error={errors["password"]}
-          {...form.register("password")}
-        />
-        <Input
-          label="phone"
-          id="phone"
-          error={errors["phone"]}
-          {...form.register("phone")}
-        />
+      <Stack orientation="V" gap="md">
+        <Input.Group error={errors["email"]?.message}>
+          <Input.Label htmlFor="email">email</Input.Label>
+          <Input.Element id="email" type="email" {...form.register("email")} />
+        </Input.Group>
+        <Input.Group error={errors["password"]?.message}>
+          <Input.Label htmlFor="password">password</Input.Label>
+          <Input.Element
+            id="password"
+            type="password"
+            {...form.register("password")}
+          />
+        </Input.Group>
+        <Input.Group error={errors["phone"]?.message}>
+          <Input.Label htmlFor="phone">phone</Input.Label>
+          <Input.Element id="phone" type="tel" {...form.register("phone")} />
+        </Input.Group>
       </Stack>
 
       <Stack orientation="V">

@@ -1,11 +1,12 @@
 import {
   forwardRef,
-  useMemo,
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from "react";
 import type { FieldError } from "react-hook-form";
-import { Stack } from "./Stack";
+import { Stack, type StackProps } from "./Stack";
+import { cn } from "@/utils/utils";
+import { Asterisk } from "lucide-react";
 
 type Size = "xs" | "sm" | "md" | "lg";
 
@@ -20,73 +21,93 @@ export type InputProps = {
   size?: Size;
   error?: FieldError;
   label?: string;
-  orientation?: "H" | "V";
   icon?: ReactNode;
 } & Omit<ComponentPropsWithoutRef<"input">, "size">;
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
-  (
-    {
-      label,
-      id,
-      className,
-      error,
-      icon,
-      orientation = "V",
-      size = "sm",
-      ...props
-    },
-    ref,
-  ) => {
-    const inputStyles = useMemo(
-      function () {
-        const base = `border-2 border-border-strong rounded-md outline-none w-full font-semibold 
-        placeholder:italic hover:border-border-strong placeholder:capitalize transition-colors px-3 
-        bg-layout-raised focus:ring-4 focus:ring-brand/20`;
+const BASE_INPUT_STYLES = `border-2 border-border-strong rounded-md outline-none w-full font-semibold placeholder:italic hover:border-border-strong placeholder:capitalize transition-colors px-3 bg-layout-raised focus:ring-4 focus:ring-brand/20 disabled:opacity-70`;
 
-        return [base, sizes[size], className].filter(Boolean).join(" ").trim();
-      },
-      [className, size],
-    );
-
+const InputElement = forwardRef<HTMLInputElement, InputProps>(
+  ({ id, className, size = "sm", ...props }, ref) => {
     return (
-      <Stack
-        orientation={orientation}
-        className="relative"
-        align={orientation === "H" ? "center" : "stretch"}
-        gap={12}
-      >
-        {label && (
-          <label
-            htmlFor={id ?? props.name}
-            className="capitalize inline-flex px-1 text-sm"
-          >
-            {label}
-          </label>
-        )}
-
-        <input
-          spellCheck={props.spellCheck ?? false}
-          id={id ?? props.name}
-          ref={ref}
-          className={inputStyles}
-          {...props}
-        />
-
-        <span
-          className={`inline-flex absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary
-            hover:text-text-normal transition-colors duration-200 cursor-pointer`}
-          data-tooltip={`Clear search`}
-        >
-          {icon && icon}
-        </span>
-        {error && (
-          <div className="text-red-400 text-sm px-1">{error.message}</div>
-        )}
-      </Stack>
+      <input
+        ref={ref}
+        spellCheck={props.spellCheck ?? false}
+        id={id ?? props.name}
+        className={cn(BASE_INPUT_STYLES, sizes[size], className)}
+        {...props}
+      />
     );
   },
 );
 
-Input.displayName = "Input";
-export default Input;
+InputElement.displayName = "Input";
+export default InputElement;
+
+interface LabelProps extends Omit<
+  ComponentPropsWithoutRef<"label">,
+  "htmlFor"
+> {
+  htmlFor: string;
+  children: ReactNode;
+  required?: boolean;
+}
+
+export function InputLabel({
+  htmlFor,
+  children,
+  required = true,
+  className,
+  ...rest
+}: LabelProps) {
+  return (
+    <span className="inline-flex m-0 justify-start items-start gap-0.5 px-1 text-sm whitespace-nowrap">
+      <label
+        className={cn("capitalize text-text-normal", className)}
+        htmlFor={htmlFor}
+        {...rest}
+      >
+        {children}
+      </label>
+      {required && <Asterisk size={10} />}
+    </span>
+  );
+}
+
+export function InputGroup({
+  children,
+  justify = "start",
+  align = "start",
+  orientation = "V",
+  gap = 10,
+  className,
+  error,
+  ...props
+}: { error?: string } & StackProps) {
+  return (
+    <Stack
+      orientation={orientation}
+      justify={justify}
+      gap={gap}
+      align={align}
+      className={cn("relative", className)}
+      {...props}
+    >
+      {children}
+
+      {error && (
+        <span
+          role="alert"
+          className="text-red-400 text-sm px-1 first-letter:capitalize leading-[1.2]"
+        >
+          {error}
+        </span>
+      )}
+    </Stack>
+  );
+}
+
+export const Input = Object.assign(InputElement, {
+  Element: InputElement,
+  Label: InputLabel,
+  Group: InputGroup,
+});

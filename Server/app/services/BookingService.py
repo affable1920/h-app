@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import ConflictError, EntityNotFoundException
-from app.schemas.inputs import BookingRequestData
+from app.schemas.appointment import BookingRequestData
 from app.schemas.enums import AppointmentStatus
 from app.database.models import Appointment, CareJourney, Patient, Slot
 
@@ -70,18 +70,13 @@ class BookingService:
             ),
             (
                 schedule.is_active,
-                "This schedule is no longer active.",
+                "The doctor is not currently accepting new consultation requests on this schedule.",
                 "Schedule is inactive."
             ),
             (
                 schedule.doctor_id == payload.doctor_id,
                 "Requested slot does not belong to the requested doctor.",
                 "Doctor mismatch between schedule and client data."
-            ),
-            (
-                payload.scheduled_date.isoweekday() in set(schedule.weekdays),
-                "The doctor has no schedule on the requested date and weekday.",
-                "Date requested by patient was not part of the doctor's schedule."
             ),
         ]
 
@@ -102,16 +97,13 @@ class BookingService:
             patient_id=user.id,
             doctor_id=payload.doctor_id,
             clinic_id=schedule.clinic_id,
-            # Assign the relationship directly since we don't flush and care
-            # journey won't have it's id generated
             care_journey=care_journey
         )
 
-        # relationship’s default cascade adds the new journey automatically.
-        # The slot is already tracked by the session.
         session.add(created_appointment)
 
         await session.flush()
+
         await session.refresh(
             instance=created_appointment,
             attribute_names=[

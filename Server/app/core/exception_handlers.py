@@ -40,7 +40,6 @@ def unhandled_error_handler(
     logger.exception("Unhandled exception", extra={
         "path": request.url.path,
         "request_id": rqst_id,
-        "context": exc
     })
 
     return JSONResponse(
@@ -80,14 +79,16 @@ def application_error_handler(
                 "code": code
             }
         },
-        status_code=status_code
+        status_code=status_code,
+        headers=exc.context.get("headers", {})
     )
 
 # ===================================================================================================================
 
 
 def validation_error_handler(
-        request: Request, exc: RequestValidationError
+        request: Request,
+        exc: RequestValidationError
 ) -> JSONResponse:
     logger.exception(
         "Request Validation error",
@@ -114,7 +115,8 @@ def validation_error_handler(
 # ===================================================================================================================
 
 def invalid_token_handler(
-        request: Request, exc: InvalidTokenError
+        request: Request,
+        exc: InvalidTokenError
 ) -> JSONResponse:
     logger.exception(
         "Invalid token",
@@ -126,6 +128,8 @@ def invalid_token_handler(
         }
     )
 
+    logger.info(exc.context, exc.code)
+
     return JSONResponse(
         content={
             "detail": {
@@ -134,5 +138,8 @@ def invalid_token_handler(
             }
         },
         status_code=401,
-        headers=exc.context.get("headers") or {}
+        headers=exc.context.get("headers", {})
     )
+
+
+# ===================================================================================================================

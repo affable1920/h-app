@@ -48,7 +48,7 @@ function Modal() {
               style={{
                 overscrollBehavior: "contain",
               }}
-              id="modal"
+              id={currModal as string}
               key={currModal}
               variants={variants}
               {...{ ...variants }}

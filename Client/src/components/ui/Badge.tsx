@@ -20,9 +20,7 @@ const colors: Record<Color, string> = {
   success: "bg-success-500 hover:bg-success-400",
 };
 
-const BASE = `inline-flex items-center justify-center transition-colors duration-150 border-2 
-  border-border-strong text-center cursor-pointer p-2 capitalize outline-none 
-  focus:ring-3 focus:ring-brand/20`;
+const BASE = `inline-flex items-center justify-center transition-colors duration-150 border border-border-vivid text-center cursor-pointer p-2 capitalize outline-none focus:ring-3 focus:ring-brand/20 shadow-md shadow-black/25`;
 
 function Badge<T extends ElementType>({
   as,
@@ -30,12 +28,12 @@ function Badge<T extends ElementType>({
   children,
   className,
   size = "sm",
-  full = true,
+  full = false,
   color = "secondary",
   current = false,
   disabled = false,
   selected = false,
-  rounded = "sm",
+  rounded = "md",
   ...rest
 }: BadgeProps<T>) {
   const Component = as || "button";

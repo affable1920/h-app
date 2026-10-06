@@ -10,6 +10,7 @@ function Confirmation({
   tagline = "",
   autoClose = false,
   timeout = 3000,
+  children,
 }: ConfirmationProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -46,8 +47,11 @@ function Confirmation({
   }
 
   return (
-    <div className="font-semibold py-6 px-8 space-y-8">
+    <div className="font-semibold py-6 px-8 flex flex-col gap-8">
       <div className="text-center first-letter:capitalize">{tagline}</div>
+
+      {children && <div className="min-w-0 flex-1">{children}</div>}
+
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={handleReject}>
           Decline <X strokeWidth={4} />

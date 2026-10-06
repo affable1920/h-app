@@ -10,7 +10,8 @@ import { DoctorOnboardingSchema, type DoctorOnboarding } from "@/schemas";
 import { useNavigate } from "react-router-dom";
 import { Stack } from "@/components/ui/Stack";
 import useModalStore from "@/stores/modal-store";
-import { useCreateDoctor } from "@/hooks/use-doctors";
+import { useSignup } from "@/hooks/use-auth";
+import { doctorKeys } from "@/hooks/keys";
 
 const FIELDS: Array<Array<keyof DoctorOnboarding>> = [
   ["profile", "name", "gender"] as const,
@@ -27,7 +28,21 @@ const FIELDS: Array<Array<keyof DoctorOnboarding>> = [
 
 export default function DrProfileSetup() {
   const navigate = useNavigate();
-  const { mutateAsync: create } = useCreateDoctor();
+
+  const useCreateDoctor = useSignup(
+    {
+      route: "doctor",
+      params: {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    },
+    () => [doctorKeys.all],
+  );
+
+  const { mutateAsync: create, isPending } = useCreateDoctor();
+
   const openModal = useModalStore((s) => s.openModal);
 
   const [step, setStep] = useState(0);
@@ -146,11 +161,13 @@ export default function DrProfileSetup() {
           </FormProvider>
 
           <Navigation
+            isSubmitting={isPending}
             stepCount={STEPS.length}
             currentStep={step}
-            showPillUi
-            navigateBack={goBack}
-            navigateForward={goForward}
+            showPillUi={true}
+            onBack={goBack}
+            onForward={goForward}
+            labelSubmitBtn="Complete onboard."
           />
         </form>
       </section>

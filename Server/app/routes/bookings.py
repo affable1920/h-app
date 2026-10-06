@@ -56,7 +56,7 @@ async def book(
         Hi {pt.username},
 
         Your appointment with Dr {created.doctor.name} is succesffuly scheduled at {created.clinic.name}
-        for {created.scheduled_date.isoformat(sep="-")} at {data.scheduled_date.time().isoformat()}.
+        for {created.scheduled_date.date().isoformat()} at {created.scheduled_date.time().isoformat(timespec="minutes")}.
 
         Thank you for using our service!"""
 

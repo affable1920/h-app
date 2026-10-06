@@ -7,9 +7,17 @@ import { AvailabilityScheduleGroup } from "../components/DrAvailabilityScheduleG
 import type { GetDoctorResponse } from "@/types/doctor-api";
 import { DateTime } from "luxon";
 import { areEqual, fromISO } from "@/domain/scheduling/utils";
+import { useGetDoctor } from "@/hooks/use-doctors";
 
 function DrAvailabilityPage() {
-  const doctor = useLoaderData<GetDoctorResponse>();
+  const initialDoctor = useLoaderData<GetDoctorResponse>();
+
+  const { data: queriedDoctor } = useGetDoctor(initialDoctor?.id, {
+    initialData: initialDoctor,
+    enabled: initialDoctor !== null,
+  });
+
+  const doctor = queriedDoctor ?? initialDoctor;
 
   const [viewMonth, setViewMonth] = useState(DateTime.local());
   const [selectedDate, setSelectedDate] = useState<DateTime | null>(null);

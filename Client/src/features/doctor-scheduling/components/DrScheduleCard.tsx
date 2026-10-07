@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import { Edit, Eye, SquareChevronRight, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Eye, SquareChevronRight, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -27,7 +27,6 @@ export function DrScheduleCard({
 }) {
   const openModal = useModalStore((s) => s.openModal);
 
-  const navigate = useNavigate();
   const [showOptions, setShowOptions] = useState(false);
 
   const { mutateAsync: remove } = useDeleteSchedule();
@@ -266,17 +265,6 @@ export function DrScheduleCard({
               transition: { duration: 0.15, ease: "linear" },
             }}
           >
-            <Button
-              aria-label="edit schedule"
-              data-tooltip="edit schedule"
-              variant="icon"
-              size="sm"
-              onClick={function () {
-                navigate(`/view/doctor/${doctor.id}/schedule`);
-              }}
-            >
-              <Edit />
-            </Button>
             <Button
               onClick={handleDelete}
               data-tooltip="delete"

@@ -75,8 +75,6 @@ async def get_doctor(
         session=session
     )
 
-# ================================================================================================
-
 
 @router.put("/me")
 async def edit_doctor(
@@ -109,9 +107,6 @@ async def edit_doctor(
     await session.refresh(doctor)
 
 
-# ================================================================================================
-
-
 @router.get(
     "/me/appointments",
     response_model=PaginatedResponse[AppointmentDoctorResponse]
@@ -134,7 +129,6 @@ async def get_doctor_appointments(
     )
 
 
-# ================================================================================================
 @router.get(
     "/me/schedules",
     response_model=PaginatedResponse[DoctorScheduleResponse]
@@ -157,7 +151,6 @@ async def get_doctor_schedules(
     )
 
 
-# ================================================================================================
 @router.put(
     "/me/schedules/{schedule_id}",
 )
@@ -189,8 +182,6 @@ async def toggle_schedule_activation(
         val=not sch.is_active
     )
 
-# ================================================================================================
-
 
 @router.get(
     path="/me/clinics",
@@ -214,7 +205,25 @@ async def get_doctor_clinics(
     )
 
 
-# ================================================================================================
+@router.put(
+    path="/me/clinics/{clinic_id}",
+    response_model=DoctorClinicResponse
+)
+async def associate_doctor_clinic(
+    clinic_id: UUID,
+    doctor: Doctor = Depends(require_doctor),
+    session: AsyncSession = Depends(get_db)
+):
+    clinic = await DoctorService.associate_clinic(
+        session=session,
+        doctor_id=doctor.id,
+        clinic_id=clinic_id
+    )
+
+    await session.commit()
+    return clinic
+
+
 @router.delete(
     path="/me/appointments/{appointment_id}",
 )

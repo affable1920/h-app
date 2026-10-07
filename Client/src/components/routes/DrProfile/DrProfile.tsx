@@ -15,16 +15,16 @@ const TABS = [
     route: "personal",
   },
   {
+    label: "Clinics",
+    route: "clinics",
+  },
+  {
     label: "Schedules",
     route: "schedules",
   },
   {
     label: "Appointments",
     route: "appointments",
-  },
-  {
-    label: "Preferences",
-    route: "preferences",
   },
 ];
 

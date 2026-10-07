@@ -27,10 +27,13 @@ export const DrProfileRoute: RouteObject = {
       },
     },
     {
-      path: "preferences",
+      path: "clinics",
       async lazy() {
+        const { DoctorClinicsTab } =
+          await import("@features/doctor-clinics/routes/DoctorClinicsTab");
+
         return {
-          element: <></>,
+          element: <DoctorClinicsTab />,
         };
       },
     },

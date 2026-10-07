@@ -6,13 +6,14 @@ from uuid import UUID
 from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.dialects.postgresql import insert
 
 from app.features.auth import security
-from app.core.exceptions import AlreadyInUseException
+from app.core.exceptions import AlreadyInUseException, EntityNotFoundException
 from app.scripts.one_off import compress
 from app.schemas.doctor import DrCreate
 from app.services.entities.main import EntityService
-from app.database.models import Appointment, Clinic, Doctor, Schedule
+from app.database.models import Appointment, Clinic, Doctor, Schedule, junction
 from app.schemas.pagination import DrRouteFilters, PaginationParams
 from app.services.PatientService import PatientService
 from app.features.auth import security
@@ -273,3 +274,38 @@ class DoctorService(EntityService[Doctor]):
 
         objs = (await session.scalars(stmt)).all()
         return count, objs
+
+    @classmethod
+    async def associate_clinic(
+        cls,
+        session: AsyncSession,
+        doctor_id: UUID,
+        clinic_id: UUID
+    ) -> Clinic:
+        clinic = await session.scalar(
+            select(Clinic)
+            .where(Clinic.id == clinic_id)
+            .options(selectinload(Clinic.reviews))
+        )
+
+        if clinic is None:
+            raise EntityNotFoundException(
+                entity_name="clinic",
+            )
+
+        stmt = (
+            insert(junction)
+            .values(
+                doctor_id=doctor_id,
+                clinic_id=clinic_id
+            )
+            .on_conflict_do_nothing(
+                index_elements=[
+                    junction.c.doctor_id,
+                    junction.c.clinic_id
+                ]
+            )
+        )
+
+        await session.execute(stmt)
+        return clinic

@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ConflictError, EntityNotFoundException
 from app.services.AppointmentService import AppointmentService
-from app.services.SchedulingService import ScheduleService
 from app.services.entities.main import EntityService
 from app.database.models import Doctor
 from app.features.auth.dependencies import require_doctor
@@ -148,38 +147,6 @@ async def get_doctor_schedules(
         objs,
         count,
         pagination_params
-    )
-
-
-@router.put(
-    "/me/schedules/{schedule_id}",
-)
-async def toggle_schedule_activation(
-    schedule_id: UUID,
-    doctor: Doctor = Depends(require_doctor),
-    session: AsyncSession = Depends(get_db),
-):
-    sch = await ScheduleService.get_schedule_for_doctor(
-        schedule_id=schedule_id,
-        session=session,
-        doctor_id=doctor.id
-    )
-
-    if sch is None:
-        raise HTTPException(
-            404,
-            detail={
-                "code": "not_found",
-                "message": "The schedule you are trying to edit does not exist.",
-            }
-        )
-
-    await ScheduleService.edit_schedule(
-        schedule_id=schedule_id,
-        doctor_id=doctor.id,
-        session=session,
-        field_name="is_active",
-        val=not sch.is_active
     )
 
 

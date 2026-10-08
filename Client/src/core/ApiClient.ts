@@ -10,6 +10,13 @@ import { type APIError } from "@/types/http";
 import useAuthStore, { logout } from "@stores/auth-store";
 import { config } from "@core/config";
 
+type APIErrorPayload = {
+  detail: {
+    code: string;
+    message: string;
+  };
+};
+
 class APIClient {
   private baseUrl: string = config.api_url;
   protected instance: AxiosInstance;
@@ -44,10 +51,10 @@ class APIClient {
     }, this.onResponseError.bind(this));
   }
 
-  private onResponseError(this: APIClient, error: AxiosError) {
-    const { request, response } = error;
+  private onResponseError(this: APIClient, error: AxiosError<APIErrorPayload>) {
+    const { response } = error;
 
-    if (!response && request) {
+    if (!response) {
       const sde = {
         message: "Recieved no response from the server.",
         code: "server_down",
@@ -57,16 +64,16 @@ class APIClient {
       return Promise.reject(sde);
     }
 
-    const { headers } = response as AxiosResponse;
+    const { headers } = response;
 
     if (headers["x-session-expire"] == "true") {
       logout("/auth");
     }
 
-    return Promise.reject(this.normalizeErrors(response!));
+    return Promise.reject(this.normalizeErrors(response));
   }
 
-  private normalizeErrors(response: AxiosResponse): APIError {
+  private normalizeErrors(response: AxiosResponse<APIErrorPayload>): APIError {
     if (response.status === 422) {
       return {
         message: "Invalid input.",
@@ -76,7 +83,7 @@ class APIClient {
       };
     }
 
-    const { code, message } = (response.data as any).detail;
+    const { code, message } = response.data.detail;
 
     return {
       code,
@@ -113,8 +120,23 @@ class APIClient {
     return await this.instance.put(this.getSlug(path), data, config);
   }
 
-  async delete<TEntity = unknown>(path: string, config?: AxiosRequestConfig) {
-    await this.instance.delete<TEntity>(this.getSlug(path), config);
+  async patch<TResponse, TBody>(
+    path: string,
+    data: TBody,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<TResponse>> {
+    return await this.instance.patch<TResponse>(
+      this.getSlug(path),
+      data,
+      config,
+    );
+  }
+
+  async delete<TResponse>(
+    path: string,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<TResponse>> {
+    return await this.instance.delete<TResponse>(this.getSlug(path), config);
   }
 }
 

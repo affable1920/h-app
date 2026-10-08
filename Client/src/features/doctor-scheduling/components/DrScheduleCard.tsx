@@ -5,7 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   useDeleteSchedule,
-  useUpdateSchedule,
+  useSetScheduleActivation,
 } from "@/features/doctor-scheduling/api/mutations";
 import type { APIError, Doctor } from "@/types/http";
 import useModalStore from "@/stores/modal-store";
@@ -29,8 +29,8 @@ export function DrScheduleCard({
 
   const [showOptions, setShowOptions] = useState(false);
 
-  const { mutateAsync: remove } = useDeleteSchedule();
-  const { mutateAsync: update } = useUpdateSchedule();
+  const { mutateAsync: removeSchedule } = useDeleteSchedule();
+  const { mutateAsync: updateSchedule } = useSetScheduleActivation();
 
   const st = fromISO(schedule.startTime).toFormat("HH:mm");
   const et = fromISO(schedule.endTime).toFormat("HH:mm");
@@ -62,10 +62,10 @@ export function DrScheduleCard({
     }
 
     try {
-      await remove({ id: schedule.id, doctorId: doctor.id });
+      await removeSchedule({ id: schedule.id, doctorId: doctor.id });
       toast.info("You schedule was sucessfully deleted.");
     } catch (ex) {
-      const error = ex as unknown as APIError;
+      const error = ex as APIError;
       if (error.code.toLowerCase() === "schedule_has_appointments") {
         if (!schedule.isActive) {
           toast.info(error.message, {
@@ -93,19 +93,18 @@ export function DrScheduleCard({
             </>
           ),
           onResolve: async function () {
-            await update({
+            await updateSchedule({
               doctorId: doctor.id,
               id: schedule.id,
-              changes: {
-                q: "is_active",
-                val: false,
-              },
+              isActive: false,
             });
           },
           onReject() {
             return;
           },
         });
+
+        return;
       }
 
       toast.error(error.code, {
@@ -139,14 +138,11 @@ export function DrScheduleCard({
       }
     }
 
-    await update(
+    await updateSchedule(
       {
         doctorId: doctor.id,
         id: schedule.id,
-        changes: {
-          q: "is_active",
-          val: !schedule.isActive,
-        },
+        isActive: !schedule.isActive,
       },
       {
         onError(error) {

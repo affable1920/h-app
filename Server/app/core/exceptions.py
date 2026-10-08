@@ -54,7 +54,10 @@ class AlreadyInUseException(AppException):
 class ScheduleHasAppointments(AppException):
     code = "SCHEDULE_HAS_APPOINTMENTS"
     status_code = 409
-    message = "The requested schedule cannot be deleted because it has active appointments"
+    message = (
+        "The requested schedule cannot be deleted because it has appointment history. "
+        "Deactivate it instead."
+    )
 
     def __init__(
             self,

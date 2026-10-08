@@ -1,5 +1,5 @@
 import logging
-from typing import Any, cast
+from typing import cast
 from uuid import UUID
 
 from sqlalchemy import exists, select
@@ -80,8 +80,6 @@ class ScheduleService:
 
         return Schedule(**common_fields, **payload.persistence_fields())
 
-    #
-
     @classmethod
     async def create_schedule(
             cls,
@@ -141,13 +139,12 @@ class ScheduleService:
         return schedule
 
     @classmethod
-    async def edit_schedule(
+    async def alter_schedule_activation(
             cls,
             schedule_id: UUID,
             doctor_id: UUID,
             session: AsyncSession,
-            field_name: str,
-            val: Any
+            val: bool
     ):
         schedule = await cls.get_schedule_for_doctor(
             session=session,
@@ -161,10 +158,16 @@ class ScheduleService:
                 identifier=schedule_id
             )
 
-        setattr(schedule, field_name, val)
-        await session.commit()
+        if schedule.is_active == val:
+            logger.info(
+                "Schedule %s is already set to %s ..",
+                schedule_id,
+                val
+            )
 
-    #
+            return
+
+        schedule.is_active = val
 
     @classmethod
     async def remove_schedule(
@@ -172,7 +175,6 @@ class ScheduleService:
             schedule_id: UUID,
             doctor_id: UUID,
             session: AsyncSession,
-            confirm: bool = False
     ):
         schedule = await cls.get_schedule_for_doctor(
             schedule_id=schedule_id,
@@ -199,7 +201,6 @@ class ScheduleService:
             )
 
         await session.delete(schedule)
-        await session.commit()
 
 
 schedule_service = ScheduleService()

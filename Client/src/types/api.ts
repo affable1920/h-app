@@ -242,23 +242,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/doctors/me/schedules/{schedule_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Toggle Schedule Activation */
-        put: operations["toggle_activation"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/doctors/me/clinics": {
         parameters: {
             query?: never;
@@ -269,6 +252,23 @@ export interface paths {
         /** Get Doctor Clinics */
         get: operations["get_clinics"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctors/me/clinics/{clinic_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Associate Doctor Clinic */
+        put: operations["associate_clinic"];
         post?: never;
         delete?: never;
         options?: never;
@@ -413,6 +413,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/schedules/{schedule_id}/activation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Alter Schedule Activation */
+        patch: operations["alter_activation"];
+        trace?: never;
+    };
     "/schedules/{schedule_id}": {
         parameters: {
             query?: never;
@@ -421,8 +438,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Edit Schedule */
-        put: operations["edit_schedule"];
+        put?: never;
         post?: never;
         /** Remove Schedule */
         delete: operations["remove_schedule"];
@@ -541,11 +557,6 @@ export interface components {
         Body_edit_doctor_doctors_me_put: {
             /** Val */
             val: string;
-        };
-        /** Body_edit_schedule_schedules__schedule_id__put */
-        Body_edit_schedule_schedules__schedule_id__put: {
-            /** Val */
-            val: unknown;
         };
         /** Body_register_dr_auth_register_doctor_post */
         Body_register_dr_auth_register_doctor_post: {
@@ -1094,6 +1105,11 @@ export interface components {
             /** Slots */
             slots?: components["schemas"]["Slot"][];
         };
+        /** ScheduleActivationUpdate */
+        ScheduleActivationUpdate: {
+            /** Isactive */
+            isActive: boolean;
+        };
         /** Slot */
         Slot: {
             /**
@@ -1622,37 +1638,6 @@ export interface operations {
             };
         };
     };
-    toggle_activation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                schedule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     get_clinics: {
         parameters: {
             query?: {
@@ -1672,6 +1657,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResponse_DoctorClinicResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    associate_clinic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clinic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorClinicResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1969,11 +1985,9 @@ export interface operations {
             };
         };
     };
-    edit_schedule: {
+    alter_activation: {
         parameters: {
-            query: {
-                q: string;
-            };
+            query?: never;
             header?: never;
             path: {
                 schedule_id: string;
@@ -1982,18 +1996,16 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Body_edit_schedule_schedules__schedule_id__put"];
+                "application/json": components["schemas"]["ScheduleActivationUpdate"];
             };
         };
         responses: {
             /** @description Successful Response */
-            200: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": unknown;
-                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -2008,10 +2020,7 @@ export interface operations {
     };
     remove_schedule: {
         parameters: {
-            query?: {
-                /** @description Confirm deletion of schedule by setting this to true. */
-                confirm?: boolean;
-            };
+            query?: never;
             header?: never;
             path: {
                 schedule_id: string;

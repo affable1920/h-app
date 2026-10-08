@@ -2,9 +2,9 @@ import { useGetClinics } from "@/hooks/use-clinics";
 import { useGetDoctorClinics } from "@/hooks/use-doctors";
 import { useState } from "react";
 import { useAssociateDoctorClinic } from "../api/mutations";
-import Spinner from "@/components/ui/Spinner";
 import type { APIError } from "@/types/http";
 import { toast } from "sonner";
+import Spinner from "@/components/ui/Spinner";
 import Card from "@/components/ui/Card";
 import { Stack } from "@/components/ui/Stack";
 import Button from "@/components/ui/Button";
@@ -74,7 +74,7 @@ export function DoctorClinicsTab() {
   return (
     <section className="space-y-8">
       <Card>
-        <Card.Header>
+        <Card.Header className="space-y-0.5">
           <Card.Title>Add an existing clinic</Card.Title>
           <Card.Description>
             Choose a clinic where you currently practise.
@@ -115,7 +115,7 @@ export function DoctorClinicsTab() {
       <section className="space-y-4">
         <h2 className="text-md font-semibold text-text-normal">Your clinics</h2>
 
-        {!linkedClinics.length ? (
+        {linkedClinics.length === 0 ? (
           <p>You have not added any clinics yet.</p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">

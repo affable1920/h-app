@@ -86,3 +86,9 @@ class Schedule(DoctorScheduleResponse):
     clinic_id: UUID
     doctor_id: UUID
     slots: list[Slot] = Field(default_factory=list)
+
+
+class ScheduleActivationUpdate(
+    StrictRequest
+):
+    is_active: Annotated[bool, Field(strict=True)]

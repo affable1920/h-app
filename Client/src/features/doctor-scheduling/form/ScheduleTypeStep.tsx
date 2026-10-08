@@ -1,6 +1,6 @@
 import { useController, useFormContext } from "react-hook-form";
-import Badge from "../../../components/ui/Badge";
-import { Stack } from "../../../components/ui/Stack";
+import Badge from "@components/ui/Badge";
+import { Stack } from "@components/ui/Stack";
 import { type ScheduleCreate } from "../contract/create-schema";
 import { DateTime } from "luxon";
 
@@ -53,54 +53,65 @@ export function ScheduleTypeStep() {
     form.clearErrors();
   }
 
+  const initialKind = field.value ?? TYPES[0];
+
   return (
-    <div>
-      <header className="text-center space-y-1.5">
-        <h2>Hey DOC !</h2>
-        <h2 className="mx-6">
+    <fieldset className="text-center">
+      <legend className="mx-6 text-text-normal leading-tight font-semibold mb-4 space-y-1">
+        Hey{" "}
+        <strong>
+          <em>DOC !</em>
+        </strong>{" "}
+        <br />
+        <span className="font-normal">
           What kind of a schedule would you like to create .. ?
-        </h2>
-      </header>
+        </span>
+      </legend>
 
       <Stack
-        style={{
-          marginTop: "14px",
-        }}
-        orientation="V"
-        gap={10}
+        align="center"
         justify="center"
+        gap={"sm"}
+        style={{ flexWrap: "wrap", marginBottom: "4px" }}
       >
-        <Stack
-          align="center"
-          justify="center"
-          gap={"sm"}
-          style={{ flexWrap: "wrap" }}
-        >
-          {TYPES.map(function (frame) {
-            return (
-              <label key={frame} htmlFor={frame}>
-                <Badge
-                  selected={frame === field.value}
-                  onClick={function () {
-                    selectKind(frame);
-                  }}
-                  className={`px-4 ${frame === field.value ? "text-black" : "text-text-normal"}`}
-                  full={false}
-                >
-                  {frame}
-                  <input type="radio" id={frame} style={{ display: "none" }} />
-                </Badge>
-              </label>
-            );
-          })}
-        </Stack>
-
-        {fieldState.error && (
-          <span role="alert" className="text-red-400 capitalize text-sm">
-            {fieldState.error?.message}
-          </span>
-        )}
+        {TYPES.map(function (frame) {
+          return (
+            <Badge
+              as="label"
+              key={frame}
+              htmlFor={frame}
+              selected={frame === field.value}
+              data-tooltip={`Describes a ${frame} schedule`}
+              className={`px-4 focus-within:ring-3 focus-within:ring-brand/20`}
+            >
+              <input
+                onChange={function () {
+                  selectKind(frame);
+                }}
+                className="sr-only"
+                type="radio"
+                id={frame}
+                name={field.name}
+                value={frame}
+                checked={frame === field.value}
+                data-modal-initial-focus={
+                  frame === initialKind ? "" : undefined
+                }
+              />
+              <span>{frame}</span>
+            </Badge>
+          );
+        })}
       </Stack>
-    </div>
+
+      {fieldState.error && (
+        <span
+          role="alert"
+          className="text-red-400 first-letter:capitalize text-sm"
+        >
+          {fieldState.error?.message}
+        </span>
+      )}
+    </fieldset>
   );
 }

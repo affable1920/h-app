@@ -6,6 +6,10 @@ function useInjectModalHandlers() {
 
   useEffect(
     function () {
+      if (!currModal) {
+        return;
+      }
+
       function handleEscape(ev: KeyboardEvent) {
         if (ev.key == "Escape") {
           removeModal();
@@ -13,6 +17,7 @@ function useInjectModalHandlers() {
       }
 
       document.addEventListener("keydown", handleEscape);
+
       return function () {
         return document.removeEventListener("keydown", handleEscape);
       };
@@ -22,10 +27,14 @@ function useInjectModalHandlers() {
 
   useEffect(
     function () {
+      if (!currModal) {
+        return;
+      }
+
       function handleClick(ev: MouseEvent) {
         const el = ev.target as Element;
 
-        if (!el.closest("#modal") && !el.closest("#portal")) {
+        if (!el.closest("#modal")) {
           removeModal();
         }
       }

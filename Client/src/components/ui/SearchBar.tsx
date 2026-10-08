@@ -29,6 +29,7 @@ const SearchBar = memo(function ({
 }: SearchBarProps) {
   return (
     <InputElement
+      data-modal-initial-focus
       size={size}
       label={label}
       disabled={disabled}

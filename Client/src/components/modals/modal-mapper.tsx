@@ -49,15 +49,45 @@ export type MapperProps = {
 
 export type Modal = keyof MapperProps;
 
-const MODAL_MAPPINGS: Record<Modal, React.ElementType> = {
-  "booking-gate": BookingGate,
-  "search-bar": SearchBar,
-  "confirmation-modal": Confirmation,
-  "schedule-creater-modal": ScheduleForm,
-  "directory-filter-modal": DirectoryFilter,
-  "doctor-profile-setup-modal": DrProfileSetup,
-  "picker-modal": Picker,
-  "information-modal": InformationModal,
+type ModalPayload = {
+  element: React.ElementType;
+  title?: string;
+  label: string;
+};
+
+const MODAL_MAPPINGS: Record<Modal, ModalPayload> = {
+  "booking-gate": {
+    element: BookingGate,
+    title: "Book an appointment",
+    label: "Book an appointment",
+  },
+  "search-bar": {
+    element: SearchBar,
+    label: "search",
+  },
+  "confirmation-modal": {
+    element: Confirmation,
+    title: "Confirm your action",
+    label: "confirm your action",
+  },
+  "schedule-creater-modal": {
+    element: ScheduleForm,
+    label: "Create a schedule",
+    title: "Create a schedule",
+  },
+  "directory-filter-modal": {
+    element: DirectoryFilter,
+    label: "filter directory",
+  },
+  "doctor-profile-setup-modal": {
+    element: DrProfileSetup,
+    label: "set up doctor profile",
+  },
+  "picker-modal": {
+    element: Picker,
+    label: "choose an option",
+  },
+  "information-modal": { element: InformationModal, label: "information" },
 };
 
 export default MODAL_MAPPINGS;

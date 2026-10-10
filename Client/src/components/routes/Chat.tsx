@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type InputEvent } from "react";
 import { ArrowUp, SendHorizonal, SquareStop } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
-import Button from "../ui/Button";
+import Button from "../lib/button/Button";
 import { useChat } from "@/features/chat/use-chat";
 import ChatResponse from "../ChatResponse";
 import Badge from "../ui/Badge";
@@ -109,7 +109,6 @@ function Chat() {
         duration: 2200,
       });
 
-      // moving the cursor to the end of the restored prompt
       const range = document.createRange();
       const selection = document.getSelection();
 
@@ -159,7 +158,7 @@ function Chat() {
       >
         {conversation.length ? (
           <>
-            {conversation.map((response, i) => {
+            {conversation.map(function (response, i) {
               const isUser = response.role === "user";
 
               return (
@@ -188,6 +187,7 @@ function Chat() {
                 onClick={function () {
                   wrapperRef.current?.scrollTo({ top: 0, behavior: "smooth" });
                 }}
+                aria-label="Scroll to top"
                 className="sticky self-end bottom-0 flex justify-center items-center"
               >
                 <ArrowUp />
@@ -198,11 +198,12 @@ function Chat() {
           <article className="flex flex-wrap gap-4 justify-center items-center py-4">
             {templates.map((template) => (
               <Badge
+                aria-label={`Send suggested message: ${template.label}`}
                 key={template.label}
                 color="primary"
                 onClick={() => sendMsg(template.label)}
                 className="capitalize"
-                full={false}
+                as="button"
               >
                 {template.label}
               </Badge>

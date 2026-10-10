@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Stack } from "./ui/Stack";
 import { Input } from "./ui/Input";
-import Button from "./ui/Button";
+import Button from "./lib/button/Button";
 import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -45,19 +45,13 @@ export function PatientSignin() {
       <Stack gap="md" orientation="V">
         <Input.Group error={errors["email"]?.message}>
           <Input.Label htmlFor="email">email</Input.Label>
-          <Input.Element
-            id="email"
-            autoFocus
-            type="email"
-            {...form.register("email")}
-          />
+          <Input.Element id="email" type="email" {...form.register("email")} />
         </Input.Group>
 
         <Input.Group error={errors["password"]?.message}>
           <Input.Label htmlFor="password">password</Input.Label>
           <Input.Element
             id="password"
-            autoFocus
             type="password"
             {...form.register("password")}
           />

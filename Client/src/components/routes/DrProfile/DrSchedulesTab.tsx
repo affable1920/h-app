@@ -1,7 +1,7 @@
 import DirectoryLayout from "@/components/lib/DirectoryLayout";
 import Pagination from "@/components/Pagination";
 import { DrScheduleCard } from "@/features/doctor-scheduling/components/DrScheduleCard";
-import Button from "@/components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import SearchBar from "@/components/ui/SearchBar";
 import Spinner from "@/components/ui/Spinner";
 import { Stack } from "@/components/ui/Stack";
@@ -31,9 +31,10 @@ export function DrSchedulesTab() {
 
         <Stack>
           <SearchBar
+            id="doctor-schedules-search"
+            aria-label="search schedules"
             size="xs"
-            clearable={true}
-            val=""
+            value=""
             disabled={!schedules.length}
             placeholder="Search for schedules ..."
           />
@@ -55,7 +56,7 @@ export function DrSchedulesTab() {
 
       <DirectoryLayout.Content>
         <Stack gap="sm" orientation="V" md={{ orientation: "H", gap: "md" }}>
-          {!schedules.length ? (
+          {schedules.length === 0 ? (
             <p className="text-center text-md leading-[1.4] text-text-normal">
               You currently have no{" "}
               <em>

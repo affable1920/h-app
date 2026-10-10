@@ -5,7 +5,7 @@ import Ratings from "./Ratings";
 import type { Doctor } from "@/types/http";
 import getActions from "@/utils/doctor-actions-config";
 import { useMemo } from "react";
-import Button from "./ui/Button";
+import Button from "./lib/button/Button";
 import { Stack } from "./ui/Stack";
 
 function DrCardFront({ doctor }: { doctor: Doctor }) {
@@ -73,7 +73,7 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
         </Stack>
       </Stack>
 
-      <Stack justify="end" align="end" gap={10}>
+      <Stack justify="end" align="stretch" gap={10}>
         {(actions || []).map(function (action) {
           const { name, label = "", icon: Icon } = action;
           return (

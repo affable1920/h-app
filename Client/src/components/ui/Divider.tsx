@@ -1,4 +1,4 @@
-import type { Color } from "@/types/ui";
+import type { Color } from "@/components/lib/button/variants";
 import { memo, type CSSProperties, type ElementType } from "react";
 
 type Labelposition = "start" | "center" | "end";

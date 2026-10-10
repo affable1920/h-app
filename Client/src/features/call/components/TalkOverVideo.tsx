@@ -15,7 +15,7 @@ import {
   Camera,
 } from "lucide-react";
 import { motion } from "motion/react";
-import Button from "@components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import { IdleView } from "@/features/call/components/IdleView";
 import { useCall } from "@/features/call/core/use-call";
 import Spinner from "@/components/ui/Spinner";

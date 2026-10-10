@@ -1,7 +1,7 @@
 import { ChevronRight, MousePointer, X } from "lucide-react";
 import { AnimatePresence, motion, type Variant } from "motion/react";
 import { forwardRef, useState } from "react";
-import Button from "./Button";
+import Button from "../lib/button/Button";
 import { Stack } from "./Stack";
 import Badge from "./Badge";
 
@@ -83,16 +83,19 @@ export const MultiSelect = forwardRef<
             style={{ flexWrap: "wrap" }}
           >
             {selected.map(function (sel) {
+              const displayLabel = getDisplayLabel(sel);
+
               return (
                 <Badge
                   onClick={function () {
                     onValueChange(selected.filter((s) => s !== sel));
                   }}
                   selected={true}
-                  full={false}
+                  as="button"
                   key={sel}
+                  aria-label={`Remove ${displayLabel} from ${label}`}
                 >
-                  {getDisplayLabel(sel)}
+                  {displayLabel}
                 </Badge>
               );
             })}

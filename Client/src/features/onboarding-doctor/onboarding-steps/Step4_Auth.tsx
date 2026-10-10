@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/Input";
 import { useFormContext } from "react-hook-form";
 import { Stack } from "@/components/ui/Stack";
 import { type DoctorOnboarding } from "@/schemas";
-import Button from "@/components/ui/Button";
+import Button from "@/components/lib/button/Button";
 
 export function Step4_Auth() {
   const form = useFormContext<DoctorOnboarding>();

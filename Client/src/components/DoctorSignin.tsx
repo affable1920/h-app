@@ -1,7 +1,7 @@
 import { DrLoginSchema, type DoctorLogin } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type FieldError } from "react-hook-form";
-import Button from "./ui/Button";
+import Button from "./lib/button/Button";
 import { Input } from "./ui/Input";
 import { Stack } from "./ui/Stack";
 import { useState, useCallback, forwardRef } from "react";
@@ -51,7 +51,6 @@ const MultiInput = forwardRef<HTMLInputElement, MultiInputProps>(
         bg-layout-raised p-2 focus:ring-4 focus:ring-brand/20"
           type={type}
           id="email"
-          autoFocus
           {...rest}
         />
 

@@ -13,7 +13,7 @@ import {
 import type { APIError, Doctor } from "@/types/http";
 import { toast } from "sonner";
 import { removeModal } from "@/stores/modal-store";
-import Button from "@components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import { useGetDoctorClinics } from "@/hooks/use-doctors";
 import {
   type ScheduleCreate,

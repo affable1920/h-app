@@ -1,17 +1,8 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useRef, useState, type KeyboardEvent } from "react";
 import { ChevronRight } from "lucide-react";
 import { AnimatePresence, motion, type Variant } from "motion/react";
-import Button from "./Button";
+import Button from "../lib/button/Button";
 import Badge from "./Badge";
-
-/**
- * single select -> selected is itself an option -> check if an option equals the selected option
- * multiple select -> selected is an array of options -> check for membership
- *
- * select all is an action in multiple mode
- * all should not be an option in a single select component's api, but only should be available
- * to multiple select components
- */
 
 const dropDownVariants: Record<string, Variant> = {
   initial: {
@@ -66,19 +57,37 @@ export const Select = forwardRef<
   HTMLUListElement,
   SingleSelectProps<OptionValue>
 >(function ({ label, options = [], onValueChange, selected }, ref) {
-  const [open, setOpen] = useState(false);
   const selectedOption = options.find((o) => o.value === selected);
 
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  function escape(ev: KeyboardEvent) {
+    if (ev.key.toLowerCase() == "escape") {
+      if (!open) {
+        return;
+      }
+
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      triggerRef.current?.focus();
+      setOpen(false);
+    }
+  }
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" onKeyDown={escape}>
       <AnimatePresence mode="wait">
-        {selected && !open && (
+        {selected !== null && !open && (
           <motion.div className="px-1">
             <Badge
+              aria-label={`remove ${selectedOption?.label} from the ${label}.`}
               selected={true}
-              full={false}
+              as="button"
               onClick={function () {
                 onValueChange(null);
+                triggerRef.current?.focus();
               }}
             >
               {selectedOption?.label}
@@ -121,6 +130,8 @@ export const Select = forwardRef<
                       onClick={function () {
                         onValueChange(opt.value);
                         setOpen(false);
+
+                        triggerRef.current?.focus();
                       }}
                       className={`appearance-none hover:bg-layout-raised p-3 py-2.5
                                    transition-colors capitalize cursor-pointer font-semibold italic
@@ -137,10 +148,12 @@ export const Select = forwardRef<
       </AnimatePresence>
 
       <Button
+        ref={triggerRef}
         onClick={function () {
           setOpen((p) => !p);
         }}
         className="w-full"
+        type="button"
         border={false}
         color="brand"
         aria-expanded={open}

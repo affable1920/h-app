@@ -19,6 +19,7 @@ export function RecurrenceStep() {
             <em className="text-xs text-text-secondary">(optional)</em>
           </Input.Label>
           <Input.Element
+            id="recurrence.startsOn"
             disabled={kind === "one-off"}
             defaultValue={kind === "one-off" ? recurrence.date : ""}
             type="date"
@@ -31,6 +32,7 @@ export function RecurrenceStep() {
             ends on <em className="text-xs text-text-secondary">(optional)</em>
           </Input.Label>
           <Input.Element
+            id="recurrence.endsOn"
             disabled={kind === "one-off"}
             defaultValue={kind === "one-off" ? recurrence.date : ""}
             size="xs"

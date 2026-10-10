@@ -3,7 +3,6 @@ import {
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from "react";
-import type { FieldError } from "react-hook-form";
 import { Stack, type StackProps } from "./Stack";
 import { cn } from "@/utils/utils";
 import { Asterisk } from "lucide-react";
@@ -19,9 +18,6 @@ const sizes: Record<Size, string> = {
 
 export type InputProps = {
   size?: Size;
-  error?: FieldError;
-  label?: string;
-  icon?: ReactNode;
 } & Omit<ComponentPropsWithoutRef<"input">, "size">;
 
 const BASE_INPUT_STYLES = `border-2 border-border-strong rounded-md outline-none w-full font-semibold placeholder:italic hover:border-border-strong placeholder:capitalize transition-colors px-3 bg-layout-raised focus:ring-4 focus:ring-brand/20 disabled:opacity-70`;
@@ -32,7 +28,7 @@ const InputElement = forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         spellCheck={props.spellCheck ?? false}
-        id={id ?? props.name}
+        id={id}
         className={cn(BASE_INPUT_STYLES, sizes[size], className)}
         {...props}
       />

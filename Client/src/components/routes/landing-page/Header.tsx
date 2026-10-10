@@ -10,7 +10,7 @@ import {
   Minimize2,
   Home,
 } from "lucide-react";
-import Button from "../../ui/Button";
+import Button from "../../lib/button/Button";
 import useAuthStore from "@/stores/auth-store";
 import { Link, useNavigate } from "react-router-dom";
 import { createStagger } from "@/utils/motion-variants";
@@ -84,9 +84,6 @@ function LandingPageHeader() {
         </div>
 
         <Button
-          needsMotion={true}
-          initial={{ scale: 0.75 }}
-          animate={{ scale: 1 }}
           onClick={function () {
             setIsMobileMenuOpen(function (p) {
               return !p;

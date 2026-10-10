@@ -1,15 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
-
-import { ArrowRight, ChevronRight, MapPinCheckInside } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import type { DateTime } from "luxon";
+import { ArrowRight, ChevronRight, MapPinCheckInside } from "lucide-react";
 
 import Badge from "@components/ui/Badge";
-import Button from "@components/ui/Button";
+import Button from "@/components/lib/button/Button";
 
 import useModalStore from "@/stores/modal-store";
 import { ClinicViewVariants, createStagger } from "@/utils/motion-variants";
 
-import type { DateTime } from "luxon";
 import type { Doctor, Schedule, Slot } from "@/types/http";
 
 import { areEqual, fromISO } from "@/domain/scheduling/utils";
@@ -60,19 +59,15 @@ export function AvailabilityScheduleGroup({
     [selectedDate, slotsForSelectedDate],
   );
 
+  const panelId = `schedule-slots-${schedule.id}`;
+
   return (
     <motion.article
       className="bg-layout"
       variants={ClinicViewVariants.articleVariants}
     >
       <header className="space-y-0.5 mb-4">
-        <div
-          onClick={function () {
-            setIsExpanded((p) => !p);
-          }}
-          role="button"
-          className="flex cursor-pointer items-center justify-between"
-        >
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-6 text-text-normal capitalize ">
             <h2 className="min-w-0 flex-1">{clinic?.name}</h2>
             <Badge as="span" className="shadow-none">
@@ -89,7 +84,16 @@ export function AvailabilityScheduleGroup({
             animate={{
               rotate: isExpanded ? 90 : 0,
             }}
-            aria-label="toggle-button"
+            type="button"
+            onClick={function () {
+              setIsExpanded((p) => !p);
+            }}
+            aria-controls={panelId}
+            aria-label={
+              clinic.name
+                ? `Available slots at ${clinic.name}`
+                : `Available slots`
+            }
             aria-expanded={isExpanded}
             data-tooltip={isExpanded ? "Collapse slots" : "View slots"}
           >
@@ -105,108 +109,114 @@ export function AvailabilityScheduleGroup({
       <AnimatePresence>
         {isExpanded && (
           <motion.div
+            id={panelId}
             className="flex flex-col"
             initial={{ height: 0 }}
             animate={{ height: "auto" }}
             exit={{ height: 0 }}
           >
             {selectedDate === null ? (
-              <p className="text-center">
+              <motion.p className="text-center">
                 Select an available date to view slots ..
-              </p>
+              </motion.p>
             ) : slotsForSelectedDate.length === 0 ? (
-              <p className="text-center">
+              <motion.p className="text-center">
                 The schedule has no slots on the selected date ..
-              </p>
+              </motion.p>
             ) : slotsForSelectedDate.every((slot) => slot.isBooked) ? (
-              <p className="text-center">All slots booked !</p>
+              <motion.p className="text-center">All slots booked !</motion.p>
             ) : (
               <motion.div
                 variants={createStagger({ exitDelay: false }).parent}
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="flex flex-wrap gap-4 justify-center my-6"
+                className="flex flex-wrap gap-4 my-6"
               >
                 {[...slotsForSelectedDate]
                   .sort(function (first, second) {
                     return Number(first.isBooked) - Number(second.isBooked);
                   })
                   .map(function (slot) {
+                    const slotTime = fromISO(slot.slotDatetime).toFormat(
+                      "HH:mm",
+                    );
+                    const isSelected = slot.id === scheduleState.slot?.id;
+
                     return (
-                      <motion.button
+                      <motion.span
                         variants={createStagger().children}
                         className="grow"
                         key={slot.id}
-                        onClick={function () {
-                          setScheduleState({ slot });
-                        }}
-                        disabled={slot.isBooked}
                       >
                         <Badge
-                          as="span"
-                          className="p-2"
-                          selected={slot.id === scheduleState.slot?.id}
+                          onClick={function () {
+                            setScheduleState({ slot });
+                          }}
+                          as="button"
                           disabled={slot.isBooked}
+                          className="p-2 px-3"
+                          selected={isSelected}
+                          aria-pressed={isSelected}
+                          aria-label={`${slotTime} appointment slot ${slot.isBooked ? "booked" : ""}`}
                         >
-                          {fromISO(slot.slotDatetime).toFormat("HH:mm")}
+                          {slotTime}
                         </Badge>
-                      </motion.button>
+                      </motion.span>
                     );
                   })}
               </motion.div>
             )}
+            <AnimatePresence>
+              {scheduleState.slot &&
+                new Set(slotsForSelectedDate.map((slot) => slot.id)).has(
+                  scheduleState.slot.id,
+                ) && (
+                  <motion.div
+                    key="button-confirm"
+                    initial={{ height: 0 }}
+                    animate={{
+                      height: "auto",
+                    }}
+                    className="flex self-end justify-end overflow-hidden"
+                    exit={{ height: 0, transition: { when: "afterChildren" } }}
+                  >
+                    <motion.span
+                      style={{ zIndex: 0 }}
+                      initial={{ opacity: 0, x: "30px" }}
+                      animate={{
+                        opacity: 1,
+                        x: 0,
+                        transition: { ease: "easeOut", duration: 0.2 },
+                      }}
+                      exit={{
+                        opacity: 0,
+                        x: "20px",
+                        transition: { ease: "linear", duration: 0.1 },
+                      }}
+                    >
+                      <Button
+                        color="white"
+                        onClick={function () {
+                          openModal("booking-gate", {
+                            doctor: doctor,
+                            clinic: clinic!,
+                            slot: scheduleState.slot!,
+                            onSuccess() {
+                              setScheduleState({ slot: null });
+                            },
+                          });
+                        }}
+                        endIcon={<ChevronRight strokeWidth={4} />}
+                      >
+                        book slot
+                      </Button>
+                    </motion.span>
+                  </motion.div>
+                )}
+            </AnimatePresence>
           </motion.div>
         )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {scheduleState.slot &&
-          new Set(slotsForSelectedDate.map((slot) => slot.id)).has(
-            scheduleState.slot.id,
-          ) && (
-            <motion.div
-              key="button-confirm"
-              initial={{ height: 0 }}
-              animate={{
-                height: "auto",
-              }}
-              className="flex self-end justify-end overflow-hidden"
-              exit={{ height: 0, transition: { when: "afterChildren" } }}
-            >
-              <motion.span
-                style={{ zIndex: 0 }}
-                initial={{ opacity: 0, x: "30px" }}
-                animate={{
-                  opacity: 1,
-                  x: 0,
-                  transition: { ease: "easeOut", duration: 0.2 },
-                }}
-                exit={{
-                  opacity: 0,
-                  x: "20px",
-                  transition: { ease: "linear", duration: 0.1 },
-                }}
-              >
-                <Button
-                  color="white"
-                  onClick={function () {
-                    openModal("booking-gate", {
-                      doctor: doctor,
-                      clinic: clinic!,
-                      slot: scheduleState.slot!,
-                      onSuccess() {
-                        setScheduleState({ slot: null });
-                      },
-                    });
-                  }}
-                  endIcon={<ChevronRight strokeWidth={4} />}
-                >
-                  book slot
-                </Button>
-              </motion.span>
-            </motion.div>
-          )}
       </AnimatePresence>
     </motion.article>
   );

@@ -1,5 +1,5 @@
 import { EditableField } from "@components/lib/EditableField";
-import Button from "@components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import { useRequestEmailVerification } from "@hooks/use-auth";
 import { useUpdateDoctor } from "@hooks/use-doctors";
 import type { APIError, ProfileResponse } from "@/types/http";

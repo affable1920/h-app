@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import Code from "../ui/Code";
 import { ArrowRight } from "lucide-react";
-import Button from "../ui/Button";
+import Button from "../lib/button/Button";
 import { Stack } from "../ui/Stack";
 
 function HomePage() {

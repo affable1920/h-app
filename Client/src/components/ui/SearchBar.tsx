@@ -1,53 +1,70 @@
-import { memo, type HTMLAttributes } from "react";
+import { memo, type ComponentPropsWithoutRef } from "react";
+import { Input } from "./Input";
+import type { Size } from "@/components/lib/button/variants";
+import Button from "../lib/button/Button";
 import { X } from "lucide-react";
-import InputElement from "./Input";
-import type { Size } from "@/types/ui";
 
-interface SearchBarProps extends Omit<
-  HTMLAttributes<HTMLInputElement>,
-  "size"
+interface SearchBarBaseProps extends Omit<
+  ComponentPropsWithoutRef<"input">,
+  "size" | "id" | "value"
 > {
-  val: string;
-  clearable?: boolean;
-  onClear?: () => void;
-  placeholder?: string;
-  grow?: boolean;
-  label?: string;
   size?: Size;
-  disabled?: boolean;
+  id: string;
+  value: string;
+  placeholder?: string;
+  label?: string;
 }
 
+type SearchBarProps = SearchBarBaseProps &
+  (
+    | {
+        clearable: true;
+        onClear: () => void;
+      }
+    | {
+        clearable?: false;
+        onClear?: never;
+      }
+  );
+
 const SearchBar = memo(function ({
-  val,
-  clearable = false,
-  onClear,
   placeholder = "search ...",
   label,
   size = "sm",
-  disabled = false,
+  clearable,
+  value,
+  onClear,
   ...rest
 }: SearchBarProps) {
   return (
-    <InputElement
-      data-modal-initial-focus
-      size={size}
-      label={label}
-      disabled={disabled}
-      id={rest.id ?? "search-bar"}
-      value={val}
-      placeholder={placeholder}
-      className="text-sm"
-      icon={
-        val ? (
-          <X
-            size={12}
-            onClick={onClear}
-            className={`cursor-pointer ${clearable ? "visible" : "invisible"}`}
-          />
-        ) : null
-      }
-      {...rest}
-    />
+    <Input.Group className="relative">
+      {label && (
+        <Input.Label required={false} htmlFor={rest.id}>
+          {label}
+        </Input.Label>
+      )}
+      <Input.Element
+        placeholder={placeholder}
+        className="text-sm"
+        value={value}
+        data-modal-initial-focus
+        size={size}
+        {...rest}
+      />
+
+      {clearable && value && (
+        <Button
+          disabled={rest.disabled}
+          className="absolute right-2 top-1/2 -translate-y-1/2"
+          onClick={onClear}
+          type="button"
+          aria-label={`clear search.`}
+          variant="icon"
+        >
+          <X />
+        </Button>
+      )}
+    </Input.Group>
   );
 });
 

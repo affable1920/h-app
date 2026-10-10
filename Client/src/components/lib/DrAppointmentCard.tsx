@@ -1,6 +1,6 @@
 import { fromISO } from "@/domain/scheduling/utils";
 import { Phone, Ban, Info } from "lucide-react";
-import Button from "../ui/Button";
+import Button from "./button/Button";
 import Badge from "../ui/Badge";
 import Card from "../ui/Card";
 import { Stack } from "../ui/Stack";
@@ -75,9 +75,8 @@ export function DrAppointmentCard({
 
           <Badge
             size="xs"
-            full={false}
+            as="span"
             className="font-black"
-            disabled={appointment.status !== "active"}
             color={appointment.status === "active" ? "indicator" : "secondary"}
           >
             {appointment.status}

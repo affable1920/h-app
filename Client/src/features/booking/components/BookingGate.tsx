@@ -13,7 +13,7 @@ import {
 import { fromISO } from "@/domain/scheduling/utils";
 import type { APIError, Clinic, Doctor, Slot } from "@/types/http";
 
-import Button from "@/components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import { Stack } from "@/components/ui/Stack";
 import { PatientSignin } from "@/components/PatientSignin";
 import { PatientRegister } from "@/components/PatientRegister";

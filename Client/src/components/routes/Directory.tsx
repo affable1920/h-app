@@ -6,7 +6,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import Pagination from "@components/Pagination";
-import Button from "@/components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import { debounce } from "@/utils/utils";
 import useModalStore from "@/stores/modal-store";
 import { ArrowLeftRight, SlidersHorizontal } from "lucide-react";
@@ -141,11 +141,13 @@ function Directory() {
 
         <Stack align="center">
           <SearchBar
+            id="directory-search"
+            aria-label={`search ${route === "doctors" ? "doctors" : "clinics"}`}
             clearable={true}
             onChange={function (ev) {
               handleSearch(ev.currentTarget.value);
             }}
-            val={localSearch ?? ""}
+            value={localSearch ?? ""}
             onClear={clearSearch}
             size="xs"
           />

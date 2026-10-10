@@ -19,7 +19,7 @@ export function Step3_Slots() {
               onBlur={field.onBlur}
               name={field.name}
               label="Appointment duration (minutes)"
-              id="base slot duration"
+              id="base-slot-duration"
               placeholder="-"
               min={5}
               max={60}
@@ -45,10 +45,10 @@ export function Step3_Slots() {
             <Stack orientation="V" justify="center">
               <Switch
                 ref={field.ref}
-                id="maxSlots"
+                id="max-slot-limit-enabled"
                 label="set max appointments per day"
-                isOn={!!field.value}
-                toggle={function () {
+                value={!!field.value}
+                onToggle={function () {
                   if (field.value === null) {
                     onChange(1);
                   } else {
@@ -77,7 +77,7 @@ export function Step3_Slots() {
                       onBlur={field.onBlur}
                       name={field.name}
                       label="Max appointments"
-                      id="max slot limit"
+                      id="max-slot-limit"
                       max={100}
                       min={1}
                       placeholder="-"
@@ -103,11 +103,11 @@ export function Step3_Slots() {
           return (
             <Switch
               label="allow online consultations"
-              id="allowOnlineConsultations"
-              toggle={function () {
+              id="allow-online-consultations"
+              onToggle={function () {
                 field.onChange(!field.value);
               }}
-              isOn={field.value}
+              value={field.value}
             />
           );
         }}
@@ -118,12 +118,12 @@ export function Step3_Slots() {
         render={function ({ field }) {
           return (
             <Switch
-              id="isActive"
+              id="is-active"
               label="Open for booking immediately"
-              toggle={function () {
+              onToggle={function () {
                 field.onChange(!field.value);
               }}
-              isOn={field.value}
+              value={field.value}
             />
           );
         }}

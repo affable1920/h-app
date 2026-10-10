@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import HD from "@/assets/mockup-1.webp";
 import MockupBooking from "./MockupBooking";
-import Button from "@/components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import Divider from "@/components/ui/Divider";
 import { Marquee } from "@/components/ui/Marquee";
 

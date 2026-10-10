@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import Button from "../ui/Button";
+import Button from "../lib/button/Button";
 import { ChevronRight, X } from "lucide-react";
 import { removeModal } from "@/stores/modal-store";
 import type { ConfirmationProps } from "./modal-mapper";
@@ -53,7 +53,7 @@ function Confirmation({
       {children && <div className="min-w-0 flex-1">{children}</div>}
 
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={handleReject}>
+        <Button onClick={handleReject}>
           Decline <X strokeWidth={4} />
         </Button>
         <Button onClick={handleResolve} color="white">

@@ -5,15 +5,16 @@ import {
 } from "react";
 import { forwardRef } from "react";
 import { Minus, Plus } from "lucide-react";
-import Button from "./Button";
+import Button from "../lib/button/Button";
 import { Stack } from "./Stack";
 
 type NumberDraft = number | "";
 
 interface StepProps extends Omit<
   ComponentPropsWithRef<"input">,
-  "min" | "max" | "step" | "onChange"
+  "min" | "max" | "step" | "onChange" | "id"
 > {
+  id: string;
   label: string;
   icon?: ReactNode;
   error?: string;
@@ -40,11 +41,12 @@ const StepInput = forwardRef<HTMLInputElement, StepProps>(function (
   ref,
 ) {
   const currentValue = Number(value);
-  const maxValue = Number(max);
+  const maxValue = max ?? Infinity;
   const minValue = Number(min);
 
   function handleChange(ev: ChangeEvent<HTMLInputElement>) {
-    onChange(ev.target.valueAsNumber);
+    const val = ev.target.value === "" ? "" : ev.target.valueAsNumber;
+    onChange(val);
   }
 
   function stepUp() {
@@ -61,6 +63,8 @@ const StepInput = forwardRef<HTMLInputElement, StepProps>(function (
     onChange(next);
   }
 
+  const errorId = `${id}-error`;
+
   return (
     <Stack orientation="V">
       <Stack justify="center" align="center">
@@ -73,11 +77,11 @@ const StepInput = forwardRef<HTMLInputElement, StepProps>(function (
       <Stack align="center" justify="center" gap="sm">
         <Button
           variant="icon"
-          aria-label="decrease"
-          id="dec"
+          aria-label={`decrease ${label}`}
           color="secondary"
           bg={true}
           size="sm"
+          type="button"
           onClick={stepDown}
           disabled={currentValue <= min}
         >
@@ -94,15 +98,17 @@ const StepInput = forwardRef<HTMLInputElement, StepProps>(function (
           value={value}
           name={name}
           id={id}
+          aria-describedby={error ? errorId : undefined}
+          aria-invalid={Boolean(error)}
           className="bg-layout-raised shadow-sm shadow-black/15 rounded-md ring-2 ring-border-strong 
           outline-none p-2 text-center focus:ring-3 focus:ring-sky-500/20"
           {...rest}
         />
         <Button
           size="sm"
-          id="inc"
+          type="button"
           onClick={stepUp}
-          aria-label="increase"
+          aria-label={`increase ${label}`}
           variant="icon"
           bg={true}
           color="secondary"
@@ -115,6 +121,7 @@ const StepInput = forwardRef<HTMLInputElement, StepProps>(function (
       {error && (
         <span
           role="alert"
+          id={errorId}
           className="capitalize text-sm text-red-400 text-center leading-1.2"
         >
           {error}

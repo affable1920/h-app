@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { motion } from "motion/react";
-import Button from "./Button";
+import Button from "../lib/button/Button";
 import { memo } from "react";
 import { Stack } from "./Stack";
 import { cn } from "@/utils/utils";

@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import Button from "./ui/Button";
+import Button from "./lib/button/Button";
 import { Input } from "./ui/Input";
 import { Stack } from "./ui/Stack";
 import { useForm } from "react-hook-form";
@@ -50,7 +50,6 @@ export const PatientRegister = memo(function () {
               <Input.Label htmlFor="email">email</Input.Label>
               <Input.Element
                 id="email"
-                autoFocus
                 type="email"
                 {...form.register("email")}
               />
@@ -60,7 +59,6 @@ export const PatientRegister = memo(function () {
               <Input.Label htmlFor="password">password</Input.Label>
               <Input.Element
                 id="password"
-                autoFocus
                 type="password"
                 {...form.register("password")}
               />
@@ -68,11 +66,7 @@ export const PatientRegister = memo(function () {
 
             <Input.Group error={errors["username"]?.message}>
               <Input.Label htmlFor="username">username</Input.Label>
-              <Input.Element
-                id="username"
-                autoFocus
-                {...form.register("username")}
-              />
+              <Input.Element id="username" {...form.register("username")} />
             </Input.Group>
           </Stack>
           <Button type="submit" color="white" loading={isPending}>

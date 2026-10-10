@@ -1,12 +1,13 @@
-import Button from "@/components/ui/Button";
-import InputElement from "@/components/ui/Input";
+import Button from "@/components/lib/button/Button";
+import Badge from "@/components/ui/Badge";
+import { Input } from "@/components/ui/Input";
 import SearchBar from "@/components/ui/SearchBar";
 import { Stack } from "@/components/ui/Stack";
 import { useSearchPaginate } from "@/hooks/use-search-paginate";
 import type { DoctorOnboarding } from "@/schemas";
 import useModalStore from "@/stores/modal-store";
 import { SPECIALIZATIONS } from "@/utils/constants";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, Asterisk } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback } from "react";
 import { useController, useFormContext } from "react-hook-form";
@@ -51,14 +52,20 @@ export function Step3_Craft() {
   });
 
   return (
-    <Stack orientation="V" gap="sm">
-      <Stack orientation="V" gap="xs">
+    <Stack orientation="V" gap="md">
+      <Stack orientation="V" gap="sm">
         <Stack orientation="V" gap={0}>
+          <label
+            aria-invalid={Boolean(errors["primary_specialization"])}
+            className="px-1 text-sm mb-2 font-semibold inline-flex m-0 gap-0.5"
+            htmlFor="primary-specialization"
+          >
+            Primary Specialization <Asterisk size={10} />
+          </label>
           <SearchBar
-            id="primarySpecialization"
-            label="primary specialization"
-            placeholder="primary specialization"
-            val={query}
+            id="primary-specialization"
+            placeholder="search for a specialization .."
+            value={query}
             onChange={search}
             clearable={true}
             onClear={reset}
@@ -70,7 +77,7 @@ export function Step3_Craft() {
           )}
         </Stack>
 
-        <Stack className="group/primary" orientation="V" gap="xs">
+        <Stack className="group/primary" orientation="V" gap="sm">
           <Stack justify="center" className="relative" align="center">
             <Button
               className="self-center opacity-0! group-hover/primary:opacity-100! transition-opacity duration-200"
@@ -119,27 +126,30 @@ export function Step3_Craft() {
               }}
             >
               {items.map(function (spec) {
+                const isSelected = spec === ps.value;
                 return (
-                  <label
+                  <Badge
+                    as="label"
                     key={spec}
                     htmlFor={spec}
-                    className={`grow cursor-pointer inline-flex px-2 py-1 text-center items-center
-                        justify-center rounded-md text-xs h-10 shadow-md shadow-black/10
-                        ${
-                          spec === ps.value
-                            ? "bg-white text-layout-raised font-semibold"
-                            : "bg-layout-raised text-text-normal"
-                        }`}
+                    selected={isSelected}
+                    size="sm"
+                    className={`grow focus-within:ring-3 focus-within:ring-brand/20`}
                   >
                     <input
                       type="radio"
                       id={spec}
+                      name={ps.name}
                       value={spec}
-                      style={{ display: "none" }}
-                      {...form.register("primary_specialization")}
+                      checked={isSelected}
+                      onChange={function () {
+                        ps.onChange(spec);
+                      }}
+                      className="sr-only"
+                      onBlur={ps.onBlur}
                     />
-                    {spec}
-                  </label>
+                    <span>{spec}</span>
+                  </Badge>
                 );
               })}
             </motion.div>
@@ -156,17 +166,22 @@ export function Step3_Craft() {
         </Stack>
       </Stack>
 
-      <InputElement
-        size="sm"
-        label="Secondary areas of focus"
-        defaultValue={"dermatology, cardiology"}
-        id="secondaryFocusAreas"
-        placeholder="comma-separated"
-        {...form.register("secondary_focus_areas")}
-      />
+      <Input.Group error={errors.secondary_focus_areas?.message}>
+        <Input.Label required={false} htmlFor="secondary-focus-areas">
+          Secondary areas of focus
+        </Input.Label>
+        <Input.Element
+          defaultValue={"dermatology, cardiology"}
+          id="secondary-focus-areas"
+          placeholder="comma-separated"
+          {...form.register("secondary_focus_areas")}
+        />
+      </Input.Group>
 
       <div className="flex flex-col gap-2">
-        <label className="capitalize px-1 text-sm">Professional Bio</label>
+        <label htmlFor="bio" className="capitalize px-1 text-sm font-semibold">
+          Professional Bio
+        </label>
         <textarea
           {...form.register("bio")}
           style={{
@@ -175,7 +190,7 @@ export function Step3_Craft() {
           }}
           id="bio"
           className={`placeholder:italic italic border-2 border-border-vivid p-2
-          rounded-md focus:ring-2 focus:ring-accent/25 placeholder:text-sm`}
+          rounded-lg focus:ring-2 focus:ring-accent/25 placeholder:text-sm`}
           placeholder="Share your approach to patient care, what drives you, or any specialised training…"
         />
       </div>

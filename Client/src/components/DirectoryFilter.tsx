@@ -1,7 +1,7 @@
 import useModalStore from "@/stores/modal-store";
 import { useMemo, useState } from "react";
 import Badge from "@/components/ui/Badge";
-import Button from "./ui/Button";
+import Button from "./lib/button/Button";
 import * as constants from "@/utils/constants";
 import { useSearchParams } from "react-router-dom";
 import { Stack } from "./ui/Stack";
@@ -158,7 +158,7 @@ function DirectoryFilter() {
                 ).map(function ([col, order]) {
                   return (
                     <Button
-                      aria-selected={col === fields.sortColumn}
+                      aria-pressed={col === fields.sortColumn}
                       onClick={function () {
                         const sc = col === fields.sortColumn ? null : col;
                         setValue("sortColumn", sc, {
@@ -173,7 +173,6 @@ function DirectoryFilter() {
                       variant="icon"
                       bg={true}
                       color={col === fields.sortColumn ? "white" : "secondary"}
-                      needsMotion={true}
                       className="text-xs capitalize grow"
                     >
                       {col}
@@ -236,9 +235,11 @@ function DirectoryFilter() {
               {[2, 3, 4].map(function (rating) {
                 return (
                   <Badge
+                    as="button"
                     key={rating}
-                    full={false}
                     className="grow"
+                    aria-label={`filter by minimum rating of ${rating} stars.`}
+                    aria-pressed={rating === fields.minRating}
                     selected={rating === fields.minRating}
                     onClick={function () {
                       setValue(
@@ -263,8 +264,10 @@ function DirectoryFilter() {
               <ShieldCheck size={13} color="teal" />
             </Stack>
             <Badge
+              aria-pressed={fields.verified === "1"}
               selected={fields.verified === "1"}
               className={`font-semibold`}
+              as="button"
               onClick={function () {
                 setValue("verified", fields.verified === "1" ? null : "1", {
                   shouldDirty: true,
@@ -283,6 +286,8 @@ function DirectoryFilter() {
                   const gdr = gender as FilterState["gender"];
                   return (
                     <Badge
+                      as="button"
+                      aria-pressed={gdr === fields.gender}
                       className="[&>svg]:size-4 items-center gap-2 capitalize"
                       selected={gdr === fields.gender}
                       onClick={function () {
@@ -309,7 +314,6 @@ function DirectoryFilter() {
                   label="min experience (years)"
                   id="experience"
                   placeholder="-"
-                  min={0}
                   max={60}
                   step={1}
                   onChange={function (e) {
@@ -356,13 +360,13 @@ function DirectoryFilter() {
             }}
             color="indicator"
             border={false}
+            type="reset"
           >
             Reset
           </Button>
         )}
         <Button
           border={false}
-          variant="ghost"
           className="shadow-sm shadow-black/20 border-border-vivid border-2"
           onClick={closeModal}
         >

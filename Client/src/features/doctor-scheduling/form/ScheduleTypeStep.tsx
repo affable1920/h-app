@@ -3,6 +3,7 @@ import Badge from "@components/ui/Badge";
 import { Stack } from "@components/ui/Stack";
 import { type ScheduleCreate } from "../contract/create-schema";
 import { DateTime } from "luxon";
+import { useId } from "react";
 
 const TYPES = ["one-off", "weekly", "monthly"] as const;
 type Recurrence = ScheduleCreate["recurrence"];
@@ -55,8 +56,15 @@ export function ScheduleTypeStep() {
 
   const initialKind = field.value ?? TYPES[0];
 
+  const id = useId();
+  const errorId = useId();
+
   return (
-    <fieldset className="text-center">
+    <fieldset
+      aria-invalid={Boolean(fieldState.error)}
+      aria-describedby={fieldState.error ? errorId : undefined}
+      className="text-center"
+    >
       <legend className="mx-6 text-text-normal leading-tight font-semibold mb-4 space-y-1">
         Hey{" "}
         <strong>
@@ -75,11 +83,13 @@ export function ScheduleTypeStep() {
         style={{ flexWrap: "wrap", marginBottom: "4px" }}
       >
         {TYPES.map(function (frame) {
+          const genId = id + frame;
+
           return (
             <Badge
               as="label"
               key={frame}
-              htmlFor={frame}
+              htmlFor={genId}
               selected={frame === field.value}
               data-tooltip={`Describes a ${frame} schedule`}
               className={`px-4 focus-within:ring-3 focus-within:ring-brand/20`}
@@ -90,7 +100,8 @@ export function ScheduleTypeStep() {
                 }}
                 className="sr-only"
                 type="radio"
-                id={frame}
+                onBlur={field.onBlur}
+                id={genId}
                 name={field.name}
                 value={frame}
                 checked={frame === field.value}
@@ -106,6 +117,7 @@ export function ScheduleTypeStep() {
 
       {fieldState.error && (
         <span
+          id={errorId}
           role="alert"
           className="text-red-400 first-letter:capitalize text-sm"
         >

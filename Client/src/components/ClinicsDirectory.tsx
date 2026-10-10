@@ -5,7 +5,7 @@ import Ratings from "./Ratings";
 import { Link, useOutletContext, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { Stack } from "./ui/Stack";
-import Button from "./ui/Button";
+import Button from "./lib/button/Button";
 import { keepPreviousData } from "@tanstack/react-query";
 
 function ClinicsDirectory() {

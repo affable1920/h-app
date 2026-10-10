@@ -1,6 +1,6 @@
 import { memo, useRef, useState, type KeyboardEvent } from "react";
 import { Stack } from "../ui/Stack";
-import Button from "../ui/Button";
+import Button from "./button/Button";
 import { Edit, X, Save } from "lucide-react";
 
 interface EditableFieldProps {

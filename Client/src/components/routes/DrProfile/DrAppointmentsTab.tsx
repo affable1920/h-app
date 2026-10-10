@@ -1,7 +1,7 @@
 import DirectoryLayout from "@/components/lib/DirectoryLayout";
 import { DrAppointmentCard } from "@/components/lib/DrAppointmentCard";
 import Pagination from "@/components/Pagination";
-import Button from "@/components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import SearchBar from "@/components/ui/SearchBar";
 import Spinner from "@/components/ui/Spinner";
 import { Stack } from "@/components/ui/Stack";
@@ -64,10 +64,12 @@ export function DrAppointmentsTab() {
     <DirectoryLayout>
       <DirectoryLayout.Header className="justify-end">
         <SearchBar
+          id="doctor-appointments-search"
           size="xs"
           className="w-fit"
-          val=""
+          value=""
           placeholder="appointments search..."
+          aria-label="Search appointments"
         />
       </DirectoryLayout.Header>
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import Button from "@/components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import {
   ArrowRight,
   BellOff,
@@ -185,7 +185,8 @@ function NavBar() {
 
         <div className="flex items-center gap-6 md:hidden">
           <Button
-            className="italic "
+            className="italic"
+            border={false}
             variant="icon"
             size="md"
             onClick={function () {

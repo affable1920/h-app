@@ -1,5 +1,5 @@
-import Button from "@/components/ui/Button";
-import type { Color } from "@/types/ui";
+import Button from "@/components/lib/button/Button";
+import type { Color } from "@/components/lib/button/variants";
 import { memo, type ReactNode } from "react";
 
 export type ToggledControlProps = {

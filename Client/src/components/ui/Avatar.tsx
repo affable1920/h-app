@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from "react";
-import Button from "./Button";
+import Button from "../lib/button/Button";
 import { AnimatePresence, motion } from "motion/react";
 import { Camera, SaveAll, X } from "lucide-react";
 

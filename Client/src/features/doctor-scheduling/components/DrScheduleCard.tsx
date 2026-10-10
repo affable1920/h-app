@@ -13,7 +13,7 @@ import type { DoctorSchedule } from "@/types/models";
 import { fromISO, getWeekday } from "@/domain/scheduling/utils";
 
 import { Stack } from "@components/ui/Stack";
-import Button from "@components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import { Switch } from "@components/ui/Switch";
 import Badge from "@components/ui/Badge";
 import Card from "@components/ui/Card";
@@ -116,9 +116,9 @@ export function DrScheduleCard({
   }
 
   async function handleActivate() {
-    const intendedState = schedule.isActive ? "deactivate" : "activate";
+    const next = schedule.isActive === true ? false : true;
 
-    if (intendedState === "deactivate") {
+    if (!next) {
       try {
         await new Promise<void>(function (res, rej) {
           openModal("confirmation-modal", {
@@ -142,7 +142,7 @@ export function DrScheduleCard({
       {
         doctorId: doctor.id,
         id: schedule.id,
-        isActive: !schedule.isActive,
+        isActive: next,
       },
       {
         onError(error) {
@@ -165,7 +165,6 @@ export function DrScheduleCard({
         },
       }}
       className="flex items-stretch"
-      key={schedule.id}
     >
       <Card className="relative group/schedule self-stretch grow border-border">
         <div>
@@ -180,12 +179,13 @@ export function DrScheduleCard({
               </Stack>
 
               <Badge
+                as="span"
                 size="xs"
-                full={false}
                 className="font-semibold p-1! tracking-wide cursor-default!"
                 color={schedule.isActive ? "indicator" : "secondary"}
-                content={schedule.isActive ? "Active" : "Paused"}
-              />
+              >
+                {schedule.isActive ? "Active" : "Paused"}
+              </Badge>
             </Stack>
           </Card.Header>
 
@@ -210,14 +210,14 @@ export function DrScheduleCard({
           </Stack>
           <Stack>
             {recurrence.kind === "one-off" ? (
-              <Badge>{recurrence.date}</Badge>
+              <Badge as="span">{recurrence.date}</Badge>
             ) : recurrence.kind === "weekly" ? (
               recurrence.weekdays.length === 7 ? (
-                <Badge full={false}>Mon - Sun</Badge>
+                <Badge as="span">Mon - Sun</Badge>
               ) : (
                 recurrence.weekdays.map(function (weekday) {
                   return (
-                    <Badge key={weekday}>
+                    <Badge as="span" key={weekday}>
                       {getWeekday(weekday).substring(0, 3)}
                     </Badge>
                   );
@@ -226,7 +226,7 @@ export function DrScheduleCard({
             ) : (
               recurrence.monthDays.map(function (monthDay) {
                 return (
-                  <Badge key={monthDay} full={false}>
+                  <Badge key={monthDay} as="span">
                     {monthDay}
                   </Badge>
                 );
@@ -249,7 +249,7 @@ export function DrScheduleCard({
         {showOptions && (
           <motion.div
             className="flex flex-col bg-layout/20 border border-border-strong rounded-xl p-4 md:p-6
-            shadow-md shadow-black/40 justify-between"
+            shadow-md shadow-black/40 justify-between items-center"
             key="options"
             layout
             initial={{ width: 0, x: 20, opacity: 0 }}
@@ -270,16 +270,14 @@ export function DrScheduleCard({
             >
               <Trash2 />
             </Button>
-            <Button
-              variant="icon"
-              data-tooltip={schedule.isActive ? "Pause" : "Resume"}
-            >
+            <div data-tooltip={schedule.isActive ? "Pause" : "Resume"}>
               <Switch
-                id="scheduleActive"
-                isOn={schedule.isActive}
-                toggle={handleActivate}
+                aria-label={`Active status for ${schedule.clinic.name}`}
+                id={`schedule-active-${schedule.id}`}
+                value={schedule.isActive}
+                onToggle={handleActivate}
               />
-            </Button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

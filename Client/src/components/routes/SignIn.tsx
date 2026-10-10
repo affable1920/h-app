@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import Button from "@/components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import { useState } from "react";
 import { Stack } from "../ui/Stack";
 import Divider from "../ui/Divider";

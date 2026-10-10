@@ -9,7 +9,7 @@ import {
   isDateToday,
 } from "@/domain/scheduling/utils";
 import Badge from "../ui/Badge";
-import Button from "../ui/Button";
+import Button from "./button/Button";
 
 const local = DateTime.local();
 
@@ -71,7 +71,7 @@ export const CalendarContent = memo(function ({
     [viewMonth],
   );
 
-  function isWkdayToday(day: (typeof WEEKDAYS)[number]) {
+  function isWeedkdayToday(day: (typeof WEEKDAYS)[number]) {
     return (
       viewMonth.month === local.month &&
       day.toLowerCase().trim() === local.weekdayLong.toLowerCase().trim()
@@ -82,11 +82,13 @@ export const CalendarContent = memo(function ({
     <div className={`flex flex-col gap-6`}>
       <div className="grid gap-4 justify-items-center grid-cols-7">
         {WEEKDAYS.map(function (weekday) {
+          const isToday = isWeedkdayToday(weekday);
+
           return (
             <h2
               key={weekday}
               className={`font-bold underline-offset-4 capitalize  ${
-                isWkdayToday(weekday)
+                isToday
                   ? "text-text-secondary underline"
                   : "text-text-secondary/80"
               }`}
@@ -99,21 +101,29 @@ export const CalendarContent = memo(function ({
 
       <div className="grid gap-4 justify-items-center grid-cols-7 gap-y-6">
         {calendar.map(function (dt) {
+          const isToday = isDateToday(dt);
+          const isSelected =
+            selectedDate !== null && areEqual(dt, selectedDate);
+
+          const isAvailable = availableDateKeys.some(function (availableDate) {
+            return areEqual(dt, availableDate);
+          });
+
+          const isDisabled = isDateInPast(dt) || !isAvailable;
+
           return (
             <Badge
-              className="size-9 md:size-10"
+              as="button"
+              className={`size-9 md:size-10 ${isToday ? "border-b-2 border-b-brand" : ""}`}
               onClick={function () {
                 onSelectDate(dt);
               }}
-              current={isDateToday(dt)}
+              aria-current={isToday ? "date" : undefined}
+              aria-label={dt.toLocaleString(DateTime.DATE_FULL)}
               key={dt.toISO()}
-              selected={selectedDate !== null && areEqual(dt, selectedDate)}
-              disabled={
-                isDateInPast(dt) ||
-                !availableDateKeys.some(function (availableDate) {
-                  return areEqual(dt, availableDate);
-                })
-              }
+              selected={isSelected}
+              aria-pressed={isSelected}
+              disabled={isDisabled}
             >
               {dt.day.toString()}
             </Badge>
@@ -126,18 +136,36 @@ export const CalendarContent = memo(function ({
 
 export function CalendarLegend() {
   return (
-    <footer className="flex justify-end items-center gap-2 [&>span]:p-1.25">
-      <Badge as="span" full={false} data-tooltip="AVAILABLE" />
-      <Badge
-        as="span"
-        full={false}
-        disabled={true}
-        data-tooltip="UNAVAILABLE"
-        className="pointer-events-auto!"
-      />
-      <Badge as="span" full={false} data-tooltip="TODAY" current={true} />
-      <Badge as="span" full={false} data-tooltip="SELECTED" selected={true} />
-    </footer>
+    <ul
+      aria-label="calendar legend"
+      className="flex flex-wrap justify-end items-center gap-2 [&>li_span]:p-2 [&>li]:text-xs [&>li]:flex [&>li]:items-center [&>li]:gap-1"
+    >
+      <li>
+        <Badge aria-hidden="true" as="span" />
+        <span>Available</span>
+      </li>
+
+      <li>
+        <Badge
+          aria-hidden="true"
+          as="span"
+          className="opacity-80 shadow-none"
+        />
+        <span>Unavailable</span>
+      </li>
+      <li>
+        <Badge
+          as="span"
+          aria-hidden="true"
+          className="border-b-2 border-b-brand"
+        />
+        <span>Today</span>
+      </li>
+      <li>
+        <Badge as="span" aria-hidden="true" selected={true} />
+        <span>Selected</span>
+      </li>
+    </ul>
   );
 }
 

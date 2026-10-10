@@ -1,7 +1,7 @@
 import { useDeleteAccount, useFetchProfile } from "@/hooks/use-auth";
 import ProfileShell from "../../ProfileShell";
 import { AnimatePresence, motion } from "motion/react";
-import Button from "../../ui/Button";
+import Button from "../../lib/button/Button";
 import { ChevronRight, ChevronUp, Delete, Settings } from "lucide-react";
 import { Stack } from "../../ui/Stack";
 import { useCallback, useRef, useState } from "react";
@@ -237,7 +237,6 @@ export function PatientProfile() {
                                 </motion.span>
                                 <Button
                                   className="group-hover/reason:-rotate-90"
-                                  needsMotion={true}
                                   variant="icon"
                                 >
                                   <ChevronUp strokeWidth={4} />
@@ -253,7 +252,7 @@ export function PatientProfile() {
                                     ? "indicator"
                                     : "secondary"
                                 }
-                                disabled={appointment.status !== "active"}
+                                as="span"
                               >
                                 {appointment.status}
                               </Badge>
@@ -270,6 +269,7 @@ export function PatientProfile() {
                                             appointment ?
                                           </p>
                                           <Badge
+                                            as="span"
                                             color="danger"
                                             style={{
                                               fontWeight: 800,

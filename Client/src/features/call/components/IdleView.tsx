@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import { AudioLines, MessageSquareText, Video } from "lucide-react";
 
 type Props = {

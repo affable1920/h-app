@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import Spinner from "@/components/ui/Spinner";
 import Card from "@/components/ui/Card";
 import { Stack } from "@/components/ui/Stack";
-import Button from "@/components/ui/Button";
+import Button from "@/components/lib/button/Button";
 import { Select } from "@/components/ui/SelectApi";
 
 export function DoctorClinicsTab() {

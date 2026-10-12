@@ -14,7 +14,7 @@ bearer = OAuth2PasswordBearer(tokenUrl="auth")
 async def get_current_user(
     token: str = Depends(bearer),
     session: AsyncSession = Depends(get_db),
-):
+) -> Doctor | Patient | None:
     """
     This function uses the bearer as a dependency.
 
@@ -35,7 +35,7 @@ async def get_current_user(
 #
 async def require_doctor(
         current_user: Doctor | Patient = Depends(get_current_user)
-):
+) -> Doctor:
     if not isinstance(current_user, Doctor):
         raise ConflictError(
             message="You as a patient are not allowed to access this resource."
@@ -48,8 +48,11 @@ async def require_doctor(
 
 async def require_patient(
         current_user: Doctor | Patient = Depends(get_current_user),
-):
-    if not isinstance(current_user, Patient):
+) -> Patient:
+    if not isinstance(
+        current_user,
+        Patient
+    ):
         raise ConflictError(
             message="You as a doctor are not allowed to access this resource."
         )

@@ -124,6 +124,9 @@ class Patient(
         cascade="all, delete-orphan",
     )
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(id={self.id}, username={self.username})"
+
 
 junction = sa.Table(
     "doctor_clinics",
@@ -232,7 +235,6 @@ class Doctor(
     )
 
     def __repr__(self) -> str:
-        super().__repr__()
         return f"{self.__class__.__name__}(name={self.name})"
 
 
@@ -290,6 +292,9 @@ class Clinic(
         primaryjoin="and_(Review.entity=='CLINIC', foreign(Review.entity_id)==Clinic.id)",
         viewonly=True
     )
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(id={self.id}, name={self.name})"
 
 
 class Schedule(
@@ -383,7 +388,6 @@ class Schedule(
     )
 
     def __repr__(self) -> str:
-        super().__repr__()
         return f"{self.__class__.__name__}(id={self.id})"
 
 
@@ -487,6 +491,9 @@ class Appointment(
 
     care_journey: Mapped["CareJourney | None"] = relationship()
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(id={self.id}, patient_name={self.patient.username})"
+
     __table_args__ = (
         sa.Index(
             "uq_appointment_active_slot",
@@ -531,6 +538,9 @@ class Review(
         )
     )
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(id={self.id}, entity={self.entity}, rating={self.rating})"
+
 
 class EmailVerificationToken(Base):
     __tablename__ = "email_verification_token"
@@ -567,6 +577,9 @@ class EmailVerificationToken(Base):
         nullable=True
     )
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(id={self.id}, user_role={self.user_role})"
+
 
 class CareJourney(
     TimeStampMixin,
@@ -584,3 +597,6 @@ class CareJourney(
     reason_for_visit: Mapped[str | None] = mapped_column(
         sa.Text,
     )
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(id={self.id})"

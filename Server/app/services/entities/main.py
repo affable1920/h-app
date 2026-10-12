@@ -3,6 +3,7 @@ import logging
 from abc import ABC, abstractmethod
 from uuid import UUID
 from typing import (
+    Any,
     ClassVar,
     Generic,
     Sequence,
@@ -104,7 +105,7 @@ class EntityService(Generic[T], ABC):
 
     @staticmethod
     def create_pg_response(
-        objs: Sequence[T],
+        objs: Sequence[T | Any],
         count: int,
         pagination: PaginationParams
     ) -> PaginatedResponse:

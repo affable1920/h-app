@@ -1,8 +1,12 @@
-from sqlalchemy import select
+import logging
+from uuid import UUID
+
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm.strategy_options import _AbstractLoad
+from sqlalchemy.orm.strategy_options import _AbstractLoad, joinedload
 
+from app.schemas.types import Email
 from app.core.exceptions import AlreadyInUseException
 from app.services.entities.main import EntityService
 
@@ -15,6 +19,8 @@ from app.database.models import (
 
 from app.schemas.patient import PatientCreate
 from app.features.auth import security
+
+logger = logging.getLogger(__name__)
 
 
 class PatientService(EntityService[Patient]):
@@ -37,19 +43,15 @@ class PatientService(EntityService[Patient]):
             .selectinload(Doctor.reviews)
         ]
 
-    #
-
     @classmethod
     async def get_by_email(
         cls,
         session: AsyncSession,
-        email: str
+        email: Email
     ) -> Patient | None:
         stmt = select(Patient).where(Patient.email == email)
         stmt = stmt.options(*cls.load_options_full())
         return await session.scalar(stmt)
-
-    #
 
     @classmethod
     async def create(
@@ -74,3 +76,53 @@ class PatientService(EntityService[Patient]):
         await session.flush()
 
         return created
+
+    @classmethod
+    async def get_appointments(
+        cls,
+        patient_id: UUID,
+        session: AsyncSession
+    ):
+        stmt = (
+            select(Appointment)
+            .where(Appointment.patient_id == patient_id)
+            .options(
+                joinedload(Appointment.care_journey),
+                joinedload(Appointment.slot),
+                joinedload(Appointment.clinic)
+            )
+        )
+
+        count = await (
+            session.scalar(
+                select(func.count()).select_from(
+                    stmt.subquery()
+                )
+            )
+        ) or 0
+
+        appointments = (await session.scalars(stmt)).all()
+        return count, appointments
+
+    @classmethod
+    async def get_appointment(
+        cls,
+        patient_id: UUID,
+        appointment_id: UUID,
+        session: AsyncSession,
+    ):
+        stmt = (
+            select(Appointment)
+            .where(
+                Appointment.id == appointment_id,
+                Appointment.patient_id == patient_id
+            )
+            .options(
+                joinedload(Appointment.care_journey),
+                joinedload(Appointment.slot),
+                joinedload(Appointment.clinic)
+            )
+        )
+
+        appointment = await session.scalar(stmt)
+        return appointment

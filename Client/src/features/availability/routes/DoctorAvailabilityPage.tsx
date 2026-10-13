@@ -1,23 +1,16 @@
 import { useCallback, useState, useMemo } from "react";
-import { useLoaderData } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Calendar } from "@components/lib/Calendar";
 import { ClinicViewVariants } from "@/utils/motion-variants";
 import { motion } from "motion/react";
 import { AvailabilityScheduleGroup } from "../components/DrAvailabilityScheduleGroup";
-import type { GetDoctorResponse } from "@/types/doctor-api";
 import { DateTime } from "luxon";
 import { areEqual, fromISO } from "@/domain/scheduling/utils";
 import { useGetDoctor } from "@/hooks/use-doctors";
 
-function DrAvailabilityPage() {
-  const initialDoctor = useLoaderData<GetDoctorResponse>();
-
-  const { data: queriedDoctor } = useGetDoctor(initialDoctor?.id, {
-    initialData: initialDoctor,
-    enabled: initialDoctor !== null,
-  });
-
-  const doctor = queriedDoctor ?? initialDoctor;
+export function DrAvailabilityPage() {
+  const doctorId = useLocation().pathname.split("/").at(-2);
+  const { data: doctor } = useGetDoctor(doctorId);
 
   const [viewMonth, setViewMonth] = useState(DateTime.local());
   const [selectedDate, setSelectedDate] = useState<DateTime | null>(null);
@@ -128,5 +121,3 @@ function DrAvailabilityPage() {
     </section>
   );
 }
-
-export default DrAvailabilityPage;

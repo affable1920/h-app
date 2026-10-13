@@ -7,9 +7,10 @@ import {
   useDeleteSchedule,
   useSetScheduleActivation,
 } from "@/features/doctor-scheduling/api/mutations";
-import type { APIError, Doctor } from "@/types/http";
+import type { APIError } from "@/types/http";
+import { type DoctorHttpMinimal } from "@/types/doctors";
 import useModalStore from "@/stores/modal-store";
-import type { DoctorSchedule } from "@/types/models";
+import type { DoctorScheduleResponse } from "@/types/schedules";
 import { fromISO, getWeekday } from "@/domain/scheduling/utils";
 
 import { Stack } from "@components/ui/Stack";
@@ -22,8 +23,8 @@ export function DrScheduleCard({
   doctor,
   schedule,
 }: {
-  doctor: Doctor;
-  schedule: DoctorSchedule;
+  doctor: DoctorHttpMinimal;
+  schedule: DoctorScheduleResponse;
 }) {
   const openModal = useModalStore((s) => s.openModal);
 

@@ -1,5 +1,5 @@
 import type { operations } from "@/types/api";
-import type { PaginationParams } from "@/types/doctor-api";
+import type { PaginationParams } from "@/types/doctors";
 
 export type DoctorFilters = operations["get_doctors"]["parameters"]["query"];
 export type ClinicFilters = operations["get_clinics"]["parameters"]["query"];

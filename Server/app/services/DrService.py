@@ -17,6 +17,7 @@ from app.database.models import Appointment, Clinic, Doctor, Schedule, junction
 from app.schemas.pagination import DrRouteFilters, PaginationParams
 from app.services.PatientService import PatientService
 from app.features.auth import security
+from sqlalchemy.orm.strategy_options import _AbstractLoad
 
 
 logger = logging.getLogger(__name__)
@@ -29,15 +30,11 @@ class DoctorService(EntityService[Doctor]):
         "rating": "avg_rating"
     }
 
-    #
-
     @classmethod
     def load_options(cls) -> list:
         return [
             selectinload(Doctor.reviews)
         ]
-
-    #
 
     @classmethod
     def load_options_full(cls):
@@ -49,8 +46,6 @@ class DoctorService(EntityService[Doctor]):
             schedules.selectinload(Schedule.slots),
             schedules.joinedload(Schedule.clinic).selectinload(Clinic.reviews)
         ]
-
-    #
 
     @classmethod
     def filter(
@@ -105,8 +100,6 @@ class DoctorService(EntityService[Doctor]):
 
         return stmt
 
-    #
-
     @classmethod
     async def create(
         cls,
@@ -154,13 +147,9 @@ class DoctorService(EntityService[Doctor]):
         await session.refresh(created)
         return created
 
-    #
-
     @staticmethod
     def get_available_wkdays(doctor: Doctor) -> set[int]:
         return set()
-
-    #
 
     @staticmethod
     def get_available_slots(doctor: Doctor, max: int = 5):
@@ -174,8 +163,6 @@ class DoctorService(EntityService[Doctor]):
         ]
 
         return slots[:min(len(slots), max)]
-
-    #
 
     @classmethod
     async def get_appointments(
@@ -210,7 +197,25 @@ class DoctorService(EntityService[Doctor]):
         objs = (await session.scalars(stmt)).all()
         return count, objs
 
-    #
+    @classmethod
+    async def get_doctor_appointment(
+        cls,
+        session: AsyncSession,
+        doctor_id: UUID,
+        appointment_id: UUID,
+        loader_options: list[_AbstractLoad] = []
+    ):
+        stmt = (
+            select(Appointment)
+            .options(*loader_options)
+            .where(
+                Appointment.id == appointment_id,
+                Appointment.doctor_id == doctor_id
+            )
+        )
+
+        appointment = await session.scalar(stmt)
+        return appointment
 
     @classmethod
     async def get_schedules(

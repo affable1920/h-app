@@ -2,14 +2,15 @@ import { EditableField } from "@components/lib/EditableField";
 import Button from "@/components/lib/button/Button";
 import { useRequestEmailVerification } from "@hooks/use-auth";
 import { useUpdateDoctor } from "@hooks/use-doctors";
-import type { APIError, ProfileResponse } from "@/types/http";
+import type { APIError } from "@/types/http";
 import { Verified } from "lucide-react";
 import { useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "sonner";
+import type { DoctorProfile } from "@/types/doctors";
 
 export function PersonalProfileTab() {
-  const doctor = useOutletContext<ProfileResponse<"doctor">>();
+  const doctor = useOutletContext<DoctorProfile>();
 
   const { mutateAsync: edit } = useUpdateDoctor();
   const { mutateAsync: requestEmailVerify, isPending } =

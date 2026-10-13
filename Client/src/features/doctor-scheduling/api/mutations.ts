@@ -1,7 +1,7 @@
 import APIClient from "@/core/ApiClient";
 import { doctorKeys } from "@hooks/keys";
 import { createMutationHook } from "@hooks/use-http";
-import type { ScheduleResponse } from "@/types/http";
+import type { ScheduleCreateResponse } from "@/types/schedules";
 
 import { doctorScheduleKeys } from "./keys";
 import { type ScheduleCreate } from "@/features/doctor-scheduling/contract/create-schema";
@@ -10,11 +10,11 @@ const api = new APIClient("/schedules");
 
 export const useCreateSchedule = createMutationHook<
   { payload: ScheduleCreate; doctorId: string },
-  ScheduleResponse
+  ScheduleCreateResponse
 >(
   ({ payload }) =>
     api
-      .post<ScheduleResponse, ScheduleCreate>(undefined, payload)
+      .post<ScheduleCreateResponse, ScheduleCreate>(undefined, payload)
       .then((res) => res.data),
   (vars) => [doctorScheduleKeys.all, doctorKeys.details(vars.doctorId)],
 );

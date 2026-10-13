@@ -8,7 +8,7 @@ import { Stack } from "./ui/Stack";
 import Button from "./lib/button/Button";
 import { keepPreviousData } from "@tanstack/react-query";
 
-function ClinicsDirectory() {
+export function ClinicsDirectory() {
   const setHasNext = useOutletContext<(hasNext: boolean) => void>();
   const [params] = useSearchParams();
 
@@ -75,5 +75,3 @@ function ClinicsDirectory() {
     );
   });
 }
-
-export default ClinicsDirectory;

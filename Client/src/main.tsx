@@ -2,7 +2,6 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 
-// Components
 import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -13,10 +12,9 @@ import "./styles/main.css";
 import "@fontsource/pt-sans/400";
 import "@fontsource/pt-sans/700";
 import "@fontsource/pt-sans/400-italic";
-import router from "./components/router.tsx";
+import { router } from "./routing/app-router.tsx";
 import queryClient from "./core/query-client.ts";
 
-// container
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <SpeedInsights />

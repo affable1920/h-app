@@ -1,9 +1,17 @@
 import { type HTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/utils/utils";
 
-export function Layout({ children }: { children: ReactNode }) {
+export function Layout({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <section className="min-h-screen mx-auto space-y-6">{children}</section>
+    <section className={cn("min-h-screen mx-auto space-y-10", className)}>
+      {children}
+    </section>
   );
 }
 

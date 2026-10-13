@@ -1,4 +1,4 @@
-import type { Role, UserResponse } from "@/types/http";
+import type { Role, UserResponse } from "@/types/user";
 import { jwtDecode } from "jwt-decode";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -39,7 +39,7 @@ const useAuthStore = create<AuthStore>()(
 
 export function logout(to?: string) {
   useAuthStore.persist.clearStorage();
-  window.location.href = to ?? "/auth";
+  window.location.href = to ?? "/app/auth";
 }
 
 export default useAuthStore;

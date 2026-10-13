@@ -19,11 +19,11 @@ import Button from "@/components/lib/button/Button";
 import { IdleView } from "@/features/call/components/IdleView";
 import { useCall } from "@/features/call/core/use-call";
 import Spinner from "@/components/ui/Spinner";
-import type { Doctor } from "@/types/http";
+import type { DoctorHttpMinimal } from "@/types/doctors";
 import { useEffect, useRef } from "react";
 
 export function TalkOverVideo() {
-  const doctor = useLoaderData<Doctor>();
+  const doctor = useLoaderData<DoctorHttpMinimal>();
   const { callPeer, callState, ...elements } = useCall();
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -85,7 +85,7 @@ export function TalkOverVideo() {
       {callState === "idle" || callState === "ringing-incoming" ? (
         <IdleView
           drImg={drImg}
-          drName={doctor?.name!}
+          drName={doctor?.name}
           startCall={function () {
             callPeer("790e47de-7d44-407e-834e-2654393c5fba");
           }}

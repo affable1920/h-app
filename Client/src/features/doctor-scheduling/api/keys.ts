@@ -1,4 +1,4 @@
-import type { PaginationParams } from "@/types/doctor-api";
+import type { PaginationParams } from "@/types/doctors";
 
 export const doctorScheduleKeys = {
   all: ["me", "schedules"] as const,

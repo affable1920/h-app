@@ -27,7 +27,7 @@ function LandingPageHeader() {
       label: "Home",
       icon: Home,
       onClick() {
-        navigate("/view");
+        navigate("/app");
       },
     },
     { label: "features", icon: Waypoints },
@@ -76,7 +76,7 @@ function LandingPageHeader() {
             <a href="#steps">How it works</a>
             <a href="#pricing">Pricing</a>
           </nav>
-          <Link className="shrink-0" to={user ? "/view" : "/auth"}>
+          <Link className="shrink-0" to={user ? "/app" : "/auth"}>
             <Button color={user ? "white" : "brand"} border={false}>
               {user ? "Get Started" : "Sign in"}
             </Button>
@@ -115,7 +115,7 @@ function LandingPageHeader() {
                 </motion.article>
               );
             })}
-            <Link className="shrink-0" to={user ? "/view" : "/auth"}>
+            <Link className="shrink-0" to={user ? "/app" : "/auth"}>
               <Button
                 size="md"
                 className="w-full"

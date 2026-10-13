@@ -1,13 +1,17 @@
 import { fromISO } from "@/domain/scheduling/utils";
 import { Phone, Ban, Info } from "lucide-react";
-import Button from "./button/Button";
-import Badge from "../ui/Badge";
-import Card from "../ui/Card";
-import { Stack } from "../ui/Stack";
-import type { APIError, AppointmentDoctorResponse } from "@/types/http";
+import Button from "./lib/button/Button";
+import Badge from "./ui/Badge";
+import Card from "./ui/Card";
+import { Stack } from "./ui/Stack";
+import type { APIError } from "@/types/http";
 import useModalStore from "@/stores/modal-store";
 import { useCancelAppointment } from "@/hooks/use-doctors";
 import { toast } from "sonner";
+import type { components } from "@/types/api";
+
+export type AppointmentDoctorResponse =
+  components["schemas"]["AppointmentDoctorResponse"];
 
 export function DrAppointmentCard({
   appointment,
@@ -84,10 +88,7 @@ export function DrAppointmentCard({
         </Stack>
       </Card.Header>
 
-      <Card.Footer
-        className="flex items-center justify-end gap-2"
-        selfAlign="end"
-      >
+      <Card.Footer className="flex items-center justify-end gap-2">
         <Button
           className="opacity-70 hover:opacity-100 transition-opacity duration-150 
                     text-text-secondary hover:text-blue-400"

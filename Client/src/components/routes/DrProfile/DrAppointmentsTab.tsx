@@ -1,5 +1,5 @@
 import DirectoryLayout from "@/components/lib/DirectoryLayout";
-import { DrAppointmentCard } from "@/components/lib/DrAppointmentCard";
+import { DrAppointmentCard } from "@/components/DrAppointmentCard";
 import Pagination from "@/components/Pagination";
 import Button from "@/components/lib/button/Button";
 import SearchBar from "@/components/ui/SearchBar";

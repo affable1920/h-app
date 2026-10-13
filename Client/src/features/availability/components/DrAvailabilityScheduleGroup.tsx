@@ -9,13 +9,14 @@ import Button from "@/components/lib/button/Button";
 import useModalStore from "@/stores/modal-store";
 import { ClinicViewVariants, createStagger } from "@/utils/motion-variants";
 
-import type { Doctor, Schedule, Slot } from "@/types/http";
+import type { Schedule, Slot } from "@/types/schedules";
+import type { DoctorHttpMinimal } from "@/types/doctors";
 
 import { areEqual, fromISO } from "@/domain/scheduling/utils";
 
 type ScheduleProps = {
   schedule: Schedule;
-  doctor: Doctor;
+  doctor: DoctorHttpMinimal;
   selectedDate: DateTime | null;
 };
 
@@ -197,6 +198,7 @@ export function AvailabilityScheduleGroup({
                     >
                       <Button
                         color="white"
+                        size="xs"
                         onClick={function () {
                           openModal("booking-gate", {
                             doctor: doctor,

@@ -100,8 +100,8 @@ export function DrSignin() {
           });
         },
         onSuccess() {
-          toast.message("You're signed in.");
-          navigate(state?.moveTo ?? "/view/idx/doctors");
+          toast.success("You're signed in.");
+          navigate(state?.moveTo ?? "/app/index/doctors");
         },
       },
     );

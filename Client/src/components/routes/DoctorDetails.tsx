@@ -1,9 +1,9 @@
-import type { Doctor } from "@/types/http";
+import type { DoctorHttpMinimal } from "@/types/doctors";
 import { useLoaderData } from "react-router-dom";
 import { Stack } from "../ui/Stack";
 
 export function DoctorDetails() {
-  const dr = useLoaderData<Doctor>();
+  const dr = useLoaderData<DoctorHttpMinimal>();
 
   if (!dr) {
     return;

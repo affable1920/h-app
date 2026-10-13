@@ -26,8 +26,8 @@ export function PatientSignin() {
         data,
       });
 
-      toast.message("logged in.");
-      navigate("/view/idx/doctors", {
+      toast.success("logged in.");
+      navigate("/app/index/doctors", {
         replace: true,
       });
     } catch (exc) {

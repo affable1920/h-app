@@ -24,7 +24,7 @@ const templates = [
 
 const EDITOR_CLASS = "is-empty";
 
-function Chat() {
+export function Chat() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -288,5 +288,3 @@ function Chat() {
     </section>
   );
 }
-
-export default Chat;

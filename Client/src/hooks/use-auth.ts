@@ -1,17 +1,22 @@
 import { queryOptions, useQuery, type QueryKey } from "@tanstack/react-query";
 import APIClient from "@/core/ApiClient";
-import type {
-  PatientCreate,
-  DoctorLogin,
-  PatientLogin,
-  UserResponse,
-  ProfileResponse,
-  Role,
-} from "@/types/http";
+import type { PatientCreate, PatientLogin } from "@/types/patients";
+import type { UserResponse } from "@/types/user";
+import type { DoctorLogin, DoctorProfile } from "@/types/doctors";
 import useAuthStore from "@/stores/auth-store";
 import type { AxiosRequestConfig } from "axios";
 import { createMutationHook } from "./use-http";
 import { doctorKeys } from "./keys";
+import type { PatientProfile } from "@/types/patients";
+
+export type Role = "doctor" | "patient";
+
+type ProfileResponseMap = {
+  doctor: DoctorProfile;
+  patient: PatientProfile;
+};
+
+export type ProfileResponse<R extends Role> = ProfileResponseMap[R];
 
 type SignupContext = {
   params?: AxiosRequestConfig;

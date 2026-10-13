@@ -119,13 +119,11 @@ const features = [
 export function LandingPageMain() {
   return (
     <section className="space-y-24 md:space-y-32 px-8 py-6 pt-12">
-      {/* Hero */}
       <section className="pt-24">
         <section
           className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 
           gap-14 items-stretch"
         >
-          {/* Mockup */}
           <motion.article
             initial={{
               filter: "blur(3px)",
@@ -230,10 +228,10 @@ export function LandingPageMain() {
             </article>
 
             <div className="flex gap-4 mt-4">
-              <Link to="/view/idx/doctors">
+              <Link to="app/index/doctors">
                 <Button endIcon={<ArrowRight />}>Find a doctor</Button>
               </Link>
-              <Link to="/auth/register" state={{ role: "doctor" }}>
+              <Link to="auth/register" state={{ role: "doctor" }}>
                 <Button color="brand" endIcon={<ArrowRight />}>
                   Join as a doctor
                 </Button>
@@ -256,8 +254,6 @@ export function LandingPageMain() {
           <Divider />
         </article>
       </section>
-
-      {/* Features */}
 
       <section id="features">
         <div className="max-w-7xl mx-auto space-y-10 md:space-y-16">
@@ -303,8 +299,6 @@ export function LandingPageMain() {
 
                     <p className="leading-tight">{feature.text}</p>
                   </div>
-
-                  {/* Feature Mockup */}
 
                   {feature.mockup ? <feature.mockup /> : null}
                 </motion.article>

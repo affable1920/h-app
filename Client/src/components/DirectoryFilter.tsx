@@ -16,11 +16,8 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import Divider from "./ui/Divider";
 import { Controller } from "react-hook-form";
-import {
-  useFilterStore,
-  EMPTY_FILTERS,
-  type FilterState,
-} from "@stores/filter-store";
+import { useFilterStore, EMPTY_FILTERS } from "@stores/filter-store";
+import type { Filters } from "@/types/pagination";
 import { Select } from "./ui/SelectApi";
 import StepInput from "./ui/StepInput";
 
@@ -154,7 +151,7 @@ function DirectoryFilter() {
                 className="flex flex-wrap gap-2"
               >
                 {Object.entries(
-                  SORT_COLS as Record<string, FilterState["sortOrder"]>,
+                  SORT_COLS as Record<string, Filters["sortOrder"]>,
                 ).map(function ([col, order]) {
                   return (
                     <Button
@@ -283,7 +280,7 @@ function DirectoryFilter() {
             <Stack justify="between" gap="sm">
               {Object.entries({ male: <Mars />, female: <Venus /> }).map(
                 function ([gender, icon]) {
-                  const gdr = gender as FilterState["gender"];
+                  const gdr = gender as Filters["gender"];
                   return (
                     <Badge
                       as="button"

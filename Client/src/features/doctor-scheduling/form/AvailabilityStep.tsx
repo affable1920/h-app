@@ -2,7 +2,7 @@ import { WEEKDAYS } from "@/utils/constants";
 import { Controller, useFormContext } from "react-hook-form";
 import { Stack } from "@components/ui/Stack";
 import type { ScheduleCreate } from "@/features/doctor-scheduling/contract/create-schema";
-import type { GetDoctorClinicsResponse } from "@/types/doctor-api";
+import type { GetDoctorClinicsResponse } from "@/types/doctors";
 import { Input } from "@/components/ui/Input";
 import { Info } from "lucide-react";
 import { Select } from "@/components/ui/SelectApi";

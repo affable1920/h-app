@@ -1,9 +1,10 @@
 import type { ElementType } from "react";
-import type { Status, Doctor } from "@/types/http";
+import type { DoctorAvailabilityStatus as Status } from "@/types/doctors";
+import type { DoctorHttpMinimal } from "@/types/doctors";
 import { CalendarFold, PhoneOutgoing, Waypoints } from "lucide-react";
 
 type DrActionName = "consult" | "schedule" | "message";
-type ActionHandler = (doctor: Doctor, ...args: unknown[]) => void;
+type ActionHandler = (doctor: DoctorHttpMinimal, ...args: unknown[]) => void;
 type ActionConfig = DrCTA & { handler: ActionHandler };
 
 type DrCTA = {

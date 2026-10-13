@@ -32,7 +32,7 @@ export const PatientRegister = memo(function () {
   async function submit(data: PatientCreate) {
     try {
       await create(data);
-      navigate("/view/idx/doctors");
+      navigate("/app/index/doctors");
     } catch (exc) {
       toast.error((exc as unknown as APIError).message);
     }

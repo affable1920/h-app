@@ -11,7 +11,7 @@ import type {
   GetDoctorAppointmentsResponse,
   GetDoctorClinicsResponse,
   PaginationParams,
-} from "@/types/doctor-api";
+} from "@/types/doctors";
 import { useSignup } from "./use-auth";
 
 const api = new APIClient("/doctors");
@@ -104,3 +104,18 @@ export const useCancelAppointment = createMutationHook(
     doctorKeys.relation("appointments", scheduleId),
   ],
 );
+
+export const getDoctorsOptions = createQueryOptions(
+  (vars) => doctorKeys.list(vars),
+  (vars: DoctorFilters) =>
+    api
+      .get(undefined, {
+        params: {
+          ...vars,
+        },
+      })
+      .then((r) => r.data),
+);
+
+export const parseDoctorParams = (sp: URLSearchParams) =>
+  Object.fromEntries(sp.entries());

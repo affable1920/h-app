@@ -5,7 +5,8 @@ import SearchBar from "../ui/SearchBar";
 import DrProfileSetup from "@/features/onboarding-doctor/DrProfileSetup";
 import ScheduleForm from "@/features/doctor-scheduling/form/ScheduleForm";
 import { Picker } from "../ui/Picker";
-import type { Clinic, Doctor, Slot } from "@/types/http";
+import type { Clinic, Slot } from "@/types/schedules";
+import type { DoctorHttpMinimal } from "@/types/doctors";
 import type { ReactNode } from "react";
 import InformationModal from "./InformationModal";
 
@@ -22,7 +23,7 @@ export type ConfirmationProps = {
 
 export type MapperProps = {
   "booking-gate": {
-    doctor: Doctor;
+    doctor: DoctorHttpMinimal;
     slot: Slot;
     clinic: Clinic;
     onSuccess: () => void;
@@ -40,7 +41,7 @@ export type MapperProps = {
     selected?: unknown;
   };
   "schedule-creater-modal": {
-    doctor: Doctor;
+    doctor: DoctorHttpMinimal;
   };
   "information-modal": {
     children: ReactNode;

@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Camera, SaveAll, X } from "lucide-react";
 
 type ImageUploaderProps = {
-  initialSrc: string;
+  initialSrc: string | null;
   alt: string;
   id: string;
   name: string;
@@ -25,6 +25,10 @@ export function Avatar({
   useEffect(
     function () {
       return function () {
+        if (!previewSrc) {
+          return;
+        }
+
         if (previewSrc.startsWith("blob:")) {
           URL.revokeObjectURL(previewSrc);
         }
@@ -69,7 +73,7 @@ export function Avatar({
   }
 
   async function handleSave() {
-    if (!isDirty) {
+    if (!isDirty || !previewSrc) {
       return;
     }
 

@@ -1,7 +1,7 @@
 import APIClient from "@/core/ApiClient";
 import { doctorKeys } from "@/hooks/keys";
 import { createMutationHook } from "@/hooks/use-http";
-import type { GetDoctorClinicsResponse } from "@/types/doctor-api";
+import type { GetDoctorClinicsResponse } from "@/types/doctors";
 
 const api = new APIClient("/doctors");
 

@@ -6,14 +6,15 @@ import DrCardFront from "./DrCardFront";
 import { useGetDoctors } from "@/hooks/use-doctors";
 import { keepPreviousData } from "@tanstack/react-query";
 
-function DoctorsDirectory() {
+export function DoctorsDirectory() {
   const [params] = useSearchParams();
   const setHasNext = useOutletContext<(hasNext: boolean) => void>();
 
   const {
-    data: { entities: doctors = [], hasNext = true } = {},
-    isFetching,
+    data: { entities: doctors = [], hasNext = false } = {},
+    isPending,
     isError,
+    isFetching,
   } = useGetDoctors(Object.fromEntries(params.entries()), {
     refetchOnMount: false,
     placeholderData: keepPreviousData,
@@ -26,7 +27,7 @@ function DoctorsDirectory() {
     [hasNext, setHasNext],
   );
 
-  if (isFetching) {
+  if (isPending || isFetching) {
     return <Spinner />;
   }
 
@@ -34,15 +35,11 @@ function DoctorsDirectory() {
     return null;
   }
 
-  return doctors.map(function (dr) {
-    return (
-      <CardFlippable
-        key={dr.id}
-        entity={dr}
-        CardFront={<DrCardFront doctor={dr} />}
-      />
-    );
-  });
+  return doctors.map((dr) => (
+    <CardFlippable
+      key={dr.id}
+      entity={dr}
+      CardFront={<DrCardFront doctor={dr} />}
+    />
+  ));
 }
-
-export default DoctorsDirectory;

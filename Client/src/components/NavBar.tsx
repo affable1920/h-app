@@ -79,7 +79,7 @@ function NavBar() {
       label: "Home",
       icon: Home,
       onclick() {
-        navigate("/view");
+        navigate("/app");
       },
     },
     {
@@ -90,7 +90,7 @@ function NavBar() {
           label: "doctor",
           icon: Stethoscope,
           onclick() {
-            navigate("/view/idx/doctors");
+            navigate("/app/index/doctors");
           },
         },
         {
@@ -101,14 +101,14 @@ function NavBar() {
           label: "pharmacy",
           icon: Syringe,
           onclick() {
-            navigate("/view/idx/clinics");
+            navigate("/app/index/clinics");
           },
         },
         {
           label: "ask assistant (Pro Plan)",
           icon: Bot,
           onclick() {
-            navigate("chat");
+            navigate("/app/chat");
           },
         },
       ],
@@ -123,7 +123,7 @@ function NavBar() {
                 label: "profile",
                 icon: User,
                 onclick() {
-                  navigate("/view/auth/me");
+                  navigate("/app/workspace");
                 },
               },
               { label: "messages", icon: Mail },

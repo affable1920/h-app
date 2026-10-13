@@ -10,7 +10,8 @@ import {
   useCreateSchedule,
   useDeleteSchedule,
 } from "@/features/doctor-scheduling/api/mutations";
-import type { APIError, Doctor } from "@/types/http";
+import type { APIError } from "@/types/http";
+import type { DoctorHttpMinimal } from "@/types/doctors";
 import { toast } from "sonner";
 import { removeModal } from "@/stores/modal-store";
 import Button from "@/components/lib/button/Button";
@@ -42,7 +43,7 @@ const VARIANTS = {
   },
 };
 
-function ScheduleForm({ doctor }: { doctor: Doctor }) {
+function ScheduleForm({ doctor }: { doctor: DoctorHttpMinimal }) {
   const [dir, setDir] = useState<1 | -1>(1);
   const [step, setStep] = useState(0);
 

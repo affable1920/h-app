@@ -2,7 +2,7 @@ import { type ExternalToast, toast } from "sonner";
 import { WebRTC } from "./WebRTC";
 import EventEmitter from "./EventEmitter";
 import type { CallSessionEvents, CallSessionState } from "../types";
-import router from "@/components/router";
+import { router } from "@/routing/app-router";
 
 /**
  * The intention for this class's implementation is to make it represent an ongoing call session from both -

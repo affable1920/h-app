@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import {
   Outlet,
   useLocation,
@@ -12,12 +12,28 @@ import useModalStore from "@/stores/modal-store";
 import { ArrowLeftRight, SlidersHorizontal } from "lucide-react";
 import SearchBar from "../ui/SearchBar";
 import { Stack } from "../ui/Stack";
-import { FILTER_KEYS } from "@/types/utils";
+import DirectoryLayout from "../lib/DirectoryLayout";
+import { PageLayout } from "./PageLayout";
+import type { Filters } from "@/types/pagination";
+
+export const FILTER_KEYS: Array<keyof Filters> = [
+  "specialization",
+  "minRating",
+  "currentlyAvailable",
+  "verified",
+  "gender",
+  "experience",
+  "fee",
+  "sortColumn",
+  "sortOrder",
+] as const;
 
 function Directory() {
+  const currentView = useLocation().pathname.split("/").at(-1) ?? "doctors";
+  const viewOnSwitch = currentView === "doctors" ? "clinics" : "doctors";
+
   const navigate = useNavigate();
   const openModal = useModalStore((s) => s.openModal);
-  const route = useLocation().pathname.split("/").at(-1) ?? "doctors";
 
   const [params, setParams] = useSearchParams();
   const [hasNext, setHasNext] = useState(false);
@@ -25,15 +41,20 @@ function Directory() {
 
   const page = params.get("page") ? Number(params.get("page")) : 1;
 
-  const activeFilterCount = Object.entries(Object.fromEntries(params.entries()))
-    .filter(function ([key, val]) {
-      return (
-        key !== "sortOrder" &&
-        Array.prototype.includes.call(FILTER_KEYS, key) &&
-        Boolean(val)
-      );
-    })
-    .filter(Boolean).length;
+  const activeFilterCount = useMemo(
+    function () {
+      return Object.entries(Object.fromEntries(params.entries()))
+        .filter(function ([key, val]) {
+          return (
+            key !== "sortOrder" &&
+            Array.prototype.includes.call(FILTER_KEYS, key) &&
+            Boolean(val)
+          );
+        })
+        .filter(Boolean).length;
+    },
+    [params],
+  );
 
   useEffect(
     function () {
@@ -110,14 +131,15 @@ function Directory() {
   );
 
   function switchDirectory() {
-    const nextDir = route === "doctors" ? "clinics" : "doctors";
-    navigate(`${nextDir}`);
+    navigate(`../${viewOnSwitch}`, {
+      replace: true,
+    });
   }
 
   return (
-    <section className="flex flex-col gap-8 mx-auto min-h-screen">
-      <section className="w-full rounded-md flex items-center justify-between">
-        <div className="flex items-center gap-2">
+    <PageLayout>
+      <DirectoryLayout>
+        <DirectoryLayout.Header className="justify-between">
           <Button
             variant="icon"
             bg={true}
@@ -137,43 +159,45 @@ function Directory() {
               </span>
             )}
           </Button>
-        </div>
 
-        <Stack align="center">
-          <SearchBar
-            id="directory-search"
-            aria-label={`search ${route === "doctors" ? "doctors" : "clinics"}`}
-            clearable={true}
-            onChange={function (ev) {
-              handleSearch(ev.currentTarget.value);
-            }}
-            value={localSearch ?? ""}
-            onClear={clearSearch}
-            size="xs"
+          <Stack align="center">
+            <SearchBar
+              id="directory-search"
+              aria-label={`search ${currentView}`}
+              clearable={true}
+              onChange={function (ev) {
+                handleSearch(ev.currentTarget.value);
+              }}
+              value={localSearch ?? ""}
+              onClear={clearSearch}
+              size="xs"
+            />
+
+            <Button
+              variant="icon"
+              bg={true}
+              aria-label={`switch view to ${viewOnSwitch}`}
+              data-tooltip={`switch to ${viewOnSwitch}`}
+              onClick={switchDirectory}
+            >
+              <ArrowLeftRight />
+            </Button>
+          </Stack>
+        </DirectoryLayout.Header>
+
+        <DirectoryLayout.Content className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
+          <Outlet context={setHasNext} />
+        </DirectoryLayout.Content>
+
+        <DirectoryLayout.Footer>
+          <Pagination
+            currentPage={page}
+            onPageChange={handlePageChange}
+            hasNext={hasNext}
           />
-
-          <Button
-            variant="icon"
-            bg={true}
-            aria-label="switch-view"
-            data-tooltip={`switch to ${route === "doctors" ? "clinics" : "doctors"}`}
-            onClick={switchDirectory}
-          >
-            <ArrowLeftRight />
-          </Button>
-        </Stack>
-      </section>
-
-      <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
-        <Outlet context={setHasNext} />
-      </section>
-
-      <Pagination
-        currentPage={page}
-        hasNext={hasNext}
-        onPageChange={handlePageChange}
-      />
-    </section>
+        </DirectoryLayout.Footer>
+      </DirectoryLayout>
+    </PageLayout>
   );
 }
 

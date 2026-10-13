@@ -1,6 +1,6 @@
 import { createQueryHook } from "@/hooks/use-http";
 import { doctorScheduleKeys } from "./keys";
-import type { PaginationParams } from "@/types/doctor-api";
+import type { PaginationParams } from "@/types/doctors";
 import type { GetDoctorSchedules } from "../contract/types";
 import APIClient from "@/core/ApiClient";
 

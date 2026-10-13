@@ -1,5 +1,9 @@
 import { cn } from "@/utils/utils";
-import type { HTMLAttributes, ReactNode } from "react";
+import type {
+  ComponentPropsWithoutRef,
+  HTMLAttributes,
+  ReactNode,
+} from "react";
 
 export function CardHeader({
   className,
@@ -71,11 +75,11 @@ export function CardWrapper({
   );
 }
 
-interface CardFooterProps extends HTMLAttributes<HTMLElement> {
-  selfAlign?: "start" | "center" | "end";
-}
-
-export function CardFooter({ className, children, ...rest }: CardFooterProps) {
+export function CardFooter({
+  className,
+  children,
+  ...rest
+}: Omit<ComponentPropsWithoutRef<"footer">, "">) {
   return (
     <footer {...rest} className={cn(className)}>
       {children}

@@ -1,17 +1,12 @@
-import type { ServerParams } from "@/types/http";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 import z from "zod";
+import type { Filters } from "@/types/pagination";
 
-export type FilterState = Omit<
-  NonNullable<ServerParams>,
-  "max" | "page" | "searchQuery" | "maxDistance"
->;
+export type FilterKey = keyof Filters;
 
-export type FilterKey = keyof FilterState;
-
-export const EMPTY_FILTERS: FilterState = {
+export const EMPTY_FILTERS: Filters = {
   specialization: null,
   minRating: null,
   currentlyAvailable: null,
@@ -35,13 +30,13 @@ const schema = z.object({
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });
 
-function seedFromParams(searchParams: URLSearchParams): FilterState {
+function seedFromParams(searchParams: URLSearchParams): Filters {
   function getNumberParam(key: FilterKey) {
     return searchParams.get(key) ? Number(searchParams.get(key)) : null;
   }
 
   const sortOrderParam = searchParams.get("sortOrder") ?? undefined;
-  const sortOrder: FilterState["sortOrder"] =
+  const sortOrder: Filters["sortOrder"] =
     sortOrderParam === "asc" || sortOrderParam === "desc"
       ? sortOrderParam
       : undefined;
@@ -51,7 +46,7 @@ function seedFromParams(searchParams: URLSearchParams): FilterState {
     minRating: getNumberParam("minRating"),
     currentlyAvailable:
       searchParams.get("currentlyAvailable") === "1" ? "1" : null,
-    gender: (searchParams.get("gender") as FilterState["gender"]) ?? null,
+    gender: (searchParams.get("gender") as Filters["gender"]) ?? null,
     experience: getNumberParam("experience"),
     fee: getNumberParam("fee"),
     sortColumn: searchParams.get("sortColumn"),
@@ -63,7 +58,7 @@ function seedFromParams(searchParams: URLSearchParams): FilterState {
 export function useFilterStore() {
   const [searchParams] = useSearchParams();
 
-  const form = useForm<FilterState>({
+  const form = useForm<Filters>({
     defaultValues: seedFromParams(searchParams),
     resolver: zodResolver(schema),
   });

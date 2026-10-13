@@ -104,10 +104,10 @@ export default function DrProfileSetup() {
       openModal("confirmation-modal", {
         tagline: "Complete your profile setup ..?",
         onResolve() {
-          navigate("/view/auth/me");
+          navigate("/app/workspace");
         },
         onReject() {
-          navigate("/view/idx/doctors");
+          navigate(".");
         },
         autoClose: true,
         timeout: 5000,

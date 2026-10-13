@@ -7,12 +7,12 @@ import Spinner from "@/components/ui/Spinner";
 import { Stack } from "@/components/ui/Stack";
 import { useGetDoctorSchedules } from "@/features/doctor-scheduling/api/queries";
 import useModalStore from "@/stores/modal-store";
-import type { ProfileResponse } from "@/types/http";
 import { Plus, SlidersHorizontal } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
+import type { DoctorProfile } from "@/types/doctors";
 
 export function DrSchedulesTab() {
-  const doctor = useOutletContext<ProfileResponse<"doctor">>();
+  const doctor = useOutletContext<DoctorProfile>();
   const openModal = useModalStore((s) => s.openModal);
 
   const { data: { entities: schedules = [] } = {}, isPending } =

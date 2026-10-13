@@ -11,15 +11,18 @@ import {
 } from "@/features/booking/api/mutations";
 
 import { fromISO } from "@/domain/scheduling/utils";
-import type { APIError, Clinic, Doctor, Slot } from "@/types/http";
+import type { Clinic, Slot } from "@/types/schedules";
+import type { DoctorHttpMinimal } from "@/types/doctors";
 
 import Button from "@/components/lib/button/Button";
 import { Stack } from "@/components/ui/Stack";
 import { PatientSignin } from "@/components/PatientSignin";
 import { PatientRegister } from "@/components/PatientRegister";
+import type { APIError } from "@/types/http";
+import { useNavigate } from "react-router-dom";
 
 type BookingGateProps = {
-  doctor: Doctor;
+  doctor: DoctorHttpMinimal;
   slot: Slot;
   clinic: Clinic;
   onSuccess?: () => void;
@@ -32,6 +35,7 @@ function BookingGate({ doctor, slot, clinic, onSuccess }: BookingGateProps) {
   const user = useAuthStore((s) => s.user);
   const role = useAuthStore((s) => s.role);
 
+  const navigate = useNavigate();
   const closeModal = useModalStore((s) => s.closeModal);
 
   const { mutateAsync: book, isPending: bookingIsPending } = useCreateBooking();
@@ -59,30 +63,47 @@ function BookingGate({ doctor, slot, clinic, onSuccess }: BookingGateProps) {
     try {
       const model = await book(payload);
 
-      toast.info("Slot booked sucessfully!", {
+      const tId = toast.info("Slot booked sucessfully!", {
         duration: 4000,
         closeButton: true,
-        action: {
-          label: "Undo",
-          onClick() {
-            cancelBooking(
-              {
-                appointmentId: model.id,
-                doctorId: doctor.id,
-              },
-              {
-                onSuccess() {
-                  toast.info("Your slot was sucessfully cancelled!");
-                },
-                onError() {
-                  toast.info("Your slot could not be cancelled!", {
-                    description: "Please try after sometime.",
-                  });
-                },
-              },
-            );
-          },
-        },
+        action: (
+          <Stack align="center">
+            <Button
+              size="xs"
+              onClick={function () {
+                toast.dismiss(tId);
+                cancelBooking(
+                  {
+                    appointmentId: model.id,
+                    doctorId: doctor.id,
+                  },
+                  {
+                    onSuccess() {
+                      toast.info("Your slot was sucessfully cancelled!");
+                    },
+                    onError() {
+                      toast.info("Your slot could not be cancelled!", {
+                        description: "Please try after sometime.",
+                      });
+                    },
+                  },
+                );
+              }}
+            >
+              Undo
+            </Button>
+
+            <Button
+              size="xs"
+              onClick={function () {
+                navigate("/app/workspace");
+                toast.dismiss(tId);
+              }}
+            >
+              View
+            </Button>
+          </Stack>
+        ),
       });
 
       onSuccess?.();
@@ -164,6 +185,7 @@ function BookingGate({ doctor, slot, clinic, onSuccess }: BookingGateProps) {
                     type="button"
                     endIcon={<Ban />}
                     color="secondary"
+                    size="xs"
                     onClick={closeModal}
                   >
                     cancel
@@ -174,6 +196,7 @@ function BookingGate({ doctor, slot, clinic, onSuccess }: BookingGateProps) {
                     color="white"
                     loading={bookingIsPending}
                     endIcon={<CalendarFold />}
+                    size="xs"
                   >
                     Book
                   </Button>
@@ -183,6 +206,7 @@ function BookingGate({ doctor, slot, clinic, onSuccess }: BookingGateProps) {
                   disabled={bookingIsPending}
                   onClick={removeModal}
                   color="indicator"
+                  size="xs"
                 >
                   Review or Edit
                 </Button>

@@ -4,12 +4,14 @@ import { Buffer } from "@/features/chat/buffer";
 import { stream } from "@/features/chat/stream";
 import useAuthStore from "@/stores/auth-store";
 import APIClient from "@/core/ApiClient";
-import type { ChatRequest } from "@/types/http";
 import { config } from "@/core/config";
+import type { operations } from "@/types/api";
 
 const DRAIN_INTERVAL_MS = 16; // 60fps
 const api = new APIClient("/chat");
 
+export type ChatRequest =
+  operations["stream_chat"]["requestBody"]["content"]["application/json"];
 type Conversation = Array<ChatRequest>;
 
 function useChat() {

@@ -2,28 +2,28 @@ import { ShieldCheck } from "lucide-react";
 import docImg from "@/assets/doctor.webp";
 import { Link, useNavigate } from "react-router-dom";
 import Ratings from "./Ratings";
-import type { Doctor } from "@/types/http";
+import type { DoctorHttpMinimal } from "@/types/doctors";
 import getActions from "@/utils/doctor-actions-config";
 import { useMemo } from "react";
 import Button from "./lib/button/Button";
 import { Stack } from "./ui/Stack";
 
-function DrCardFront({ doctor }: { doctor: Doctor }) {
+function DrCardFront({ doctor }: { doctor: DoctorHttpMinimal }) {
   const navigate = useNavigate();
 
   const actions = useMemo(
     function () {
       return getActions(doctor.status ?? "unknown", {
-        consult: function (doctor: Doctor) {
-          navigate(`/view/doctor/${doctor.id}/consult`);
+        consult: function (doctor: DoctorHttpMinimal) {
+          navigate(`/app/index/doctors/${doctor.id}/consult`);
         },
 
-        schedule: function (doctor: Doctor) {
-          navigate(`/view/doctor/${doctor.id}/schedule`);
+        schedule: function (doctor: DoctorHttpMinimal) {
+          navigate(`/app/index/doctors/${doctor.id}/schedule`);
         },
 
-        message: function (doctor: Doctor) {
-          navigate(`/view/doctor/${doctor.id}/message`);
+        message: function (doctor: DoctorHttpMinimal) {
+          navigate(`/app/index/doctors/${doctor.id}/message`);
         },
       });
     },
@@ -43,7 +43,7 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
         <Stack orientation="V">
           <Stack orientation="V" gap={2}>
             <Stack gap={6} align="center">
-              <Link to={`/view/doctor/${doctor.id}`}>
+              <Link to={`/app/index/doctors/${doctor.id}`}>
                 <h2 className="line-clamp-1 truncate capitalize text-text-normal">
                   Dr. {doctor.name}
                 </h2>
@@ -61,7 +61,7 @@ function DrCardFront({ doctor }: { doctor: Doctor }) {
               {!!doctor.experience && <p>({doctor.experience}y)</p>}
             </Stack>
           </Stack>
-          <Link to={`/view/doctor/${doctor.id}/reviews`}>
+          <Link to={``}>
             <Stack
               data-tooltip={`Rated ${doctor.rating} across ${doctor.reviewCount} reviews`}
               gap="xs"

@@ -58,10 +58,13 @@ class Settings(BaseSettings):
         return self
 
     @model_validator(mode="after")
-    def adjust_allowed_origins(self) -> "Settings":
+    def adjust_allowed_origins(
+        self
+    ) -> "Settings":
         if self.env == "dev":
             self.allowed_origins = "*"
-        self.allowed_origins = "http://localhost:5173"
+        else:
+            self.allowed_origins = "http://localhost:5173"
         return self
 
 

@@ -1,14 +1,12 @@
 import logging
 
-from fastapi import (
-    FastAPI,
-)
-
+from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from app.features.calling import websocket
 from app.routes import patients
 from app.core.exceptions import AppException, InvalidTokenError
 from app.routes import schedules
@@ -16,7 +14,6 @@ from app.scripts.openapi_spec import generate_openapi_spec
 from app.features.chatbot import chat
 from app.core.config import settings
 from app.routes import auth, doctors, bookings, clinics
-from app.features.calling import ws_route
 from app.core.exception_handlers import (
     application_error_handler,
     invalid_token_handler,
@@ -35,6 +32,7 @@ async def root(app: FastAPI):
     app.openapi_schema = generate_openapi_spec(app=app)
 
     yield
+
     logger.info("Shutting down ...\n")
 
 
@@ -55,7 +53,6 @@ app.add_middleware(
 )
 
 
-# Routes
 app.include_router(auth.router)
 app.include_router(doctors.router)
 app.include_router(bookings.router)
@@ -63,9 +60,7 @@ app.include_router(clinics.router)
 app.include_router(chat.router)
 app.include_router(schedules.router)
 app.include_router(patients.router)
-app.add_websocket_route("/ws", ws_route.ws_endpoint)
-
-# Global Exception Handlers
+app.add_websocket_route("/ws", websocket.websocket_route)
 
 
 def _application_error_handler(request, exc):
@@ -114,11 +109,12 @@ if __name__ == "__main__":
 
     inside_container = settings.is_using_container == "1"
 
-    # when not running the server inside a container, locally for instance,
-    # we always set the server as the current directory so Path.cwd()
-    # always resolves sucessfully to the server, our target.
+    base_directory = (
+        Path.cwd()
+        if inside_container
+        else Path(__file__).parent
+    )
 
-    base_dir = Path.cwd() if inside_container else Path(__file__).parent
     mode_https = settings.use_https == "1"
 
     mode = settings.env
@@ -129,23 +125,35 @@ if __name__ == "__main__":
     )
 
     logging.info(
-        f"starting the server with ${base_dir.name} as the root directory".capitalize(
+        f"starting the server with ${base_directory.name} as the root directory".capitalize(
         )
     )
 
-    logger.info(f"""
-        base directory -> {base_dir}
-        inside container -> {inside_container}
-        mode -> {mode}
-    """)
-
     def get_ssl_key():
-        target_fl = "../certs/key.pem" if inside_container else "../localhost+3-key.pem"
-        return Path.resolve(base_dir / target_fl) if mode_https else None
+        target_fl = (
+            "../certs/key.pem"
+            if inside_container
+            else "../localhost+3-key.pem"
+        )
+
+        return (
+            Path.resolve(base_directory / target_fl)
+            if mode_https
+            else None
+        )
 
     def get_ssl_cert():
-        target_fl = "../certs/cert.pem" if inside_container else "../localhost+3.pem"
-        return Path.resolve(base_dir / target_fl) if mode_https else None
+        target_fl = (
+            "../certs/cert.pem"
+            if inside_container
+            else "../localhost+3.pem"
+        )
+
+        return (
+            Path.resolve(base_directory / target_fl)
+            if mode_https
+            else None
+        )
 
     uvicorn.run(
         app="app.main:app",

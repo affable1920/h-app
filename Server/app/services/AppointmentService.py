@@ -1,42 +1,131 @@
+from typing import Sequence
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
+from sqlalchemy.orm.strategy_options import _AbstractLoad
 
-from app.services.DrService import DoctorService
 from app.schemas.enums import AppointmentStatus
 from app.core.exceptions import ConflictError, EntityNotFoundException
-from app.database.models import Appointment
+from app.database.models import Appointment, Doctor, Patient
 
 
 class AppointmentService:
-    @classmethod
-    async def cancel_doctor_appointment(
-        cls,
+    @staticmethod
+    async def get_appointment(
         session: AsyncSession,
-        doctor_id: UUID,
-        appointment_id: UUID
-    ):
-        item = await DoctorService.get_doctor_appointment(
-            session=session,
-            doctor_id=doctor_id,
-            appointment_id=appointment_id,
-            loader_options=[
-                joinedload(Appointment.slot)
-            ]
+        appointment_id: UUID,
+        loader_opts: list[_AbstractLoad] | None = None
+    ) -> Appointment | None:
+        stmt = (
+            select(Appointment)
+            .where(Appointment.id == appointment_id)
+            .options(*(loader_opts or []))
         )
 
-        if item is None:
+        appointment = await session.scalar(stmt)
+        return appointment
+
+    @staticmethod
+    async def get_for_participant(
+        session: AsyncSession,
+        appointment_id: UUID,
+        participant: Doctor | Patient,
+        loader_opts: list[_AbstractLoad] | None = None
+    ) -> Appointment:
+        if isinstance(
+            participant,
+            Doctor
+        ):
+            ownership = Appointment.doctor_id == participant.id
+
+        elif isinstance(
+            participant,
+            Patient
+        ):
+            ownership = Appointment.patient_id == participant.id
+
+        else:
+            raise TypeError("Unsupported participant type.")
+
+        stmt = (
+            select(Appointment)
+            .where(
+                Appointment.id == appointment_id,
+                ownership
+            )
+            .options(*(loader_opts or []))
+        )
+
+        appointment = await session.scalar(stmt)
+
+        if appointment is None:
             raise EntityNotFoundException(
                 "appointment"
             )
 
-        if item.status is not AppointmentStatus.ACTIVE:
+        return appointment
+
+    @staticmethod
+    async def get_participant_appointments(
+        session: AsyncSession,
+        participant: Doctor | Patient,
+        loader_opts: list[_AbstractLoad] | None = None
+    ) -> list[Appointment] | Sequence[Appointment]:
+        if isinstance(
+            participant,
+            Doctor
+        ):
+            ownership = Appointment.doctor_id == participant.id
+
+        elif isinstance(
+            participant,
+            Patient
+        ):
+            ownership = Appointment.patient_id == participant.id
+
+        else:
+            raise TypeError("Unsupported participant type.")
+
+        stmt = (
+            select(Appointment)
+            .where(ownership)
+            .options(*(loader_opts or []))
+        )
+
+        return (await session.scalars(stmt)).all()
+
+    @staticmethod
+    async def cancel_appointment(
+        session: AsyncSession,
+        appointment_id: UUID,
+        participant: Doctor | Patient
+    ):
+        if isinstance(
+            participant,
+            Patient
+        ):
+            return
+
+        appointment = await AppointmentService.get_for_participant(
+            session,
+            appointment_id,
+            participant,
+            [joinedload(Appointment.slot)]
+        )
+
+        if appointment is None:
+            raise EntityNotFoundException(
+                "appointment"
+            )
+
+        if appointment.status is not AppointmentStatus.ACTIVE:
             raise ConflictError(
                 "The requested appointment is already not active"
             )
 
-        item.slot.is_booked = False
-        item.status = AppointmentStatus.CANCELLED
+        appointment.slot.is_booked = False
+        appointment.status = AppointmentStatus.CANCELLED
 
-        session.add(item)
+        session.add(appointment)

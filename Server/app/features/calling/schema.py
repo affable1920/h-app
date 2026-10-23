@@ -1,38 +1,59 @@
 import enum
-from typing import Any
-from pydantic import BaseModel, ConfigDict
+from typing import Annotated, Any
+from uuid import UUID
+from pydantic import BaseModel, ConfigDict, Field
 from app.schemas.base import snake_to_camel
 
 
-class MsgType(str, enum.Enum):
+class WS_Schema(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=snake_to_camel,
+        validate_by_name=True,
+        serialize_by_alias=True,
+    )
+
+
+class ClientMessageType(enum.StrEnum):
+    INIT = "init"
     OFFER = "offer"
     ANSWER = "answer"
-    ICE = "ice-candidate"
-    USER_LEFT = "user-left"
-    OFFLINE = "offline"
-    HANG_UP = "hang-up"
-    BROADCAST = "broadcast"
     OFFER_DECLINE = "offer-decline"
+    ICE = "ice-candidate"
+    HANG_UP = "hang-up"
 
 
-class Metadata(BaseModel):
-    to_: str
-    from_: str
+class ServerMessageType(enum.StrEnum):
+    CONFIRMATION = "confirmation"
+    ERROR = "error"
+    TIMEOUT = "timeout"
+    OFFLINE = "offline"
+    OFFER = "offer"
+    ANSWER = "answer"
+    OFFER_DECLINE = "offer-decline"
+    ICE = "ice-candidate"
+    HANG_UP = "hang-up"
 
-    model_config = ConfigDict(
-        alias_generator=snake_to_camel
-    )
+
+class ClientMetadata(WS_Schema):
+    to: UUID
+    appointment_id: UUID
 
 
-class WS_Message(BaseModel):
-    msg_type: MsgType
-    payload: Any | None = {}
-    metadata: Metadata | None = None
+class ServerMetadata(WS_Schema):
+    from_: Annotated[UUID | None, Field(
+        alias="from"
+    )] = None
 
-    model_config = ConfigDict(
-        extra="allow",
-        from_attributes=True,
-        use_enum_values=True,
-        alias_generator=snake_to_camel,
-        validate_by_name=True
-    )
+    appointment_id: UUID | None = None
+
+
+class ClientMessage(WS_Schema):
+    msg_type: ClientMessageType
+    payload: Any | None = None
+    metadata: ClientMetadata
+
+
+class ServerMessage(WS_Schema):
+    msg_type: ServerMessageType
+    payload: Any | None = None
+    metadata: ServerMetadata | None = None

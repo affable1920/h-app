@@ -78,7 +78,7 @@ export function DrProfile() {
   return (
     <PageLayout>
       <div className="bg-layout/20 border border-border/80 rounded-xl shadow-md shadow-black/60 p-4 md:p-6">
-        <Stack gap="sm" align="center">
+        <Stack gap="sm" align="end">
           <Avatar
             name="image"
             onSave={handleEdit}
@@ -88,10 +88,10 @@ export function DrProfile() {
           />
           <div className="flex-1 flex flex-col gap-2">
             <div>
-              <h1 className="font-semibold text-text-normal text-md capitalize">
+              <h1 className="font-semibold text-text-normal text-lg capitalize">
                 Dr. {doctor.name}
               </h1>
-              <p className="text-sm mt-0.5 text-text-normal">
+              <p className="text-sm text-text-normal">
                 {doctor.primarySpecialization}
               </p>
             </div>

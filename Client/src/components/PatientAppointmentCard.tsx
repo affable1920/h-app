@@ -1,5 +1,5 @@
 import { fromISO } from "@/domain/scheduling/utils";
-import { Ban, Eye } from "lucide-react";
+import { Eye, Trash } from "lucide-react";
 import Button from "./lib/button/Button";
 import Badge from "@components/ui/Badge";
 import Card from "@components/ui/Card";
@@ -9,10 +9,8 @@ import useModalStore from "@/stores/modal-store";
 import { useCancelAppointment } from "@/hooks/use-doctors";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import type { components } from "@/types/api";
-
-export type AppointmentPatientResponse =
-  components["schemas"]["AppointmentPatientResponse"];
+import { getClassConfig } from "./lib/button/styles";
+import type { AppointmentPatientResponse } from "@/types/appointment";
 
 export function PatientAppointmentCard({
   appointment,
@@ -20,11 +18,7 @@ export function PatientAppointmentCard({
   appointment: AppointmentPatientResponse;
 }) {
   const appointmentDoctor = appointment.doctor;
-  const careJourney = appointment.careJourney;
-
   const openModal = useModalStore((s) => s.openModal);
-  //   const closeModal = useModalStore((s) => s.closeModal);
-
   const { mutateAsync: cancelAppointment } = useCancelAppointment();
 
   async function handleCancellation() {
@@ -60,21 +54,14 @@ export function PatientAppointmentCard({
   }
 
   return (
-    <Card className="border-border">
+    <Card className="border-border flex flex-col gap-2">
       <Card.Header className="flex items-start justify-between">
         <Stack orientation="V">
           <Card.Title>Dr. {appointmentDoctor?.name}</Card.Title>
-
-          <Stack orientation="V" gap={4} className="tracking-wider">
-            <h4 className="leading-[1.1] opacity-70">Appointment Reason</h4>
-            <Card.Description className="text-sm leading-[1.2]">
-              {careJourney?.reasonForVisit ?? "No Reason provided"}
-            </Card.Description>
-          </Stack>
         </Stack>
 
         <Stack align="center" gap={12}>
-          <span className="text-sm font-semibold whitespace-nowrap tracking-wider">
+          <span className="text-sm font-semibold whitespace-nowrap tracking-wide">
             {fromISO(appointment.scheduledDate).toFormat("dd LLL yyyy")}
           </span>
 
@@ -89,17 +76,19 @@ export function PatientAppointmentCard({
         </Stack>
       </Card.Header>
 
-      <Card.Footer className="flex items-center justify-end gap-3">
+      <Card.Footer className="flex items-center justify-end self-end gap-3">
         {appointment.status === "active" && (
-          <Button endIcon={<Ban />} size="xs" onClick={handleCancellation}>
+          <Button endIcon={<Trash />} size="xs" onClick={handleCancellation}>
             Cancel
           </Button>
         )}
 
-        <Link to="">
-          <Button size="xs" endIcon={<Eye />} color="brand">
-            Preview{" "}
-          </Button>
+        <Link
+          to={`/app/workspace/patient/appointments/${appointment.id}`}
+          className={getClassConfig({ size: "xs", color: "brand" })}
+          aria-label={`View appointment with Dr. ${appointmentDoctor.name}`}
+        >
+          View <Eye aria-hidden="true" />
         </Link>
       </Card.Footer>
     </Card>

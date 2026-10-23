@@ -1,9 +1,7 @@
 import APIClient from "@/core/ApiClient";
 import { createQueryHook } from "./use-http";
-import type {
-  GetPatientAppointmentResponse,
-  GetPatientAppointmentsResponse,
-} from "@/types/patients";
+import type { GetPatientAppointmentsResponse } from "@/types/patients";
+import { type AppointmentPatientResponse } from "@/types/appointment";
 
 const api = new APIClient("/patients/me");
 
@@ -25,6 +23,6 @@ export const useGetPatientAppointment = createQueryHook(
   (id?: string) => patientKeys.appointment(id!),
   (id) =>
     api
-      .get<GetPatientAppointmentResponse>(`appointments/${id}`)
+      .get<AppointmentPatientResponse>(`appointments/${id}`)
       .then((res) => res.data),
 );

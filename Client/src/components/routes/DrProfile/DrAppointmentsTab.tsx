@@ -6,21 +6,39 @@ import SearchBar from "@/components/ui/SearchBar";
 import Spinner from "@/components/ui/Spinner";
 import { Stack } from "@/components/ui/Stack";
 import { useGetDoctorAppointments } from "@/hooks/use-doctors";
-import { RefreshCcw } from "lucide-react";
+import { ArrowUpAZ, RefreshCcw, SlidersHorizontal } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { useCallback } from "react";
 
 export function DrAppointmentsTab() {
+  const [params, setParams] = useSearchParams();
+
+  const page = params.get("page") ? Number(params.get("page")) : 1;
+
   const {
     data: { entities: appointments = [], hasNext = false } = {},
     isPending,
     isError,
     refetch,
-  } = useGetDoctorAppointments(
-    {
-      max: 4,
+  } = useGetDoctorAppointments({ max: 4, page });
+
+  const handlePageChange = useCallback(
+    function (dir: "next" | "previous") {
+      const NOOP =
+        (!hasNext && dir === "next") || (page === 1 && dir === "previous");
+      if (NOOP) {
+        return;
+      }
+
+      setParams(function (prev) {
+        const next = new URLSearchParams(prev);
+        const updated = dir === "next" ? page + 1 : page - 1;
+
+        next.set("page", String(updated));
+        return next;
+      });
     },
-    {
-      staleTime: 5 * 60 * 1000,
-    },
+    [hasNext, page, setParams],
   );
 
   if (isPending) {
@@ -62,16 +80,37 @@ export function DrAppointmentsTab() {
 
   return (
     <DirectoryLayout>
-      <DirectoryLayout.Header className="justify-end">
-        <SearchBar
-          id="doctor-appointments-search"
-          size="xs"
-          className="w-fit"
-          value=""
-          placeholder="appointments search..."
-          aria-label="Search appointments"
-        />
-      </DirectoryLayout.Header>
+      {appointments.length > 0 && (
+        <DirectoryLayout.Header className="justify-between">
+          <Stack align="center">
+            <Button
+              data-tooltip="filter"
+              aria-label={"filter appointments"}
+              variant="icon"
+              bg
+            >
+              <SlidersHorizontal />
+            </Button>
+            <Button
+              data-tooltip="sort"
+              aria-label={"sort appointments"}
+              variant="icon"
+              bg
+            >
+              <ArrowUpAZ />
+            </Button>
+          </Stack>
+          <Stack>
+            <SearchBar
+              id="doctor-schedules-search"
+              aria-label="search schedules"
+              size="xs"
+              value=""
+              placeholder="Search for appointments ..."
+            />
+          </Stack>
+        </DirectoryLayout.Header>
+      )}
 
       <DirectoryLayout.Content className="space-y-6">
         <Stack orientation="V" md={{ orientation: "H" }} gap={20}>
@@ -88,9 +127,9 @@ export function DrAppointmentsTab() {
 
       <DirectoryLayout.Footer>
         <Pagination
-          currentPage={1}
+          currentPage={page}
           hasNext={hasNext ?? false}
-          onPageChange={function () {}}
+          onPageChange={handlePageChange}
         />
       </DirectoryLayout.Footer>
     </DirectoryLayout>

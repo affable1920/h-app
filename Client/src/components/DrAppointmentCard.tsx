@@ -1,5 +1,7 @@
 import { fromISO } from "@/domain/scheduling/utils";
-import { Phone, Ban, Info } from "lucide-react";
+import { Ban, Eye } from "lucide-react";
+import { Link } from "react-router-dom";
+import { getClassConfig } from "./lib/button/styles";
 import Button from "./lib/button/Button";
 import Badge from "./ui/Badge";
 import Card from "./ui/Card";
@@ -57,19 +59,12 @@ export function DrAppointmentCard({
   }
 
   return (
-    <Card className="border-border">
+    <Card className="border-border flex flex-col gap-3">
       <Card.Header className="flex items-start justify-between">
         <Stack orientation="V">
-          <Card.Title>
+          <Card.Title className="text-base">
             {appointment.patient?.name ?? appointment.patient?.username}
           </Card.Title>
-
-          <Stack orientation="V" gap={1} className="tracking-wider">
-            <h4 className="leading-[1.1] opacity-70">Appointment Reason</h4>
-            <Card.Description className="text-sm">
-              {appointment.careJourney?.reasonForVisit ?? "No Reason provided"}
-            </Card.Description>
-          </Stack>
         </Stack>
 
         <Stack align="center">
@@ -89,62 +84,25 @@ export function DrAppointmentCard({
       </Card.Header>
 
       <Card.Footer className="flex items-center justify-end gap-2">
-        <Button
-          className="opacity-70 hover:opacity-100 transition-opacity duration-150 
-                    text-text-secondary hover:text-blue-400"
-          variant="icon"
-          bg={true}
-          data-tooltip="contact"
-        >
-          <Phone />
-        </Button>
-
         {appointment.status === "active" && (
           <Button
             className="opacity-70 hover:opacity-100 transition-opacity duration-150 
             text-text-secondary hover:text-red-700"
-            variant="icon"
-            bg={true}
+            size="xs"
             data-tooltip="cancel"
             onClick={handleCancellation}
           >
-            <Ban />
+            Cancel <Ban />
           </Button>
         )}
 
-        <Button
-          bg={true}
-          onClick={function () {
-            openModal("information-modal", {
-              children: (
-                <div className="min-h-40 p-4 space-y-3">
-                  <header className="text-center font-semibold">
-                    <h2 className="text-md">Appointment Details</h2>
-                  </header>
-                  <div className="flex flex-col items-center gap-2 text-center">
-                    <Stack align="center" gap={12}>
-                      <span className="text-text-teritiary font-bold">
-                        Created at
-                      </span>{" "}
-                      -
-                      <span>
-                        {fromISO(appointment.createdAt).toFormat(
-                          "dd LLL yy '@' HH:mm",
-                        )}
-                      </span>
-                    </Stack>
-                  </div>
-                </div>
-              ),
-            });
-          }}
-          data-tooltip="more info"
-          variant="icon"
-          className="opacity-70 hover:opacity-100 transition-opacity duration-150 
-                    text-text-secondary hover:text-text"
+        <Link
+          to={`/app/workspace/doctor/appointments/${appointment.id}`}
+          className={getClassConfig({ size: "xs", color: "brand" })}
+          aria-label={`View appointment with ${appointment.patient.name ?? appointment.patient.username ?? "patient"}`}
         >
-          <Info />
-        </Button>
+          View <Eye aria-hidden="true" />
+        </Link>
       </Card.Footer>
     </Card>
   );

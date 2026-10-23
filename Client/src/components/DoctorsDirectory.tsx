@@ -4,7 +4,6 @@ import CardFlippable from "@/components/lib/CardFlippable";
 import Spinner from "@/components/ui/Spinner";
 import DrCardFront from "./DrCardFront";
 import { useGetDoctors } from "@/hooks/use-doctors";
-import { keepPreviousData } from "@tanstack/react-query";
 
 export function DoctorsDirectory() {
   const [params] = useSearchParams();
@@ -15,10 +14,7 @@ export function DoctorsDirectory() {
     isPending,
     isError,
     isFetching,
-  } = useGetDoctors(Object.fromEntries(params.entries()), {
-    refetchOnMount: false,
-    placeholderData: keepPreviousData,
-  });
+  } = useGetDoctors(Object.fromEntries(params.entries()));
 
   useEffect(
     function () {

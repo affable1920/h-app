@@ -13,6 +13,7 @@ import type {
   PaginationParams,
 } from "@/types/doctors";
 import { useSignup } from "./use-auth";
+import { keepPreviousData } from "@tanstack/react-query";
 
 const api = new APIClient("/doctors");
 
@@ -26,6 +27,10 @@ export const useGetDoctors = createQueryHook(
         },
       })
       .then((res) => res.data),
+  {
+    placeholderData: keepPreviousData,
+    refetchOnMount: false,
+  },
 );
 
 export const useGetDoctor = createQueryHook(
@@ -83,6 +88,9 @@ export const useGetDoctorAppointments = createQueryHook(
         },
       })
       .then((res) => res.data),
+  {
+    placeholderData: keepPreviousData,
+  },
 );
 
 export const useGetDoctorClinics = createQueryHook(

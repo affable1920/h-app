@@ -66,7 +66,7 @@ export function CardWrapper({
   return (
     <article
       className={cn(
-        "bg-layout/20 border border-border/80 rounded-xl p-4 md:p-6 space-y-6 shadow-md shadow-black/40",
+        "bg-layout/20 border border-border/80 rounded-xl p-4 pb-3 space-y-6 shadow-md shadow-black/40",
         className,
       )}
     >

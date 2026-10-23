@@ -41,12 +41,6 @@ export function workspaceMiddleware(expectedRole: Role): MiddlewareFunction {
 }
 
 export function workspaceRedirect() {
-  console.log("Inside Workspace Redirect Middleware ..");
-
   const { role } = requireStoredSession();
-  console.log("User Role: ", role);
-
-  console.log("Forwarding to..", workspaceHomes[role]);
-
   return redirect(workspaceHomes[role]);
 }

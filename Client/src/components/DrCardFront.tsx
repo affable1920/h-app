@@ -67,7 +67,7 @@ function DrCardFront({ doctor }: { doctor: DoctorHttpMinimal }) {
               gap="xs"
               align="center"
             >
-              {!!doctor.rating && <Ratings rating={doctor.rating} />}
+              {!!doctor.reviewCount && <Ratings rating={doctor.rating} />}
             </Stack>
           </Link>
         </Stack>

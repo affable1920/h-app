@@ -17,18 +17,16 @@ a React hook themselves — they just close over config and hand
 back a new function. Calling them is NOT bound by Rules of Hooks.
  */
 
-export function createQueryHook<TParams, TData>(
+export function createQueryHook<TParams, TData, TError = APIError>(
   keyFn: (params?: TParams) => QueryKey,
   fetchFn: (params?: TParams) => Promise<TData>,
+  options?: Omit<UseQueryOptions<TData, TError>, "queryKey" | "queryFn">,
 ) {
   // RENDER TIME: the returned function is the HOOK, The only hook-call
   // boundary in the chain.
 
-  return function useResourceQuery(
-    params?: TParams,
-    options?: Omit<UseQueryOptions<TData>, "queryKey" | "queryFn">,
-  ) {
-    return useQuery({
+  return function useResourceQuery(params?: TParams) {
+    return useQuery<TData, TError>({
       queryKey: keyFn(params),
       queryFn() {
         return fetchFn(params);
@@ -46,6 +44,7 @@ export function createMutationHook<TVariables, TData>(
 ) {
   return function useResourceMutation() {
     return useMutation({
+      ...options,
       mutationFn,
       onSuccess(data, vars, onMutateResult, context) {
         invalidateKeys(vars, data).forEach(function (key) {
@@ -60,7 +59,6 @@ export function createMutationHook<TVariables, TData>(
       onError(error, ...rest) {
         options?.onError?.(error, ...rest);
       },
-      ...options,
     });
   };
 }

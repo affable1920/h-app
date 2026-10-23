@@ -1,9 +1,11 @@
-import type { DoctorHttpMinimal } from "@/types/doctors";
-import { useLoaderData } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Stack } from "../ui/Stack";
+import { doctorOptions } from "@/hooks/use-doctors";
+import { useQuery } from "@tanstack/react-query";
 
 export function DoctorDetails() {
-  const dr = useLoaderData<DoctorHttpMinimal>();
+  const { id: doctorId } = useParams();
+  const { data: dr } = useQuery(doctorOptions(doctorId!));
 
   if (!dr) {
     return;

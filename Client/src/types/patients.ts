@@ -1,10 +1,7 @@
-import type { components, operations, paths } from "./api";
+import type { components, operations } from "./api";
 
 export type GetPatientAppointmentsResponse =
-  paths["/patients/me/appointments"]["get"]["responses"]["200"]["content"]["application/json"];
-
-export type GetPatientAppointmentResponse =
-  paths["/patients/me/appointments/{appointment_id}"]["get"]["responses"]["200"]["content"]["application/json"];
+  components["schemas"]["PaginatedResponse_AppointmentPatientResponse_"];
 
 export type PatientCreate =
   operations["register_pt"]["requestBody"]["content"]["application/json"];

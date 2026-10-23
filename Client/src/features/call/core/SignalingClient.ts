@@ -1,27 +1,19 @@
 import { config } from "@/core/config";
 import EventEmitter from "@/features/call/core/EventEmitter";
-import type {
-  SignalingEventMessage,
-  SignalingEvent,
-  SignalingClientEvents,
-} from "../types";
+
+import {
+  clientMessageSchema,
+  serverMessageSchema,
+  type ClientMessage,
+  type SignalingClientEvents,
+} from "../contract/schema";
 
 class SignalingClient extends EventEmitter<SignalingClientEvents> {
-  /** 
-  - event listeners lifecycle for the signaling-client
-
-  being a session-scoped singleton, listeners should be attached as long as the user 
-  is connected to the websocket. PERIOD. This client has nothing to do with either any ongoing call or
-  a connected RTC client. Nothing on this client gets torn down per call.
-
-  examples - app tear down, user forced logout, forced reconnect
-  **/
-
   private ws: WebSocket | null = null;
   private readonly url: string = config.ws_url;
 
-  private readonly delay = 1000;
-  private shouldReconnect = true;
+  private readonly delay = 1_000;
+  private shouldReconnect = false;
 
   private attempt = 1;
   private readonly maxAttempts = 3;
@@ -35,46 +27,77 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
     super();
   }
 
-  private onOpen() {
+  private onopen() {
     console.log(
-      "[SignalingClient.onopen] Websocket connection opened. readyState: ",
-      this.ws?.readyState,
+      "[SignalingClient.onopen] Websockt connection opened sucessfully..",
     );
 
     this.resetWsVariables();
   }
 
-  private onClose(token: string, ev: CloseEvent) {
+  private onclose(token: string, ev: CloseEvent) {
     if (ev.code === 1006 && !ev.wasClean) {
       this.reconnect(token);
     }
+
+    if (ev.code === 4444) {
+      console.error(
+        "[SignalingClient.onclose] Connection closed by the server. Token is probably invalid.",
+      );
+
+      this.close(4444);
+
+      this.emit("error", {
+        msgType: "error",
+        payload: {
+          message: ev.reason,
+          code: String(ev.code),
+        },
+      });
+    }
   }
 
-  private onMessage<K extends SignalingEvent>(ev: MessageEvent) {
-    const msg: SignalingEventMessage<K> = JSON.parse(JSON.parse(ev.data));
-    const { msgType } = msg;
-    this.emit(msgType, msg);
+  private onmessage(ev: MessageEvent) {
+    let raw: unknown;
+
+    try {
+      raw = JSON.parse(ev.data);
+    } catch {
+      console.error("Recieved invalid websocket JSON.");
+      return;
+    }
+
+    const parsed = serverMessageSchema.safeParse(raw);
+
+    if (!parsed.success) {
+      console.error("Recieved websocket message with an invalid shape.. ");
+      console.log("Message recieved .. ", raw);
+
+      return;
+    }
+
+    const message = parsed.data;
+    this.emit(message.msgType, message);
   }
 
   private reconnect(token: string) {
     const lg = this.getLogger("SignalingClient.reconnect");
 
     if (this.attempt > this.maxAttempts) {
-      lg("All attempts to reconnect exhausted. Closing the connection...");
-
-      this.close(1002, "Maximum reconnect attempts reached.");
+      lg("All attempts to reconnect have exhausted. Closing the connection..");
+      this.close(1002, "Maximum reconnect attempts reached..");
 
       this.shouldReconnect = false;
       return;
     }
 
     if (!this.shouldReconnect) {
-      lg("found should reconnect to be false, aborting ...");
-      this.close(1002, "should not reconnect");
+      lg("Found SHOULD_RECONNECT to be false. Aborting..");
+      this.close(1002, "SHOULD_NOT reconnect");
       return;
     }
 
-    const dly =
+    const delay =
       this.attempt === 1
         ? this.delay
         : this.delay * this.attempt +
@@ -83,31 +106,30 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
 
     lg(
       `Attempting to reconnect...
-          \nTrying Attempt (${this.attempt}) after (${dly} ms.)`,
+          \nTrying Attempt (${this.attempt}) after (${delay} ms.)`,
     );
 
-    setTimeout(this.connect.bind(this, token), dly);
+    setTimeout(this.connect.bind(this, token), delay);
     this.attempt += 1;
   }
 
   connect(token: string) {
     const lg = this.getLogger("SignalingClient.connect");
-    lg("\nNew  websocket connection request recieved ...");
+    lg("\nNew  websocket connection request recieved..");
 
     if (this.isConnected) {
       lg(
-        "\nWebsocket connection is already in (connected) or (connecting). Aborting connection creation request. current connection state: " +
-          this.isConnected,
+        "\nWebsocket connection is already in (connected) or (connecting) state. Aborting connection creation request. current connection state: " +
+          this._readyState,
       );
+
       return;
     }
 
-    lg("Connecting WebSocket to " + this.url);
-
     this.ws = new WebSocket(this.url, token);
-    this.ws.onopen = this.onOpen;
-    this.ws.onmessage = this.onMessage;
-    this.ws.onclose = this.onClose.bind(this, token);
+    this.ws.onopen = this.onopen;
+    this.ws.onmessage = this.onmessage;
+    this.ws.onclose = this.onclose.bind(this, token);
   }
 
   get isConnected() {
@@ -118,32 +140,25 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
     return this.ws.readyState <= WebSocket.OPEN;
   }
 
-  get connectionState() {
+  get _readyState() {
     return this.ws?.readyState;
   }
 
-  send<K extends SignalingEvent>(
-    msgType: K,
-    msgData: Omit<SignalingEventMessage, "msgType">,
-  ) {
-    if (!this.ws) {
+  send(message: ClientMessage) {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       return;
     }
 
-    this.ws.send(
-      JSON.stringify({
-        msgType,
-        ...msgData,
-      }),
-    );
+    const validated = clientMessageSchema.parse(message);
+    this.ws.send(JSON.stringify(validated));
   }
 
   close(code: number = 1000, reason?: string) {
     console.log(
-      `"Closing signaling client connection with code ${code} and reason ${reason}"`,
+      `"Closing signaling client connection with code ${code} and reason ${reason}.."`,
     );
 
-    if ((this.connectionState ?? 0) > 1) {
+    if ((this._readyState ?? 0) > 1) {
       return;
     }
 

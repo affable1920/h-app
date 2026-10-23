@@ -6,6 +6,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.strategy_options import _AbstractLoad, joinedload
 
+from app.schemas.pagination import PaginationParams
 from app.schemas.types import Email
 from app.core.exceptions import AlreadyInUseException
 from app.services.entities.main import EntityService
@@ -81,16 +82,19 @@ class PatientService(EntityService[Patient]):
     async def get_appointments(
         cls,
         patient_id: UUID,
-        session: AsyncSession
+        session: AsyncSession,
+        pagination_params: PaginationParams | None = None
     ):
+        loader_opts = [
+            joinedload(Appointment.care_journey),
+            joinedload(Appointment.slot),
+            joinedload(Appointment.clinic)
+        ]
+
         stmt = (
             select(Appointment)
             .where(Appointment.patient_id == patient_id)
-            .options(
-                joinedload(Appointment.care_journey),
-                joinedload(Appointment.slot),
-                joinedload(Appointment.clinic)
-            )
+            .options(*loader_opts)
         )
 
         count = await (
@@ -101,28 +105,8 @@ class PatientService(EntityService[Patient]):
             )
         ) or 0
 
+        if pagination_params:
+            stmt = cls.paginate(stmt, pagination_params)
+
         appointments = (await session.scalars(stmt)).all()
         return count, appointments
-
-    @classmethod
-    async def get_appointment(
-        cls,
-        patient_id: UUID,
-        appointment_id: UUID,
-        session: AsyncSession,
-    ):
-        stmt = (
-            select(Appointment)
-            .where(
-                Appointment.id == appointment_id,
-                Appointment.patient_id == patient_id
-            )
-            .options(
-                joinedload(Appointment.care_journey),
-                joinedload(Appointment.slot),
-                joinedload(Appointment.clinic)
-            )
-        )
-
-        appointment = await session.scalar(stmt)
-        return appointment

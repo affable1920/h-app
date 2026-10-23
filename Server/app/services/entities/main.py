@@ -159,8 +159,8 @@ class EntityService(Generic[T], ABC):
     @classmethod
     async def get_by_id(
         cls,
+        entity_id: UUID,
         session: AsyncSession,
-        entity_id: UUID
     ) -> T | None:
         stmt = (
             select(cls.entity)

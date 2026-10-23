@@ -1,6 +1,5 @@
 import logging
 import secrets
-from typing import Optional
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
@@ -41,19 +40,19 @@ class AuthService:
         session: AsyncSession,
         user_id: UUID,
         role: str
-    ) -> Optional[Doctor | Patient]:
+    ) -> Doctor | Patient | None:
         match role:
             case "doctor":
-                return await DoctorService.get_by_id(
+                return (await DoctorService.get_by_id(
                     session=session,
                     entity_id=user_id
-                )
+                ))
 
             case "patient":
-                return await PatientService.get_by_id(
+                return (await PatientService.get_by_id(
                     session=session,
                     entity_id=user_id
-                )
+                ))
 
             case _:
                 return None

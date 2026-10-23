@@ -3,11 +3,12 @@ from typing import Optional
 from uuid import UUID
 from fastapi import Body, Depends, APIRouter, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.core.exceptions import ConflictError, EntityNotFoundException
 from app.services.AppointmentService import AppointmentService
 from app.services.entities.main import EntityService
-from app.database.models import Doctor
+from app.database.models import Appointment, Clinic, Doctor
 from app.features.auth.dependencies import require_doctor
 from app.schemas.appointment import AppointmentDoctorResponse
 from app.schemas.clinic import DoctorClinicResponse
@@ -129,6 +130,28 @@ async def get_doctor_appointments(
 
 
 @router.get(
+    "/me/appointments/{appointment_id}",
+    response_model=AppointmentDoctorResponse
+)
+async def get_doctor_appointment(
+    appointment_id: UUID,
+    doctor: Doctor = Depends(require_doctor),
+    session: AsyncSession = Depends(get_db),
+):
+    return await AppointmentService.get_for_participant(
+        session=session,
+        appointment_id=appointment_id,
+        participant=doctor,
+        loader_opts=[
+            joinedload(Appointment.patient),
+            joinedload(Appointment.slot),
+            joinedload(Appointment.care_journey),
+            joinedload(Appointment.clinic).selectinload(Clinic.reviews),
+        ],
+    )
+
+
+@router.get(
     "/me/schedules",
     response_model=PaginatedResponse[DoctorScheduleResponse]
 )
@@ -199,29 +222,10 @@ async def cancel_appointment(
     session: AsyncSession = Depends(get_db),
     doctor: Doctor = Depends(require_doctor),
 ):
-    try:
-        await AppointmentService.cancel_doctor_appointment(
-            session,
-            doctor.id,
-            appointment_id
-        )
+    await AppointmentService.cancel_appointment(
+        session=session,
+        appointment_id=appointment_id,
+        participant=doctor,
+    )
 
-        await session.commit()
-
-    except EntityNotFoundException as e:
-        raise HTTPException(
-            404,
-            detail={
-                "code": "not_found",
-                "msg": "The requested doctor could not be found."
-            }
-        ) from e
-
-    except ConflictError as e:
-        raise HTTPException(
-            409,
-            detail={
-                "code": e.code,
-                "msg": e.message
-            }
-        )
+    await session.commit()

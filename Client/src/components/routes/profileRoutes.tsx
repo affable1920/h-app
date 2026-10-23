@@ -2,6 +2,7 @@ import { type RouteObject } from "react-router-dom";
 import { PersonalProfileTab } from "@routes/DrProfile/PersonalProfileTab";
 import { PatientProfile } from "./PatientProfile/PatientProfile";
 import { DrProfile } from "./DrProfile/DrProfile";
+import { AppointmentViewPage } from "../AppointmentViewPage";
 
 export const patientProfileRoute: RouteObject[] = [
   {
@@ -18,13 +19,11 @@ export const patientProfileRoute: RouteObject[] = [
           };
         },
       },
-      {
-        path: "view/:appointmentId",
-        Component() {
-          return <div>{"HI"}</div>;
-        },
-      },
     ],
+  },
+  {
+    path: "appointments/:appointmentId",
+    element: <AppointmentViewPage role="patient" />,
   },
 ];
 
@@ -69,5 +68,9 @@ export const drProfileRoute: RouteObject[] = [
         },
       },
     ],
+  },
+  {
+    path: "appointments/:appointmentId",
+    element: <AppointmentViewPage role="doctor" />,
   },
 ];

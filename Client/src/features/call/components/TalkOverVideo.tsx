@@ -1,5 +1,4 @@
-import { useLoaderData } from "react-router-dom";
-import drImg from "@/assets/doctor.webp";
+import { useParams } from "react-router-dom";
 import {
   type ToggledControlProps,
   ToggledControl,
@@ -19,11 +18,13 @@ import Button from "@/components/lib/button/Button";
 import { IdleView } from "@/features/call/components/IdleView";
 import { useCall } from "@/features/call/core/use-call";
 import Spinner from "@/components/ui/Spinner";
-import type { DoctorHttpMinimal } from "@/types/doctors";
 import { useEffect, useRef } from "react";
+import { useGetDoctor } from "@/hooks/use-doctors";
 
 export function TalkOverVideo() {
-  const doctor = useLoaderData<DoctorHttpMinimal>();
+  const { id: doctorId } = useParams();
+  const { data: doctor } = useGetDoctor(doctorId!);
+
   const { callPeer, callState, ...elements } = useCall();
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -45,6 +46,19 @@ export function TalkOverVideo() {
     [elements.local, elements.remote],
   );
 
+  useEffect(
+    function () {
+      const el = remoteVideoRef.current;
+
+      if (!el) {
+        return;
+      }
+
+      el.muted = elements.isSpeakerMuted;
+    },
+    [elements.isSpeakerMuted],
+  );
+
   const controls: Array<ToggledControlProps> = [
     {
       isToggled: !!elements.isMicMuted,
@@ -58,9 +72,7 @@ export function TalkOverVideo() {
     },
     {
       isToggled: !!elements.isSpeakerMuted,
-      onToggle: function () {
-        elements.toggleSpeaker(remoteVideoRef.current!);
-      },
+      onToggle: elements.toggleSpeaker,
       toggledColor: "secondary",
       unToggledColor: "white",
       toggledIcon: <VolumeOff />,
@@ -80,14 +92,17 @@ export function TalkOverVideo() {
     elements.endCall();
   }
 
+  if (!doctor) {
+    return;
+  }
+
   return (
     <section className="h-screen max-h-[calc(100vh-12rem)] my-12">
       {callState === "idle" || callState === "ringing-incoming" ? (
         <IdleView
-          drImg={drImg}
-          drName={doctor?.name}
+          doctor={doctor}
           startCall={function () {
-            callPeer("790e47de-7d44-407e-834e-2654393c5fba");
+            callPeer();
           }}
         />
       ) : callState === "ringing-outgoing" ? (

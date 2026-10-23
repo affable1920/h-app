@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
-import { CallContext } from "../components/CallProvider";
-import type { CallSessionState } from "../types";
+import { CallContext } from "../core/context";
+import type { CallSessionState } from "../contract/types";
 
 export function useCall() {
   const [isMicMuted, setIsMicMuted] = useState(false);
@@ -40,17 +40,15 @@ export function useCall() {
 
     setIsMicMuted(function (prev) {
       const next = !prev;
-      // mic enabled and mic muted are anonymous
+      // mic enabled and mic muted are opposites
       localAudio.enabled = !next;
       return next;
     });
   }
 
-  function toggleSpeaker(el: HTMLVideoElement) {
+  function toggleSpeaker() {
     setIsSpeakerMuted(function (prev) {
-      const next = !prev;
-      el.muted = next;
-      return next;
+      return !prev;
     });
   }
 
@@ -76,9 +74,12 @@ export function useCall() {
     callSession?.endOngoingCall();
   }
 
-  function callPeer(peerId: string) {
-    console.log("calling peer with id ", peerId);
-    callSession?.sendOutgoing(peerId);
+  async function callPeer() {
+    await callSession?.sendOutgoing();
+  }
+
+  function initiate(peerId: string, appointmentId: string) {
+    callSession?.initiate(peerId, appointmentId);
   }
 
   const publicApi = {
@@ -92,6 +93,7 @@ export function useCall() {
     isSpeakerMuted,
     invertCamera,
     callState,
+    initiate,
     local: callSession?.local,
     remote: callSession?.remote,
   };

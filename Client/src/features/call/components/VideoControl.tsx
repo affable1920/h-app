@@ -23,7 +23,6 @@ export const ToggledControl = memo(function ({
   unToggledIcon,
   unToggledTooltip,
 }: ToggledControlProps) {
-  // This is a helper button component, which acts on a given conditional, to render different icons and tooltips
   return (
     <Button
       variant="icon"

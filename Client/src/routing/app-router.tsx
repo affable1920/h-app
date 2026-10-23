@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import { DoctorDetails } from "../components/routes/DoctorDetails";
-import { loaderDoctor, loaderDoctors } from "./loaders";
+import { loaderAppointment, loaderDoctor } from "./loaders";
 import { CallProvider } from "@/features/call/components/CallProvider";
 import App from "../components/App";
 import Directory from "../components/routes/Directory";
@@ -25,6 +25,7 @@ import {
 import { PageLayout } from "../components/routes/PageLayout";
 import { LayoutRoute } from "../components/LayoutRoute";
 import { Chat } from "../components/routes/Chat";
+import { Consultation } from "@/features/call/components/Consultation";
 
 export const router = createBrowserRouter([
   {
@@ -61,6 +62,15 @@ export const router = createBrowserRouter([
         Component: Layout,
         children: [
           {
+            path: "consultation/:appointmentId",
+            element: (
+              <PageLayout>
+                <Consultation />
+              </PageLayout>
+            ),
+            loader: loaderAppointment,
+          },
+          {
             index: true,
             element: (
               <PageLayout>
@@ -87,7 +97,6 @@ export const router = createBrowserRouter([
                     children: [
                       {
                         index: true,
-                        loader: loaderDoctors,
                         lazy: async function () {
                           const { DoctorsDirectory } =
                             await import("@components/DoctorsDirectory");

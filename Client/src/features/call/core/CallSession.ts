@@ -1,23 +1,21 @@
 import { type ExternalToast, toast } from "sonner";
+import { router } from "@/routing/app-router";
 import { WebRTC } from "./WebRTC";
 import EventEmitter from "./EventEmitter";
-import type { CallSessionEvents, CallSessionState } from "../contract/types";
-import { router } from "@/routing/app-router";
 import type { ServerMessageFor } from "../contract/schema";
+import type { CallSessionEvents, CallSessionState } from "../contract/types";
 
 export default class CallSession extends EventEmitter<CallSessionEvents> {
   private client: WebRTC;
-  #state: CallSessionState = "idle";
 
-  private localStream: MediaStream | null = null;
-  private remoteStream: MediaStream | null = null;
+  #state: CallSessionState = "idle";
+  #localStream: MediaStream | null = null;
+  #remoteStream: MediaStream | null = null;
 
   private appointmentId: string | null = null;
   private readonly localUser: { id: string; token: string };
 
   constructor({ id, token }: { id: string; token: string }) {
-    console.log("Call session instance created .");
-
     super();
     this.localUser = {
       id,
@@ -49,24 +47,24 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
     this.client.off("call-confirmation", this.sendOutgoing);
   }
 
-  get state() {
+  get state(): CallSessionState {
     return this.#state;
   }
 
-  get audio() {
-    return this.localStream?.getAudioTracks()[0];
+  get localAudioTrack(): MediaStreamTrack | null {
+    return this.#localStream?.getAudioTracks()[0] ?? null;
   }
 
-  get video() {
-    return this.localStream?.getVideoTracks()[0];
+  get localVideoTrack(): MediaStreamTrack | null {
+    return this.#localStream?.getVideoTracks()[0] ?? null;
   }
 
-  get local() {
-    return this.localStream;
+  get localStream(): MediaStream | null {
+    return this.#localStream;
   }
 
-  get remote() {
-    return this.remoteStream;
+  get remoteStream(): MediaStream | null {
+    return this.#remoteStream;
   }
 
   #setState(next: CallSessionState) {
@@ -92,26 +90,26 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
 
   private async saveRemoteStream(ev: CustomEvent<MediaStream>) {
     const stream = ev.detail;
-    this.remoteStream = stream;
+    this.#remoteStream = stream;
     this.emit("remote-stream", stream);
     this.#setState("connected");
   }
 
   private closeTracks() {
-    if (this.localStream) {
-      this.localStream.getTracks().forEach(function (track) {
+    if (this.#localStream) {
+      this.#localStream.getTracks().forEach(function (track) {
         track.stop();
       });
 
-      this.localStream = null;
+      this.#localStream = null;
     }
 
-    if (this.remoteStream) {
-      this.remoteStream.getTracks().forEach(function (track) {
+    if (this.#remoteStream) {
+      this.#remoteStream.getTracks().forEach(function (track) {
         track.stop();
       });
 
-      this.remoteStream = null;
+      this.#remoteStream = null;
     }
   }
 
@@ -158,7 +156,7 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
     await this.client.connect(this.localUser.token);
     await this.acquireMedia();
 
-    this.emit("local-stream", this.localStream!);
+    this.emit("local-stream", this.#localStream!);
     await this.client.createAnswer(ev);
   }
 
@@ -176,7 +174,7 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
     });
 
     this.#setState("connecting");
-    this.emit("local-stream", this.localStream!);
+    this.emit("local-stream", this.#localStream!);
   }
 
   onPeerDecline(ev: CustomEvent<ServerMessageFor<"offer-decline">>) {
@@ -200,7 +198,7 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
       video: true,
     });
 
-    this.localStream = stream;
+    this.#localStream = stream;
     this.client.addTracks(stream);
 
     log(

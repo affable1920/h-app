@@ -11,7 +11,7 @@ const config = {
 };
 
 export class WebRTC extends EventEmitter<WebRTCEvents> {
-  private _rtc: RTCPeerConnection | null = null;
+  private peerConnection: RTCPeerConnection | null = null;
 
   private peerId: string | null = null;
   private appointmentId: string | null = null;
@@ -35,22 +35,6 @@ export class WebRTC extends EventEmitter<WebRTCEvents> {
     this.relay(signalingClient, "confirmation", "call-confirmation");
     this.relay(signalingClient, "offline", "peer-offline");
     this.relay(signalingClient, "timeout", "call-timeout");
-  }
-
-  private get rtc() {
-    return this._rtc;
-  }
-
-  private set rtc(val: RTCPeerConnection | null) {
-    this._rtc = val;
-  }
-
-  get isCreated() {
-    if (this.rtc === null) {
-      return false;
-    }
-
-    return true;
   }
 
   private sendToPeer(message: ClientMessageBody) {
@@ -81,7 +65,7 @@ export class WebRTC extends EventEmitter<WebRTCEvents> {
 
   addTracks(stream: MediaStream) {
     function addTrack(this: WebRTC, track: MediaStreamTrack) {
-      this.rtc?.addTrack(track, stream);
+      this.peerConnection?.addTrack(track, stream);
     }
 
     stream.getTracks().forEach(addTrack.bind(this));
@@ -89,7 +73,7 @@ export class WebRTC extends EventEmitter<WebRTCEvents> {
 
   private async flushIceCandidates() {
     for (const candidate of this.iceCandidateBuffer) {
-      await this.rtc?.addIceCandidate(candidate);
+      await this.peerConnection?.addIceCandidate(candidate);
     }
 
     this.iceCandidateBuffer = [];
@@ -98,10 +82,10 @@ export class WebRTC extends EventEmitter<WebRTCEvents> {
   async connect(token: string) {
     await signalingClient.connect(token);
 
-    if (!this.isCreated) {
-      this._rtc = new RTCPeerConnection(config);
-      this._rtc.ontrack = this.onRemoteTrack;
-      this._rtc.onicecandidate = this.onIce;
+    if (this.peerConnection === null) {
+      this.peerConnection = new RTCPeerConnection(config);
+      this.peerConnection.ontrack = this.onRemoteTrack;
+      this.peerConnection.onicecandidate = this.onIce;
     }
   }
 
@@ -131,14 +115,14 @@ export class WebRTC extends EventEmitter<WebRTCEvents> {
   }
 
   async createOffer() {
-    if (!this.rtc) {
+    if (!this.peerConnection) {
       return;
     }
 
     const log = this.getLogger("createOffer");
-    const sdp = await this.rtc.createOffer();
+    const sdp = await this.peerConnection.createOffer();
 
-    await this.rtc.setLocalDescription(sdp);
+    await this.peerConnection.setLocalDescription(sdp);
     this.sendToPeer({
       msgType: "offer",
       payload: sdp,
@@ -155,10 +139,10 @@ export class WebRTC extends EventEmitter<WebRTCEvents> {
     this.peerId = metadata.from;
     this.appointmentId = metadata.appointmentId;
 
-    await this.rtc?.setRemoteDescription(payload);
+    await this.peerConnection?.setRemoteDescription(payload);
 
-    const answer = await this.rtc?.createAnswer();
-    await this.rtc?.setLocalDescription(answer);
+    const answer = await this.peerConnection?.createAnswer();
+    await this.peerConnection?.setLocalDescription(answer);
 
     if (answer) {
       this.sendToPeer({
@@ -174,7 +158,7 @@ export class WebRTC extends EventEmitter<WebRTCEvents> {
     const lg = this.getLogger("WebRTC.onAnswer");
 
     const msg = ev.detail;
-    await this.rtc?.setRemoteDescription(msg.payload);
+    await this.peerConnection?.setRemoteDescription(msg.payload);
 
     lg(
       `Answer recieved, and set as remote description. flushing ice candidates ...`,
@@ -190,10 +174,10 @@ export class WebRTC extends EventEmitter<WebRTCEvents> {
 
     const candidate = ev.detail.payload;
 
-    if (candidate && this.rtc?.remoteDescription?.type) {
+    if (candidate && this.peerConnection?.remoteDescription?.type) {
       lg("answer already set, adding ice-candidates to RTC client..");
 
-      await this.rtc.addIceCandidate(candidate);
+      await this.peerConnection.addIceCandidate(candidate);
     } else if (candidate) {
       lg("answer yet to be recieved, saving candidates to the buffer for now.");
       this.iceCandidateBuffer.push(candidate);
@@ -230,9 +214,9 @@ export class WebRTC extends EventEmitter<WebRTCEvents> {
   }
 
   close() {
-    if (this.rtc) {
-      this.rtc.close();
-      this.rtc = null;
+    if (this.peerConnection) {
+      this.peerConnection.close();
+      this.peerConnection = null;
     }
 
     this.iceCandidateBuffer = [];

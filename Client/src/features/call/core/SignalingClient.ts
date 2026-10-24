@@ -29,7 +29,7 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
 
   private onopen() {
     console.log(
-      "[SignalingClient.onopen] Websockt connection opened sucessfully..",
+      "[SignalingClient.onopen] Websocket connection opened sucessfully..",
     );
 
     this.resetWsVariables();
@@ -42,7 +42,7 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
 
     if (ev.code === 4444) {
       console.error(
-        "[SignalingClient.onclose] Connection closed by the server. Token is probably invalid.",
+        "[SignalingClient.onclose] Connection closed by the server. \nprobable cause: Invalid token.",
       );
 
       this.close(4444);
@@ -132,7 +132,7 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
 
       function onFailure() {
         cleanup();
-        reject();
+        reject(new Error("Signaling client closed before it opened."));
       }
 
       socket.addEventListener("open", onOpen, { once: true });
@@ -160,37 +160,29 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
     return this.waitForOpen(socket);
   }
 
-  get isConnected() {
-    if (!this.ws) {
-      return false;
-    }
-
-    return this.ws.readyState <= WebSocket.OPEN;
-  }
-
-  get _readyState() {
-    return this.ws?.readyState;
-  }
-
   send(message: ClientMessage) {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+    const socket = this.ws;
+
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
       return;
     }
 
     const validated = clientMessageSchema.parse(message);
-    this.ws.send(JSON.stringify(validated));
+    socket.send(JSON.stringify(validated));
   }
 
   close(code: number = 1000, reason?: string) {
-    console.log(
-      `"Closing signaling client connection with code ${code} and reason ${reason}.."`,
-    );
+    const socket = this.ws;
 
-    if ((this._readyState ?? 0) > 1) {
+    if (
+      !socket ||
+      socket.readyState === WebSocket.CLOSED ||
+      socket.readyState === WebSocket.CLOSING
+    ) {
       return;
     }
 
-    this.ws?.close(code, reason);
+    socket.close(code, reason);
   }
 }
 

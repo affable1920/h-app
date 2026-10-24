@@ -39,17 +39,17 @@ export function Consultation() {
     function () {
       const localEl = localVideoRef.current;
 
-      if (localEl && elements.local) {
-        localEl.srcObject = elements.local;
+      if (localEl && elements.localStream) {
+        localEl.srcObject = elements.localStream;
       }
 
       const remoteEl = remoteVideoRef.current;
 
-      if (remoteEl && elements.remote) {
-        remoteEl.srcObject = elements.remote;
+      if (remoteEl && elements.remoteStream) {
+        remoteEl.srcObject = elements.remoteStream;
       }
     },
-    [elements.local, elements.remote],
+    [elements.localStream, elements.remoteStream],
   );
 
   useEffect(

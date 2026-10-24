@@ -32,7 +32,7 @@ export function useCall() {
   );
 
   function toggleMic() {
-    const localAudio = callSession?.audio;
+    const localAudio = callSession?.localAudioTrack;
 
     if (!localAudio) {
       return;
@@ -57,7 +57,7 @@ export function useCall() {
   }
 
   function toggleCam() {
-    const localVideo = callSession?.video;
+    const localVideo = callSession?.localVideoTrack;
 
     if (!localVideo) {
       return;
@@ -94,8 +94,8 @@ export function useCall() {
     invertCamera,
     callState,
     initiate,
-    local: callSession?.local,
-    remote: callSession?.remote,
+    localStream: callSession?.localStream ?? null,
+    remoteStream: callSession?.remoteStream ?? null,
   };
 
   return publicApi;

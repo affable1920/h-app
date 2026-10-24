@@ -36,14 +36,14 @@ export function TalkOverVideo() {
       const rEl = remoteVideoRef.current;
 
       if (el) {
-        el.srcObject = elements.local!;
+        el.srcObject = elements.localStream!;
       }
 
       if (rEl) {
-        rEl.srcObject = elements.remote!;
+        rEl.srcObject = elements.remoteStream!;
       }
     },
-    [elements.local, elements.remote],
+    [elements.localStream, elements.remoteStream],
   );
 
   useEffect(

@@ -155,7 +155,7 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
       replace: true,
     });
 
-    this.client.connect(this.localUser.token);
+    await this.client.connect(this.localUser.token);
     await this.acquireMedia();
 
     this.emit("local-stream", this.localStream!);
@@ -214,11 +214,11 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
     await this.client.start();
   }
 
-  initiate(peerId: string, appointmentId: string) {
+  async initiate(peerId: string, appointmentId: string) {
     this.appointmentId = appointmentId;
     this.client.on("call-confirmation", this.sendOutgoing);
 
-    this.client.connect(this.localUser.token);
+    await this.client.connect(this.localUser.token);
     this.client.initiate(peerId, appointmentId);
   }
 

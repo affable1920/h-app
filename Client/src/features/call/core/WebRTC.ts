@@ -95,15 +95,8 @@ export class WebRTC extends EventEmitter<WebRTCEvents> {
     this.iceCandidateBuffer = [];
   }
 
-  connect(token: string) {
-    if (!signalingClient.isConnected) {
-      console.log(
-        `[WebRTC.connect] SignalingClient not connected! Current state: ${signalingClient._readyState}`,
-        "Connecting to the signaling client.",
-      );
-
-      signalingClient.connect(token);
-    }
+  async connect(token: string) {
+    await signalingClient.connect(token);
 
     if (!this.isCreated) {
       this._rtc = new RTCPeerConnection(config);

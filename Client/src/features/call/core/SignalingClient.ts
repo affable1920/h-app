@@ -106,30 +106,58 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
 
     lg(
       `Attempting to reconnect...
-          \nTrying Attempt (${this.attempt}) after (${delay} ms.)`,
+      \nTrying Attempt (${this.attempt}) after (${delay} ms.)`,
     );
 
     setTimeout(this.connect.bind(this, token), delay);
     this.attempt += 1;
   }
 
-  connect(token: string) {
-    const lg = this.getLogger("SignalingClient.connect");
-    lg("\nNew  websocket connection request recieved..");
-
-    if (this.isConnected) {
-      lg(
-        "\nWebsocket connection is already in (connected) or (connecting) state. Aborting connection creation request. current connection state: " +
-          this._readyState,
-      );
-
-      return;
+  private waitForOpen(socket: WebSocket): Promise<void> {
+    if (socket.readyState === WebSocket.OPEN) {
+      return Promise.resolve();
     }
 
-    this.ws = new WebSocket(this.url, token);
-    this.ws.onopen = this.onopen;
-    this.ws.onmessage = this.onmessage;
-    this.ws.onclose = this.onclose.bind(this, token);
+    return new Promise(function (resolve, reject) {
+      function cleanup() {
+        socket.removeEventListener("open", onOpen);
+        socket.removeEventListener("close", onFailure);
+        socket.removeEventListener("error", onFailure);
+      }
+
+      function onOpen() {
+        cleanup();
+        resolve();
+      }
+
+      function onFailure() {
+        cleanup();
+        reject();
+      }
+
+      socket.addEventListener("open", onOpen, { once: true });
+      socket.addEventListener("close", onFailure, { once: true });
+      socket.addEventListener("error", onFailure, { once: true });
+    });
+  }
+
+  connect(token: string): Promise<void> {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      return Promise.resolve();
+    }
+
+    if (this.ws?.readyState === WebSocket.CONNECTING) {
+      return this.waitForOpen(this.ws);
+    }
+
+    const socket = new WebSocket(this.url, token);
+    this.ws = socket;
+
+    socket.onopen = this.onopen;
+    socket.onmessage = this.onmessage;
+    socket.onclose = this.onclose.bind(this, token);
+
+    return this.waitForOpen(socket);
   }
 
   get isConnected() {

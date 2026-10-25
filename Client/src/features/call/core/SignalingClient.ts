@@ -12,8 +12,10 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
   private ws: WebSocket | null = null;
   private readonly url: string = config.ws_url;
 
+  #reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
   private readonly delay = 1_000;
-  private shouldReconnect = false;
+  private shouldReconnect = true;
 
   private attempt = 1;
   private readonly maxAttempts = 3;
@@ -27,6 +29,15 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
     super();
   }
 
+  private stopReconnecting() {
+    if (this.#reconnectTimer) {
+      clearTimeout(this.#reconnectTimer);
+      this.#reconnectTimer = null;
+    }
+
+    this.shouldReconnect = false;
+  }
+
   private onopen() {
     console.log(
       "[SignalingClient.onopen] Websocket connection opened sucessfully..",
@@ -36,16 +47,13 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
   }
 
   private onclose(token: string, ev: CloseEvent) {
-    if (ev.code === 1006 && !ev.wasClean) {
-      this.reconnect(token);
-    }
-
     if (ev.code === 4444) {
       console.error(
-        "[SignalingClient.onclose] Connection closed by the server. \nprobable cause: Invalid token.",
+        "[SignalingClient.onclose] Connection closed by the server.",
+        "\nProbable cause: [Invalid token].",
       );
 
-      this.close(4444);
+      this.stopReconnecting();
 
       this.emit("error", {
         msgType: "error",
@@ -54,6 +62,12 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
           code: String(ev.code),
         },
       });
+
+      return;
+    }
+
+    if (ev.code === 1006 && !ev.wasClean) {
+      this.reconnect(token);
     }
   }
 
@@ -81,19 +95,19 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
   }
 
   private reconnect(token: string) {
-    const lg = this.getLogger("SignalingClient.reconnect");
+    const logger = this.getLogger("SignalingClient.reconnect");
 
     if (this.attempt > this.maxAttempts) {
-      lg("All attempts to reconnect have exhausted. Closing the connection..");
-      this.close(1002, "Maximum reconnect attempts reached..");
+      logger("All attempts to reconnect have exhausted..");
 
-      this.shouldReconnect = false;
+      this.stopReconnecting();
       return;
     }
 
     if (!this.shouldReconnect) {
-      lg("Found SHOULD_RECONNECT to be false. Aborting..");
-      this.close(1002, "SHOULD_NOT reconnect");
+      logger("Found SHOULD_RECONNECT to be false. Aborting..");
+
+      this.stopReconnecting();
       return;
     }
 
@@ -104,12 +118,21 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
           this.delay * this.attempt +
           (this.delay * this.attempt) / 2;
 
-    lg(
+    logger(
       `Attempting to reconnect...
       \nTrying Attempt (${this.attempt}) after (${delay} ms.)`,
     );
 
-    setTimeout(this.connect.bind(this, token), delay);
+    this.#reconnectTimer = setTimeout(
+      function (this: SignalingClient) {
+        this.#reconnectTimer = null;
+        void this.connect(token).catch(function (err) {
+          console.error(`Reconnect attempt failed: ${err}`);
+        });
+      }.bind(this),
+      delay,
+    );
+
     this.attempt += 1;
   }
 
@@ -164,6 +187,7 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
     const socket = this.ws;
 
     if (!socket || socket.readyState !== WebSocket.OPEN) {
+      console.log("Websocket not OPEN. Cannot send a message to the server..");
       return;
     }
 
@@ -171,14 +195,11 @@ class SignalingClient extends EventEmitter<SignalingClientEvents> {
     socket.send(JSON.stringify(validated));
   }
 
-  close(code: number = 1000, reason?: string) {
+  close(code = 1000, reason?: string) {
+    this.stopReconnecting();
     const socket = this.ws;
 
-    if (
-      !socket ||
-      socket.readyState === WebSocket.CLOSED ||
-      socket.readyState === WebSocket.CLOSING
-    ) {
+    if (!socket || socket.readyState >= WebSocket.CLOSING) {
       return;
     }
 

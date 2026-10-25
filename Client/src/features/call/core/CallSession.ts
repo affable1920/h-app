@@ -36,6 +36,7 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
     this.client.on("answer", this.onPeerAccept);
     this.client.on("offer-decline", this.onPeerDecline);
     this.client.on("call-timeout", this.onOutgoingTimeout);
+    this.client.on("peer-offline", this.onPeerOffline);
   }
 
   private stoplisteningForPerCallEvents() {
@@ -45,6 +46,19 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
     this.client.off("offer-decline", this.onPeerDecline);
     this.client.off("call-timeout", this.onOutgoingTimeout);
     this.client.off("call-confirmation", this.sendOutgoing);
+    this.client.off("peer-offline", this.onPeerOffline);
+  }
+
+  private onPeerOffline(ev: CustomEvent<ServerMessageFor<"offline">>) {
+    this.resetFailedCallSetup();
+    this.notify("Remote peer offline.", {
+      description: ev.detail.payload.message,
+    });
+  }
+
+  private handleCallSetupFailure() {
+    this.resetFailedCallSetup();
+    this.notify("Could not establish a real-time connection.");
   }
 
   get state(): CallSessionState {
@@ -121,7 +135,7 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
     this.appointmentId = null;
     this.#setState("idle");
 
-    this.notify("Request timed out.", {
+    this.notify("Request timed out ..", {
       description: message,
       duration: 5_000,
     });
@@ -153,7 +167,15 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
       replace: true,
     });
 
-    await this.client.connect(this.localUser.token);
+    try {
+      await this.client.connect(this.localUser.token);
+    } catch (ex) {
+      console.log(ex);
+
+      this.handleCallSetupFailure();
+      return;
+    }
+
     await this.acquireMedia();
 
     this.emit("local-stream", this.#localStream!);
@@ -216,8 +238,14 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
     this.appointmentId = appointmentId;
     this.client.on("call-confirmation", this.sendOutgoing);
 
-    await this.client.connect(this.localUser.token);
-    this.client.initiate(peerId, appointmentId);
+    try {
+      await this.client.connect(this.localUser.token);
+      this.client.initiate(peerId, appointmentId);
+    } catch (ex) {
+      console.log(ex);
+
+      this.handleCallSetupFailure();
+    }
   }
 
   onPeerHangup() {
@@ -234,5 +262,13 @@ export default class CallSession extends EventEmitter<CallSessionEvents> {
 
     this.#setState("idle");
     this.notify("Call ended.");
+  }
+
+  private resetFailedCallSetup() {
+    this.appointmentId = null;
+    this.closeTracks();
+
+    this.client.close();
+    this.#setState("idle");
   }
 }

@@ -19,10 +19,11 @@ export function CallProvider({ children }: { children: ReactNode }) {
         console.log(
           "Not authenticated, not creating the Call Session instance",
         );
+
         return;
       }
 
-      function listener(ev: CustomEvent) {
+      function onError(ev: CustomEvent) {
         const { code, message } = ev.detail.payload;
 
         if (code === "4444") {
@@ -32,20 +33,23 @@ export function CallProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        toast.error((code ?? "ERROR").toUpperCase(), {
+        toast.error((code ?? "error").toUpperCase(), {
           description: message,
         });
       }
 
-      signalingClient.connect(token);
-      signalingClient.on("error", listener);
+      void signalingClient.connect(token).catch(function (err) {
+        console.error(`Background signaling connect failed: ${err}`);
+      });
+
+      signalingClient.on("error", onError);
 
       const frame = requestAnimationFrame(function () {
         setSession(new CallSession({ id: user.id, token }));
       });
 
       return function () {
-        signalingClient.off("error", listener);
+        signalingClient.off("error", onError);
         cancelAnimationFrame(frame);
       };
     },

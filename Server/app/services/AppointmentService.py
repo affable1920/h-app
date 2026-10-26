@@ -8,7 +8,7 @@ from sqlalchemy.orm.strategy_options import _AbstractLoad
 
 from app.schemas.enums import AppointmentStatus
 from app.core.exceptions import ConflictError, EntityNotFoundException
-from app.database.models import Appointment, Doctor, Patient
+from app.database.models import Appointment, Clinic, Doctor, Patient
 
 
 class AppointmentService:
@@ -129,3 +129,34 @@ class AppointmentService:
         appointment.status = AppointmentStatus.CANCELLED
 
         session.add(appointment)
+
+    @staticmethod
+    async def complete_appointment(
+        appointment_id: UUID,
+        session: AsyncSession,
+        participant: Doctor
+    ) -> Appointment:
+        appointment = (
+            await AppointmentService.get_for_participant(
+                session=session,
+                appointment_id=appointment_id,
+                participant=participant,
+                loader_opts=[
+                    joinedload(Appointment.patient),
+                    joinedload(Appointment.slot),
+                    joinedload(Appointment.care_journey),
+                    joinedload(Appointment.clinic).selectinload(Clinic.reviews)
+                ]
+            )
+        )
+
+        if (
+            appointment.status
+            is not AppointmentStatus.ACTIVE
+        ):
+            raise ConflictError(
+                "The appointment is not in a valid state to be marked as complete."
+            )
+
+        appointment.status = AppointmentStatus.COMPLETED
+        return appointment

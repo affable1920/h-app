@@ -5,7 +5,6 @@ from fastapi import Body, Depends, APIRouter, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from app.core.exceptions import ConflictError, EntityNotFoundException
 from app.services.AppointmentService import AppointmentService
 from app.services.entities.main import EntityService
 from app.database.models import Appointment, Clinic, Doctor
@@ -229,3 +228,22 @@ async def cancel_appointment(
     )
 
     await session.commit()
+
+
+@router.post(
+    "/me/appointments/{appointment_id}/complete",
+    response_model=AppointmentDoctorResponse
+)
+async def complete_appointment(
+    appointment_id: UUID,
+    session: AsyncSession = Depends(get_db),
+    doctor: Doctor = Depends(require_doctor),
+):
+    appointment = await AppointmentService.complete_appointment(
+        appointment_id=appointment_id,
+        session=session,
+        participant=doctor
+    )
+
+    await session.commit()
+    return appointment

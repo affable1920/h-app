@@ -1,19 +1,41 @@
-import { fromISO } from "@/domain/scheduling/utils";
 import { Ban, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getClassConfig } from "./lib/button/styles";
 import Button from "./lib/button/Button";
 import Badge from "./ui/Badge";
 import Card from "./ui/Card";
-import { Stack } from "./ui/Stack";
 import type { APIError } from "@/types/http";
 import useModalStore from "@/stores/modal-store";
 import { useCancelAppointment } from "@/hooks/use-doctors";
 import { toast } from "sonner";
 import type { components } from "@/types/api";
+import type { AppointmentStatus } from "@/types/appointment";
+import { cn } from "@/utils/utils";
 
 export type AppointmentDoctorResponse =
   components["schemas"]["AppointmentDoctorResponse"];
+
+const statusPresentation: Record<
+  AppointmentStatus,
+  { label: string; classes: string }
+> = {
+  active: {
+    label: "Active",
+    classes: "border-indicator/25 bg-indicator/10 text-indicator",
+  },
+  completed: {
+    label: "Completed",
+    classes: "border-emerald-300/25 bg-emerald-300/10 text-emerald-300",
+  },
+  cancelled: {
+    label: "Cancelled",
+    classes: "bg-layout-raised",
+  },
+  missed: {
+    label: "Missed",
+    classes: "border-amber-300/25 bg-amber-300/10 text-amber-300",
+  },
+};
 
 export function DrAppointmentCard({
   appointment,
@@ -61,35 +83,29 @@ export function DrAppointmentCard({
   return (
     <Card className="border-border flex flex-col gap-3">
       <Card.Header className="flex items-start justify-between">
-        <Stack orientation="V">
-          <Card.Title className="text-base">
-            {appointment.patient?.name ?? appointment.patient?.username}
-          </Card.Title>
-        </Stack>
+        <Card.Title className="text-base">
+          {appointment.patient?.name ?? appointment.patient?.username}
+        </Card.Title>
 
-        <Stack align="center">
-          <span className="m-0 inline-flex text-sm font-semibold">
-            {fromISO(appointment.scheduledDate).toFormat("dd LLL yyyy")}
-          </span>
-
-          <Badge
-            size="xs"
-            as="span"
-            className="font-black"
-            color={appointment.status === "active" ? "indicator" : "secondary"}
-          >
-            {appointment.status}
-          </Badge>
-        </Stack>
+        <Badge
+          size="xs"
+          as="span"
+          className={cn(
+            "font-black px-2",
+            statusPresentation[appointment.status].classes,
+          )}
+          color={appointment.status === "active" ? "indicator" : "secondary"}
+        >
+          {appointment.status}
+        </Badge>
       </Card.Header>
 
       <Card.Footer className="flex items-center justify-end gap-2">
         {appointment.status === "active" && (
           <Button
-            className="opacity-70 hover:opacity-100 transition-opacity duration-150 
-            text-text-secondary hover:text-red-700"
             size="xs"
             data-tooltip="cancel"
+            aria-label={`Cancel appointment with ${appointment.patient.name ?? appointment.patient.username ?? "patient"}`}
             onClick={handleCancellation}
           >
             Cancel <Ban />
@@ -98,7 +114,7 @@ export function DrAppointmentCard({
 
         <Link
           to={`/app/workspace/doctor/appointments/${appointment.id}`}
-          className={getClassConfig({ size: "xs", color: "brand" })}
+          className={getClassConfig({ size: "xs", color: "white" })}
           aria-label={`View appointment with ${appointment.patient.name ?? appointment.patient.username ?? "patient"}`}
         >
           View <Eye aria-hidden="true" />

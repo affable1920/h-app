@@ -32,6 +32,10 @@ import type { components } from "@/types/api";
 import type { Role } from "@/types/user";
 import { fromISO } from "@/domain/scheduling/utils";
 import { useCall } from "@/features/call/core/use-call";
+import { useAppointmentCompletion } from "@/features/appointments/api/mutations";
+import type { APIError } from "@/types/http";
+import { toast } from "sonner";
+import useModalStore from "@/stores/modal-store";
 
 type AppointmentStatus = components["schemas"]["AppointmentStatus"];
 
@@ -132,13 +136,19 @@ export function AppointmentViewPage({ role }: { role: Role }) {
           )}
         </section>
       ) : (
-        <AppointmentOverview detail={data} />
+        <AppointmentOverview detail={data} participantId={participantId} />
       )}
     </PageLayout>
   );
 }
 
-function AppointmentOverview({ detail }: { detail: AppointmentDetail }) {
+function AppointmentOverview({
+  detail,
+  participantId,
+}: {
+  detail: AppointmentDetail;
+  participantId?: string;
+}) {
   const { appointment, role } = detail;
 
   const scheduled = fromISO(appointment.scheduledDate).toLocal();
@@ -172,6 +182,46 @@ function AppointmentOverview({ detail }: { detail: AppointmentDetail }) {
   const elements = useCall();
   const peerId = doctor ? doctor.id : patient ? patient.id : null;
 
+  const { mutateAsync: markComplete, isPending } = useAppointmentCompletion();
+
+  const openModal = useModalStore((s) => s.openModal);
+
+  async function markAsComplete() {
+    if (!participantId) {
+      return;
+    }
+
+    try {
+      await new Promise<void>(function (resolve, reject) {
+        openModal("confirmation-modal", {
+          tagline: "Did this consultation take place ?",
+          onResolve() {
+            resolve();
+          },
+          onReject() {
+            reject();
+          },
+        });
+      });
+    } catch {
+      return;
+    }
+
+    try {
+      await markComplete({
+        appointmentId: appointment.id,
+        doctorId: participantId,
+      });
+
+      toast.success("Appointment marked as complete successfully!");
+    } catch (ex) {
+      const error = ex as APIError;
+      toast.error(error.code, {
+        description: error.message,
+      });
+    }
+  }
+
   return (
     <article aria-labelledby="appointment-title" className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
@@ -183,28 +233,42 @@ function AppointmentOverview({ detail }: { detail: AppointmentDetail }) {
           >
             Appointment overview
           </h1>
-          <p className="mt-0.5 text-base leading-relaxed text-text-secondary">
+          <p className="mt-1 text-base leading-relaxed text-text-secondary">
             {role === "doctor"
               ? "A little context before you meet your patient."
               : "Your visit, with all the details in one place."}
           </p>
         </div>
-        <span
-          className={cn(
-            "inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold",
-            status.classes,
+        <div className={cn("flex flex-col gap-2")}>
+          <span
+            className={cn(
+              "inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold",
+              status.classes,
+            )}
+          >
+            {appointment.status === "completed" ? (
+              <Check size={14} aria-hidden="true" />
+            ) : (
+              <span
+                aria-hidden="true"
+                className="size-1.5 rounded-full bg-current"
+              />
+            )}
+            {status.label}
+          </span>
+          {appointment.status === "active" && detail.role === "doctor" && (
+            <Button
+              onClick={function () {
+                markAsComplete();
+              }}
+              color="indicator"
+              loading={isPending}
+              size="xs"
+            >
+              Mark complete
+            </Button>
           )}
-        >
-          {appointment.status === "completed" ? (
-            <Check size={14} aria-hidden="true" />
-          ) : (
-            <span
-              aria-hidden="true"
-              className="size-1.5 rounded-full bg-current"
-            />
-          )}
-          {status.label}
-        </span>
+        </div>
       </header>
 
       <section

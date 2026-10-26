@@ -53,10 +53,10 @@ function Confirmation({
       {children && <div className="min-w-0 flex-1">{children}</div>}
 
       <div className="flex items-center justify-between">
-        <Button onClick={handleReject}>
+        <Button color="secondary" size="xs" onClick={handleReject}>
           Decline <X strokeWidth={4} />
         </Button>
-        <Button onClick={handleResolve} color="white">
+        <Button size="xs" onClick={handleResolve} color="white">
           Accept <ChevronRight strokeWidth={4} />
         </Button>
       </div>

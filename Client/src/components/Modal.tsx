@@ -108,7 +108,7 @@ function Modal() {
           >
             {ModalElement.title && (
               <header id="modal-title" className="text-center my-2 mt-4">
-                <h2 className="text-[13px] font-bold text-text-normal/80 uppercase">
+                <h2 className="text-[13px] font-bold text-stone-300 opacity-85 uppercase">
                   {ModalElement.title}
                 </h2>
               </header>

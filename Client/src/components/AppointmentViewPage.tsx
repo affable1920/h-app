@@ -82,7 +82,7 @@ export function AppointmentViewPage({ role }: { role: Role }) {
 
   return (
     <PageLayout className="max-w-7xl pb-16">
-      <nav aria-label="Appointment navigation" className="mb-8">
+      <nav aria-label="Appointment navigation" className="mb-6">
         <Link
           to={backTo}
           className={cn(
@@ -182,9 +182,8 @@ function AppointmentOverview({
   const elements = useCall();
   const peerId = doctor ? doctor.id : patient ? patient.id : null;
 
-  const { mutateAsync: markComplete, isPending } = useAppointmentCompletion();
-
   const openModal = useModalStore((s) => s.openModal);
+  const { mutateAsync: markComplete, isPending } = useAppointmentCompletion();
 
   async function markAsComplete() {
     if (!participantId) {
@@ -224,7 +223,7 @@ function AppointmentOverview({
 
   return (
     <article aria-labelledby="appointment-title" className="space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
+      <header className="flex flex-wrap items-baseline justify-between gap-4">
         <div>
           <h1
             id="appointment-title"
@@ -256,11 +255,9 @@ function AppointmentOverview({
             )}
             {status.label}
           </span>
-          {appointment.status === "active" && detail.role === "doctor" && (
+          {role === "doctor" && appointment.status === "active" && (
             <Button
-              onClick={function () {
-                markAsComplete();
-              }}
+              onClick={markAsComplete}
               color="indicator"
               loading={isPending}
               size="xs"
@@ -325,8 +322,8 @@ function AppointmentOverview({
           </div>
         </div>
         <dl
-          className="relative grid divide-white/10 border-t border-white/10 bg-background/10 
-        grid-cols-3 divide-x"
+          className="relative grid grid-cols-3 border-t border-white/10 bg-background/10 
+        divide-x divide-white/10"
         >
           <OverviewFact
             icon={Clock3}
@@ -358,67 +355,70 @@ function AppointmentOverview({
             >
               {role === "patient" ? (
                 <Stethoscope
-                  size={14}
+                  size={13}
                   className="text-violet-300"
                   aria-hidden="true"
                 />
               ) : (
                 <UserRound
-                  size={14}
+                  size={13}
                   className="text-violet-300"
                   aria-hidden="true"
                 />
               )}
               {role === "patient" ? "Your doctor" : "Your patient"}
             </h2>
-            <div className="flex items-center gap-4">
-              <span
-                aria-hidden="true"
-                className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-brand/20 bg-brand/10 text-xl font-bold text-violet-200"
-              >
-                {initial}
-              </span>
-              <div className="min-w-0">
-                <h3 className="break-words text-[17px] tracking-[0.05em] capitalize">
-                  {name}
-                </h3>
-                <p className="mt-1 break-words text-sm text-text-secondary">
-                  {doctor ? (
-                    doctor.primarySpecialization
-                  ) : (
-                    <a
-                      href={`mailto:/${patient?.email}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 hover:underline underline-offset-4"
-                    >
-                      <Mail size={10} />
-                      {patient?.email}
-                    </a>
-                  )}
-                </p>
-              </div>
-
-              {appointment.status === "active" && (
-                <Button
-                  size="xs"
-                  bg
-                  variant="icon"
-                  color="secondary"
-                  data-tooltip="consult right now"
-                  className="justify-self-end"
-                  onClick={function () {
-                    if (!peerId) {
-                      return;
-                    }
-
-                    elements.initiate(peerId, appointment.id);
-                  }}
+            <article className="flex items-end justify-between border-b border-border-strong pb-5">
+              <div className="flex items-end gap-4">
+                <span
+                  aria-hidden="true"
+                  className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-brand/20 bg-brand/10 text-xl font-bold text-violet-200"
                 >
-                  <Phone />
-                </Button>
-              )}
-            </div>
+                  {initial}
+                </span>
+                <div className="min-w-0">
+                  <h3 className="break-words text-[17px] tracking-[0.05em] capitalize">
+                    {name}
+                  </h3>
+                  <p className="mt-1 break-words text-sm text-text-secondary">
+                    {doctor ? (
+                      doctor.primarySpecialization
+                    ) : (
+                      <a
+                        href={`mailto:/${patient?.email}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 hover:underline underline-offset-4"
+                      >
+                        <Mail size={10} />
+                        {patient?.email}
+                      </a>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <article className="flex items-end justify-end">
+                {appointment.status !== "active" && (
+                  <Button
+                    size="xs"
+                    bg={true}
+                    color="secondary"
+                    variant="icon"
+                    data-tooltip="consult right now"
+                    className="justify-self-end"
+                    onClick={function () {
+                      if (!peerId) {
+                        return;
+                      }
+
+                      elements.initiate(peerId, appointment.id);
+                    }}
+                  >
+                    <Phone />
+                  </Button>
+                )}
+              </article>
+            </article>
             {doctor && (
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border-strong pt-4 text-sm">
                 <span className="text-text-secondary">
@@ -444,7 +444,7 @@ function AppointmentOverview({
           >
             <div className="mb-5 flex items-center gap-2">
               <FileText
-                size={14}
+                size={13}
                 className="text-violet-300"
                 aria-hidden="true"
               />
@@ -485,7 +485,7 @@ function AppointmentOverview({
               className="mb-5 flex items-center gap-2 text-[14px]"
             >
               <Hospital
-                size={14}
+                size={13}
                 className="text-violet-300"
                 aria-hidden="true"
               />
@@ -505,18 +505,15 @@ function AppointmentOverview({
               <span>{appointment.clinic.location}</span>
               <MapPinCheckIcon size={12} />
             </Link>
-            {mode === "online" && (
-              <p className="mt-4 border-t border-border-strong pt-4 text-base leading-relaxed text-text-secondary">
+
+            <p className="mt-4 border-t border-border-strong pt-4 text-base text-text-secondary">
+              {mode === "online"
+                ? `
                 This slot is online. The clinic is listed as the appointment's
-                associated location.
-              </p>
-            )}
-            {mode === "hybrid" && (
-              <p className="mt-4 border-t border-border-strong pt-4 text-base text-text-secondary">
-                This slot supports online and in-person visits. A specific
-                format is not recorded on this appointment.
-              </p>
-            )}
+                associated location.`
+                : ` This slot supports online and in-person visits. A specific
+                format is not recorded on this appointment.`}
+            </p>
           </section>
 
           <section
@@ -540,7 +537,7 @@ function AppointmentOverview({
       </div>
 
       <footer className="flex flex-col gap-2 border-t border-border-strong pt-3 text-sm leading-relaxed text-text-secondary sm:flex-row sm:items-start sm:justify-between">
-        <p className="flex items-center gap-2 mx-auto font-semibold opacity-65 select-none">
+        <p className="flex items-center gap-2 mx-auto font-semibold opacity-65 select-none leading-[1.24]">
           <CalendarDays size={12} aria-hidden="true" />
           {status.description}
         </p>

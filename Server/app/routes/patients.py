@@ -45,7 +45,7 @@ async def get_patient_appointments(
         session=session
     )
 
-    return PatientService.create_pg_response(
+    return PatientService.create_paginated_response(
         objs=objs,
         count=count,
         pagination=pagination_params

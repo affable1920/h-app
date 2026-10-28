@@ -32,7 +32,7 @@ async def get_clinics(
         filters=filter_params
     )
 
-    response = ClinicService.create_pg_response(
+    response = ClinicService.create_paginated_response(
         objs=objs,
         count=count,
         pagination=pagination_params

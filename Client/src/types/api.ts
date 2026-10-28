@@ -303,8 +303,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Mark Appointment Complete */
-        post: operations["mark_complete"];
+        /** Complete Appointment */
+        post: operations["complete_appointment"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1036,55 +1036,55 @@ export interface components {
         PaginatedResponse_AppointmentDoctorResponse_: {
             /** Entities */
             entities: components["schemas"]["AppointmentDoctorResponse"][];
-            /** Count */
-            count: number;
             /** Hasnext */
             hasNext?: boolean | null;
+            /** Count */
+            readonly count: number;
         };
         /** PaginatedResponse[AppointmentPatientResponse] */
         PaginatedResponse_AppointmentPatientResponse_: {
             /** Entities */
             entities: components["schemas"]["AppointmentPatientResponse"][];
-            /** Count */
-            count: number;
             /** Hasnext */
             hasNext?: boolean | null;
+            /** Count */
+            readonly count: number;
         };
         /** PaginatedResponse[ClinicHttpMinimal] */
         PaginatedResponse_ClinicHttpMinimal_: {
             /** Entities */
             entities: components["schemas"]["ClinicHttpMinimal"][];
-            /** Count */
-            count: number;
             /** Hasnext */
             hasNext?: boolean | null;
+            /** Count */
+            readonly count: number;
         };
         /** PaginatedResponse[DoctorClinicResponse] */
         PaginatedResponse_DoctorClinicResponse_: {
             /** Entities */
             entities: components["schemas"]["DoctorClinicResponse"][];
-            /** Count */
-            count: number;
             /** Hasnext */
             hasNext?: boolean | null;
+            /** Count */
+            readonly count: number;
         };
         /** PaginatedResponse[DoctorHttpMinimal] */
         PaginatedResponse_DoctorHttpMinimal_: {
             /** Entities */
             entities: components["schemas"]["DoctorHttpMinimal"][];
-            /** Count */
-            count: number;
             /** Hasnext */
             hasNext?: boolean | null;
+            /** Count */
+            readonly count: number;
         };
         /** PaginatedResponse[DoctorScheduleResponse] */
         PaginatedResponse_DoctorScheduleResponse_: {
             /** Entities */
             entities: components["schemas"]["DoctorScheduleResponse"][];
-            /** Count */
-            count: number;
             /** Hasnext */
             hasNext?: boolean | null;
+            /** Count */
+            readonly count: number;
         };
         /** PatientCreate */
         PatientCreate: {
@@ -1556,7 +1556,7 @@ export interface operations {
                 fee?: number | null;
                 gender?: components["schemas"]["Gender"] | null;
                 page?: number;
-                max?: number;
+                pageSize?: number;
                 sortColumn?: string | null;
                 sortOrder?: components["schemas"]["SortOrder"];
             };
@@ -1656,7 +1656,7 @@ export interface operations {
         parameters: {
             query?: {
                 page?: number;
-                max?: number;
+                pageSize?: number;
             };
             header?: never;
             path?: never;
@@ -1750,7 +1750,7 @@ export interface operations {
         parameters: {
             query?: {
                 page?: number;
-                max?: number;
+                pageSize?: number;
             };
             header?: never;
             path?: never;
@@ -1782,7 +1782,7 @@ export interface operations {
         parameters: {
             query?: {
                 page?: number;
-                max?: number;
+                pageSize?: number;
             };
             header?: never;
             path?: never;
@@ -1841,7 +1841,7 @@ export interface operations {
             };
         };
     };
-    mark_complete: {
+    complete_appointment: {
         parameters: {
             query?: never;
             header?: never;
@@ -1940,7 +1940,7 @@ export interface operations {
         parameters: {
             query?: {
                 page?: number;
-                max?: number;
+                pageSize?: number;
                 searchQuery?: string | null;
                 minRating?: number | null;
                 maxDistance?: number | null;
@@ -2211,7 +2211,7 @@ export interface operations {
         parameters: {
             query?: {
                 page?: number;
-                max?: number;
+                pageSize?: number;
             };
             header?: never;
             path?: never;

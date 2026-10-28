@@ -52,7 +52,7 @@ async def get_doctors(
         sort=sort
     )
 
-    response = DoctorService.create_pg_response(
+    response = DoctorService.create_paginated_response(
         objs=objects,
         count=count,
         pagination=pagination_params
@@ -121,7 +121,7 @@ async def get_doctor_appointments(
         pagination_params=pagination_params
     )
 
-    return EntityService.create_pg_response(
+    return EntityService.create_paginated_response(
         objs=objs,
         count=count,
         pagination=pagination_params
@@ -165,7 +165,7 @@ async def get_doctor_schedules(
         pagination_params=pagination_params
     )
 
-    return EntityService.create_pg_response(
+    return EntityService.create_paginated_response(
         objs,
         count,
         pagination_params
@@ -187,7 +187,7 @@ async def get_doctor_clinics(
         pagination_params=pagination_params
     )
 
-    return EntityService.create_pg_response(
+    return EntityService.create_paginated_response(
         objs=objs,
         count=count,
         pagination=pagination_params

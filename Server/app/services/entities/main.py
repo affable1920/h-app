@@ -98,23 +98,22 @@ class EntityService(Generic[T], ABC):
     @classmethod
     def paginate(cls, stmt: Select, pagination: PaginationParams) -> Select:
         """ Concrete method - pagination logic is truly generic """
-        stmt = stmt.offset(pagination.offset).limit(pagination.max)
+        stmt = stmt.offset(pagination.offset).limit(pagination.page_size)
         return stmt
 
     #
 
     @staticmethod
-    def create_pg_response(
+    def create_paginated_response(
         objs: Sequence[T | Any],
         count: int,
         pagination: PaginationParams
     ) -> PaginatedResponse:
-        last_page = math.ceil(count / pagination.max)
+        last_page = math.ceil(count / pagination.page_size)
         has_next = pagination.page < last_page
 
         return PaginatedResponse(
             entities=objs,
-            count=count,
             has_next=has_next,
         )
 

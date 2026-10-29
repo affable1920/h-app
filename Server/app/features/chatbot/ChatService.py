@@ -33,6 +33,8 @@ class Assistant:
     MAX_HISTORY_TOKENS - context window length - ensures fair usage
     """
 
+    doctor_adapter = DoctorToolAdapter()
+
     MODEL = "llama-3.3-70b-versatile"
     # 1/4 of the total context window length of the model - 3000 TPM for llama-3.3-70b
     MAX_HISTORY_TOKENS = 7500
@@ -42,7 +44,11 @@ class Assistant:
     )
     history: dict[str, list] = {}
 
-    def __init__(self, user_id: str, session: AsyncSession):
+    def __init__(
+            self,
+            user_id: str,
+            session: AsyncSession
+    ):
         """
         user_id - Different groq http client for different users
         session - sql_alchemy session object
@@ -59,7 +65,10 @@ class Assistant:
         usr_history = cls.history.get(user_id, [])
         response = [
             chat for chat in usr_history
-            if not chat.get("role") == Role.TOOL and not chat.get("tool_calls")
+            if (
+                not chat.get("role") == Role.TOOL
+                and not chat.get("tool_calls")
+            )
         ]
 
         logger.info(f"User history \n{response}")
@@ -94,14 +103,14 @@ class Assistant:
     #
 
     def get_tools(self) -> dict[str, dict]:
-        adapter = DoctorToolAdapter(session=self._session)
+        adapter = DoctorToolAdapter()
 
         registry = {
             "find_drs_many": {
-                "function": adapter.find_drs_many
+                "function": adapter.find_doctors
             },
             "get_drprofile_single": {
-                "function": adapter.get_drprofile_single
+                "function": adapter.get_drprofile
             }
         }
 
@@ -331,5 +340,6 @@ class Assistant:
                 logger.info("\nStreaming finished successfully ...")
                 yield json.dumps({"type": "done"}) + "\n"
 
-                # return inside a generator function raises StopIteration, which we want at this point
+                # return inside a generator function raises StopIteration,
+                # which we want at this point
                 return

@@ -1,74 +1,33 @@
 import logging
 from uuid import UUID
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.exceptions import EntityNotFoundException
+from app.schemas.doctor import DoctorHttpFull
 from app.database.models import Doctor
 from app.schemas.for_tool_calls import DrMinimal
 from app.schemas.enums import Gender
 from app.schemas.pagination import DrRouteFilters
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.DrService import DoctorService
 
 logger = logging.getLogger(__name__)
 
-"""
-#TO IMPLEMENT TOOLS
-Doctors:    find_doctors        
-            get_doctor_profile  
-
-Clinics:    find_clinics
-            get_clinic_details
-
-Appointments: book_appointment
-              get_my_appointments
-              cancel_appointment
-"""
-
 
 class DoctorToolAdapter:
-    """
-    The adapter/middleware class bridging the gap between user queries and the service layer utilities
-    that get the work done on a user query.
-
-    Each tool should be thought of as a capability, rather than a scenario.
-    This distinctional thought pattern is what will save us from having to create a tool
-    for every individual use case - which really makes it hard for the model to choose a tool
-    given it now has a lot of choices, rather than a few.
-
-    --
-    A tool should represnt a capability like search, read, write, so instead of having tools like
-    find_doctors_by_speciality, ___location, ___etc...,
-    we can have a single tool find_doctors with optional parameters
-
-    We are going to map tools to domain boundaries and operations on entities
-    so, booking an appointment is a single operation, even though it can have multiple steps.
-
-    This saves us from creating 50 tools, instead we only create 5.
-
-    - Also worth mentioning:
-    Too many tools = model confusion (has to pick between many similar options)
-    Each tool definition costs tokens in every request
-
-    example - the find_doctors method on our tool class:
-    One function handles:
-
-    "find me a cardiologist" → specialization="cardiology"
-    "find an experienced surgeon" → specialization="surgery", experience=10
-    "find a cheap doctor" → fee=500
-    "find an available female doctor" → gender="female", currently_available=True
-    """
-
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
-    #
-
     @staticmethod
-    def to_schema(dtr: Doctor, minimal: bool = True):
-        return DrMinimal.model_validate(dtr)
+    def to_schema(
+        doctor: Doctor,
+        minimal: bool = True
+    ):
+        return (
+            DrMinimal.model_validate(doctor)
+            if minimal
+            else DoctorHttpFull.model_validate(doctor)
+        )
 
-    #
-
-    async def find_drs_many(
+    async def find_doctors(
             self,
+            session: AsyncSession,
             specialization: str | None = None,
             min_rating: float | None = None,
             experience: int | None = None,
@@ -85,44 +44,68 @@ class DoctorToolAdapter:
             **kwargs
         )
 
-        _, entities = await DoctorService.get_all(
-            session=self.session, pagination=None,
-            filters=filters
+        _, entities = await DoctorService.get_all_doctors(
+            session=session,
+            pagination_params=None,
+            filter_params=filters
         )
 
-        return [self.to_schema(dtr=d) for d in entities]
+        return [self.to_schema(doctor=d) for d in entities]
 
     #
 
-    async def get_drprofile_single(
+    async def get_drprofile(
             self,
+            session: AsyncSession,
             doctor_id: UUID | None = None,
             name: str | None = None
     ):
-        result = None
-
-        if doctor_id:
-            result = await DoctorService.get_by_id(
-                session=self.session,
-                entity_id=doctor_id
+        if (
+            name is None
+            and doctor_id is None
+        ):
+            raise TypeError(
+                "One of the doctor's id or name is required to fetch a doctor.."
             )
 
-        if name:
-            result = await DoctorService.get(
-                session=self.session,
-                ident_key="name",
-                ident_val=name
+        result = await DoctorService.get(
+            session=session,
+            ident_key=(
+                "name" if (
+                    by_name := name is not None
+                )
+                else "id"
+            ),
+            ident_val=(
+                name if by_name else doctor_id
             )
+        )
 
         if result is None:
-            raise
+            raise EntityNotFoundException(
+                "doctor"
+            )
 
-        minimal = self.to_schema(dtr=result, minimal=False).model_dump()
+        minimal = (
+            self.to_schema(
+                doctor=result,
+                minimal=False
+            )
+            .model_dump()
+        )
 
         response = minimal
         response.update({
-            "available_slots": DoctorService.get_available_slots(result),
-            "available_weekdays": DoctorService.get_available_wkdays(result),
+            "available_slots": (
+                DoctorService.get_available_slots(
+                    doctor=result
+                )
+            ),
+            "available_weekdays": (
+                DoctorService.get_doctor_availability(
+                    doctor=result
+                )
+            ),
         })
 
         return response

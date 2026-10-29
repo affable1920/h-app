@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ScheduleHasAppointments
 from app.features.auth.dependencies import require_doctor
-from app.services.SchedulingService import schedule_service
+from app.services.SchedulingService import ScheduleService
 
 from app.database.models import Doctor
 from app.database.entry_async import get_db
@@ -37,7 +37,7 @@ async def create_schedule(
     doctor: Doctor = Depends(require_doctor),
     session: AsyncSession = Depends(get_db),
 ):
-    created = await schedule_service.create_schedule(
+    created = await ScheduleService.create_schedule(
         doctor_id=doctor.id,
         session=session,
         payload=data
@@ -57,7 +57,7 @@ async def alter_schedule_activation(
     doctor: Doctor = Depends(require_doctor),
     session: AsyncSession = Depends(get_db),
 ):
-    await schedule_service.alter_schedule_activation(
+    await ScheduleService.alter_schedule_activation(
         schedule_id=schedule_id,
         doctor_id=doctor.id,
         session=session,
@@ -80,7 +80,7 @@ async def remove_schedule(
     session: AsyncSession = Depends(get_db)
 ):
     try:
-        await schedule_service.remove_schedule(
+        await ScheduleService.remove_schedule(
             schedule_id=schedule_id,
             doctor_id=doctor.id,
             session=session,

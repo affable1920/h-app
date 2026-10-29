@@ -28,7 +28,7 @@ async def get_clinics(
 ):
     count, objs = await ClinicService.get_all(
         session=session,
-        pagination=pagination_params,
+        pagination_params=pagination_params,
         filters=filter_params
     )
 
@@ -49,7 +49,8 @@ async def get_clinic(
     clinic_id: UUID,
     session: AsyncSession = Depends(get_db)
 ):
-    return await ClinicService.get_by_id(
-        entity_id=clinic_id,
-        session=session
+    return await ClinicService.get(
+        session=session,
+        ident_key="id",
+        ident_val=clinic_id
     )

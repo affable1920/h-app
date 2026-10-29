@@ -3,13 +3,12 @@ from typing import Optional
 from uuid import UUID
 from fastapi import Body, Depends, APIRouter, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 
+from app.services.SchedulingService import ScheduleService
 from app.services.AppointmentService import AppointmentService
-from app.services.entities.main import EntityService
-from app.database.models import Appointment, Clinic, Doctor
+from app.database.models import Doctor
 from app.features.auth.dependencies import require_doctor
-from app.schemas.appointment import AppointmentDoctorResponse
+from app.schemas.appointment import AppointmentDoctorResponse, GetAppointmentsFilters
 from app.schemas.clinic import DoctorClinicResponse
 from app.schemas.doctor import DoctorHttpFull, DoctorHttpMinimal
 from app.schemas.pagination import (
@@ -45,11 +44,11 @@ async def get_doctors(
     sort: SortParams = Depends(),
     session: AsyncSession = Depends(get_db),
 ):
-    count, objects = await DoctorService.get_all(
-        session,
-        pagination=pagination_params,
-        filters=filters,
-        sort=sort
+    count, objects = await DoctorService.get_all_doctors(
+        session=session,
+        pagination_params=pagination_params,
+        filter_params=filters,
+        sort_params=sort
     )
 
     response = DoctorService.create_paginated_response(
@@ -69,8 +68,8 @@ async def get_doctor(
     doctor_id: UUID,
     session: AsyncSession = Depends(get_db)
 ):
-    return await DoctorService.get_by_id(
-        entity_id=doctor_id,
+    return await DoctorService.get_doctor_by_id(
+        doctor_id=doctor_id,
         session=session
     )
 
@@ -113,15 +112,17 @@ async def edit_doctor(
 async def get_doctor_appointments(
     doctor: Doctor = Depends(require_doctor),
     session: AsyncSession = Depends(get_db),
-    pagination_params: PaginationParams = Depends()
+    pagination_params: PaginationParams = Depends(),
+    filters: GetAppointmentsFilters = Depends()
 ):
-    count, objs = await DoctorService.get_appointments(
+    count, objs = await AppointmentService.get_all_for_participant(
         session=session,
-        doctor_id=doctor.id,
-        pagination_params=pagination_params
+        participant=doctor,
+        pagination_params=pagination_params,
+        filters=filters
     )
 
-    return EntityService.create_paginated_response(
+    return DoctorService.create_paginated_response(
         objs=objs,
         count=count,
         pagination=pagination_params
@@ -140,13 +141,7 @@ async def get_doctor_appointment(
     return await AppointmentService.get_for_participant(
         session=session,
         appointment_id=appointment_id,
-        participant=doctor,
-        loader_opts=[
-            joinedload(Appointment.patient),
-            joinedload(Appointment.slot),
-            joinedload(Appointment.care_journey),
-            joinedload(Appointment.clinic).selectinload(Clinic.reviews),
-        ],
+        participant=doctor
     )
 
 
@@ -159,13 +154,13 @@ async def get_doctor_schedules(
     session: AsyncSession = Depends(get_db),
     pagination_params: PaginationParams = Depends()
 ):
-    count, objs = await DoctorService.get_schedules(
+    count, objs = await ScheduleService.get_schedules_for_doctor(
         session=session,
         doctor_id=doctor.id,
         pagination_params=pagination_params
     )
 
-    return EntityService.create_paginated_response(
+    return DoctorService.create_paginated_response(
         objs,
         count,
         pagination_params
@@ -181,13 +176,13 @@ async def get_doctor_clinics(
     session: AsyncSession = Depends(get_db),
     pagination_params: PaginationParams = Depends()
 ):
-    count, objs = await DoctorService.get_clinics(
+    count, objs = await DoctorService.get_clinics_for_doctor(
         session=session,
         doctor_id=doctor.id,
         pagination_params=pagination_params
     )
 
-    return EntityService.create_paginated_response(
+    return DoctorService.create_paginated_response(
         objs=objs,
         count=count,
         pagination=pagination_params

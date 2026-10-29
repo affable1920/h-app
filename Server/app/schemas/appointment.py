@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.schemas.base import EntityResponse, StrictRequest
+from app.schemas.base import ApiSchema, EntityResponse, StrictRequest
 from app.schemas.clinic import ClinicHttpMinimal
 from app.schemas.doctor import DoctorHttpMinimal
 from app.schemas.enums import AppointmentStatus
@@ -39,3 +39,8 @@ class AppointmentDoctorResponse(AppointmentConfirmation):
     slot: Slot
     clinic: ClinicHttpMinimal
     patient: UserResponse
+
+
+class GetAppointmentsFilters(ApiSchema):
+    appointment_status: AppointmentStatus | None = None
+    scheduled_date: datetime | None = None

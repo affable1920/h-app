@@ -43,15 +43,16 @@ class AuthService:
     ) -> Doctor | Patient | None:
         match role:
             case "doctor":
-                return (await DoctorService.get_by_id(
+                return (await DoctorService.get_doctor_by_id(
                     session=session,
-                    entity_id=user_id
+                    doctor_id=user_id
                 ))
 
             case "patient":
-                return (await PatientService.get_by_id(
+                return (await PatientService.get(
                     session=session,
-                    entity_id=user_id
+                    ident_key="id",
+                    ident_val=user_id
                 ))
 
             case _:
@@ -201,15 +202,16 @@ class AuthService:
         user = None
 
         if role == UserRoleV2.PATIENT:
-            user = await PatientService.get_by_id(
+            user = await PatientService.get(
                 session=session,
-                entity_id=user_id
+                ident_key="id",
+                ident_val=user_id
             )
 
         elif role == UserRoleV2.DOCTOR:
-            user = await DoctorService.get_by_id(
+            user = await DoctorService.get_doctor_by_id(
                 session=session,
-                entity_id=user_id
+                doctor_id=user_id
             )
 
         if user is None:
@@ -309,7 +311,7 @@ class AuthService:
         payload: DrCreate
     ):
         async with session.begin():
-            created = await DoctorService.create(
+            created = await DoctorService.create_doctor(
                 session=session,
                 data=payload
             )
@@ -332,7 +334,7 @@ class AuthService:
         payload: PatientCreate
     ):
         async with session.begin():
-            patient = await PatientService.create(
+            patient = await PatientService.create_patient(
                 session=session,
                 data=payload
             )

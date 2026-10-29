@@ -81,7 +81,7 @@ export function DrAppointmentCard({
   }
 
   return (
-    <Card className="border-border flex flex-col gap-3">
+    <Card key={appointment.id} className="border-border flex flex-col gap-3">
       <Card.Header className="flex items-start justify-between">
         <Card.Title className="text-base">
           {appointment.patient?.name ?? appointment.patient?.username}

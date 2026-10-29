@@ -1,11 +1,13 @@
-from typing import Tuple
+from typing import Sequence, Tuple
 
-from sqlalchemy import Select
+from sqlalchemy import Select, select, or_
 from sqlalchemy.orm import selectinload
+from sqlalchemy.orm.strategy_options import _AbstractLoad
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.pagination import ClinicRouteFilters
-from app.services.entities.main import EntityService
+from app.services.entities.QueryService import QueryService
+from app.schemas.pagination import ClinicRouteFilters, PaginationParams
+from app.services.entities.EntityService import EntityService
 from app.database.models import Clinic
 
 
@@ -14,37 +16,59 @@ class ClinicService(EntityService[Clinic]):
 
     @classmethod
     def filter(
-        cls, stmt: Select, filters: ClinicRouteFilters
+        cls,
+        stmt: Select,
+        filters: ClinicRouteFilters
     ) -> Select[Tuple[Clinic]]:
         if filters.search_query:
             stmt = stmt.where(
-                Clinic.name.icontains(filters.search_query)
+                or_(
+                    Clinic.name.icontains(
+                        filters.search_query
+                    ),
+                    Clinic.location.icontains(
+                        filters.search_query
+                    )
+                )
             )
 
         if filters.facilities:
-            stmt = stmt.where(Clinic.facilities.op("&&")(filters.facilities))
+            stmt = stmt.where(
+                Clinic.facilities.op("&&")(filters.facilities)
+            )
+
+        if filters.min_rating:
+            stmt = stmt.where(
+                Clinic.avg_rating >= filters.min_rating
+            )
 
         return stmt
 
-    #
-
     @classmethod
-    def load_options(cls) -> list:
+    def load_base_options(cls) -> list[_AbstractLoad]:
         return [
             selectinload(Clinic.reviews)
         ]
 
-    #
+    @classmethod
+    def load_all_options(cls) -> list[_AbstractLoad]:
+        return cls.load_base_options()
 
     @classmethod
-    def load_options_full(cls):
-        return super().load_options_full()
+    async def get_all(
+        cls,
+        session: AsyncSession,
+        filters: ClinicRouteFilters | None = None,
+        pagination_params: PaginationParams | None = None,
+    ) -> Tuple[int, Sequence[Clinic]]:
+        stmt = select(Clinic)
 
-    #
+        if filters is not None:
+            stmt = cls.filter(stmt, filters)
 
-    @classmethod
-    async def create(cls, session: AsyncSession, data) -> Clinic:
-        return Clinic()
-
-
-clinic_srvc = ClinicService()
+        return await QueryService.get_all(
+            base_statement=stmt,
+            session=session,
+            pagination=pagination_params,
+            loaders=cls.load_base_options()
+        )

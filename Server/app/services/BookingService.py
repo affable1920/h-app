@@ -1,7 +1,10 @@
 import logging
+from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.services.entities.QueryService import QueryService
 from app.core.exceptions import ConflictError, EntityNotFoundException
 from app.schemas.appointment import BookingRequestData
 from app.schemas.enums import AppointmentStatus
@@ -13,18 +16,18 @@ logger = logging.getLogger(__name__)
 
 class BookingService:
     @staticmethod
-    async def find_slot_by_id(
-        slot_id: str,
+    async def get_slot_by_id(
+        slot_id: UUID,
         session: AsyncSession
     ):
-        load_options = joinedload(Slot.schedule)
-
-        return (
-            await session.scalar(
-                select(Slot).options(load_options).where(
-                    Slot.id == slot_id
-                )
-            ))
+        return await QueryService.get_by_id(
+            model=Slot,
+            entity_id=slot_id,
+            session=session,
+            loader_options=[
+                joinedload(Slot.schedule)
+            ]
+        )
 
     #
 
@@ -50,8 +53,8 @@ class BookingService:
         session: AsyncSession,
         payload: BookingRequestData,
     ) -> Appointment:
-        slot = await cls.find_slot_by_id(
-            slot_id=str(payload.slot_id),
+        slot = await cls.get_slot_by_id(
+            slot_id=payload.slot_id,
             session=session
         )
 
@@ -114,8 +117,6 @@ class BookingService:
         )
 
         return created_appointment
-
-    #
 
     @classmethod
     async def cancel_booking(

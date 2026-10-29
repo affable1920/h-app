@@ -3,21 +3,45 @@ import logging
 from typing import Sequence, Tuple
 from uuid import UUID
 
-from sqlalchemy import Select, func, or_, select
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm.strategy_options import _AbstractLoad
+from sqlalchemy import Select, or_, select
+from sqlalchemy.orm import (
+    selectinload,
+    InstrumentedAttribute
+)
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
 
+from app.schemas.enums import ScheduleKind
+from app.services.entities.QueryService import QueryService
 from app.features.auth import security
-from app.core.exceptions import AlreadyInUseException, EntityNotFoundException
+
 from app.scripts.one_off import compress
 from app.schemas.doctor import DrCreate
-from app.services.entities.main import EntityService
-from app.database.models import Appointment, Clinic, Doctor, Schedule, junction
-from app.schemas.pagination import DrRouteFilters, PaginationParams
+from app.services.entities.EntityService import EntityService
+
+from app.core.exceptions import (
+    AlreadyInUseException,
+    EntityNotFoundException
+)
+
+from app.database.models import (
+    Clinic,
+    Doctor,
+    Schedule,
+    junction
+)
+
+from app.schemas.pagination import (
+    DrRouteFilters,
+    PaginationParams,
+    SortOrder,
+    SortParams
+)
+
 from app.services.PatientService import PatientService
 from app.features.auth import security
-from sqlalchemy.orm.strategy_options import _AbstractLoad
 
 
 logger = logging.getLogger(__name__)
@@ -25,37 +49,32 @@ logger = logging.getLogger(__name__)
 
 class DoctorService(EntityService[Doctor]):
     entity = Doctor
-    sort_col_map = {
-        "reviews": "review_count",
-        "rating": "avg_rating"
-    }
 
     @classmethod
-    def load_options(cls) -> list:
+    def load_base_options(cls) -> list[_AbstractLoad]:
         return [
             selectinload(Doctor.reviews)
         ]
 
     @classmethod
-    def load_options_full(cls):
-        # load schedules once and then use the loaded ones as branches
+    def load_all_options(cls) -> list[_AbstractLoad]:
         schedules = selectinload(Doctor.schedules)
 
         return [
-            selectinload(Doctor.reviews),
+            *cls.load_base_options(),
             schedules.selectinload(Schedule.slots),
-            schedules.joinedload(Schedule.clinic).selectinload(Clinic.reviews)
+            (
+                schedules.joinedload(Schedule.clinic)
+                .selectinload(Clinic.reviews)
+            )
         ]
 
     @classmethod
     def filter(
-        cls, stmt: Select[Tuple[Doctor]],
+        cls,
+        stmt: Select[Tuple[Doctor]],
         filters: DrRouteFilters,
     ) -> Select[Tuple[Doctor]]:
-        """
-        (args): all filters to be used for doctors
-        Return -> a query with only the doctors that meet the filter criteria.
-        """
         if filters.specialization:
             stmt = stmt.where(
                 Doctor.primary_specialization.ilike(
@@ -64,12 +83,14 @@ class DoctorService(EntityService[Doctor]):
 
         if filters.min_rating:
             stmt = stmt.where(
-                # usabe because avg_rating is a hybrid property
-                Doctor.avg_rating >= filters.min_rating
+                Doctor.avg_rating
+                >= filters.min_rating
             )
 
         if filters.consults_online:
-            stmt = stmt.where(Doctor.consults_online.is_(True))
+            stmt = stmt.where(
+                Doctor.consults_online.is_(True)
+            )
 
         if filters.gender:
             stmt = stmt.where(
@@ -101,18 +122,91 @@ class DoctorService(EntityService[Doctor]):
         return stmt
 
     @classmethod
-    async def create(
+    def constructor_ordering_clauses(
+        cls, sort_params: SortParams
+    ) -> list[InstrumentedAttribute]:
+        clauses = [
+            Doctor.name
+        ]
+
+        if sort_params.column is None:
+            return clauses
+
+        column = getattr(Doctor, sort_params.column, None)
+
+        if column is not None:
+            if sort_params.order == SortOrder.DESC:
+                column = column.desc()
+
+            clauses = [
+                column,
+                *clauses
+            ]
+
+            return clauses
+
+        return clauses
+
+    @classmethod
+    async def get_all_doctors(
+        cls,
+        session: AsyncSession,
+        filter_params: DrRouteFilters | None = None,
+        pagination_params: PaginationParams | None = None,
+        sort_params: SortParams | None = None,
+    ) -> Tuple[int, Sequence[Doctor]]:
+        stmt = select(Doctor)
+
+        if filter_params is not None:
+            stmt = cls.filter(stmt, filter_params)
+
+        ordering_clauses = None
+
+        if sort_params is not None:
+            ordering_clauses = (
+                cls.constructor_ordering_clauses(
+                    sort_params
+                )
+            )
+
+        return await QueryService.get_all(
+            base_statement=stmt,
+            session=session,
+            pagination=pagination_params,
+            loaders=cls.load_base_options(),
+            ordering_clauses=ordering_clauses
+        )
+
+    @classmethod
+    async def get_doctor_by_id(
+            cls,
+            doctor_id: UUID,
+            session: AsyncSession
+    ):
+        return await QueryService.get_by_id(
+            model=Doctor,
+            entity_id=doctor_id,
+            session=session,
+            loader_options=cls.load_all_options()
+        )
+
+    @classmethod
+    async def create_doctor(
         cls,
         session: AsyncSession,
         data: DrCreate
     ) -> Doctor:
         if (
-                await cls.email_exists(session, email=data.email)) \
-                or await PatientService.email_exists(session, email=data.email
-                                                     ):
+            await cls.email_exists(session, email=data.email)
+            or await PatientService.email_exists(session, email=data.email)
+        ):
             raise AlreadyInUseException("email")
 
-        if await cls.get(session, "license_number", data.license_number):
+        if await cls.get(
+            session=session,
+            ident_key="license_number",
+            ident_val=data.license_number
+        ):
             raise AlreadyInUseException("license")
 
         compressed = None
@@ -123,7 +217,9 @@ class DoctorService(EntityService[Doctor]):
             )
 
             img = await data.profile.read()
-            compressed, _ = compress(base64.b64encode(img).decode("utf-8"))
+            compressed, _ = compress(
+                base64.b64encode(img).decode("utf-8")
+            )
 
         created = Doctor(
             image=compressed,
@@ -148,137 +244,64 @@ class DoctorService(EntityService[Doctor]):
         return created
 
     @staticmethod
-    def get_available_wkdays(doctor: Doctor) -> set[int]:
-        return set()
+    def get_doctor_availability(
+        doctor: Doctor
+    ):
+        availability = [
+            {
+                (key_name := (
+                    "weekdays" if (
+                        schedule.recurrence_kind
+                        == ScheduleKind.WEEKLY
+                    )
+                    else "month_days" if (
+                        schedule.recurrence_kind
+                        == ScheduleKind.MONTHLY
+                    )
+                    else "date"
+                )): getattr(schedule, key_name)
+            }
+            for schedule in doctor.schedules
+        ]
+
+        return availability
 
     @staticmethod
-    def get_available_slots(doctor: Doctor, max: int = 5):
+    def get_available_slots(
+        doctor: Doctor,
+        max: int = 5
+    ):
         slots = [
             {
                 "duration": slot.duration,
-                "slot_datetime": slot.slot_datetime.strftime("%y-%m-%d %H:%M")
+                "slot_datetime": (
+                    slot.slot_datetime.strftime(
+                        "%y-%m-%d %H:%M"
+                    )
+                )
             }
             for schedule in doctor.schedules
-            for slot in schedule.slots if not slot.is_booked
+            for slot in schedule.slots
+            if not slot.is_booked
         ]
 
         return slots[:min(len(slots), max)]
 
     @classmethod
-    async def get_appointments(
-            cls,
-            session: AsyncSession,
-            doctor_id: UUID,
-            pagination_params: PaginationParams | None = None
-    ) -> tuple[int, Sequence[Appointment]]:
-        stmt = (
-            select(Appointment)
-            .options(
-                joinedload(Appointment.patient),
-                joinedload(Appointment.care_journey),
-                joinedload(Appointment.clinic),
-            )
-            .where(Appointment.doctor_id == doctor_id)
-            .order_by(
-                Appointment.scheduled_date.desc(),
-                Appointment.id.asc()
-            )
-        )
-
-        count = await session.scalar(
-            select(func.count()).select_from(
-                stmt.subquery()
-            )
-        ) or 0
-
-        if pagination_params is not None:
-            stmt = cls.paginate(stmt, pagination_params)
-
-        objs = (await session.scalars(stmt)).all()
-        return count, objs
-
-    @classmethod
-    async def get_doctor_appointment(
+    async def get_clinics_for_doctor(
         cls,
-        session: AsyncSession,
         doctor_id: UUID,
-        appointment_id: UUID,
-        loader_options: list[_AbstractLoad] = []
-    ):
-        stmt = (
-            select(Appointment)
-            .options(*loader_options)
-            .where(
-                Appointment.id == appointment_id,
-                Appointment.doctor_id == doctor_id
-            )
-        )
-
-        appointment = await session.scalar(stmt)
-        return appointment
-
-    @classmethod
-    async def get_schedules(
-        cls,
         session: AsyncSession,
-        doctor_id: UUID,
         pagination_params: PaginationParams | None = None
     ):
-        stmt = (
-            select(Schedule)
-            .options(
-                selectinload(Schedule.slots),
-                joinedload(Schedule.clinic).selectinload(Clinic.reviews)
-            )
-            .where(Schedule.doctor_id == doctor_id)
-            .order_by(Schedule.is_active.desc())
+        return await QueryService.get_all(
+            base_statement=select(Clinic).join(Doctor.clinics),
+            session=session,
+            where_clauses=[Doctor.id == doctor_id],
+            ordering_clauses=[Clinic.name, Clinic.id],
+            loaders=[selectinload(Clinic.reviews)],
+            pagination=pagination_params
         )
-
-        count = await (
-            session.scalar(
-                select(func.count()).select_from(
-                    stmt.subquery()
-                )
-            )
-        ) or 0
-
-        if pagination_params is not None:
-            stmt = cls.paginate(stmt, pagination_params)
-
-        objs = (await session.scalars(stmt)).all()
-        return count, objs
-
-    #
-
-    @classmethod
-    async def get_clinics(
-        cls,
-        session: AsyncSession,
-        doctor_id: UUID,
-        pagination_params: PaginationParams | None = None
-    ):
-        stmt = (
-            select(Clinic)
-            .select_from(Doctor)
-            .join(Doctor.clinics)
-            .where(Doctor.id == doctor_id)
-            .options(selectinload(Clinic.reviews))
-            .order_by(Clinic.name, Clinic.id)
-        )
-
-        count = await (
-            session.scalar(
-                select(func.count()).select_from(
-                    stmt.subquery()
-                )
-            )
-        ) or 0
-
-        if pagination_params is not None:
-            stmt = cls.paginate(stmt, pagination_params)
-
-        objs = (await session.scalars(stmt)).all()
-        return count, objs
 
     @classmethod
     async def associate_clinic(

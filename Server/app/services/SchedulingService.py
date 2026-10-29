@@ -4,8 +4,10 @@ from uuid import UUID
 
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, selectinload
 
+from app.schemas.pagination import PaginationParams
+from app.services.entities.QueryService import QueryService
 from app.core.exceptions import (
     ConflictError,
     EntityNotFoundException,
@@ -26,23 +28,30 @@ logger = logging.getLogger(__name__)
 
 class ScheduleService:
     @classmethod
-    async def get_clinic_for_doctor(
+    async def get_schedules_for_doctor(
         cls,
         doctor_id: UUID,
-        clinic_id: UUID,
-        session: AsyncSession
-    ) -> Clinic | None:
-        stmt = (
-            select(Clinic)
-            .join(junction, Clinic.id == junction.c.clinic_id)
-            .where(
-                junction.c.doctor_id == doctor_id,
-                Clinic.id == clinic_id,
-            )
-            .options(selectinload(Clinic.reviews))
+        session: AsyncSession,
+        pagination_params: PaginationParams | None = None
+    ):
+        return await QueryService.get_all(
+            base_statement=(
+                select(Schedule).where(
+                    Schedule.doctor_id == doctor_id
+                )
+            ),
+            session=session,
+            ordering_clauses=[
+                Schedule.is_active.desc(),
+            ],
+            pagination=pagination_params,
+            loaders=[
+                selectinload(Schedule.slots),
+                joinedload(Schedule.clinic).selectinload(
+                    Clinic.reviews
+                )
+            ]
         )
-
-        return await session.scalar(stmt)
 
     @classmethod
     async def get_schedule_for_doctor(
@@ -51,14 +60,16 @@ class ScheduleService:
             doctor_id: UUID,
             session: AsyncSession
     ) -> Schedule | None:
-        return await (
-            session.scalar(
-                select(Schedule)
-                .where(
-                    Schedule.id == schedule_id,
-                    Schedule.doctor_id == doctor_id
-                )
-            )
+        return await QueryService.get_by_id(
+            model=Schedule,
+            entity_id=schedule_id,
+            session=session,
+            where_clauses=[
+                Schedule.doctor_id == doctor_id
+            ],
+            loader_options=[
+                selectinload(Schedule.slots)
+            ]
         )
 
     @staticmethod
@@ -87,20 +98,30 @@ class ScheduleService:
             session: AsyncSession,
             payload: CreateSchedule,
     ) -> Schedule:
-        clinic = await cls.get_clinic_for_doctor(
-            doctor_id=doctor_id,
-            clinic_id=payload.clinic_id,
-            session=session
+        stmt = (
+            select(Clinic)
+            .join(
+                junction,
+                Clinic.id == junction.c.clinic_id
+            )
+            .where(
+                junction.c.doctor_id == doctor_id,
+                Clinic.id == payload.clinic_id,
+            )
+            .options(selectinload(Clinic.reviews))
         )
+
+        clinic = await session.scalar(stmt)
 
         if clinic is None:
             raise ConflictError(
-                message="The doctor has no associated relationship with the requested clinic .."
+                message="The doctor has no associated relationship "
+                "with the requested clinic .."
             )
 
         schedule = cls.build_schedule_record(
-            payload,
-            doctor_id
+            payload=payload,
+            doctor_id=doctor_id
         )
 
         schedule.clinic = clinic
@@ -201,6 +222,3 @@ class ScheduleService:
             )
 
         await session.delete(schedule)
-
-
-schedule_service = ScheduleService()

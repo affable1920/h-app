@@ -41,6 +41,7 @@ class AppointmentDoctorResponse(AppointmentConfirmation):
     patient: UserResponse
 
 
-class GetAppointmentsFilters(ApiSchema):
+class AppointmentFilters(ApiSchema):
+    search_query: str | None = None
     appointment_status: AppointmentStatus | None = None
     scheduled_date: datetime | None = None

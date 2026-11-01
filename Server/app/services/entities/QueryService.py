@@ -39,7 +39,7 @@ class QueryService:
             ordering_clauses: list[Any] | None = None,
             pagination: PaginationParams | None = None,
             loaders: list[_AbstractLoad] | None = None,
-    ) -> tuple[int, Sequence[T]]:
+    ) -> tuple[int, Sequence[DeclarativeBase]]:
         stmt = base_statement
 
         if where_clauses is not None:

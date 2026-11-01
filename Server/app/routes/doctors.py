@@ -8,7 +8,7 @@ from app.services.SchedulingService import ScheduleService
 from app.services.AppointmentService import AppointmentService
 from app.database.models import Doctor
 from app.features.auth.dependencies import require_doctor
-from app.schemas.appointment import AppointmentDoctorResponse, GetAppointmentsFilters
+from app.schemas.appointment import AppointmentDoctorResponse, AppointmentFilters
 from app.schemas.clinic import DoctorClinicResponse
 from app.schemas.doctor import DoctorHttpFull, DoctorHttpMinimal
 from app.schemas.pagination import (
@@ -113,13 +113,15 @@ async def get_doctor_appointments(
     doctor: Doctor = Depends(require_doctor),
     session: AsyncSession = Depends(get_db),
     pagination_params: PaginationParams = Depends(),
-    filters: GetAppointmentsFilters = Depends()
+    filters: AppointmentFilters = Depends(),
+    sort_params: SortParams = Depends()
 ):
     count, objs = await AppointmentService.get_all_for_participant(
         session=session,
         participant=doctor,
         pagination_params=pagination_params,
-        filters=filters
+        filters=filters,
+        sort_params=sort_params
     )
 
     return DoctorService.create_paginated_response(

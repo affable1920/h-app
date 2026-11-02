@@ -11,9 +11,8 @@ export function DoctorsDirectory() {
 
   const {
     data: { entities: doctors = [], hasNext = false } = {},
-    isPending,
     isError,
-    isFetching,
+    isLoading,
   } = useGetDoctors(Object.fromEntries(params.entries()));
 
   useEffect(
@@ -23,7 +22,7 @@ export function DoctorsDirectory() {
     [hasNext, setHasNext],
   );
 
-  if (isPending || isFetching) {
+  if (isLoading) {
     return <Spinner />;
   }
 

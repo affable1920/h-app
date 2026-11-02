@@ -6,7 +6,6 @@ import { Link, useOutletContext, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { Stack } from "./ui/Stack";
 import Button from "./lib/button/Button";
-import { keepPreviousData } from "@tanstack/react-query";
 
 export function ClinicsDirectory() {
   const setHasNext = useOutletContext<(hasNext: boolean) => void>();
@@ -14,11 +13,9 @@ export function ClinicsDirectory() {
 
   const {
     data: { entities: clinics = [], hasNext = false } = {},
-    isFetching,
+    isLoading,
     isError,
-  } = useGetClinics(Object.fromEntries(params.entries()), {
-    placeholderData: keepPreviousData,
-  });
+  } = useGetClinics(Object.fromEntries(params.entries()));
 
   useEffect(
     function () {
@@ -27,7 +24,7 @@ export function ClinicsDirectory() {
     [hasNext, setHasNext],
   );
 
-  if (isFetching) {
+  if (isLoading) {
     return <Spinner />;
   }
 

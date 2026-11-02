@@ -1,137 +1,99 @@
-import DirectoryLayout from "@/components/lib/DirectoryLayout";
 import { DrAppointmentCard } from "@/components/DrAppointmentCard";
-import Pagination from "@/components/Pagination";
 import Button from "@/components/lib/button/Button";
-import SearchBar from "@/components/ui/SearchBar";
-import Spinner from "@/components/ui/Spinner";
 import { Stack } from "@/components/ui/Stack";
 import { useGetDoctorAppointments } from "@/hooks/use-doctors";
-import { ArrowUpAZ, RefreshCcw, SlidersHorizontal } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
-import { useCallback } from "react";
+import { RefreshCcw } from "lucide-react";
+import { useFilters } from "@/hooks/use-filters";
+import Spinner from "@/components/ui/Spinner";
+import { AppointmentsTab } from "../AppointmentsTab";
 
 export function DrAppointmentsTab() {
-  const [params, setParams] = useSearchParams();
-
-  const page = params.get("page") ? Number(params.get("page")) : 1;
+  const {
+    page,
+    activeFiltersCount,
+    appointmentStatus,
+    searchQuery,
+    sortColumn,
+    sortOrder,
+  } = useFilters();
 
   const {
-    data: { entities: appointments = [], hasNext = false } = {},
-    isPending,
+    data: { entities: appointments, hasNext = false } = {},
     isError,
     refetch,
-  } = useGetDoctorAppointments({ max: 4, page });
+    isLoading,
+    error,
+  } = useGetDoctorAppointments({
+    page,
+    appointmentStatus,
+    searchQuery,
+    sortColumn,
+    sortOrder: sortOrder ?? undefined,
+  });
 
-  const handlePageChange = useCallback(
-    function (dir: "next" | "previous") {
-      const NOOP =
-        (!hasNext && dir === "next") || (page === 1 && dir === "previous");
-      if (NOOP) {
-        return;
-      }
-
-      setParams(function (prev) {
-        const next = new URLSearchParams(prev);
-        const updated = dir === "next" ? page + 1 : page - 1;
-
-        next.set("page", String(updated));
-        return next;
-      });
-    },
-    [hasNext, page, setParams],
-  );
-
-  if (isPending) {
-    return <Spinner />;
-  }
-
-  if (isError) {
-    return (
-      <div className="text-center mx-auto w-full">
-        Could not fetch your appointments. <br />
-        Please try again ... <br />
-        <Button
-          onClick={function () {
-            refetch();
-          }}
-          data-tooltip="retry"
-          className="mt-4"
-          variant="icon"
-          bg={true}
-          aria-label="Retry-request"
-        >
-          <RefreshCcw />
-        </Button>
-      </div>
-    );
-  }
-
-  if (!appointments.length) {
-    return (
-      <p className="text-center text-md leading-[1.4] text-text-normal">
-        You currently have no{" "}
-        <em>
-          <strong>appointments</strong>
-        </em>
-        .
-      </p>
-    );
-  }
+  const hasAppointments = appointments && appointments.length > 0;
 
   return (
-    <DirectoryLayout>
-      {appointments.length > 0 && (
-        <DirectoryLayout.Header className="justify-between">
-          <Stack align="center">
+    <AppointmentsTab hasNext={hasNext ?? false}>
+      {isError ? (
+        <div className="text-center mx-auto w-full">
+          {error.status === 401 ? (
+            <p>
+              You are not authenticated to view these appointments .. <br />
+              Please login or sign up first. <br />
+            </p>
+          ) : (
+            <p>
+              Due to an unexpected error <br />
+              We could not fetch your appointments right now. <br />
+              Please try again later ... <br />
+            </p>
+          )}
+          {![401, 403, 422].includes(error.status) && (
             <Button
-              data-tooltip="filter"
-              aria-label={"filter appointments"}
+              onClick={function () {
+                refetch();
+              }}
+              data-tooltip="Try again"
+              className="mt-4"
               variant="icon"
-              bg
+              bg={true}
+              aria-label="Retry request to get doctor appointments"
             >
-              <SlidersHorizontal />
+              <RefreshCcw />
             </Button>
-            <Button
-              data-tooltip="sort"
-              aria-label={"sort appointments"}
-              variant="icon"
-              bg
-            >
-              <ArrowUpAZ />
-            </Button>
-          </Stack>
-          <Stack>
-            <SearchBar
-              id="doctor-schedules-search"
-              aria-label="search schedules"
-              size="xs"
-              value=""
-              placeholder="Search for appointments ..."
-            />
-          </Stack>
-        </DirectoryLayout.Header>
-      )}
-
-      <DirectoryLayout.Content className="space-y-6">
-        <Stack orientation="V" md={{ orientation: "H" }} gap={20}>
-          {appointments.map(function (appointment) {
-            return (
-              <DrAppointmentCard
-                key={appointment.id}
-                appointment={appointment}
-              />
-            );
-          })}
+          )}
+        </div>
+      ) : (
+        <Stack
+          orientation="V"
+          md={{ orientation: "H", align: "center" }}
+          gap={20}
+        >
+          {isLoading ? (
+            <Spinner />
+          ) : !hasAppointments ? (
+            <div className="flex flex-col items-center gap-2">
+              {activeFiltersCount === 0 ? (
+                <p className="text-center">You have no appointments ..</p>
+              ) : (
+                <p className="text-center">
+                  We found no appointments matching your query ..
+                </p>
+              )}
+            </div>
+          ) : (
+            appointments.map(function (appointment) {
+              return (
+                <DrAppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                />
+              );
+            })
+          )}
         </Stack>
-      </DirectoryLayout.Content>
-
-      <DirectoryLayout.Footer>
-        <Pagination
-          currentPage={page}
-          hasNext={hasNext ?? false}
-          onPageChange={handlePageChange}
-        />
-      </DirectoryLayout.Footer>
-    </DirectoryLayout>
+      )}
+    </AppointmentsTab>
   );
 }

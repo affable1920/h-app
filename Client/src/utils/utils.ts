@@ -11,14 +11,23 @@ export function debounce<Args extends Array<unknown>>(
 ) {
   let timeoutId: ReturnType<typeof setTimeout>;
 
-  return function memoized(...args: Args) {
+  function cancel() {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
+  }
+
+  function debounced(...args: Args) {
+    cancel();
 
     timeoutId = setTimeout(function () {
       fn(...args);
     }, ms);
+  }
+
+  return {
+    cancel,
+    debounced,
   };
 }
 

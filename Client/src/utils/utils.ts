@@ -44,13 +44,13 @@ export function paginate<T>(
   return list.slice(start, limit);
 }
 
-export function sort<T>(items: Array<T> = [], fn: (a: T, b: T) => number) {
-  return items.sort(fn);
-}
-
-export function filter<T>(
-  items: Array<T> = [],
-  predicate: (a: T, index: number, array: T[]) => unknown,
+export function parseNumberParam(
+  searchParams: URLSearchParams,
+  key: string,
+  defaultValue: number,
 ) {
-  return items.filter(predicate);
+  const value = searchParams.get(key);
+  return value !== "" && value !== null && value !== undefined
+    ? Number(value)
+    : defaultValue;
 }

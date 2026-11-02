@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Outlet,
   useLocation,
@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import Pagination from "@components/Pagination";
 import Button from "@/components/lib/button/Button";
-import { debounce } from "@/utils/utils";
 import useModalStore from "@/stores/modal-store";
 import { ArrowLeftRight, SlidersHorizontal } from "lucide-react";
 import SearchBar from "../ui/SearchBar";
@@ -15,6 +14,7 @@ import { Stack } from "../ui/Stack";
 import DirectoryLayout from "../lib/DirectoryLayout";
 import { PageLayout } from "./PageLayout";
 import type { Filters } from "@/types/pagination";
+import { parseNumberParam } from "@/utils/utils";
 
 export const FILTER_KEYS: Array<keyof Filters> = [
   "specialization",
@@ -28,6 +28,8 @@ export const FILTER_KEYS: Array<keyof Filters> = [
   "sortOrder",
 ] as const;
 
+const sq = "searchQuery";
+
 function Directory() {
   const currentView = useLocation().pathname.split("/").at(-1) ?? "doctors";
   const viewOnSwitch = currentView === "doctors" ? "clinics" : "doctors";
@@ -37,9 +39,9 @@ function Directory() {
 
   const [params, setParams] = useSearchParams();
   const [hasNext, setHasNext] = useState(false);
-  const [localSearch, setLocalSearch] = useState<string | null>(null);
 
-  const page = params.get("page") ? Number(params.get("page")) : 1;
+  const page = parseNumberParam(params, "page", 1);
+  const searchQuery = params.get(sq) ?? null;
 
   const activeFilterCount = useMemo(
     function () {
@@ -56,19 +58,6 @@ function Directory() {
     [params],
   );
 
-  useEffect(
-    function () {
-      const frame = requestAnimationFrame(function () {
-        setLocalSearch(params.get("searchQuery"));
-      });
-
-      return function () {
-        cancelAnimationFrame(frame);
-      };
-    },
-    [params],
-  );
-
   const setPage = useCallback(
     function (pg: number) {
       setParams(function (prev) {
@@ -80,39 +69,27 @@ function Directory() {
     [setParams],
   );
 
-  const setSearchQuery = useRef(
-    debounce(function (sq: string) {
-      const key = "searchQuery";
+  const handleSearch = useCallback(
+    function (query: string) {
       setParams(function (prev) {
         const next = new URLSearchParams(prev);
 
-        next.set(key, sq);
+        next.set(sq, query);
         next.set("page", "1");
 
-        return next;
-      });
-    }, 350),
-  ).current;
-
-  const handleSearch = useCallback(
-    function (val: string) {
-      setLocalSearch(val);
-      setSearchQuery(val);
-    },
-    [setSearchQuery],
-  );
-
-  const clearSearch = useCallback(
-    function () {
-      setLocalSearch("");
-      setParams(function (prev) {
-        const next = new URLSearchParams(prev);
-        next.delete("searchQuery");
         return next;
       });
     },
     [setParams],
   );
+
+  function clearSearch() {
+    setParams(function (prev) {
+      const next = new URLSearchParams(prev);
+      next.delete(sq);
+      return next;
+    });
+  }
 
   const handlePageChange = useCallback(
     function (direction: "next" | "previous") {
@@ -154,7 +131,10 @@ function Directory() {
           >
             <SlidersHorizontal />
             {!!activeFilterCount && (
-              <span className="absolute -top-2 -right-2 bg-accent text-white rounded-md w-4 h-4 flex items-center justify-center text-xs">
+              <span
+                className="absolute -top-2 -right-2 bg-accent text-white rounded-md 
+              w-4 h-4 flex items-center justify-center text-xs"
+              >
                 {activeFilterCount}
               </span>
             )}
@@ -162,14 +142,12 @@ function Directory() {
 
           <Stack align="center">
             <SearchBar
+              value={searchQuery}
               id="directory-search"
               aria-label={`search ${currentView}`}
               clearable={true}
-              onChange={function (ev) {
-                handleSearch(ev.currentTarget.value);
-              }}
-              value={localSearch ?? ""}
               onClear={clearSearch}
+              onChange={handleSearch}
               size="xs"
             />
 

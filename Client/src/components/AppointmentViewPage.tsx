@@ -398,7 +398,7 @@ function AppointmentOverview({
                 </div>
               </div>
               <article className="flex items-end justify-end">
-                {appointment.status !== "active" && (
+                {appointment.status === "active" && (
                   <Button
                     size="xs"
                     bg={true}

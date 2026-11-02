@@ -1,5 +1,4 @@
 import { useFetchProfile } from "@/hooks/use-auth";
-import Divider from "@components/ui/Divider";
 import { PageLayout } from "../PageLayout";
 import { NavLink, Outlet } from "react-router-dom";
 import { Stack } from "@/components/ui/Stack";
@@ -52,8 +51,6 @@ export function PatientProfile() {
           </div>
         </Stack>
       </div>
-
-      <Divider />
 
       <div className="border-b border-border/40 sticky top-0 bg-background/80 backdrop-blur-md z-10 mt-8">
         <nav

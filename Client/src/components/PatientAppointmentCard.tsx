@@ -1,9 +1,6 @@
-import { fromISO } from "@/domain/scheduling/utils";
-import { Eye, Trash } from "lucide-react";
 import Button from "./lib/button/Button";
 import Badge from "@components/ui/Badge";
 import Card from "@components/ui/Card";
-import { Stack } from "@components/ui/Stack";
 import type { APIError } from "@/types/http";
 import useModalStore from "@/stores/modal-store";
 import { useCancelAppointment } from "@/hooks/use-doctors";
@@ -11,6 +8,8 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { getClassConfig } from "./lib/button/styles";
 import type { AppointmentPatientResponse } from "@/types/appointment";
+import { statusPresentation } from "@/utils/constants";
+import { cn } from "@/utils/utils";
 
 export function PatientAppointmentCard({
   appointment,
@@ -54,41 +53,43 @@ export function PatientAppointmentCard({
   }
 
   return (
-    <Card className="border-border flex flex-col gap-2">
+    <Card key={appointment.id} className="border-border flex flex-col gap-2">
       <Card.Header className="flex items-start justify-between">
-        <Stack orientation="V">
-          <Card.Title>Dr. {appointmentDoctor?.name}</Card.Title>
-        </Stack>
+        <Card.Title className="text-base">
+          Dr. {appointment.doctor.name}
+        </Card.Title>
 
-        <Stack align="center" gap={12}>
-          <span className="text-sm font-semibold whitespace-nowrap tracking-wide">
-            {fromISO(appointment.scheduledDate).toFormat("dd LLL yyyy")}
-          </span>
-
-          <Badge
-            size="xs"
-            as="span"
-            className="font-black"
-            color={appointment.status === "active" ? "indicator" : "secondary"}
-          >
-            {appointment.status}
-          </Badge>
-        </Stack>
+        <Badge
+          size="xs"
+          as="span"
+          className={cn(
+            "font-black px-2",
+            statusPresentation[appointment.status].classes,
+          )}
+        >
+          {appointment.status}
+        </Badge>
       </Card.Header>
 
-      <Card.Footer className="flex items-center justify-end self-end gap-3">
+      <Card.Footer className="flex items-center justify-end gap-3">
         {appointment.status === "active" && (
-          <Button endIcon={<Trash />} size="xs" onClick={handleCancellation}>
+          <Button
+            size="xs"
+            color="secondary"
+            data-tooltip="cancel"
+            aria-label={`Cancel appointment with ${appointment.doctor.name}`}
+            onClick={handleCancellation}
+          >
             Cancel
           </Button>
         )}
 
         <Link
           to={`/app/workspace/patient/appointments/${appointment.id}`}
-          className={getClassConfig({ size: "xs", color: "brand" })}
-          aria-label={`View appointment with Dr. ${appointmentDoctor.name}`}
+          className={getClassConfig({ size: "xs", color: "white" })}
+          aria-label={`View appointment with ${appointment.doctor.name}`}
         >
-          View <Eye aria-hidden="true" />
+          View
         </Link>
       </Card.Footer>
     </Card>

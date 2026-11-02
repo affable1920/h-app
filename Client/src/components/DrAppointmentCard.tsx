@@ -1,4 +1,3 @@
-import { Ban, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getClassConfig } from "./lib/button/styles";
 import Button from "./lib/button/Button";
@@ -8,34 +7,9 @@ import type { APIError } from "@/types/http";
 import useModalStore from "@/stores/modal-store";
 import { useCancelAppointment } from "@/hooks/use-doctors";
 import { toast } from "sonner";
-import type { components } from "@/types/api";
-import type { AppointmentStatus } from "@/types/appointment";
+import type { AppointmentDoctorResponse } from "@/types/appointment";
 import { cn } from "@/utils/utils";
-
-export type AppointmentDoctorResponse =
-  components["schemas"]["AppointmentDoctorResponse"];
-
-const statusPresentation: Record<
-  AppointmentStatus,
-  { label: string; classes: string }
-> = {
-  active: {
-    label: "Active",
-    classes: "border-indicator/25 bg-indicator/10 text-indicator",
-  },
-  completed: {
-    label: "Completed",
-    classes: "border-emerald-300/25 bg-emerald-300/10 text-emerald-300",
-  },
-  cancelled: {
-    label: "Cancelled",
-    classes: "bg-layout-raised",
-  },
-  missed: {
-    label: "Missed",
-    classes: "border-amber-300/25 bg-amber-300/10 text-amber-300",
-  },
-};
+import { statusPresentation } from "@/utils/constants";
 
 export function DrAppointmentCard({
   appointment,
@@ -94,21 +68,21 @@ export function DrAppointmentCard({
             "font-black px-2",
             statusPresentation[appointment.status].classes,
           )}
-          color={appointment.status === "active" ? "indicator" : "secondary"}
         >
           {appointment.status}
         </Badge>
       </Card.Header>
 
-      <Card.Footer className="flex items-center justify-end gap-2">
+      <Card.Footer className="flex items-center justify-end gap-3">
         {appointment.status === "active" && (
           <Button
             size="xs"
+            color="secondary"
             data-tooltip="cancel"
             aria-label={`Cancel appointment with ${appointment.patient.name ?? appointment.patient.username ?? "patient"}`}
             onClick={handleCancellation}
           >
-            Cancel <Ban />
+            Cancel
           </Button>
         )}
 
@@ -117,7 +91,7 @@ export function DrAppointmentCard({
           className={getClassConfig({ size: "xs", color: "white" })}
           aria-label={`View appointment with ${appointment.patient.name ?? appointment.patient.username ?? "patient"}`}
         >
-          View <Eye aria-hidden="true" />
+          View
         </Link>
       </Card.Footer>
     </Card>

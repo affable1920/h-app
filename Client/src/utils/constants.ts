@@ -1,3 +1,5 @@
+import type { AppointmentStatus } from "@/types/appointment";
+
 export const SPECIALIZATIONS = [
   "Cardiology",
   "Neurology",
@@ -43,3 +45,32 @@ export const WEEKDAYS = [
   "saturday",
   "sunday",
 ] as const;
+
+export const statusPresentation: Record<
+  AppointmentStatus,
+  { label: string; classes: string }
+> = {
+  active: {
+    label: "Active",
+    classes: "border-indicator/25 bg-indicator/10 text-indicator",
+  },
+  completed: {
+    label: "Completed",
+    classes: "border-emerald-300/25 bg-emerald-300/10 text-emerald-300",
+  },
+  cancelled: {
+    label: "Cancelled",
+    classes: "bg-layout-raised",
+  },
+  missed: {
+    label: "Missed",
+    classes: "border-amber-300/25 bg-amber-300/10 text-amber-300",
+  },
+};
+
+export const APPOINTMENT_STATUSES: Array<AppointmentStatus> = [
+  "active",
+  "completed",
+  "missed",
+  "cancelled",
+];

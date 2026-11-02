@@ -8,12 +8,15 @@ import {
 import type {
   GetDoctorResponse,
   GetAllDoctorsResponse,
-  GetDoctorAppointmentsResponse,
   GetDoctorClinicsResponse,
-  PaginationParams,
 } from "@/types/doctors";
+import type {
+  GetDoctorAppointmentsResponse,
+  GetDoctorAppointmentsParams,
+} from "@/types/appointment";
 import { useSignup } from "./use-auth";
 import { keepPreviousData } from "@tanstack/react-query";
+import type { PaginationParams } from "@/types/pagination";
 
 const api = new APIClient("/doctors");
 
@@ -80,7 +83,7 @@ export const doctorOptions = createQueryOptions(
 
 export const useGetDoctorAppointments = createQueryHook(
   (params) => doctorKeys.relations("appointments", params),
-  (params: PaginationParams) =>
+  (params: GetDoctorAppointmentsParams) =>
     api
       .get<GetDoctorAppointmentsResponse>(`me/appointments`, {
         params: {

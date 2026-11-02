@@ -8,3 +8,8 @@ export type Filters = Omit<
   NonNullable<ServerParams>,
   "max" | "page" | "searchQuery" | "maxDistance"
 >;
+
+export type PaginationParams = Pick<
+  NonNullable<operations["get_doctors"]["parameters"]["query"]>,
+  "page" | "pageSize"
+>;

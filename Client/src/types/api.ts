@@ -465,23 +465,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/patients/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Patient Profile */
-        get: operations["get_profile"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/patients/me/appointments": {
         parameters: {
             query?: never;
@@ -1657,6 +1640,11 @@ export interface operations {
             query?: {
                 page?: number;
                 pageSize?: number;
+                searchQuery?: string | null;
+                appointmentStatus?: components["schemas"]["AppointmentStatus"] | null;
+                scheduledDate?: string | null;
+                sortColumn?: string | null;
+                sortOrder?: components["schemas"]["SortOrder"];
             };
             header?: never;
             path?: never;
@@ -2187,31 +2175,16 @@ export interface operations {
             };
         };
     };
-    get_profile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PatientProfileResponse"];
-                };
-            };
-        };
-    };
     get_appointments: {
         parameters: {
             query?: {
                 page?: number;
                 pageSize?: number;
+                searchQuery?: string | null;
+                appointmentStatus?: components["schemas"]["AppointmentStatus"] | null;
+                scheduledDate?: string | null;
+                sortColumn?: string | null;
+                sortOrder?: components["schemas"]["SortOrder"];
             };
             header?: never;
             path?: never;

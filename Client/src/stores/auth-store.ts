@@ -1,3 +1,4 @@
+import queryClient from "@/core/query-client";
 import type { Role, UserResponse } from "@/types/user";
 import { jwtDecode } from "jwt-decode";
 import { create } from "zustand";
@@ -39,7 +40,8 @@ const useAuthStore = create<AuthStore>()(
 
 export function logout(to?: string) {
   useAuthStore.persist.clearStorage();
-  window.location.href = to ?? "/app/auth";
+  queryClient.clear();
+  window.location.href = to ?? "auth";
 }
 
 export default useAuthStore;

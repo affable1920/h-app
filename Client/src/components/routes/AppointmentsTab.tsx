@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import DirectoryLayout from "@/components/lib/DirectoryLayout";
 import Pagination from "@/components/Pagination";
 import Button from "@/components/lib/button/Button";
@@ -10,7 +10,6 @@ import {
   ArrowUpAZ,
   Calendar,
   Check,
-  RefreshCcw,
   SlidersHorizontal,
   X,
 } from "lucide-react";
@@ -31,17 +30,16 @@ export function AppointmentsTab({
   const {
     page,
     appointmentStatus,
-    handlePageChange,
-    handleStatusChange,
+    activeFiltersCount,
     searchQuery,
-    changeSortOrder,
-    reset,
-    handleSearch,
     sortColumn,
     sortOrder,
-    handleSort,
-    resetSort,
+    reset,
+    handlePageChange,
+    setFilter,
   } = useFilters();
+
+  const viewSummary = Boolean(appointmentStatus || sortColumn);
 
   const [showOptions, setShowOptions] = useState<"filter" | "sort" | null>(
     null,
@@ -69,15 +67,6 @@ export function AppointmentsTab({
       document.removeEventListener("mousedown", handleMouseDown);
     };
   }, []);
-
-  const clearSearch = useMemo(
-    function () {
-      return function () {
-        reset("searchQuery");
-      };
-    },
-    [reset],
-  );
 
   return (
     <DirectoryLayout className="space-y-8">
@@ -109,6 +98,21 @@ export function AppointmentsTab({
           >
             <ArrowUpAZ />
           </Button>
+
+          {activeFiltersCount > 0 && (
+            <Button
+              data-tooltip="clear all"
+              aria-label="clear appointment search, filters, and sorting"
+              variant="icon"
+              bg={true}
+              type="reset"
+              onClick={function () {
+                reset();
+              }}
+            >
+              <X />
+            </Button>
+          )}
 
           <AnimatePresence mode="sync">
             {showOptions === "sort" && (
@@ -148,7 +152,7 @@ export function AppointmentsTab({
                         data-tooltip="sort descending"
                         disabled={!sortColumn}
                         onClick={function () {
-                          changeSortOrder("desc");
+                          setFilter("sortOrder", "desc");
                         }}
                       >
                         DESC <ArrowUpAZ />
@@ -160,7 +164,7 @@ export function AppointmentsTab({
                         )}
                         disabled={!sortColumn}
                         onClick={function () {
-                          changeSortOrder("asc");
+                          setFilter("sortOrder", "asc");
                         }}
                         data-tooltip="sort ascending"
                       >
@@ -179,7 +183,13 @@ export function AppointmentsTab({
                           size="xs"
                           color="secondary"
                           data-tooltip="clear sort"
-                          onClick={resetSort}
+                          aria-label="clear sort filters"
+                          onClick={function () {
+                            reset({
+                              sortColumn: true,
+                              sortOrder: true,
+                            });
+                          }}
                         >
                           <X />
                         </Button>
@@ -208,7 +218,7 @@ export function AppointmentsTab({
                               flex items-center gap-2 w-full p-2 justify-between cursor-pointer
                               hover:bg-layout-raised rounded-lg transition-colors duration-200 flex-1 min-w-0"
                             onClick={function () {
-                              handleSort(label);
+                              setFilter("sortColumn", label);
                             }}
                           >
                             <span className="inline-flex items-center gap-2 shrink-0">
@@ -239,9 +249,13 @@ export function AppointmentsTab({
             aria-label="search appointments"
             size="xs"
             value={searchQuery ?? ""}
-            onChange={handleSearch}
+            onChange={function (ev) {
+              setFilter("searchQuery", ev);
+            }}
             clearable={true}
-            onClear={clearSearch}
+            onClear={function () {
+              reset({ searchQuery: true });
+            }}
             placeholder="Search for appointments ..."
           />
         </Stack>
@@ -263,7 +277,7 @@ export function AppointmentsTab({
             >
               <motion.div
                 initial={{ height: 0 }}
-                animate={{ height: "auto", marginBottom: "24px" }}
+                animate={{ height: "auto", marginBottom: "20px" }}
                 exit={{ height: 0, marginBottom: 0 }}
                 className="flex gap-5 items-center"
               >
@@ -277,7 +291,7 @@ export function AppointmentsTab({
                         <Badge
                           as="button"
                           onClick={function () {
-                            handleStatusChange(status);
+                            setFilter("appointmentStatus", status);
                           }}
                           className={cn(
                             "text-center",
@@ -292,27 +306,94 @@ export function AppointmentsTab({
                     );
                   })}
                 </Stack>
-                {appointmentStatus !== null && (
-                  <Button
-                    data-tooltip="reset"
-                    aria-label="reset appointment filters"
-                    color="secondary"
-                    variant="icon"
-                    bg={true}
-                    size="xs"
-                    onClick={function () {
-                      reset("appointmentStatus");
-                    }}
-                  >
-                    <RefreshCcw />
-                  </Button>
-                )}
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {children}
+        <AnimatePresence mode="wait">
+          {viewSummary && (
+            <motion.div
+              initial={{ height: 0 }}
+              animate={{ height: "auto", marginBottom: "20px" }}
+              exit={{
+                height: 0,
+                marginBottom: 0,
+                transition: {
+                  when: "beforeChildren",
+                  duration: 0.1,
+                },
+              }}
+              className="flex justify-end"
+            >
+              <motion.article
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                initial={{ y: "30px" }}
+                animate={{ y: 0 }}
+                exit={{
+                  y: "20px",
+                  transition: {
+                    y: {
+                      duration: 0.1,
+                      ease: "easeIn",
+                    },
+                    marginBottom: {
+                      duration: 0.2,
+                      ease: "easeOut",
+                    },
+                  },
+                }}
+                transition={{
+                  ease: "easeOut",
+                  duration: 0.2,
+                }}
+                className="italic space-y-1.5 text-right"
+              >
+                Viewing{" "}
+                {appointmentStatus && (
+                  <span>
+                    Status:{" "}
+                    <span
+                      className={cn(
+                        "px-2 py-[0.25] rounded-md text-sm ring-1 inline-flex ring-current/30 mx-1",
+                        statusPresentation[appointmentStatus].classes,
+                      )}
+                    >
+                      {appointmentStatus}
+                    </span>
+                  </span>
+                )}
+                <br />
+                {sortColumn && (
+                  <span>
+                    Sorted by:{" "}
+                    <span
+                      className={cn(
+                        "inline-flex px-2 py-[0.25] rounded-md text-sm ring-1 ring-current/30 mx-1",
+                      )}
+                    >
+                      {sortColumn}
+                    </span>{" "}
+                    from:{" "}
+                    <span
+                      className={cn(
+                        "inline-flex px-2 py-[0.25] rounded-md text-sm ring-1 ring-current/30 mx-1",
+                      )}
+                    >
+                      {sortOrder === "desc"
+                        ? "recents first"
+                        : "earliest first"}
+                    </span>
+                  </span>
+                )}
+              </motion.article>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <section>{children}</section>
       </DirectoryLayout.Content>
 
       <DirectoryLayout.Footer>

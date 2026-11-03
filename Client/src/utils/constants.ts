@@ -74,3 +74,7 @@ export const APPOINTMENT_STATUSES: Array<AppointmentStatus> = [
   "missed",
   "cancelled",
 ];
+
+export const APPOINTMENT_STATUSES_SET: Set<string> = new Set(
+  APPOINTMENT_STATUSES,
+);

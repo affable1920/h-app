@@ -1,6 +1,12 @@
 import { ChevronRight, MousePointer, X } from "lucide-react";
 import { AnimatePresence, motion, type Variant } from "motion/react";
-import { forwardRef, useState } from "react";
+import {
+  forwardRef,
+  useRef,
+  useState,
+  type ForwardedRef,
+  type KeyboardEvent,
+} from "react";
 import Button from "../lib/button/Button";
 import { Stack } from "./Stack";
 import Badge from "./Badge";
@@ -53,10 +59,7 @@ interface MultiSelectProps<T extends string | number> {
   clearable?: boolean;
 }
 
-export const MultiSelect = forwardRef<
-  HTMLUListElement,
-  MultiSelectProps<string | number>
->(function (
+function MultiSelectInner<T extends string | number>(
   {
     label,
     clearable = true,
@@ -64,17 +67,32 @@ export const MultiSelect = forwardRef<
     onValueChange,
     selected = [],
     showSelectAll = false,
-  },
-  ref,
+  }: MultiSelectProps<T>,
+  ref: ForwardedRef<HTMLUListElement>,
 ) {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
-  function getDisplayLabel(option: Option<string | number>["value"]) {
+  function getDisplayLabel(option: T) {
     return options.find((o) => o.value === option)?.label;
   }
 
+  function escape(ev: KeyboardEvent) {
+    if (!isOpen) {
+      return;
+    }
+
+    if (ev.key.toLowerCase() === "escape") {
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    }
+  }
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" onKeyDown={escape}>
       {selected.length > 0 && (
         <Stack className="px-1" justify="between" align="start">
           <Stack
@@ -120,7 +138,7 @@ export const MultiSelect = forwardRef<
         </Stack>
       )}
       <AnimatePresence mode="wait">
-        {open && (
+        {isOpen && (
           <motion.div
             layout
             variants={dropDownVariants}
@@ -190,19 +208,26 @@ export const MultiSelect = forwardRef<
       </AnimatePresence>
 
       <Button
+        ref={triggerRef}
         color="brand"
         className="w-full"
         border={false}
-        aria-expanded={open}
+        aria-expanded={isOpen}
         onClick={function () {
-          setOpen((p) => !p);
+          setIsOpen((p) => !p);
         }}
       >
         {label}
-        <motion.i animate={{ rotate: open ? -90 : 0 }}>
+        <motion.i animate={{ rotate: isOpen ? -90 : 0 }}>
           <ChevronRight size={10} strokeWidth={5} />
         </motion.i>
       </Button>
     </div>
   );
-});
+}
+
+export const MultiSelect = forwardRef(MultiSelectInner) as <
+  T extends string | number,
+>(
+  props: MultiSelectProps<T> & { ref?: ForwardedRef<HTMLUListElement> },
+) => ReturnType<typeof MultiSelectInner>;

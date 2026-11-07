@@ -1,4 +1,3 @@
-import DirectoryFilter from "@/components/DirectoryFilter";
 import BookingGate from "@/features/booking/components/BookingGate";
 import Confirmation from "./Confirmation";
 import SearchBar from "../ui/SearchBar";
@@ -9,6 +8,8 @@ import type { Clinic, Slot } from "@/types/schedules";
 import type { DoctorHttpMinimal } from "@/types/doctors";
 import type { ReactNode } from "react";
 import InformationModal from "./InformationModal";
+import { DoctorFilterPanel } from "../DoctorsFilterPanel";
+import { ClinicFilterPanel } from "../ClinicsFilterPanel";
 
 export type ConfirmationProps = {
   tagline: ReactNode;
@@ -33,7 +34,8 @@ export type MapperProps = {
     context: unknown;
   };
   "confirmation-modal": ConfirmationProps;
-  "directory-filter-modal": object;
+  "doctor-filter-modal": object;
+  "clinic-filter-modal": object;
   "doctor-profile-setup-modal": object;
   "picker-modal": {
     items: Array<unknown>;
@@ -76,9 +78,13 @@ const MODAL_MAPPINGS: Record<Modal, ModalPayload> = {
     label: "Create a schedule",
     title: "Create a schedule",
   },
-  "directory-filter-modal": {
-    element: DirectoryFilter,
-    label: "filter directory",
+  "doctor-filter-modal": {
+    element: DoctorFilterPanel,
+    label: "doctor directory filter",
+  },
+  "clinic-filter-modal": {
+    element: ClinicFilterPanel,
+    label: "clinic directory filter",
   },
   "doctor-profile-setup-modal": {
     element: DrProfileSetup,

@@ -46,6 +46,11 @@ from app.features.auth import security
 
 logger = logging.getLogger(__name__)
 
+SORT_COLUMNS_MAP = {
+    "rating": "avg_rating",
+    "reviews": "review_count"
+}
+
 
 class DoctorService(EntityService[Doctor]):
     entity = Doctor
@@ -132,7 +137,12 @@ class DoctorService(EntityService[Doctor]):
         if sort_params.column is None:
             return clauses
 
-        column = getattr(Doctor, sort_params.column, None)
+        mapped_column = SORT_COLUMNS_MAP.get(
+            sort_params.column,
+            sort_params.column
+        )
+
+        column = getattr(Doctor, mapped_column, None)
 
         if column is not None:
             if sort_params.order == SortOrder.DESC:

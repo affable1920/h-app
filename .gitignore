@@ -1,4 +1,3 @@
-
 # Dependencies
 node_modules/
 venv/
@@ -72,3 +71,6 @@ Area Assessment.md
 
 docs/backend-learning-log.md
 BACKEND_SPRINT.md
+
+tests/
+.github/

@@ -1,74 +1,41 @@
-import useModalStore from "@/stores/modal-store";
-import { useMemo, useState } from "react";
-import Badge from "@/components/ui/Badge";
+import { useState, type ReactNode } from "react";
 import Button from "./lib/button/Button";
-import * as constants from "@/utils/constants";
-import { useSearchParams } from "react-router-dom";
 import { Stack } from "./ui/Stack";
-import Ratings from "./Ratings";
-import {
-  ArrowDownAZ,
-  Mars,
-  ShieldCheck,
-  SlidersHorizontal,
-  Venus,
-} from "lucide-react";
+import { ArrowDownAZ, ArrowUpAZ, SlidersHorizontal, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Divider from "./ui/Divider";
-import { Controller } from "react-hook-form";
-import { useFilterStore, EMPTY_FILTERS } from "@stores/filter-store";
-import type { Filters } from "@/types/pagination";
-import { Select } from "./ui/SelectApi";
-import StepInput from "./ui/StepInput";
+import { removeModal } from "@/stores/modal-store";
+import Badge from "./ui/Badge";
+import { cn } from "@/utils/utils";
 
-const labelStyle = "text-text-normal capitalize text-center";
+interface DirectoryFilterProps {
+  onReset: () => void;
+  onApply: () => void;
+  children: ReactNode;
+  sortColumns: readonly string[];
+  sortColumn: string | null;
+  sortOrder: "asc" | "desc" | null;
+  hasActiveFilters: boolean;
+  isDirty: boolean;
+  onClearSort: () => void;
+  setSortColumn: (col: string) => void;
+  setSortOrder: (order: "asc" | "desc") => void;
+}
 
-const SORT_COLS = {
-  name: "asc",
-  rating: "desc",
-  reviews: "desc",
-  experience: "desc",
-  fee: "asc",
-};
-
-function DirectoryFilter() {
-  const [, setSearchParams] = useSearchParams();
-  const closeModal = useModalStore((s) => s.closeModal);
-  const [showSorter, setShowSorter] = useState(false);
-
-  const { setValue, getValues, control, ...form } = useFilterStore();
-
-  const so = form.watch("sortColumn");
-
-  const fields = form.watch();
-
-  const hasActiveFilters = useMemo(
-    function () {
-      return Object.values(fields).some(function (v) {
-        return Boolean(v);
-      });
-    },
-    [fields],
-  );
-
-  async function applyFiltersHttp() {
-    const newParams = new URLSearchParams();
-
-    for (const [key, val] of Object.entries(getValues())) {
-      if (!val) {
-        continue;
-      }
-
-      newParams.set(key, String(val));
-    }
-
-    try {
-      setSearchParams(newParams);
-      closeModal();
-    } catch (ex) {
-      console.log(ex);
-    }
-  }
+function DirectoryFilter({
+  sortColumn,
+  sortOrder,
+  children,
+  sortColumns,
+  onClearSort,
+  onReset,
+  onApply,
+  isDirty,
+  setSortOrder,
+  setSortColumn,
+  hasActiveFilters,
+}: DirectoryFilterProps) {
+  const [showSorter, setShowSorter] = useState(Boolean(sortColumn));
 
   return (
     <section className="h-full flex flex-col gap-8 py-6">
@@ -103,277 +70,139 @@ function DirectoryFilter() {
       <Stack
         orientation="V"
         gap={0}
-        className="grow relative px-8 py-6 overflow-y-scroll"
+        justify="center"
+        className="grow relative overflow-y-scroll"
         style={{ scrollbarWidth: "none", scrollBehavior: "smooth" }}
       >
-        <AnimatePresence mode="wait">
-          {showSorter && (
-            <motion.div
-              className="flex flex-col gap-4"
-              initial={{ height: 0, marginBottom: 0 }}
-              animate={{ height: "auto", marginBottom: "32px" }}
-              exit={{ height: 0, marginBottom: 0 }}
-            >
-              <Stack justify="between" align="center" className="relative">
-                <p className={labelStyle + " mx-auto"}>Sort by</p>
-                {so && (
-                  <Button
-                    onClick={function () {
-                      form.reset(
-                        {
-                          ...fields,
-                          sortColumn: null,
-                          sortOrder: undefined,
-                        },
-                        { keepDefaultValues: true },
-                      );
-                    }}
-                    aria-label="clear-sort"
-                    size="sm"
-                    variant="icon"
-                    className="absolute right-2 underline-offset-2 hover:underline hover:text-blue-500 
-                    transition-colors"
-                  >
-                    clear
-                  </Button>
-                )}
-              </Stack>
+        <Stack className="px-8">
+          <AnimatePresence mode="wait">
+            {showSorter && (
               <motion.div
-                initial={{ y: "-20px", opacity: 0 }}
-                animate={{
-                  y: 0,
-                  opacity: 1,
-                }}
-                exit={{
-                  y: "-10px",
-                  opacity: 0,
-                }}
-                className="flex flex-wrap gap-2"
+                className="flex flex-col gap-4"
+                initial={{ height: 0, marginBottom: 0 }}
+                animate={{ height: "auto", marginBottom: "32px" }}
+                exit={{ height: 0, marginBottom: 0 }}
               >
-                {Object.entries(
-                  SORT_COLS as Record<string, Filters["sortOrder"]>,
-                ).map(function ([col, order]) {
-                  return (
-                    <Button
-                      aria-pressed={col === fields.sortColumn}
-                      onClick={function () {
-                        const sc = col === fields.sortColumn ? null : col;
-                        setValue("sortColumn", sc, {
-                          shouldDirty: true,
-                        });
-                        setValue("sortOrder", order, {
-                          shouldDirty: true,
-                        });
-                      }}
-                      key={col}
-                      size="sm"
-                      variant="icon"
-                      bg={true}
-                      color={col === fields.sortColumn ? "white" : "secondary"}
-                      className="text-xs capitalize grow"
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  {sortColumn && (
+                    <Stack
+                      className="min-w-0 grow"
+                      gap={"xs"}
+                      align="center"
+                      justify="end"
                     >
-                      {col}
-                    </Button>
-                  );
-                })}
-              </motion.div>
-              <Divider />
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <Stack gap="md" orientation="V">
-          <Controller
-            control={control}
-            name="specialization"
-            render={function ({ field, fieldState }) {
-              return (
-                <Stack orientation="V">
-                  {fieldState.error && (
-                    <span
-                      role="alert"
-                      className="text-red-400 text-sm px-1 first-letter:capitalize"
-                    >
-                      {fieldState.error.message}
-                    </span>
+                      {sortOrder !== null && (
+                        <Badge
+                          as="button"
+                          size="xs"
+                          onClick={function () {
+                            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                          }}
+                          data-tooltip={`set sort order to ${sortOrder === "asc" ? "DESC" : "ASC"}`}
+                          className="self-stretch gap-2 font-semibold px-2"
+                        >
+                          {sortOrder === "asc" ? (
+                            <>
+                              <ArrowDownAZ size={10} />
+                              ASC
+                            </>
+                          ) : (
+                            <>
+                              <ArrowUpAZ size={10} /> DESC
+                            </>
+                          )}
+                        </Badge>
+                      )}
+
+                      <Button
+                        onClick={onClearSort}
+                        aria-label="clear-sort"
+                        size="xs"
+                        variant="icon"
+                        color="secondary"
+                        bg={true}
+                        data-tooltip="clear sort filters"
+                        className="self-stretch"
+                      >
+                        <X />
+                      </Button>
+                    </Stack>
                   )}
+                </motion.div>
 
-                  <Select
-                    label="filter by specialization"
-                    options={constants.SPECIALIZATIONS.map((sp) => ({
-                      label: sp,
-                      value: sp,
-                    }))}
-                    onValueChange={function (option) {
-                      setValue("specialization", option as string, {
-                        shouldDirty: true,
-                      });
-                    }}
-                    selected={field.value ?? null}
-                  />
-                </Stack>
-              );
-            }}
-          />
-
-          <Stack orientation="V">
-            <p className={labelStyle}>
-              filter by{" "}
-              <em>
-                <strong>rating</strong>
-              </em>
-            </p>
-
-            <Stack
-              gap={10}
-              style={{
-                flexWrap: "wrap",
-              }}
-            >
-              {[2, 3, 4].map(function (rating) {
-                return (
-                  <Badge
-                    as="button"
-                    key={rating}
-                    className="grow"
-                    aria-label={`filter by minimum rating of ${rating} stars.`}
-                    aria-pressed={rating === fields.minRating}
-                    selected={rating === fields.minRating}
-                    onClick={function () {
-                      setValue(
-                        "minRating",
-                        rating === fields.minRating ? null : rating,
-                        {
-                          shouldDirty: true,
-                        },
-                      );
-                    }}
-                  >
-                    <Ratings rating={rating} />
-                  </Badge>
-                );
-              })}
-            </Stack>
-          </Stack>
-
-          <Stack orientation="V">
-            <Stack justify="center" gap={4} align="center">
-              <p className={labelStyle}>Verfication</p>
-              <ShieldCheck size={13} color="teal" />
-            </Stack>
-            <Badge
-              aria-pressed={fields.verified === "1"}
-              selected={fields.verified === "1"}
-              className={`font-semibold`}
-              as="button"
-              onClick={function () {
-                setValue("verified", fields.verified === "1" ? null : "1", {
-                  shouldDirty: true,
-                });
-              }}
-            >
-              Verified Doctors only
-            </Badge>
-          </Stack>
-
-          <Stack orientation="V">
-            <p className={labelStyle}>Gender</p>
-            <Stack justify="between" gap="sm">
-              {Object.entries({ male: <Mars />, female: <Venus /> }).map(
-                function ([gender, icon]) {
-                  const gdr = gender as Filters["gender"];
-                  return (
-                    <Badge
-                      as="button"
-                      aria-pressed={gdr === fields.gender}
-                      className="[&>svg]:size-4 items-center gap-2 capitalize"
-                      selected={gdr === fields.gender}
-                      onClick={function () {
-                        setValue("gender", gdr === fields.gender ? null : gdr, {
-                          shouldDirty: true,
-                        });
-                      }}
-                      key={gender}
-                    >
-                      {gender} {icon}
-                    </Badge>
-                  );
-                },
-              )}
-            </Stack>
-          </Stack>
-
-          <Controller
-            name="experience"
-            control={control}
-            render={function ({ field: { onChange, ...field }, fieldState }) {
-              return (
-                <StepInput
-                  label="min experience (years)"
-                  id="experience"
-                  placeholder="-"
-                  max={60}
-                  step={1}
-                  onChange={function (e) {
-                    onChange(e);
+                <motion.div
+                  initial={{ y: "-20px", opacity: 0 }}
+                  animate={{
+                    y: 0,
+                    opacity: 1,
                   }}
-                  onBlur={field.onBlur}
-                  value={field.value ?? ""}
-                  error={fieldState.error?.message}
-                />
-              );
-            }}
-          />
-
-          <Controller
-            name="fee"
-            control={control}
-            render={function ({ field: { onChange, ...field }, fieldState }) {
-              return (
-                <StepInput
-                  label="max fee"
-                  id="fee"
-                  placeholder="-"
-                  max={800}
-                  step={50}
-                  name={field.name}
-                  onChange={function (e) {
-                    onChange(e);
+                  exit={{
+                    y: "-10px",
+                    opacity: 0,
                   }}
-                  onBlur={field.onBlur}
-                  value={field.value ?? ""}
-                  error={fieldState.error?.message}
-                />
-              );
-            }}
-          />
+                  className="flex flex-wrap gap-2.5"
+                >
+                  {sortColumns.map(function (col) {
+                    return (
+                      <Button
+                        aria-pressed={col === sortColumn}
+                        onClick={function () {
+                          setSortColumn(col);
+                        }}
+                        key={col}
+                        variant="icon"
+                        bg={true}
+                        color={col === sortColumn ? "white" : "secondary"}
+                        className={cn("text-xs capitalize grow")}
+                      >
+                        {col}
+                      </Button>
+                    );
+                  })}
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <Divider />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Stack>
+
+        <Stack className="grow px-8 py-4">{children}</Stack>
       </Stack>
 
-      <Stack align="center" justify="end" className="px-6 [&_button]:scale-90">
+      <Stack align="center" justify="end" className="px-6">
         {hasActiveFilters && (
           <Button
             onClick={function () {
-              form.reset(EMPTY_FILTERS, { keepDefaultValues: true });
+              onReset();
             }}
+            size="xs"
             color="indicator"
-            border={false}
             type="reset"
           >
             Reset
           </Button>
         )}
-        <Button
-          border={false}
-          className="shadow-sm shadow-black/20 border-border-vivid border-2"
-          onClick={closeModal}
-        >
+        <Button size="xs" color="secondary" onClick={removeModal}>
           Cancel
         </Button>
         <Button
-          border={false}
-          disabled={!form.formState.isDirty}
+          size="xs"
+          disabled={!isDirty}
           color="white"
-          onClick={applyFiltersHttp}
+          onClick={function () {
+            onApply();
+            removeModal();
+          }}
         >
           Apply
         </Button>

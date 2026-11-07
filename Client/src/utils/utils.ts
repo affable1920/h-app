@@ -44,13 +44,42 @@ export function paginate<T>(
   return list.slice(start, limit);
 }
 
-export function parseNumberParam(
-  searchParams: URLSearchParams,
-  key: string,
-  defaultValue: number,
-) {
-  const value = searchParams.get(key);
-  return value !== "" && value !== null && value !== undefined
-    ? Number(value)
-    : defaultValue;
+export function parseNumber(
+  raw: string | null,
+  defaultValue: number | null = null,
+): number | null {
+  /**
+   * parse incoming string as a number if it passes isSafeInteger,
+   * accepts a default, which defaults to null
+   */
+  const value = raw === null ? NaN : Number(raw);
+  return Number.isSafeInteger(value) ? value : defaultValue;
+}
+
+export function safeParseNumber(
+  raw: string | null,
+  defaultValue: number = 1,
+): number {
+  /**
+   * if raw equals null, we save value as NaN (not a safe integer)
+   *
+   * otherwise, there are two possibilities:
+   * "" - an empty string, resulting in value being 0.
+   * "abc" | "1" - (a non-empty string), value to be NaN if the
+   * string can't possibly be number converted, else the number.
+   *
+   * so, we either end up with 0, NaN, or a Number
+   * Number.isSafeInteger
+   * - allows only 0 and the Number to pass
+   * - then we check for the number being positive
+   *
+   * else, anyway we return the default 1
+   */
+
+  const value = raw === null ? NaN : Number(raw);
+  return Number.isSafeInteger(value) && value > 0 ? value : defaultValue;
+}
+
+export function parseSwitch(raw: string | null): "1" | null {
+  return raw !== null && raw === "1" ? raw : null;
 }

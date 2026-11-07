@@ -1,5 +1,26 @@
 import type { AppointmentStatus } from "@/types/appointment";
 
+export const CLINIC_FACILITIES = [
+  "Pathology Lab",
+  "X-Ray",
+  "Ultrasound",
+  "CT Scan",
+  "MRI",
+  "ECG",
+  "Echocardiography",
+  "Endoscopy",
+
+  "Emergency Care",
+  "ICU",
+  "Operation Theatre",
+  "Day Care Surgery",
+  "Maternity Ward",
+  "Dialysis",
+  "Vaccination",
+  "Pharmacy",
+  "Ambulance Service",
+];
+
 export const SPECIALIZATIONS = [
   "Cardiology",
   "Neurology",

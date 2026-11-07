@@ -5,7 +5,7 @@ const attrs = {
   strokeWidth: 0,
 };
 
-const Ratings = ({ rating }: { rating: number }) => {
+const Ratings = ({ value }: { value: number }) => {
   return (
     <div className="flex relative [&_svg]:size-3.5">
       {Array.from({ length: 5 }, (_, i) => (
@@ -13,7 +13,7 @@ const Ratings = ({ rating }: { rating: number }) => {
       ))}
 
       <div className="absolute flex">
-        {Array.from({ length: Math.floor(rating) }, (_, i) => (
+        {Array.from({ length: Math.floor(value) }, (_, i) => (
           <StarIcon {...attrs} key={i + 1} fill="#fbbf24" />
         ))}
       </div>

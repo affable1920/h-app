@@ -68,13 +68,12 @@ function ScheduleForm({ doctor }: { doctor: DoctorHttpMinimal }) {
     },
   });
 
-  const clinicsQuery = useGetDoctorClinics(undefined, {
-    staleTime: 5 * 60 * 1000,
-  });
+  const clinicsQuery = useGetDoctorClinics();
 
   const { mutateAsync: create } = useCreateSchedule();
   const { mutate: deleteSchedule } = useDeleteSchedule();
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const recurrence = form.watch("recurrence.kind");
 
   const STEPS = [

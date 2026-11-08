@@ -2,50 +2,73 @@ import { useBreakpoint } from "@/hooks/use-breakpoint";
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
+  type CSSProperties,
+  type ElementType,
   type ForwardedRef,
   type JSX,
   type ReactNode,
 } from "react";
 
-const GAPSIZES = ["xs", "sm", "md", "lg"] as const;
-type GapSize = (typeof GAPSIZES)[number];
-
-type Breakpoint = "md" | "lg";
-type StackPosition = "start" | "center" | "end" | "stretch" | "between";
-
-const gaps: Record<GapSize, string> = {
+const gaps = {
   xs: "8px",
   sm: "16px",
   md: "32px",
   lg: "48px",
+} as const;
+
+type GapSize = keyof typeof gaps;
+
+type Breakpoint = "md" | "lg";
+type StackPosition = "start" | "center" | "end" | "stretch" | "between";
+type Orientation = "H" | "V";
+
+const alignItemsMap: Record<StackPosition, CSSProperties["alignItems"]> = {
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+  stretch: "stretch",
+  between: "stretch", // "between" has no meaning on the cross axis
 };
+
+const justifyContentMap: Record<
+  StackPosition,
+  CSSProperties["justifyContent"]
+> = {
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+  stretch: "stretch",
+  between: "space-between",
+};
+
+type StackElement = "div" | "span";
+type ElementFor = { div: HTMLDivElement; span: HTMLSpanElement };
 
 type LayoutProps = {
-  gap?: GapSize | number;
-  reverse?: boolean;
+  orientation?: Orientation;
   justify?: StackPosition;
   align?: StackPosition;
-  orientation?: "H" | "V";
+  reverse?: boolean;
+  gap?: GapSize | number;
 };
 
-export type StackProps<TAs extends "div" | "span" = "div"> = {
+export type StackProps<TAs extends StackElement = "div"> = {
   as?: TAs;
   children: ReactNode;
 } & LayoutProps &
-  Omit<ComponentPropsWithoutRef<TAs>, "children" | "as"> & {
-    [brk in Breakpoint]?: LayoutProps;
-  };
+  Partial<Record<Breakpoint, LayoutProps>> &
+  Omit<
+    ComponentPropsWithoutRef<TAs>,
+    "children" | "as" | keyof LayoutProps | Breakpoint
+  >;
 
-// ============================================================================================
-// INNER COMPONENT WITH FORWARDREF ---
-const StackInner = forwardRef<any, StackProps<any>>(function (
-  { children, as, md, lg, ...rest },
-  ref,
-) {
-  const Component = as ?? "div";
+const StackInner = forwardRef<
+  ElementFor[StackElement],
+  StackProps<StackElement>
+>(function ({ children, as, md, lg, ...rest }, ref) {
+  const Component: ElementType = as ?? "div";
   const tier = useBreakpoint();
 
-  // Extract layout-only props which should be overridden per tier
   const {
     orientation: baseOrientation = "H",
     reverse: baseReverse = false,
@@ -55,56 +78,49 @@ const StackInner = forwardRef<any, StackProps<any>>(function (
     ...htmlAttributes
   } = rest;
 
-  const breakpointOverride =
-    tier === "lg" ? (lg ?? md) : tier === "md" ? md : undefined;
+  const override = tier === "lg" ? (lg ?? md) : tier === "md" ? md : undefined;
 
-  const orientation = breakpointOverride?.orientation ?? baseOrientation;
-  const reverse = breakpointOverride?.reverse ?? baseReverse;
-  const align = breakpointOverride?.align ?? baseAlign;
-  const justify = breakpointOverride?.justify ?? baseJustify;
-  const gap = breakpointOverride?.gap ?? baseGap;
+  const orientation = override?.orientation ?? baseOrientation;
+  const reverse = override?.reverse ?? baseReverse;
+  const align = override?.align ?? baseAlign;
+  const justify = override?.justify ?? baseJustify;
+  const gap = override?.gap ?? baseGap;
 
-  const getOrientation =
-    orientation === "H"
-      ? reverse
-        ? "row-reverse"
-        : "row"
-      : reverse
-        ? "column-reverse"
-        : "column";
+  const isH = orientation === "H";
+
+  const flexDirection: CSSProperties["flexDirection"] = isH
+    ? reverse
+      ? "row-reverse"
+      : "row"
+    : reverse
+      ? "column-reverse"
+      : "column";
 
   const calculatedGap =
     typeof gap === "number" ? `${gap}px` : gaps[gap as GapSize];
 
+  const style: CSSProperties = {
+    ...htmlAttributes.style,
+    display: "flex",
+    flexDirection,
+    alignItems: alignItemsMap[isH ? align : justify],
+    gap: calculatedGap,
+    justifyContent: justifyContentMap[isH ? justify : align],
+  };
+
   return (
     <Component
       {...htmlAttributes}
-      ref={ref}
-      style={{
-        ...htmlAttributes.style,
-        display: "flex",
-        flexDirection: getOrientation,
-        alignItems: orientation === "H" ? align : justify,
-        gap: calculatedGap,
-        justifyContent:
-          orientation === "H"
-            ? justify === "between"
-              ? "space" + "-between"
-              : justify
-            : align,
-      }}
+      ref={ref as ForwardedRef<HTMLDivElement>}
+      style={style}
     >
       {children}
     </Component>
   );
 });
 
-// ============================================================================================
-// STRICT TYPE CASTED EXPORT ---
-// This casting explicitly allows the 'as' prop to properly change the Ref's typings dynamically
-
-export const Stack = StackInner as <TAs extends "div" | "span">(
+export const Stack = StackInner as <TAs extends StackElement>(
   props: StackProps<TAs> & {
-    ref?: ForwardedRef<TAs extends "div" ? HTMLDivElement : HTMLSpanElement>;
+    ref?: ForwardedRef<ElementFor[TAs]>;
   },
 ) => JSX.Element;

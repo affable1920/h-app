@@ -16,8 +16,10 @@ async function* stream(content: ReadableStream<Uint8Array<ArrayBuffer>>) {
       .filter(Boolean);
 
     for (const line of lines) {
+      let chunk;
+
       try {
-        var chunk = JSON.parse(line);
+        chunk = JSON.parse(line);
       } catch {
         chunk = {};
       }

@@ -13,7 +13,7 @@ from app.features.calling.schema import (
 )
 
 from app.database.models import Doctor, Patient
-from app.core.exceptions import AppException, InvalidTokenError
+from app.core.exceptions import AppException, AuthenticationError
 from app.database.entry_async import AsyncSessionLocal
 from app.features.auth.dependencies import get_current_user
 
@@ -56,7 +56,7 @@ async def authenticate_client(
                 session=session,
             )
 
-        except InvalidTokenError:
+        except AuthenticationError:
             await reject_connection(
                 ws=ws,
                 reason="Invalid or expired session..",

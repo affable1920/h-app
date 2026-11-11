@@ -8,10 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.user import UserResponse
 from app.core.exceptions import (
+    AuthenticationError,
     ConflictError,
     EntityNotFoundException,
-    InvalidCredentialsError,
-    InvalidTokenError
 )
 
 from app.database.models import (
@@ -58,8 +57,6 @@ class AuthService:
             case _:
                 return None
 
-    #
-
     @staticmethod
     async def find_token_by_hash(
         token: str,
@@ -75,8 +72,6 @@ class AuthService:
                 )
             )
         )
-
-    #
 
     @staticmethod
     def create_verification_link_record(
@@ -96,8 +91,6 @@ class AuthService:
         )
 
         return link
-
-    #
 
     @staticmethod
     async def send_verification_mail(
@@ -159,8 +152,6 @@ class AuthService:
             )
         )
 
-    #
-
     @staticmethod
     async def verify_email(
         link: str,
@@ -177,7 +168,7 @@ class AuthService:
                 "Rejecting the verification ..."
             )
 
-            raise InvalidTokenError(message="Invalid token")
+            raise AuthenticationError(message="Invalid token")
 
         if token_record.used_at is not None:
             logger.info(
@@ -185,15 +176,15 @@ class AuthService:
                 "Token already used"
             )
 
-            raise InvalidTokenError(message="token already used..")
+            raise AuthenticationError(message="token already used..")
 
         if token_record.exp < datetime.now(timezone.utc):
             logger.info(
                 "Token has expired ..."
             )
 
-            raise InvalidTokenError(
-                message="Token expired. Please request a new one!"
+            raise AuthenticationError(
+                message="Session expired. Please login again!"
             )
 
         user_id = token_record.user_id
@@ -232,8 +223,6 @@ class AuthService:
             )
         )
 
-    #
-
     @classmethod
     async def login_doctor(
         cls,
@@ -258,9 +247,7 @@ class AuthService:
             pwd=credentials.password,
             hash=db_user.hash
         ):
-            raise InvalidCredentialsError(
-                message="Invalid password.."
-            )
+            raise AuthenticationError(message="Invalid credentials")
 
         token = security.create_access_token(
             id=db_user.id,
@@ -268,8 +255,6 @@ class AuthService:
         )
 
         return token, db_user
-
-    #
 
     @classmethod
     async def login_patient(
@@ -291,9 +276,7 @@ class AuthService:
             pwd=credentials.password,
             hash=db_user.hash
         ):
-            raise InvalidCredentialsError(
-                message="Invalid password.."
-            )
+            raise AuthenticationError(message="Invalid credentials..")
 
         token = security.create_access_token(
             id=db_user.id,
@@ -301,8 +284,6 @@ class AuthService:
         )
 
         return token, db_user
-
-    #
 
     @classmethod
     async def register_doctor(
@@ -324,8 +305,6 @@ class AuthService:
             response = UserResponse.model_validate(created)
 
         return access_token, response
-
-    #
 
     @classmethod
     async def register_patient(

@@ -56,7 +56,7 @@ class PatientService(EntityService[Patient]):
             await cls.email_exists(session, data.email)
         ):
             raise AlreadyInUseException(
-                identifier="email"
+                field="email"
             )
 
         created = Patient(

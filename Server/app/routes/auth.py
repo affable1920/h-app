@@ -2,14 +2,30 @@ import logging
 import secrets
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, BackgroundTasks, Body, Depends, HTTPException, Query, Response
+
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Body,
+    Depends,
+    HTTPException,
+    Query,
+    Response
+)
 
 from app.schemas.enums import UserRoleV2
 from app.services.MailService import MailService
-from app.features.auth.dependencies import get_current_user, require_patient
+
+from app.features.auth.dependencies import (
+    get_current_user,
+    require_patient
+)
+
 from app.features.auth.service import AuthService
 
-from app.core.exceptions import AlreadyInUseException, EntityNotFoundException
+from app.core.exceptions import (
+    EntityNotFoundException
+)
 
 from app.database.models import Doctor, Patient
 from app.database.entry_async import get_db
@@ -20,7 +36,12 @@ from app.schemas.doctor import (
     DrProfileResponse,
     get_dr_onboarding,
 )
-from app.schemas.patient import PatientCreate, PatientLogin, PatientProfileResponse
+from app.schemas.patient import (
+    PatientCreate,
+    PatientLogin,
+    PatientProfileResponse
+)
+
 from app.schemas.user import UserResponse
 
 
@@ -32,26 +53,16 @@ logger = logging.getLogger(__name__)
     "/register/patient",
     response_model=UserResponse
 )
-async def register_pt(
+async def register_patient(
     user: PatientCreate,
     response: Response,
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_db)
 ):
-    try:
-        token, created = await AuthService.register_patient(
-            session=session,
-            payload=user
-        )
-
-    except AlreadyInUseException as e:
-        raise HTTPException(
-            409,
-            detail={
-                "code": "already_in_use",
-                "message": "The email provided is already registered with another account.",
-            }
-        ) from e
+    token, created = await AuthService.register_patient(
+        session=session,
+        payload=user
+    )
 
     raw_token = secrets.token_urlsafe(32)
 
@@ -73,11 +84,9 @@ async def register_pt(
     response.headers["x-auth-token"] = token
     return created
 
-#
-
 
 @router.post("/login/patient", response_model=UserResponse)
-async def login_pt(
+async def login_patient(
     user_cred: PatientLogin,
     response: Response,
     session: AsyncSession = Depends(get_db)
@@ -90,30 +99,18 @@ async def login_pt(
     response.headers["x-auth-token"] = token
     return UserResponse.model_validate(patient)
 
-#
-
 
 @router.post("/register/doctor", response_model=UserResponse)
-async def register_dr(
+async def register_doctor(
     response: Response,
     background_tasks: BackgroundTasks,
     data: DrCreate = Depends(get_dr_onboarding),
     session: AsyncSession = Depends(get_db)
 ):
-    try:
-        token, created = await AuthService.register_doctor(
-            session=session,
-            payload=data
-        )
-
-    except AlreadyInUseException as e:
-        raise HTTPException(
-            409,
-            detail={
-                "code": "already_in_use",
-                "message": e.message,
-            }
-        )
+    token, created = await AuthService.register_doctor(
+        session=session,
+        payload=data
+    )
 
     raw_token = secrets.token_urlsafe(32)
     verification_link = AuthService.create_verification_link_record(
@@ -134,11 +131,9 @@ async def register_dr(
     response.headers["x-auth-token"] = token
     return created
 
-#
-
 
 @router.post("/login/doctor")
-async def login_dr(
+async def login_doctor(
     credentials: DoctorLogin,
     response: Response,
     session: AsyncSession = Depends(get_db)
@@ -150,8 +145,6 @@ async def login_dr(
 
     response.headers["x-auth-token"] = token
     return UserResponse.model_validate(doctor)
-
-#
 
 
 @router.get(
@@ -183,8 +176,6 @@ async def me(
         "user"
     )
 
-
-#
 
 @router.delete("")
 async def remove_account(
@@ -222,7 +213,8 @@ async def edit(
             409,
             detail={
                 "code": "unauthorized_error",
-                "message": "You cannot change your email address as your email is already verified."
+                "message": "You cannot change your email address as "
+                "your email is already verified."
             }
         )
 
@@ -231,8 +223,6 @@ async def edit(
     await session.commit()
     await session.refresh(current_user)
 
-
-#
 
 @router.post("/request-email-verify")
 async def request(
@@ -250,13 +240,12 @@ async def request(
     )
 
     return (
-        "An email containing a verification link has been sent to you email address"
+        "An email containing a verification link has been sent to you email address. "
         "Please click on the link to verify your email."
         "The link expires after 5 minutes.."
     )
 
 
-# The verification endpoint
 @router.get("/verify-email")
 async def email_verification(
     token: str = Query(...),

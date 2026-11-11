@@ -104,5 +104,6 @@ def application_error_handler(
         code=exc.code,
         message=exc.message,
         details=exc.details,
-        request_id=getattr(request.state, "request_id", None)
+        request_id=getattr(request.state, "request_id", None),
+        headers=exc.context.get("headers")
     )

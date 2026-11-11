@@ -1,24 +1,29 @@
-class AppException(Exception):
-    code: str = "APPLICATION_ERROR"
+from typing import Any
 
-    # http hint only - another layer like ws ignores this, thus optional as well
-    status_code: int | None = None
+
+class AppException(Exception):
+    status_code: int = 500
+    code: str = "application_error"
     message: str = "An application error occurred."
 
     def __init__(
             self,
             message: str | None = None,
+            *,
+            code: str | None = None,
+            details: dict[str, Any] | None = None,
             **context
     ) -> None:
-        super().__init__(self.message)
         self.message = message or self.message
-        self.context = context
+        self.code = code or self.code
+        self.details = details or {}  # public, sent to the client
+        self.context = context       # internal, logged only
 
-#
+        super().__init__(self.message)
 
 
 class EntityNotFoundException(AppException):
-    code = "ENTITY_NOT_FOUND"
+    code = "entity_not_found"
     status_code = 404
 
     def __init__(
@@ -26,51 +31,15 @@ class EntityNotFoundException(AppException):
             entity_name: str,
             **context
     ) -> None:
-        self.message = (
-            f"The requested {entity_name} could not be found."
+        super().__init__(
+            f"The requested {entity_name.lower()} could not be found.",
+            details={"name": entity_name},
+            **context
         )
-        super().__init__(self.message, **context)
-
-#
-
-
-class AlreadyInUseException(AppException):
-    code = "ALREADY_EXISTS"
-    status_code = 409
-
-    def __init__(
-            self,
-            identifier: str,
-            message: str | None = None,
-            **context
-    ) -> None:
-        self.message = f"{identifier} already exists. Try a different one."
-        super().__init__(message, **context)
-
-
-#
-
-
-class ScheduleHasAppointments(AppException):
-    code = "SCHEDULE_HAS_APPOINTMENTS"
-    status_code = 409
-    message = (
-        "The requested schedule cannot be deleted because it has appointment history. "
-        "Deactivate it instead."
-    )
-
-    def __init__(
-            self,
-            **context
-    ) -> None:
-        super().__init__(self.message, **context)
-
-
-#
 
 
 class ConflictError(AppException):
-    code = "CONFLICT_ERROR"
+    code = "conflict_error"
     status_code = 409
 
     def __init__(
@@ -78,30 +47,45 @@ class ConflictError(AppException):
             message: str,
             **context
     ) -> None:
-        super().__init__(message, **context)
+        super().__init__(
+            message,
+            **context,
+        )
 
 
-#
-class InvalidCredentialsError(AppException):
-    status_code = 401
-
-    def __init__(
-            self,
-            message: str | None = None,
-            **context
-    ) -> None:
-        super().__init__(message, **context)
-
-
-#
-
-class InvalidTokenError(AppException):
-    status_code = 401
-    code = "INVALID_TOKEN"
+class AlreadyInUseException(ConflictError):
+    code = "already_exists"
 
     def __init__(
             self,
-            message: str | None = None,
+            field: str,
             **context
     ) -> None:
-        super().__init__(message, **context)
+        super().__init__(
+            f"{field.lower()} already exists.",
+            details={"field": field},
+            **context
+        )
+
+
+class ScheduleHasAppointments(ConflictError):
+    def __init__(
+            self,
+            **context
+    ) -> None:
+        super().__init__(
+            "The requested action cannot proceed because the appointment "
+            "has history.",
+            code="schedule_has_appointments",
+            **context
+        )
+
+
+class AuthenticationError(AppException):
+    status_code = 401
+    code = "authentication_error"
+
+
+class AuthorizationError(AppException):
+    status_code = 403
+    code = "authorization_error"

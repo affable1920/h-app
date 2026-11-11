@@ -4,25 +4,6 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-def setup_logging():
-    logging.basicConfig(
-        level=logging.DEBUG,
-        force=True,
-        format="%(name)s - %(levelname)s - %(message)s"
-    )
-
-    loggers_to_suppress = ["faker", "passlib",
-                           "httpx", "httpcore", "groq"
-                           ]
-
-    for l in loggers_to_suppress:
-        logging.getLogger(l).handlers = []
-        logging.getLogger(l).propagate = False
-
-
-setup_logging()
-
-
 class Settings(BaseSettings):
     # env-specific
     env: Literal["dev", "prod"] = "dev"
@@ -57,15 +38,32 @@ class Settings(BaseSettings):
 
         return self
 
-    @model_validator(mode="after")
-    def adjust_allowed_origins(
-        self
-    ) -> "Settings":
-        if self.env == "dev":
-            self.allowed_origins = "*"
-        else:
-            self.allowed_origins = "http://localhost:5173"
-        return self
-
 
 settings = Settings()  # type: ignore
+
+
+def setup_logging():
+    logging.basicConfig(
+        level=(
+            logging.INFO
+            if settings.env == "prod"
+            else logging.DEBUG
+        ),
+        force=True,
+        format="%(name)s - %(levelname)s - %(message)s"
+    )
+
+    loggers_to_suppress = [
+        "faker",
+        "passlib",
+        "httpx",
+        "httpcore",
+        "groq"
+    ]
+
+    for l in loggers_to_suppress:
+        logging.getLogger(l).handlers = []
+        logging.getLogger(l).propagate = False
+
+
+setup_logging()

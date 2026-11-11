@@ -1,145 +1,108 @@
 import logging
-from uuid import uuid4
+from starlette.exceptions import HTTPException
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from .exceptions import AppException, InvalidTokenError
+from .exceptions import AppException
+from .shared import log_app_error, error_response
 
 
 logger = logging.getLogger(__name__)
 
 
-ERROR_MAP: dict[str, int] = {
-    "RATE_LIMITED": 429
-}
-
-
-class ErrorHttp(BaseModel):
-    message: str
-    code: str
-    status: int
-    detail: dict | None = None
-
-
-# ===================================================================================================================
-
-def resolve_error_status_code(
-        exc: AppException
-) -> int:
-    return exc.status_code or ERROR_MAP.get(exc.code, 500)
-
-
-# ===================================================================================================================
-
 def unhandled_error_handler(
         request: Request, exc: Exception
 ) -> JSONResponse:
-    rqst_id = getattr(request.state, "request_id", uuid4())
+    request_id = getattr(request.state, "request_id", None)
 
-    logger.exception("Unhandled exception", extra={
-        "path": request.url.path,
-        "request_id": rqst_id,
-    })
-
-    return JSONResponse(
-        content={
-            "detail": {
-                "message": "An internal server error ocurred.",
-                "code": "internal_server_error",
-            }
-        },
-        status_code=500
+    logger.exception(
+        f"Unhandled exception"
+        "request id: %s"
+        "request path: %s",
+        request_id,
+        request.url.path,
     )
 
-# ===================================================================================================================
+    return error_response(
+        status=500,
+        code="unknown_error",
+        message="An unexpected error occurred.",
+        request_id=request_id
+    )
+
+
+def http_exception_handler(
+        request: Request, exc: HTTPException
+) -> JSONResponse:
+    request_id = getattr(request.state, "request_id", None)
+
+    if isinstance(exc.detail, dict):
+        code = exc.detail.get("code", "http_error")
+        message = exc.detail.get("message", "Request failed.")
+
+    else:
+        code, message = "http_error", exc.detail
+
+    logger.warning(
+        """Http Exception..
+                status_code: %s,
+                code: %s,
+                message: %s,
+                request_id: %s,
+                request_path: %s""",
+        exc.status_code, code, message, request_id, request.url.path
+    )
+
+    return error_response(
+        status=exc.status_code,
+        code=code,
+        message=message,
+        request_id=request_id
+    )
+
+
+def validation_error_handler(
+        request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    request_id = getattr(request.state, "request_id", None)
+
+    errors = [
+        {
+            "loc": list(e["loc"]),
+            "msg": e["msg"],
+            "type": e["type"]
+        } for e in exc.errors()
+    ]
+
+    logger.warning(
+        """logged request validation error ..
+                request_path:  %s,
+                request_id:  %s
+                status_code:  422,
+                code:  "validation_error",
+                message:  "An error occurred while validating a user's request data..",
+                errors:  %s""",
+        request.url.path, request_id, errors
+    )
+
+    return error_response(
+        status=422,
+        code="validation_error",
+        message="Request data validation failed.",
+        details={"errors": errors},
+        request_id=request_id
+    )
 
 
 def application_error_handler(
         request: Request, exc: AppException
 ) -> JSONResponse:
-    rqst_id = getattr(
-        request.state, "request_id", uuid4()
+    log_app_error(request, exc)
+
+    return error_response(
+        status=exc.status_code,
+        code=exc.code,
+        message=exc.message,
+        details=exc.details,
+        request_id=getattr(request.state, "request_id", None)
     )
-
-    status_code = resolve_error_status_code(exc)
-    msg, code = exc.message, exc.code
-
-    logger.exception("App Exception", extra={
-        "code": code,
-        "path": request.url.path,
-        "request_id": rqst_id,
-        **exc.context
-    })
-
-    return JSONResponse(
-        content={
-            "detail": {
-                "message": msg,
-                "code": code
-            }
-        },
-        status_code=status_code,
-        headers=exc.context.get("headers", {})
-    )
-
-# ===================================================================================================================
-
-
-def validation_error_handler(
-        request: Request,
-        exc: RequestValidationError
-) -> JSONResponse:
-    logger.exception(
-        "Request Validation error",
-        extra={
-            "path": request.url.path,
-            "request_id": getattr(
-                request.state, "request_id", uuid4()
-            ),
-            "details": exc.errors()
-        }
-    )
-
-    return JSONResponse(
-        status_code=422,
-        content={
-            "detail": {
-                "message": "Recieved invalid request data.",
-                "code": "validation_error"
-            }
-        }
-    )
-
-
-# ===================================================================================================================
-
-def invalid_token_handler(
-        request: Request,
-        exc: InvalidTokenError
-) -> JSONResponse:
-    logger.exception(
-        "Invalid token",
-        extra={
-            "path": request.url.path,
-            "request_id": getattr(
-                request.state, "request_id", uuid4()
-            ),
-        }
-    )
-
-    logger.info(exc.context, exc.code)
-
-    return JSONResponse(
-        content={
-            "detail": {
-                "message": "Invalid or expired token",
-                "code": "invalid_token"
-            }
-        },
-        status_code=401,
-        headers=exc.context.get("headers", {})
-    )
-
-
-# ===================================================================================================================

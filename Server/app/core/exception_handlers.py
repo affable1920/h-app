@@ -27,7 +27,7 @@ def unhandled_error_handler(
         status=500,
         code="unknown_error",
         message="An unexpected error occurred.",
-        request_id=request_id
+        request_id=request_id,
     )
 
 
@@ -49,15 +49,17 @@ def http_exception_handler(
                 code: %s,
                 message: %s,
                 request_id: %s,
-                request_path: %s""",
-        exc.status_code, code, message, request_id, request.url.path
+                request_path: %s
+                exception: %s""",
+        exc.status_code, code, message, request_id, request.url.path, exc.detail
     )
 
     return error_response(
         status=exc.status_code,
         code=code,
         message=message,
-        request_id=request_id
+        request_id=request_id,
+        headers=exc.headers
     )
 
 
@@ -90,7 +92,7 @@ def validation_error_handler(
         code="validation_error",
         message="Request data validation failed.",
         details={"errors": errors},
-        request_id=request_id
+        request_id=request_id,
     )
 
 
@@ -105,5 +107,5 @@ def application_error_handler(
         message=exc.message,
         details=exc.details,
         request_id=getattr(request.state, "request_id", None),
-        headers=exc.context.get("headers")
+        headers=exc.headers
     )

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Mapping
 
 
 class AppException(Exception):
@@ -12,12 +12,14 @@ class AppException(Exception):
             *,
             code: str | None = None,
             details: dict[str, Any] | None = None,
+            headers: Mapping[str, str] | None = None,
             **context
     ) -> None:
         self.message = message or self.message
         self.code = code or self.code
         self.details = details or {}  # public, sent to the client
         self.context = context       # internal, logged only
+        self.headers = headers
 
         super().__init__(self.message)
 
@@ -59,10 +61,14 @@ class AlreadyInUseException(ConflictError):
     def __init__(
             self,
             field: str,
+            message: str | None = None,
             **context
     ) -> None:
         super().__init__(
-            f"{field.lower()} already exists.",
+            message=(
+                f"{field.lower()} already exists."
+                if message is None else message
+            ),
             details={"field": field},
             **context
         )

@@ -57,7 +57,8 @@ app.add_middleware(
     expose_headers=[
         "x-auth-token",
         "x-session-expire",
-        "x-request-id"
+        "x-request-id",
+        "x-session-issued"
     ],
 )
 

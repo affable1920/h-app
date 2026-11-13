@@ -50,7 +50,7 @@ def generate_patients(
         {
             "username": faker.user_name(),
             "email": faker.unique.email(),
-            "hash": security.hash(faker.password())
+            "hash": security.hash_password(faker.password())
         }
         for _ in range(count)
     ]
@@ -130,7 +130,7 @@ def create_doctor() -> dict[str, object]:
     return {
         "name": faker.name(),
         "email": faker.unique.email(),
-        "hash": security.hash(faker.password()),
+        "hash": security.hash_password(faker.password()),
         "phone": generate_random_contact(),
         "experience": random.randint(1, 35),
         "verified": roll(),

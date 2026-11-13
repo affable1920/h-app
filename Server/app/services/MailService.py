@@ -5,33 +5,6 @@ from email.message import EmailMessage
 from app.core.config import settings
 
 
-def send_mail(
-        recipient: EmailStr,
-        body: tuple[str, str]
-):
-    from_ = "affableshamik98@gmail.com"
-    port = 465
-
-    context = ssl.create_default_context(
-        purpose=ssl.Purpose.SERVER_AUTH
-    )
-
-    message = EmailMessage()
-
-    message["From"] = from_
-    message["To"] = recipient
-    message["Subject"] = body[0]
-    message.set_content(body[1])
-
-    with smtplib.SMTP_SSL(
-        host="smtp.gmail.com",
-        port=port,
-        context=context
-    ) as server:
-        server.login(from_, settings.gmail_password)
-        server.send_message(message)
-
-
 class MailService:
     @classmethod
     def send_mail(
@@ -69,12 +42,16 @@ class MailService:
         recipient: EmailStr,
         verification_link: str
     ):
+        print(
+            f"verification mail to be sent to recipient: {recipient}"
+        )
+
         cls.send_mail(
             recipient=recipient,
             content=(
                 "Email Verification",
-                "Confirm your email address using the link below\n\n"
-                f"{verification_link}\n\n"
-                "The link is only valid for 5 minutes."
+                f"""Confirm your email address using the link below\n\n
+                {verification_link}
+                The link is only valid for 5 minutes."""
             )
         )

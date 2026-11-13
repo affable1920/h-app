@@ -185,7 +185,7 @@ class DoctorService(EntityService[Doctor]):
             pagination=pagination_params,
             loaders=cls.load_base_options(),
             ordering_clauses=ordering_clauses
-        )
+        )  # type: ignore
 
     @classmethod
     async def get_doctor_by_id(
@@ -231,6 +231,8 @@ class DoctorService(EntityService[Doctor]):
                 base64.b64encode(img).decode("utf-8")
             )
 
+        hashed_pwd = security.hash_password_aio(pwd=data.password)
+
         created = Doctor(
             image=compressed,
             name=data.name,
@@ -244,13 +246,11 @@ class DoctorService(EntityService[Doctor]):
             graduation_year=data.graduation_year,
             college_studied=data.medical_college,
             email=data.email,
-            hash=security.hash(data.password),
+            hash=hashed_pwd,
             phone=data.phone
         )
 
         session.add(created)
-        await session.flush()
-        await session.refresh(created)
         return created
 
     @staticmethod

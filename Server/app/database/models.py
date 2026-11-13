@@ -600,3 +600,49 @@ class CareJourney(
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(id={self.id})"
+
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_token"
+
+    id: Mapped[PrimaryKey]
+
+    token_hash: Mapped[str] = mapped_column(
+        unique=True,
+        index=True
+    )
+
+    user_id: Mapped[UUID] = mapped_column(index=True)
+
+    user_role: Mapped[UserRoleV2] = mapped_column(
+        sa.Enum(
+            UserRoleV2,
+            name="user_role"
+        )
+    )
+
+    family_id: Mapped[UUID] = mapped_column(index=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
+        server_default=sa.func.now()
+    )
+
+    expires_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True))
+
+    family_expires_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True)
+    )
+
+    used_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
+        nullable=True
+    )
+
+    revoked_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
+        nullable=True
+    )
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(id={self.id})"

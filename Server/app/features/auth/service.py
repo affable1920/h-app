@@ -1,33 +1,36 @@
+from datetime import datetime, timedelta, timezone
 import logging
 import secrets
-from datetime import datetime, timedelta, timezone
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from sqlalchemy import select
+from psycopg2 import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.entry_async import AsyncSessionLocal
 from app.schemas.user import UserResponse
 from app.core.exceptions import (
+    AlreadyInUseException,
     AuthenticationError,
-    ConflictError,
     EntityNotFoundException,
 )
 
 from app.database.models import (
     Doctor,
-    EmailVerificationToken,
-    Patient
+    Patient,
+    RefreshToken
 )
 
 from app.features.auth import security
+from app.schemas.patient import (
+    PatientCreate,
+    PatientLogin
+)
 
 from app.schemas.enums import UserRoleV2
 from app.schemas.doctor import DoctorLogin, DrCreate
-from app.schemas.patient import PatientCreate, PatientLogin
-
-from app.services.MailService import MailService
 from app.services.PatientService import PatientService
 from app.services.DrService import DoctorService
+import sqlalchemy as sa
 
 
 logger = logging.getLogger(__name__)
@@ -38,190 +41,24 @@ class AuthService:
     async def get_current_user(
         session: AsyncSession,
         user_id: UUID,
-        role: str
+        role: UserRoleV2
     ) -> Doctor | Patient | None:
         match role:
-            case "doctor":
-                return (await DoctorService.get_doctor_by_id(
+            case UserRoleV2.DOCTOR:
+                return await DoctorService.get_doctor_by_id(
                     session=session,
                     doctor_id=user_id
-                ))
+                )
 
-            case "patient":
-                return (await PatientService.get(
+            case UserRoleV2.PATIENT:
+                return await PatientService.get(
                     session=session,
                     ident_key="id",
                     ident_val=user_id
-                ))
+                )
 
             case _:
                 return None
-
-    @staticmethod
-    async def find_token_by_hash(
-        token: str,
-        session: AsyncSession,
-    ):
-        return await (
-            session.scalar(
-                select(EmailVerificationToken).where(
-                    EmailVerificationToken.hash
-                    == security.hash_verification_token(
-                        token
-                    )
-                )
-            )
-        )
-
-    @staticmethod
-    def create_verification_link_record(
-        user_id: UUID,
-        user_role: UserRoleV2,
-        token: str,
-        exp: int = 5,
-    ):
-        link = EmailVerificationToken(
-            user_id=user_id,
-            user_role=user_role,
-            hash=security.hash_verification_token(token),
-            exp=(
-                datetime.now(timezone.utc)
-                + timedelta(minutes=exp)
-            )
-        )
-
-        return link
-
-    @staticmethod
-    async def send_verification_mail(
-        session: AsyncSession,
-        user: Patient | Doctor,
-    ):
-        role = (
-            UserRoleV2.PATIENT if isinstance(
-                user, Patient
-            )
-            else UserRoleV2.DOCTOR
-        )
-
-        stmt = (
-            select(EmailVerificationToken).where(
-                EmailVerificationToken.user_id == user.id,
-                EmailVerificationToken.user_role == role
-            )
-        )
-
-        token_record = await session.scalar(stmt)
-
-        if token_record:
-            if (
-                (datetime.now() - token_record.created_at).total_seconds() <= 15
-            ):
-                raise ConflictError(
-                    message="You have recently sent a verification mail. "
-                    "Please wait for 15 seconds before requesting another mail."
-                )
-
-            logger.info(
-                f"Deleting previously generated token for the user {user}..."
-            )
-
-            await session.delete(token_record)
-
-        logger.info(
-            f"Creating a new token for email verification for user {user} ..."
-        )
-
-        token = secrets.token_urlsafe(32)
-        link = AuthService.create_verification_link_record(
-            user.id,
-            role,
-            token
-        )
-
-        session.add(link)
-        await session.commit()
-
-        MailService.send_mail(
-            recipient=user.email,
-            content=(
-                "Email Verification",
-                "Confirm your email address using the link below\n\n"
-                f"{token}\n\n"
-                "The link is only valid for 5 minutes."
-            )
-        )
-
-    @staticmethod
-    async def verify_email(
-        link: str,
-        session: AsyncSession,
-    ):
-        token_record = await AuthService.find_token_by_hash(
-            token=link,
-            session=session
-        )
-
-        if token_record is None:
-            logger.info(
-                "No token found stored for the user trying to verify their email "
-                "Rejecting the verification ..."
-            )
-
-            raise AuthenticationError(message="Invalid token")
-
-        if token_record.used_at is not None:
-            logger.info(
-                "Token verification against the stored hash failed.. "
-                "Token already used"
-            )
-
-            raise AuthenticationError(message="token already used..")
-
-        if token_record.exp < datetime.now(timezone.utc):
-            logger.info(
-                "Token has expired ..."
-            )
-
-            raise AuthenticationError(
-                message="Session expired. Please login again!"
-            )
-
-        user_id = token_record.user_id
-        role = token_record.user_role
-
-        user = None
-
-        if role == UserRoleV2.PATIENT:
-            user = await PatientService.get(
-                session=session,
-                ident_key="id",
-                ident_val=user_id
-            )
-
-        elif role == UserRoleV2.DOCTOR:
-            user = await DoctorService.get_doctor_by_id(
-                session=session,
-                doctor_id=user_id
-            )
-
-        if user is None:
-            raise EntityNotFoundException(entity_name="user")
-
-        if user.email_verified:
-            return "Email already verified."
-
-        user.email_verified = True
-        token_record.used_at = datetime.now(timezone.utc)
-
-        await session.commit()
-        MailService.send_mail(
-            recipient=user.email,
-            content=(
-                "Email Verification",
-                "Your email has been verified successfully ..."
-            )
-        )
 
     @classmethod
     async def login_doctor(
@@ -232,29 +69,32 @@ class AuthService:
         method_used = "id" if credentials.id else "email"
         value = credentials.model_dump()[method_used]
 
-        db_user = await DoctorService.get(
-            session=session,
-            ident_key=method_used,
-            ident_val=value
-        )
-
-        if db_user is None:
-            raise EntityNotFoundException(
-                entity_name="doctor"
+        async with session.begin():
+            db_user = await DoctorService.get(
+                session=session,
+                ident_key=method_used,
+                ident_val=value
             )
 
-        if not security.authenticate_pwd(
-            pwd=credentials.password,
-            hash=db_user.hash
-        ):
-            raise AuthenticationError(message="Invalid credentials")
+            if db_user is None:
+                raise EntityNotFoundException(
+                    entity_name="doctor"
+                )
 
-        token = security.create_access_token(
-            id=db_user.id,
-            role=UserRoleV2.DOCTOR
-        )
+            if not await security.authenticate_password_aio(
+                pwd=credentials.password,
+                hash=db_user.hash
+            ):
+                raise AuthenticationError(message="Invalid credentials")
 
-        return token, db_user
+            response_user = UserResponse.model_validate(db_user)
+            access_token, refresh_token = cls.issue_session(
+                session,
+                db_user.id,
+                UserRoleV2.DOCTOR
+            )
+
+        return access_token, refresh_token, response_user
 
     @classmethod
     async def login_patient(
@@ -262,28 +102,31 @@ class AuthService:
             session: AsyncSession,
             credentials: PatientLogin
     ):
-        db_user = await PatientService.get_by_email(
-            session=session,
-            email=credentials.email
-        )
-
-        if db_user is None:
-            raise EntityNotFoundException(
-                entity_name="patient"
+        async with session.begin():
+            db_user = await PatientService.get_by_email(
+                session=session,
+                email=credentials.email
             )
 
-        if not security.authenticate_pwd(
-            pwd=credentials.password,
-            hash=db_user.hash
-        ):
-            raise AuthenticationError(message="Invalid credentials..")
+            if db_user is None:
+                raise EntityNotFoundException(
+                    entity_name="patient"
+                )
 
-        token = security.create_access_token(
-            id=db_user.id,
-            role=UserRoleV2.PATIENT
-        )
+            if not await security.authenticate_password_aio(
+                pwd=credentials.password,
+                hash=db_user.hash
+            ):
+                raise AuthenticationError(message="Invalid credentials..")
 
-        return token, db_user
+            response_user = UserResponse.model_validate(db_user)
+            access_token, refresh_token = cls.issue_session(
+                session,
+                db_user.id,
+                UserRoleV2.PATIENT
+            )
+
+        return access_token, refresh_token, response_user
 
     @classmethod
     async def register_doctor(
@@ -291,20 +134,23 @@ class AuthService:
         session: AsyncSession,
         payload: DrCreate
     ):
-        async with session.begin():
-            created = await DoctorService.create_doctor(
-                session=session,
-                data=payload
-            )
+        try:
+            async with session.begin():
+                created = await DoctorService.create_doctor(
+                    session=session,
+                    data=payload
+                )
 
-            access_token = security.create_access_token(
-                id=created.id,
-                role=UserRoleV2.DOCTOR
-            )
+                await session.flush()
+                response_user = UserResponse.model_validate(created)
 
-            response = UserResponse.model_validate(created)
+        except IntegrityError as e:
+            raise AlreadyInUseException(
+                field="email",
+                message="An account with this email already exists."
+            ) from e
 
-        return access_token, response
+        return response_user
 
     @classmethod
     async def register_patient(
@@ -312,17 +158,190 @@ class AuthService:
         session: AsyncSession,
         payload: PatientCreate
     ):
-        async with session.begin():
-            patient = await PatientService.create_patient(
-                session=session,
-                data=payload
+        try:
+            async with session.begin():
+                created = await PatientService.create_patient(
+                    session=session,
+                    data=payload
+                )
+
+                await session.flush()
+                response_user = UserResponse.model_validate(created)
+
+        except IntegrityError as e:
+            raise AlreadyInUseException(
+                field="email",
+                message="An account with this email already exists."
+            ) from e
+
+        return response_user
+
+    @classmethod
+    def create_refresh_token(
+        cls,
+        user_id: UUID,
+        role: UserRoleV2,
+        family_id: UUID | None = None,
+        family_expiry: datetime | None = None
+    ):
+        raw = secrets.token_urlsafe(nbytes=32)
+        hashed = security.hash_token(raw)
+
+        expiry = datetime.now(timezone.utc) + timedelta(days=14)
+
+        record = RefreshToken(
+            token_hash=hashed,
+            user_id=user_id,
+            user_role=role,
+            expires_at=expiry,
+            family_id=(
+                family_id
+                if family_id is not None
+                else uuid4()
+            ),
+            family_expires_at=(
+                family_expiry
+                if family_expiry is not None
+                else expiry
+            )
+        )
+
+        return raw, record
+
+    @classmethod
+    async def rotate_refresh_token(
+            cls,
+            refresh_token: str,
+            session: AsyncSession
+    ) -> tuple[str, str]:
+        now = datetime.now(timezone.utc)
+
+        # 1. Atomically claim the token ONLY if it is unused, unrevoked,
+        # or unexpired
+        claim_stmt = (
+            sa.update(RefreshToken)
+            .where(
+                (
+                    RefreshToken.token_hash
+                    == security.hash_token(refresh_token)
+                ),
+                RefreshToken.used_at.is_(None),
+                RefreshToken.revoked_at.is_(None),
+                RefreshToken.expires_at > now
+            )
+            .values(used_at=now)
+            .returning(RefreshToken)
+        )
+
+        claimed_token = await session.scalar(claim_stmt)
+
+        # 2. If claim failed, figure out why (expired, invalid, or REUSE ATTACK)
+        if claimed_token is None:
+            existing_token = await session.scalar(
+                sa.select(RefreshToken)
+                .where(
+                    RefreshToken.token_hash
+                    == security.hash_token(refresh_token)
+                )
             )
 
-            access_token = security.create_access_token(
-                id=patient.id,
-                role=UserRoleV2.PATIENT
+            # Replay attack detected: token was already used!
+            if (
+                existing_token is not None
+                and existing_token.used_at is not None
+            ):
+                await cls.revoke_against_family(
+                    family_id=existing_token.family_id,
+                    session=None
+                )
+
+            # Raising here rolls back the main request `session`,
+            # but the family revocation above is already safely committed!
+            raise AuthenticationError(
+                message="Your session has expired. Please login manually...",
+                reason="Invalid or reused refresh token."
             )
 
-            response = UserResponse.model_validate(patient)
+        # 3. Happy path: issue the next token in the same family using
+        # the main session
+        return cls.issue_session(
+            session=session,
+            user_id=claimed_token.user_id,
+            role=claimed_token.user_role,
+            family_id=claimed_token.family_id,
+            family_expiry=claimed_token.family_expires_at
+        )
 
-        return access_token, response
+    @classmethod
+    async def get_refresh_token(
+        cls,
+        token: str,
+        session: AsyncSession
+    ) -> RefreshToken | None:
+        stmt = (
+            sa.select(RefreshToken)
+            .where(
+                RefreshToken.token_hash
+                == security.hash_token(token)
+            )
+        )
+
+        result = await session.scalar(stmt)
+        return result
+
+    @classmethod
+    def issue_session(
+        cls,
+        session: AsyncSession,
+        user_id: UUID,
+        role: UserRoleV2,
+        family_id: UUID | None = None,
+        family_expiry: datetime | None = None
+    ):
+        refresh_token, record = cls.create_refresh_token(
+            user_id=user_id,
+            role=role,
+            family_id=family_id,
+            family_expiry=family_expiry
+        )
+
+        session.add(record)
+
+        access_token = security.create_access_token(
+            user_id=user_id,
+            role=role
+        )
+
+        return access_token, refresh_token
+
+    @classmethod
+    async def revoke_against_family(
+        cls,
+        family_id: UUID,
+        session: AsyncSession | None = None
+    ):
+        async def _execute(db: AsyncSession) -> None:
+            stmt = (
+                sa.update(RefreshToken)
+                .returning(RefreshToken.id)
+                .where(
+                    RefreshToken.family_id == family_id,
+                    RefreshToken.revoked_at.is_(None)
+                )
+                .values(revoked_at=datetime.now(timezone.utc))
+            )
+
+            tokens = (await db.scalars(stmt)).all()
+            logger.info(
+                f"""Revoked token for family {family_id}
+                {tokens}"""
+            )
+
+        if session is not None:
+            await _execute(session)
+            await session.commit()
+
+        else:
+            async with AsyncSessionLocal() as short_session:
+                async with short_session.begin():
+                    await _execute(short_session)

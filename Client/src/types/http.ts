@@ -1,7 +1,7 @@
 export type APIError = {
   message: string;
   code: string;
-  status: number;
+  statusCode: number;
   ctx?: unknown;
-  detail?: unknown;
+  details?: unknown;
 };

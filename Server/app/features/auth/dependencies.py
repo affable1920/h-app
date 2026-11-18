@@ -92,6 +92,23 @@ def set_auth_headers(
 
     response.set_cookie(
         key="refresh_token", value=refresh_token,
-        path="/auth", httponly=True, secure=True,
+        path="/api/auth", httponly=True, secure=True,
         samesite="none", max_age=__MAX_COOKIE_AGE
+    )
+
+    response.set_cookie(
+        key="has_session",
+        value="1",
+        max_age=__MAX_COOKIE_AGE
+    )
+
+
+def clear_auth_headers(response: Response):
+    response.delete_cookie(
+        key="refresh_token",
+        path="/api/auth"
+    )
+
+    response.delete_cookie(
+        key="has_session",
     )

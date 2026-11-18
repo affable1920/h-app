@@ -83,3 +83,19 @@ export function safeParseNumber(
 export function parseSwitch(raw: string | null): "1" | null {
   return raw !== null && raw === "1" ? raw : null;
 }
+
+export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+export function getCookie(name: string) {
+  const cookies = document.cookie.split("; ");
+
+  for (const cookie of cookies) {
+    const [key, value] = cookie.split("=");
+
+    if (key === name) {
+      return decodeURIComponent(value as string);
+    }
+  }
+
+  return null;
+}

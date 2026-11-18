@@ -15,6 +15,10 @@ import "@fontsource/pt-sans/400-italic";
 import { router } from "./routing/app-router.tsx";
 import queryClient from "./core/query-client.ts";
 
+import { registerSessionListeners } from "./routing/restoreSession.ts";
+
+registerSessionListeners();
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <SpeedInsights />

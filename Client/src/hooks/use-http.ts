@@ -63,9 +63,10 @@ export function createMutationHook<TVariables, TData>(
   };
 }
 
-export function createQueryOptions<TParams, TData>(
+export function createQueryOptions<TParams, TData, TError = APIError>(
   keyFn: (params: TParams) => QueryKey,
   fetchFn: (params: TParams) => Promise<TData>,
+  options?: Omit<UseQueryOptions<TData, TError>, "queryKey" | "queryFn">,
 ) {
   return function useResourceOptions(params: TParams) {
     return queryOptions({
@@ -73,6 +74,7 @@ export function createQueryOptions<TParams, TData>(
       queryFn() {
         return fetchFn(params);
       },
+      ...options,
     });
   };
 }

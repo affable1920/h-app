@@ -76,7 +76,7 @@ export function AppointmentViewPage({ role }: { role: Role }) {
   const participantId = useAuthStore((state) => state.user?.id);
 
   const { data, isPending, isError, error, refetch, isFetching } =
-    useAppointmentDetail(role, participantId, appointmentId);
+    useAppointmentDetail(role, participantId, appointmentId!);
 
   const backTo = `/app/workspace/${role}/appointments`;
 
@@ -118,13 +118,13 @@ export function AppointmentViewPage({ role }: { role: Role }) {
             role="alert"
             className="mx-auto mt-3 max-w-sm text-base text-text-secondary"
           >
-            {error?.status === 404 || error?.status === 403
+            {error?.statusCode === 404 || error?.statusCode === 403
               ? "This appointment could not be found, or is not available to your account."
-              : error?.status === 422
+              : error?.statusCode === 422
                 ? "This appointment link is not valid. Please open an appointment from your list."
                 : "We couldn't load your appointment. Please check your connection and try again."}
           </p>
-          {![403, 404, 422].includes(error?.status ?? 0) && (
+          {![403, 404, 422].includes(error?.statusCode ?? 0) && (
             <Button
               className="mt-6"
               onClick={() => void refetch()}

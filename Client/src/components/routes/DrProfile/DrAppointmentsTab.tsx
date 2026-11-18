@@ -28,6 +28,7 @@ export function DrAppointmentsTab() {
     appointmentStatus,
     searchQuery,
     sortColumn,
+    pageSize: 4,
     sortOrder: sortOrder ?? undefined,
   });
 
@@ -37,7 +38,7 @@ export function DrAppointmentsTab() {
     <AppointmentsTab hasNext={hasNext ?? false}>
       {isError ? (
         <div className="text-center mx-auto w-full">
-          {error.status === 401 ? (
+          {error.statusCode === 401 ? (
             <p>
               You are not authenticated to view these appointments .. <br />
               Please login or sign up first. <br />
@@ -49,7 +50,7 @@ export function DrAppointmentsTab() {
               Please try again later ... <br />
             </p>
           )}
-          {![401, 403, 422].includes(error.status) && (
+          {![401, 403, 422].includes(error.statusCode) && (
             <Button
               onClick={function () {
                 refetch();

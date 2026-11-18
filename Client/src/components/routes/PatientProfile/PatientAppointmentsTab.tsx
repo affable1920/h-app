@@ -28,7 +28,8 @@ export function PatientAppointmentsTab() {
     appointmentStatus,
     searchQuery,
     sortColumn,
-    sortOrder,
+    pageSize: 4,
+    sortOrder: sortOrder ?? undefined,
   });
 
   const hasAppointments = appointments && appointments.length > 0;
@@ -40,7 +41,7 @@ export function PatientAppointmentsTab() {
           Due to an unexpected error <br />
           We could not fetch your appointments right now. <br />
           Please try again later ... <br />
-          {![403, 422].includes(error.status) && (
+          {![403, 422].includes(error.statusCode) && (
             <Button
               onClick={function () {
                 refetch();

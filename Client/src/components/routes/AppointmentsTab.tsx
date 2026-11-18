@@ -296,8 +296,9 @@ export function AppointmentsTab({
                           className={cn(
                             "text-center",
                             statusPresentation[status].classes,
+                            "px-3 font-semibold",
                             status === appointmentStatus &&
-                              "ring-2 ring-current/30",
+                              "ring-2 ring-current/25",
                           )}
                         >
                           {status}

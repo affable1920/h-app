@@ -22,7 +22,7 @@ function HomePage() {
         </Link>
 
         <Link
-          to="idx/doctors"
+          to="index/doctors"
           className="flex items-center gap-1 hover:[&>svg]:translate-x-2 transition-transform duration-200"
         >
           <Button color="white" border={false} endIcon={<ArrowRight />}>

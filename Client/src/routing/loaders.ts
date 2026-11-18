@@ -31,11 +31,13 @@ export async function loaderAppointment({ params }: LoaderFunctionArgs) {
     throw new Error("No appointment ID in route params");
   }
 
-  return await queryClient.ensureQueryData(
+  await queryClient.ensureQueryData(
     appointmentDetailOptions({
       role,
       participantId: user.id,
       appointmentId: params.appointmentId,
     }),
   );
+
+  return null;
 }

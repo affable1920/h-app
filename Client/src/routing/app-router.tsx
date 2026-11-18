@@ -1,31 +1,40 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
-import { DoctorDetails } from "../components/routes/DoctorDetails";
 import { loaderAppointment, loaderDoctor } from "./loaders";
-import { CallProvider } from "@/features/call/components/CallProvider";
-import App from "../components/App";
-import Directory from "../components/routes/Directory";
-import Layout from "../components/routes/AppLayout";
-import LandingPage from "../components/routes/LandingPage";
-import HomePage from "../components/routes/HomePage";
-import ErrorBoundary from "../components/ErrorBoundary";
-import useAuthStore from "@/stores/auth-store";
-import SignIn from "../components/routes/SignIn";
-import Register from "../components/routes/Register";
 
+// feature-components
+import { CallProvider } from "@features/call/components/CallProvider";
+import { Consultation } from "@/features/call/components/Consultation";
+
+// routes
+import { DoctorDetails } from "@routes/DoctorDetails";
+import Directory from "@routes/Directory";
+import Layout from "@routes/AppLayout";
+import LandingPage from "@routes/LandingPage";
+import HomePage from "@routes/HomePage";
+import SignIn from "@routes/SignIn";
+import Register from "@routes/Register";
+import { drProfileRoute, patientProfileRoute } from "@routes/profileRoutes";
+import { PageLayout } from "@routes/PageLayout";
+import { Chat } from "@routes/Chat";
+
+// stores
+import useAuthStore from "@stores/auth-store";
+
+// app-components
+import App from "@components/App";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { LayoutRoute } from "@components/LayoutRoute";
+import { HydrateFallback } from "@/components/HydrateFallback";
+
+// routing services
 import {
   authMiddleware,
-  workspaceMiddleware,
+  requireRole,
+  workspaceIndex,
   workspaceRedirect,
 } from "@/routing/middleware";
-
-import {
-  drProfileRoute,
-  patientProfileRoute,
-} from "../components/routes/profileRoutes";
-import { PageLayout } from "../components/routes/PageLayout";
-import { LayoutRoute } from "../components/LayoutRoute";
-import { Chat } from "../components/routes/Chat";
-import { Consultation } from "@/features/call/components/Consultation";
+import { WorkspaceBoundary } from "@/components/WorkspaceBoundary";
+import { ensureSessionAtStartup } from "./restoreSession";
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +43,7 @@ export const router = createBrowserRouter([
         <App />
       </CallProvider>
     ),
+    middleware: [ensureSessionAtStartup],
     errorElement: <ErrorBoundary />,
     children: [
       {
@@ -60,6 +70,7 @@ export const router = createBrowserRouter([
       {
         path: "app",
         Component: Layout,
+        HydrateFallback,
         children: [
           {
             path: "consultation/:appointmentId",
@@ -93,7 +104,7 @@ export const router = createBrowserRouter([
                 path: "doctors",
                 children: [
                   {
-                    element: <Directory />, // pathless listing layout
+                    element: <Directory />,
                     children: [
                       {
                         index: true,
@@ -165,6 +176,7 @@ export const router = createBrowserRouter([
           {
             path: "workspace",
             middleware: [authMiddleware],
+            errorElement: <WorkspaceBoundary />,
             Component: Outlet,
             children: [
               {
@@ -173,13 +185,22 @@ export const router = createBrowserRouter([
               },
               {
                 path: "patient",
-                middleware: [workspaceMiddleware("patient")],
-                children: patientProfileRoute,
+                loader: requireRole("patient"),
+                children: [
+                  { index: true, loader: workspaceIndex("patient") },
+                  ...patientProfileRoute,
+                ],
               },
               {
                 path: "doctor",
-                middleware: [workspaceMiddleware("doctor")],
-                children: drProfileRoute,
+                loader: requireRole("doctor"),
+                children: [
+                  {
+                    index: true,
+                    loader: workspaceIndex("doctor"),
+                  },
+                  ...drProfileRoute,
+                ],
               },
             ],
           },

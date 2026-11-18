@@ -1,7 +1,7 @@
 import { redirect, type MiddlewareFunction } from "react-router-dom";
-
-import useAuthStore from "@/stores/auth-store";
+import { ensureSessionAtStartup } from "./restoreSession";
 import type { Role } from "@/types/user";
+import useAuthStore from "@stores/auth-store";
 
 const WORKSPACE_INDEX = "/app/workspace";
 
@@ -9,6 +9,19 @@ const workspaceHomes = {
   doctor: WORKSPACE_INDEX + "/doctor/personal",
   patient: WORKSPACE_INDEX + "/patient/appointments",
 } satisfies Record<Role, string>;
+
+export const sessionMiddleware: MiddlewareFunction = async (_, next) => {
+  const outcome = await ensureSessionAtStartup();
+
+  if (outcome === "unavailable") {
+    throw new Response("Could not restore your session. Please retry ..!", {
+      status: 503,
+      statusText: "Session unavailable",
+    });
+  }
+
+  await next();
+};
 
 function requireStoredSession() {
   const { token, role } = useAuthStore.getState();
@@ -25,22 +38,29 @@ export const authMiddleware: MiddlewareFunction = async (_, next) => {
   await next();
 };
 
-export function workspaceMiddleware(expectedRole: Role): MiddlewareFunction {
-  return async function (_, next) {
-    const session = requireStoredSession();
+export async function workspaceRedirect() {
+  const { role } = requireStoredSession();
+  return redirect(workspaceHomes[role]);
+}
 
-    if (session.role !== expectedRole) {
-      throw new Response("You cannot access this workspace", {
+export function requireRole(expectedRole: Role) {
+  return function () {
+    const { role } = requireStoredSession();
+
+    if (role !== expectedRole) {
+      throw new Response("You cannot access this workspace ..", {
         status: 403,
-        statusText: "Unauthorized",
+        statusText: "Forbidden",
       });
     }
 
-    await next();
+    return null;
   };
 }
 
-export function workspaceRedirect() {
-  const { role } = requireStoredSession();
-  return redirect(workspaceHomes[role]);
+export function workspaceIndex(expectedRole: Role, homePage?: string) {
+  return function () {
+    requireRole(expectedRole)();
+    return redirect(homePage ?? workspaceHomes[expectedRole]);
+  };
 }

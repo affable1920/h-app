@@ -6,16 +6,10 @@ import type {
   AxiosRequestConfig,
 } from "axios";
 
-import { type APIError } from "@/types/http";
-import useAuthStore, { logout } from "@stores/auth-store";
+import { type APIError, type IncomingErrorPayload } from "@/types/http";
+import useAuthStore from "@stores/auth-store";
 import { config } from "@core/config";
-
-type APIErrorPayload = {
-  detail: {
-    code: string;
-    message: string;
-  };
-};
+import { getFreshAccessToken } from "@/routing/restoreSession";
 
 class APIClient {
   private baseUrl: string = config.api_url;
@@ -36,7 +30,7 @@ class APIClient {
         const token = useAuthStore.getState().token;
 
         if (token) {
-          config.headers["Authorization"] = `Bearer ${token}`;
+          config.headers.set("Authorization", `Bearer ${token}`);
         }
 
         return config;
@@ -51,45 +45,81 @@ class APIClient {
     }, this.onResponseError.bind(this));
   }
 
-  private onResponseError(this: APIClient, error: AxiosError<APIErrorPayload>) {
+  private async onResponseError(
+    this: APIClient,
+    error: AxiosError<IncomingErrorPayload>,
+  ) {
     const { response } = error;
 
     if (!response) {
       const sde = {
         message: "Recieved no response from the server.",
         code: "server_down",
-        status: 500,
+        statusCode: 500,
       };
 
       return Promise.reject(sde);
     }
 
-    const { headers } = response;
+    // save the original request config object and additionally a flag with it
+    // determining if the request retried.
+    const original = error.config as
+      | (AxiosRequestConfig & { _retry?: boolean })
+      | undefined;
 
-    if (headers["x-session-expire"] == "true") {
-      logout("/auth");
+    if (!original) {
+      return Promise.reject(this.normalizeErrors(response));
+    }
+
+    if (
+      response.status === 401 &&
+      response.headers["x-session-expire"] == "true" &&
+      !original._retry // only retry if not already
+    ) {
+      original._retry = true;
+
+      const authorization = original.headers?.Authorization ?? "";
+
+      const sentToken = authorization.startsWith("Bearer ")
+        ? authorization.slice("Bearer ".length)
+        : null;
+
+      const currentToken = useAuthStore.getState().token;
+
+      if (currentToken && currentToken !== sentToken) {
+        return this.instance(original);
+      }
+
+      try {
+        const newToken = await getFreshAccessToken();
+
+        if (newToken !== sentToken) {
+          return this.instance(original);
+        }
+      } catch (refreshError) {
+        return Promise.reject(refreshError);
+      }
     }
 
     return Promise.reject(this.normalizeErrors(response));
   }
 
-  private normalizeErrors(response: AxiosResponse<APIErrorPayload>): APIError {
+  private normalizeErrors(
+    response: AxiosResponse<IncomingErrorPayload>,
+  ): APIError {
     if (response.status === 422) {
       return {
+        ...response.data,
         message: "Invalid input.",
         code: "validation_error",
-        status: 422,
-        detail: response,
+        statusCode: response.data.status_code,
+        details: response.data,
       };
     }
 
-    const { code, message } = response.data.detail;
-
     return {
-      code,
-      message,
-      status: response.status,
-      detail: response,
+      ...response.data,
+      statusCode: response.data.status_code,
     };
   }
 

@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import useAuthStore, { logout } from "@/stores/auth-store";
+import useAuthStore from "@/stores/auth-store";
 import CallSession from "../core/CallSession";
 import signalingClient from "../core/SignalingClient";
 import { CallContext } from "../core/context";
@@ -27,8 +27,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
         const { code, message } = ev.detail.payload;
 
         if (code === "4444") {
-          toast.info("Session expired. logging you out..");
-          logout();
+          toast.info(
+            "Call provider could not connect .. Error is logged below..",
+          );
+          console.error(ev.detail);
 
           return;
         }

@@ -8,14 +8,23 @@ import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import type { APIError } from "@/types/http";
+import { useEffect } from "react";
+import { ToggledPasswordInput } from "./lib/button/ToggledPasswordInput";
 
 export function PatientSignin() {
-  const { mutateAsync: signin, isPending } = useSignin();
   const navigate = useNavigate();
+  const { mutateAsync: signin, isPending } = useSignin();
 
-  const form = useForm<PatientSignin>({
+  const { setFocus, ...form } = useForm<PatientSignin>({
     resolver: zodResolver(PatientSigninSchema),
   });
+
+  useEffect(
+    function () {
+      setFocus("email");
+    },
+    [setFocus],
+  );
 
   const { errors } = form.formState;
 
@@ -26,7 +35,7 @@ export function PatientSignin() {
         data,
       });
 
-      toast.success("logged in.");
+      toast.success("You're signed in.");
       navigate("/app/index/doctors", {
         replace: true,
       });
@@ -45,16 +54,17 @@ export function PatientSignin() {
       <Stack gap="md" orientation="V">
         <Input.Group error={errors["email"]?.message}>
           <Input.Label htmlFor="email">email</Input.Label>
-          <Input.Element id="email" type="email" {...form.register("email")} />
+          <Input.Element
+            autoComplete="off"
+            id="email"
+            type="email"
+            {...form.register("email")}
+          />
         </Input.Group>
 
         <Input.Group error={errors["password"]?.message}>
           <Input.Label htmlFor="password">password</Input.Label>
-          <Input.Element
-            id="password"
-            type="password"
-            {...form.register("password")}
-          />
+          <ToggledPasswordInput id="password" {...form.register("password")} />
         </Input.Group>
       </Stack>
       <Stack orientation="V" className="mt-4">

@@ -3,6 +3,7 @@ import { useFormContext } from "react-hook-form";
 import { Stack } from "@/components/ui/Stack";
 import { type DoctorOnboarding } from "@/schemas";
 import Button from "@/components/lib/button/Button";
+import { ToggledPasswordInput } from "@/components/lib/button/ToggledPasswordInput";
 
 export function Step4_Auth() {
   const form = useFormContext<DoctorOnboarding>();
@@ -19,11 +20,7 @@ export function Step4_Auth() {
         </Input.Group>
         <Input.Group error={errors["password"]?.message}>
           <Input.Label htmlFor="password">password</Input.Label>
-          <Input.Element
-            id="password"
-            type="password"
-            {...form.register("password")}
-          />
+          <ToggledPasswordInput id="password" {...form.register("password")} />
         </Input.Group>
         <Input.Group error={errors["phone"]?.message}>
           <Input.Label htmlFor="phone">phone</Input.Label>

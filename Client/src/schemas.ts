@@ -58,12 +58,12 @@ export const stepIdentity = z.object({
 
 export const stepCredentials = z.object({
   degree: z.string().min(3, "Please enter a valid degree name"),
-  medical_college: z.string(),
-  graduation_year: z
+  medicalCollege: z.string(),
+  graduationYear: z
     .number()
     .min(1950, "Please enter a valid year ..")
     .max(DateTime.now().year, "Graduation year cannot be in the future .."),
-  license_number: z.string().min(4, "Enter a valid license number"),
+  licenseNumber: z.string().min(4, "Enter a valid license number"),
   experience: z
     .number("Experience must be a valid number ..")
     .min(0)
@@ -71,10 +71,10 @@ export const stepCredentials = z.object({
 });
 
 export const stepCraft = z.object({
-  primary_specialization: z.string({
+  primarySpecialization: z.string({
     error: "A primary field of practice is required",
   }),
-  secondary_focus_areas: z
+  secondaryFocusAreas: z
     .union([
       z.array(z.string()),
       z.string().transform(function (v) {

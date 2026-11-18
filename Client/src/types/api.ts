@@ -13,25 +13,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register Pt */
-        post: operations["register_pt"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/login/patient": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Login Pt */
-        post: operations["login_pt"];
+        /** Register Patient */
+        post: operations["register_patient"];
         delete?: never;
         options?: never;
         head?: never;
@@ -47,8 +30,25 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register Dr */
-        post: operations["register_dr"];
+        /** Register Doctor */
+        post: operations["register_doctor"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login/patient": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login Patient */
+        post: operations["login_patient"];
         delete?: never;
         options?: never;
         head?: never;
@@ -64,8 +64,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Login Dr */
-        post: operations["login_dr"];
+        /** Login Doctor */
+        post: operations["login_doctor"];
         delete?: never;
         options?: never;
         head?: never;
@@ -114,8 +114,8 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Edit */
-        put: operations["edit"];
+        /** Update Allowed Field */
+        put: operations["update_field"];
         post?: never;
         delete?: never;
         options?: never;
@@ -151,6 +151,40 @@ export interface paths {
         get: operations["email_verification"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh */
+        post: operations["refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout */
+        post: operations["logout"];
         delete?: never;
         options?: never;
         head?: never;
@@ -600,57 +634,15 @@ export interface components {
             /** Content */
             content: string;
         };
-        /** Body_edit_auth_edit_put */
-        Body_edit_auth_edit_put: {
-            /** Nw */
-            nw: string;
-        };
         /** Body_edit_doctor_doctors_me_put */
         Body_edit_doctor_doctors_me_put: {
             /** Val */
             val: string;
         };
-        /** Body_register_dr_auth_register_doctor_post */
-        Body_register_dr_auth_register_doctor_post: {
-            /** Name */
-            name: string;
-            gender: components["schemas"]["Gender"];
-            /** Degree */
-            degree: string;
-            /** License Number */
-            license_number: string;
-            /** Primary Specialization */
-            primary_specialization: string;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** Password */
-            password: string;
-            /**
-             * Medical College
-             * @default NA
-             */
-            medical_college: string;
-            /** Graduation Year */
-            graduation_year?: number | null;
-            /**
-             * Experience
-             * @default 0
-             */
-            experience: number | null;
-            /**
-             * Secondary Focus Areas
-             * @default []
-             */
-            secondary_focus_areas: string[];
-            /** Bio */
-            bio?: string | null;
-            /** Phone */
-            phone?: string | null;
-            /** Profile */
-            profile?: string | null;
+        /** Body_update_allowed_field_auth_edit_put */
+        Body_update_allowed_field_auth_edit_put: {
+            /** Property Value */
+            property_value: string;
         };
         /** BookingRequestData */
         BookingRequestData: {
@@ -898,6 +890,45 @@ export interface components {
             /** Recurrence */
             recurrence: components["schemas"]["OneOffRecurrence"] | components["schemas"]["WeeklyRecurrence"] | components["schemas"]["MonthlyRecurrence"];
             clinic: components["schemas"]["ClinicHttpMinimal"];
+        };
+        /** DrCreate */
+        DrCreate: {
+            /** Name */
+            name: string;
+            gender: components["schemas"]["Gender"];
+            /** Profile */
+            profile?: string | null;
+            /** Degree */
+            degree: string;
+            /**
+             * Medicalcollege
+             * @default NA
+             */
+            medicalCollege: string;
+            /** Graduationyear */
+            graduationYear?: number | null;
+            /** Licensenumber */
+            licenseNumber: string;
+            /** Experience */
+            experience?: number | null;
+            /** Primaryspecialization */
+            primarySpecialization: string;
+            /**
+             * Secondaryfocusareas
+             * @default []
+             */
+            secondaryFocusAreas: string[];
+            /** Bio */
+            bio?: string | null;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+            /** Phone */
+            phone?: string | null;
         };
         /** DrProfileResponse */
         DrProfileResponse: {
@@ -1267,7 +1298,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    register_pt: {
+    register_patient: {
         parameters: {
             query?: never;
             header?: never;
@@ -1281,12 +1312,12 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponse"];
+                    "application/json": components["schemas"]["UserResponse"] | string;
                 };
             };
             /** @description Validation Error */
@@ -1300,7 +1331,40 @@ export interface operations {
             };
         };
     };
-    login_pt: {
+    register_doctor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/x-www-form-urlencoded": components["schemas"]["DrCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"] | string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    login_patient: {
         parameters: {
             query?: never;
             header?: never;
@@ -1333,40 +1397,7 @@ export interface operations {
             };
         };
     };
-    register_dr: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["Body_register_dr_auth_register_doctor_post"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    login_dr: {
+    login_doctor: {
         parameters: {
             query?: never;
             header?: never;
@@ -1385,7 +1416,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["UserResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1414,7 +1445,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DrProfileResponse"] | components["schemas"]["PatientProfileResponse"] | null;
+                    "application/json": components["schemas"]["DrProfileResponse"] | components["schemas"]["PatientProfileResponse"];
                 };
             };
         };
@@ -1429,20 +1460,18 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            200: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": unknown;
-                };
+                content?: never;
             };
         };
     };
-    edit: {
+    update_field: {
         parameters: {
             query: {
-                q: string;
+                property_key: string;
             };
             header?: never;
             path?: never;
@@ -1450,7 +1479,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Body_edit_auth_edit_put"];
+                "application/json": components["schemas"]["Body_update_allowed_field_auth_edit_put"];
             };
         };
         responses: {
@@ -1513,6 +1542,55 @@ export interface operations {
                 content: {
                     "application/json": unknown;
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                refresh_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

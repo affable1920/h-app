@@ -9,6 +9,7 @@ import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
+import { ToggledPasswordInput } from "./lib/button/ToggledPasswordInput";
 
 type MultiInputProps = {
   methodA: string;
@@ -122,11 +123,7 @@ export function DrSignin() {
         />
         <Input.Group error={errors["password"]?.message}>
           <Input.Label htmlFor="password">password</Input.Label>
-          <Input.Element
-            id="password"
-            type="password"
-            {...form.register("password")}
-          />
+          <ToggledPasswordInput id="password" {...form.register("password")} />
         </Input.Group>
       </Stack>
 

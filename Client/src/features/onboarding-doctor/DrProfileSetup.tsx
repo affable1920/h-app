@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, type Resolver } from "react-hook-form";
 import { AnimatePresence, motion } from "motion/react";
 import type { APIError } from "@/types/http";
 import { toast } from "sonner";
@@ -10,19 +10,19 @@ import { DoctorOnboardingSchema, type DoctorOnboarding } from "@/schemas";
 import { useNavigate } from "react-router-dom";
 import { Stack } from "@/components/ui/Stack";
 import useModalStore from "@/stores/modal-store";
-import { useSignup } from "@/hooks/use-auth";
+import { useSignin, useSignup } from "@/hooks/use-auth";
 import { doctorKeys } from "@/hooks/keys";
 
 const FIELDS: Array<Array<keyof DoctorOnboarding>> = [
   ["profile", "name", "gender"] as const,
   [
     "degree",
-    "medical_college",
-    "graduation_year",
-    "license_number",
+    "medicalCollege",
+    "graduationYear",
+    "licenseNumber",
     "experience",
   ] as const,
-  ["primary_specialization", "secondary_focus_areas", "bio"] as const,
+  ["primarySpecialization", "secondaryFocusAreas", "bio"] as const,
   ["email", "password", "phone"] as const,
 ] as const;
 
@@ -42,6 +42,7 @@ export default function DrProfileSetup() {
   );
 
   const { mutateAsync: create, isPending } = useCreateDoctor();
+  const { mutate: signin } = useSignin();
 
   const openModal = useModalStore((s) => s.openModal);
 
@@ -51,10 +52,10 @@ export default function DrProfileSetup() {
   const StepComponent = STEPS[step]!;
 
   const form = useForm<DoctorOnboarding>({
-    resolver: zodResolver(DoctorOnboardingSchema),
+    resolver: zodResolver(DoctorOnboardingSchema) as Resolver<DoctorOnboarding>,
     defaultValues: {
       profile: null,
-      secondary_focus_areas: [],
+      secondaryFocusAreas: [],
       experience: 0,
     },
     reValidateMode: "onChange",
@@ -99,7 +100,33 @@ export default function DrProfileSetup() {
     }
 
     try {
-      await create(fd);
+      const response = await create(fd);
+
+      if (typeof response.data === "string") {
+        toast.info(response.data, {
+          duration: 4000,
+          dismissible: true,
+          action: {
+            label: "login",
+            onClick: function () {
+              signin(
+                {
+                  route: "patient",
+                  data: {
+                    email: formData.email,
+                    password: formData.password,
+                  },
+                },
+                {
+                  onSuccess: function () {
+                    navigate("/app/index/doctors");
+                  },
+                },
+              );
+            },
+          },
+        });
+      }
 
       openModal("confirmation-modal", {
         tagline: "Complete your profile setup ..?",

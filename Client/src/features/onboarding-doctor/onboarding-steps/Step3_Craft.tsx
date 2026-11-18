@@ -27,7 +27,7 @@ export function Step3_Craft() {
   }, []);
 
   const { field: ps } = useController({
-    name: "primary_specialization",
+    name: "primarySpecialization",
     control: form.control,
     rules: {
       required: "Primary specialization is required",
@@ -56,7 +56,7 @@ export function Step3_Craft() {
       <Stack orientation="V" gap="sm">
         <Stack orientation="V" gap={0}>
           <label
-            aria-invalid={Boolean(errors["primary_specialization"])}
+            aria-invalid={Boolean(errors["primarySpecialization"])}
             className="px-1 text-sm mb-2 font-semibold inline-flex m-0 gap-0.5"
             htmlFor="primary-specialization"
           >
@@ -70,9 +70,9 @@ export function Step3_Craft() {
             clearable={true}
             onClear={reset}
           />
-          {errors["primary_specialization"] && (
+          {errors["primarySpecialization"] && (
             <div className="italic text-sm text-red-600 px-1">
-              {errors["primary_specialization"]?.message}
+              {errors["primarySpecialization"]?.message}
             </div>
           )}
         </Stack>
@@ -94,7 +94,7 @@ export function Step3_Craft() {
               variant="icon"
               onClick={function () {
                 openModal("picker-modal", {
-                  name: "primary_specialization",
+                  name: "primarySpecialization",
                   items: SPECIALIZATIONS.sort(sortFn),
                   onSelect: ps.onChange,
                   selected: ps.value,
@@ -166,7 +166,7 @@ export function Step3_Craft() {
         </Stack>
       </Stack>
 
-      <Input.Group error={errors.secondary_focus_areas?.message}>
+      <Input.Group error={errors.secondaryFocusAreas?.message}>
         <Input.Label required={false} htmlFor="secondary-focus-areas">
           Secondary areas of focus
         </Input.Label>
@@ -174,7 +174,7 @@ export function Step3_Craft() {
           defaultValue={"dermatology, cardiology"}
           id="secondary-focus-areas"
           placeholder="comma-separated"
-          {...form.register("secondary_focus_areas")}
+          {...form.register("secondaryFocusAreas")}
         />
       </Input.Group>
 

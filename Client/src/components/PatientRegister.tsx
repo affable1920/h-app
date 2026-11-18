@@ -7,8 +7,8 @@ import { Stack } from "./ui/Stack";
 import { useForm } from "react-hook-form";
 import { type PatientCreate, PatientCreateSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSignup } from "@/hooks/use-auth";
-import type { APIError } from "@/types/http";
+import { useSignin, useSignup } from "@/hooks/use-auth";
+import { ToggledPasswordInput } from "./lib/button/ToggledPasswordInput";
 
 export const PatientRegister = memo(function () {
   const useRegister = useSignup(
@@ -18,7 +18,9 @@ export const PatientRegister = memo(function () {
     () => [["auth", "me"]],
   );
 
-  const { mutateAsync: create, isPending } = useRegister();
+  const { mutate: create, isPending } = useRegister();
+  const { mutate: signin } = useSignin();
+
   const form = useForm<PatientCreate>({
     resolver: zodResolver(PatientCreateSchema),
   });
@@ -30,12 +32,46 @@ export const PatientRegister = memo(function () {
   } = form;
 
   async function submit(data: PatientCreate) {
-    try {
-      await create(data);
-      navigate("/app/index/doctors");
-    } catch (exc) {
-      toast.error((exc as unknown as APIError).message);
-    }
+    create(data, {
+      onSuccess(res, variables) {
+        if (typeof res.data === "string") {
+          toast.info(res.data, {
+            duration: 4000,
+            dismissible: true,
+            action: {
+              label: "login",
+              onClick: function () {
+                signin(
+                  {
+                    route: "patient",
+                    data: {
+                      email: variables.email,
+                      password: variables.password,
+                    },
+                  },
+                  {
+                    onSuccess: function () {
+                      navigate("/app/index/doctors");
+                    },
+                  },
+                );
+              },
+            },
+            description: "Go to the login page to re-login..",
+          });
+
+          return;
+        }
+
+        navigate("/app/index/doctors");
+      },
+
+      onError(error) {
+        toast.error(error.code, {
+          description: error.message,
+        });
+      },
+    });
   }
 
   return (
@@ -57,9 +93,8 @@ export const PatientRegister = memo(function () {
 
             <Input.Group error={errors["password"]?.message}>
               <Input.Label htmlFor="password">password</Input.Label>
-              <Input.Element
+              <ToggledPasswordInput
                 id="password"
-                type="password"
                 {...form.register("password")}
               />
             </Input.Group>

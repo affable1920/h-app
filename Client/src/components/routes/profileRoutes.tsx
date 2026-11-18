@@ -9,7 +9,6 @@ export const patientProfileRoute: RouteObject[] = [
     element: <PatientProfile />,
     children: [
       {
-        index: true,
         path: "appointments",
         async lazy() {
           const { PatientAppointmentsTab } =
@@ -32,7 +31,6 @@ export const drProfileRoute: RouteObject[] = [
     element: <DrProfile />,
     children: [
       {
-        index: true,
         path: "personal",
         element: <PersonalProfileTab />,
       },

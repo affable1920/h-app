@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
-import Button from "@/components/lib/button/Button";
+import useAuthStore from "@stores/auth-store";
+import type { MobileNavItem } from "@/types/utils";
+import { useLogout } from "@hooks/use-auth";
+
 import {
   ArrowRight,
   BellOff,
@@ -19,8 +23,7 @@ import {
   Syringe,
   User,
 } from "lucide-react";
-import useAuthStore, { logout } from "@/stores/auth-store";
-import type { MobileNavItem } from "@/types/utils";
+import Button from "@components/lib/button/Button";
 import MobileNavigationItem from "./MobileNavigationItem";
 import Divider from "./ui/Divider";
 import DesktopNavigationItem from "./DesktopNavigationItem";
@@ -29,8 +32,10 @@ function NavBar() {
   const { pathname = "" } = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
+  const { mutate: logout } = useLogout();
+
   const navigate = useNavigate();
-  const user = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.token);
 
   useEffect(
     function () {
@@ -135,7 +140,17 @@ function NavBar() {
                 label: "logout",
                 icon: LogOut,
                 onclick: function () {
-                  logout("/auth");
+                  logout(null, {
+                    onSuccess(data) {
+                      const message =
+                        typeof data === "string" && data.trim() !== ""
+                          ? data
+                          : "You have been logged out ..";
+
+                      toast.info(message);
+                      navigate("/");
+                    },
+                  });
                 },
               },
             ],

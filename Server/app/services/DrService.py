@@ -221,7 +221,7 @@ class DoctorService(EntityService[Doctor]):
 
         compressed = None
 
-        if data.profile:
+        if data.profile is not None:
             logger.info(
                 f"Compressing profile image for doctor {data.name} ..."
             )
@@ -231,7 +231,7 @@ class DoctorService(EntityService[Doctor]):
                 base64.b64encode(img).decode("utf-8")
             )
 
-        hashed_pwd = security.hash_password_aio(pwd=data.password)
+        hashed_pwd = await security.hash_password_aio(pwd=data.password)
 
         created = Doctor(
             image=compressed,

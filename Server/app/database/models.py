@@ -634,14 +634,12 @@ class RefreshToken(Base):
         sa.DateTime(timezone=True)
     )
 
-    used_at: Mapped[datetime] = mapped_column(
+    used_at: Mapped[datetime | None] = mapped_column(
         sa.DateTime(timezone=True),
-        nullable=True
     )
 
-    revoked_at: Mapped[datetime] = mapped_column(
+    revoked_at: Mapped[datetime | None] = mapped_column(
         sa.DateTime(timezone=True),
-        nullable=True
     )
 
     def __repr__(self) -> str:

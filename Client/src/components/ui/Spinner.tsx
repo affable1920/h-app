@@ -1,26 +1,39 @@
-type Size = "xs" | "sm" | "md" | "lg";
-const sizes: Record<Size, string> = {
-  xs: "size-2",
-  sm: "size-4",
-  md: "size-6",
-  lg: "size-8",
-};
+import { cn } from "@/utils/utils";
 
-const Spinner = ({
+type Size = "xs" | "sm" | "md" | "lg";
+type Color = "brand" | "white" | "primary" | "indicator";
+
+const sizes = {
+  xs: "size-3",
+  sm: "size-4",
+  md: "size-5",
+  lg: "size-7",
+} satisfies Record<Size, string>;
+
+const colors = {
+  white: "border-white",
+  brand: "border-brand",
+  indicator: "border-indicator",
+  primary: "border-layout",
+} satisfies Record<Color, string>;
+
+function Spinner({
   size = "sm",
-  loading = true,
+  color = "white",
 }: {
   size?: Size;
-  loading?: boolean;
-}) => {
-  if (!loading) return null;
-
+  color?: Color;
+}) {
   return (
     <div
-      className={`border-4 rounded-full border-brand border-b-transparent rotate-360 animate-spin 
-    duration-[infinity] ${sizes[size]}`}
+      className={cn(
+        `border-4 rounded-full rotate-360 animate-spin duration-[infinity]`,
+        sizes[size],
+        colors[color],
+        "border-b-transparent",
+      )}
     />
   );
-};
+}
 
 export default Spinner;

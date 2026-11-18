@@ -8,6 +8,7 @@ import type { AxiosRequestConfig } from "axios";
 import { createMutationHook } from "./use-http";
 import { doctorKeys } from "./keys";
 import type { PatientProfile } from "@/types/patients";
+import queryClient from "@/core/query-client";
 
 export type Role = "doctor" | "patient";
 
@@ -39,7 +40,7 @@ export function useSignup<TVariables extends Omit<SignupContext, "data">>(
 ) {
   return createMutationHook(
     (payload: SignupContext["data"]) =>
-      api.post<UserResponse, SignupContext["data"]>(
+      api.post<UserResponse | string, SignupContext["data"]>(
         `register/${vars.route}`,
         payload,
         {
@@ -55,11 +56,11 @@ export function useSignup<TVariables extends Omit<SignupContext, "data">>(
         const jwt = headers["x-auth-token"];
 
         if (!jwt) {
-          throw new Error("login failed.");
+          return created as string;
         }
 
-        setUser(created);
         saveToken(jwt);
+        setUser(created as UserResponse);
 
         options?.onSuccess?.(data, ...rest);
       },
@@ -84,10 +85,6 @@ export const useSignin = createMutationHook(
 
       const jwt = headers["x-auth-token"];
 
-      if (!jwt) {
-        return;
-      }
-
       saveToken(jwt);
       setUser(loggedinUser);
     },
@@ -95,7 +92,7 @@ export const useSignin = createMutationHook(
 );
 
 export function useFetchProfile<R extends Role>(role: R) {
-  return useQuery(fetchProfileOptions<R>(role));
+  return useQuery(fetchProfileOptions(role));
 }
 
 export const useDeleteAccount = createMutationHook(
@@ -119,4 +116,20 @@ export function fetchProfileOptions<R extends Role>(role: R) {
 export const useRequestEmailVerification = createMutationHook(
   () => api.post<string, null>("request-email-verify").then((res) => res.data),
   () => [["auth", "me"]],
+);
+
+export const useLogout = createMutationHook<null, unknown>(
+  async function () {
+    try {
+      return (
+        await api.post("logout", null, {
+          withCredentials: true,
+        })
+      ).data;
+    } finally {
+      queryClient.clear();
+      useAuthStore.getState().clearAuth();
+    }
+  },
+  () => [],
 );

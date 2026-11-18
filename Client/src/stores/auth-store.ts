@@ -1,8 +1,6 @@
-import queryClient from "@/core/query-client";
 import type { Role, UserResponse } from "@/types/user";
 import { jwtDecode } from "jwt-decode";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 interface AuthStore {
   token: string | null;
@@ -10,38 +8,28 @@ interface AuthStore {
   role: Role | null;
   setUser: (usr: UserResponse) => void;
   saveToken: (jwt: string) => void;
+  clearAuth: () => void;
 }
 
-const useAuthStore = create<AuthStore>()(
-  persist(
-    (set) => ({
-      token: null,
-      user: null,
+const useAuthStore = create<AuthStore>((set) => ({
+  user: null,
 
-      role: null,
+  setUser(usr) {
+    set({ user: usr });
+  },
 
-      setUser(usr) {
-        set({ user: usr });
-      },
+  token: null,
+  role: null,
+  saveToken(jwt) {
+    set({
+      token: jwt,
+      role: jwtDecode<{ role: "doctor" | "patient" }>(jwt).role,
+    });
+  },
 
-      saveToken(jwt) {
-        set({
-          token: jwt,
-          role: jwtDecode<{ role: "doctor" | "patient" }>(jwt).role,
-        });
-      },
-    }),
-
-    {
-      name: "auth-storage",
-    },
-  ),
-);
-
-export function logout(to?: string) {
-  useAuthStore.persist.clearStorage();
-  queryClient.clear();
-  window.location.href = to ?? "auth";
-}
+  clearAuth() {
+    set({ token: null, user: null, role: null });
+  },
+}));
 
 export default useAuthStore;

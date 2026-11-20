@@ -52,8 +52,8 @@ export function DrProfile() {
         {
           id: doctor?.id as string,
           changes: {
-            q: field,
-            val,
+            fieldName: field,
+            fieldValue: val,
           },
         },
         {

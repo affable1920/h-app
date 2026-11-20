@@ -1,10 +1,10 @@
 import { EditableField } from "@components/lib/EditableField";
 import Button from "@/components/lib/button/Button";
 import { useRequestEmailVerification } from "@hooks/use-auth";
-import { useUpdateDoctor } from "@hooks/use-doctors";
+import { useUpdateDoctor, type DoctorFieldChange } from "@hooks/use-doctors";
 import type { APIError } from "@/types/http";
 import { Verified } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "sonner";
 import type { DoctorProfile } from "@/types/doctors";
@@ -13,25 +13,60 @@ export function PersonalProfileTab() {
   const doctor = useOutletContext<DoctorProfile>();
 
   const { mutateAsync: edit } = useUpdateDoctor();
-  const { mutateAsync: requestEmailVerify, isPending } =
-    useRequestEmailVerification();
+  const {
+    mutateAsync: requestEmailVerify,
+    isPending,
+    isSuccess,
+  } = useRequestEmailVerification();
+
+  const verifyRef = useRef<HTMLButtonElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    function () {
+      if (isSuccess && verifyRef.current) {
+        const el = verifyRef.current;
+        const initial = el.style.display ?? "block";
+
+        el.style.display = "none";
+
+        timerRef.current = setTimeout(function () {
+          el.style.display = initial;
+        }, 15000);
+      }
+
+      return function () {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+        }
+      };
+    },
+    [isSuccess],
+  );
 
   const handleSave = useCallback(
     async function (key: string, val: unknown) {
-      return await edit({
-        id: doctor.id,
-        changes: {
-          q: key,
-          val: val,
-        },
-      });
+      try {
+        await edit({
+          id: doctor.id,
+          changes: {
+            fieldName: key,
+            fieldValue: val,
+          } as DoctorFieldChange,
+        });
+      } catch (ex) {
+        const error = ex as APIError;
+        toast.error(error.code, {
+          description: error.message,
+        });
+      }
     },
     [edit, doctor.id],
   );
 
   async function requestEmailVerification() {
     try {
-      const message = await requestEmailVerify(null);
+      const message = await requestEmailVerify();
       toast.info(message);
     } catch (e) {
       const exc = e as unknown as APIError;
@@ -103,6 +138,7 @@ export function PersonalProfileTab() {
                   <Button
                     onClick={requestEmailVerification}
                     size="xs"
+                    ref={verifyRef}
                     loading={isPending}
                     border={false}
                     data-tooltip="Verify email"

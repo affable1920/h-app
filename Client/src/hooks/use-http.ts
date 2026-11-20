@@ -36,28 +36,33 @@ export function createQueryHook<TParams, TData, TError = APIError>(
   };
 }
 
-export function createMutationHook<TVariables, TData>(
+export function createMutationHook<
+  TData = unknown,
+  TVariables = void,
+  TError = APIError,
+  TContext = unknown,
+>(
   mutationFn: (vars: TVariables) => Promise<TData>,
   // given the variables and the result, return the query keys to invalidate
-  invalidateKeys: (vars: TVariables, data: TData) => Array<QueryKey>,
-  options?: Omit<UseMutationOptions<TData, APIError, TVariables>, "mutationFn">,
+  invalidateKeys?: (vars: TVariables, data: TData) => Array<QueryKey>,
+  options?: Omit<
+    UseMutationOptions<TData, TError, TVariables, TContext>,
+    "mutationFn"
+  >,
 ) {
   return function useResourceMutation() {
-    return useMutation({
-      ...options,
+    return useMutation<TData, TError, TVariables, TContext>({
       mutationFn,
-      onSuccess(data, vars, onMutateResult, context) {
-        invalidateKeys(vars, data).forEach(function (key) {
-          queryClient.invalidateQueries({
-            queryKey: key,
-          });
-        });
+      ...options,
+      onSuccess: async function (data, vars, onMutateResult, context) {
+        if (invalidateKeys) {
+          const keys = invalidateKeys(vars, data);
+          await Promise.all(
+            keys.map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+          );
+        }
 
-        options?.onSuccess?.(data, vars, onMutateResult, context);
-      },
-
-      onError(error, ...rest) {
-        options?.onError?.(error, ...rest);
+        return options?.onSuccess?.(data, vars, onMutateResult, context);
       },
     });
   };

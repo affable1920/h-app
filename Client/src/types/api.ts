@@ -106,23 +106,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/edit": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update Allowed Field */
-        put: operations["update_field"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/auth/request-email-verify": {
         parameters: {
             query?: never;
@@ -636,13 +619,8 @@ export interface components {
         };
         /** Body_edit_doctor_doctors_me_put */
         Body_edit_doctor_doctors_me_put: {
-            /** Val */
-            val: string;
-        };
-        /** Body_update_allowed_field_auth_edit_put */
-        Body_update_allowed_field_auth_edit_put: {
-            /** Property Value */
-            property_value: string;
+            /** Field Value */
+            field_value: string;
         };
         /** BookingRequestData */
         BookingRequestData: {
@@ -1468,41 +1446,6 @@ export interface operations {
             };
         };
     };
-    update_field: {
-        parameters: {
-            query: {
-                property_key: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Body_update_allowed_field_auth_edit_put"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     request: {
         parameters: {
             query?: never;
@@ -1681,7 +1624,7 @@ export interface operations {
     edit_doctor: {
         parameters: {
             query: {
-                q: string;
+                fieldName: string;
             };
             header?: never;
             path?: never;
@@ -1694,13 +1637,11 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": unknown;
-                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

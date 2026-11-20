@@ -114,11 +114,18 @@ export function fetchProfileOptions<R extends Role>(role: R) {
 }
 
 export const useRequestEmailVerification = createMutationHook(
-  () => api.post<string, null>("request-email-verify").then((res) => res.data),
+  () =>
+    api
+      .post<string, null>("request-email-verify", null, {
+        timeout: 5000,
+        timeoutErrorMessage:
+          "The server did not response. Please try the operation after sometime.",
+      })
+      .then((res) => res.data),
   () => [["auth", "me"]],
 );
 
-export const useLogout = createMutationHook<null, unknown>(
+export const useLogout = createMutationHook(
   async function () {
     try {
       return (

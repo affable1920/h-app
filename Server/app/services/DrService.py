@@ -4,7 +4,7 @@ from typing import Sequence, Tuple
 from uuid import UUID
 
 from sqlalchemy.orm.strategy_options import _AbstractLoad
-from sqlalchemy import Select, or_, select
+from sqlalchemy import Select, or_, select, update
 from sqlalchemy.orm import (
     selectinload,
     InstrumentedAttribute
@@ -23,6 +23,8 @@ from app.services.entities.EntityService import EntityService
 
 from app.core.exceptions import (
     AlreadyInUseException,
+    AppException,
+    ConflictError,
     EntityNotFoundException
 )
 
@@ -49,6 +51,14 @@ logger = logging.getLogger(__name__)
 SORT_COLUMNS_MAP = {
     "rating": "avg_rating",
     "reviews": "review_count"
+}
+
+
+ALLOWED_FIELD_UPDATES = {
+    "name",
+    "phone",
+    "profile",
+    "email"
 }
 
 
@@ -347,3 +357,52 @@ class DoctorService(EntityService[Doctor]):
 
         await session.execute(stmt)
         return clinic
+
+    @classmethod
+    async def update(
+        cls,
+        session: AsyncSession,
+        doctor: Doctor,
+        field_name: str,
+        field_value: str
+    ):
+        if (
+            field_name not in ALLOWED_FIELD_UPDATES
+        ):
+            raise ConflictError(
+                message=f"""Field {field_name} is not allowed to be updated""",
+            )
+
+        if (
+            field_name == "email"
+        ):
+            if doctor.email_verified:
+                raise ConflictError(
+                    message="You cannot change your email after verification ..!"
+                )
+
+            if (
+                await cls.email_exists(session, email=field_value)
+                or await PatientService.email_exists(session, email=field_value)
+            ):
+                raise AlreadyInUseException(
+                    field="email",
+                    message="This email is already registered within our database. "
+                    "Please try a different one ..!"
+                )
+
+        try:
+            stmt = (
+                update(Doctor)
+                .where(Doctor.id == doctor.id)
+                .values(**{field_name: field_value})
+                .returning(Doctor)
+            )
+
+            await session.scalar(stmt)
+            await session.commit()
+
+        except Exception as e:
+            await session.rollback()
+            logger.exception(e)
+            raise AppException from e

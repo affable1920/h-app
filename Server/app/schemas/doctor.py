@@ -3,7 +3,7 @@ from statistics import mean
 from typing import Annotated, Self
 
 from fastapi import File, Form, UploadFile
-from pydantic import Field, computed_field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 from app.schemas.base import EntityResponse, StrictRequest
 from app.schemas.enums import Gender, Status
@@ -44,40 +44,6 @@ class DrCreate(StrictRequest):
     email: Annotated[Email, Form(...)]
     password: Annotated[Password, Form(...)]
     phone: Annotated[str | None, Form(max_length=10)] = None
-
-
-def get_dr_onboarding(
-    name: Annotated[Username, Form(...)],
-    gender: Annotated[Gender, Form(...)],
-    degree: Annotated[str, Form(...)],
-    license_number: Annotated[str, Form(...)],
-    primary_specialization: Annotated[str, Form(...)],
-    email: Annotated[Email, Form(...)],
-    password: Annotated[Password, Form(...)],
-    medical_college: Annotated[str, Form(...)] = "NA",
-    graduation_year: Annotated[int | None, Form(...)] = None,
-    experience: Annotated[int | None, Form(...)] = 0,
-    secondary_focus_areas: Annotated[list[str], Form(...)] = [],
-    bio: Annotated[str | None, Form(...)] = None,
-    phone: Annotated[str | None, Form(...)] = None,
-    profile: Annotated[UploadFile | None, File(...)] = None,
-) -> DrCreate:
-    return DrCreate(
-        name=name,
-        profile=profile,
-        gender=gender,
-        degree=degree,
-        graduation_year=graduation_year,
-        medical_college=medical_college,
-        license_number=license_number,
-        experience=experience,
-        primary_specialization=primary_specialization,
-        secondary_focus_areas=secondary_focus_areas,
-        bio=bio,
-        email=email,
-        phone=phone,
-        password=password,
-    )
 
 
 class DoctorHttpMinimal(EntityResponse):

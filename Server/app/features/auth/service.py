@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
 import logging
 import secrets
+import sqlalchemy as sa
 from uuid import UUID, uuid4
-
-from psycopg2 import IntegrityError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.entry_async import AsyncSessionLocal
@@ -11,6 +11,7 @@ from app.schemas.user import UserResponse
 from app.core.exceptions import (
     AlreadyInUseException,
     AuthenticationError,
+    ConflictError,
     EntityNotFoundException,
 )
 
@@ -30,7 +31,6 @@ from app.schemas.enums import UserRoleV2
 from app.schemas.doctor import DoctorLogin, DrCreate
 from app.services.PatientService import PatientService
 from app.services.DrService import DoctorService
-import sqlalchemy as sa
 
 
 logger = logging.getLogger(__name__)
@@ -66,6 +66,8 @@ class AuthService:
         credentials: DoctorLogin,
         session: AsyncSession
     ):
+        """ lookup, authenticate credentials and issue session """
+
         method_used = "id" if credentials.id else "email"
         value = credentials.model_dump()[method_used]
 
@@ -216,10 +218,9 @@ class AuthService:
     ) -> tuple[str, str]:
         now = datetime.now(timezone.utc)
 
-        # 1. Atomically claim the token ONLY if it is unused, unrevoked,
-        # or unexpired
+        # 1. Atomically claim the token ONLY if it is unused, unrevoked, or unexpired.
         claim_stmt = (
-            sa.update(RefreshToken)
+            sa.select(RefreshToken)
             .where(
                 (
                     RefreshToken.token_hash
@@ -227,10 +228,10 @@ class AuthService:
                 ),
                 RefreshToken.used_at.is_(None),
                 RefreshToken.revoked_at.is_(None),
-                RefreshToken.expires_at > now
+                RefreshToken.expires_at > now,
+                RefreshToken.family_expires_at > now
             )
-            .values(used_at=now)
-            .returning(RefreshToken)
+            .with_for_update()
         )
 
         claimed_token = await session.scalar(claim_stmt)
@@ -250,17 +251,49 @@ class AuthService:
                 existing_token is not None
                 and existing_token.used_at is not None
             ):
+                # if the token is expired or revoked (reuse attempt),
+                # revoke all assigned tokens of the same family.
+
+                if (
+                    (now - existing_token.used_at).total_seconds()
+                    < 15
+                ):
+                    # ask client to wait for a grace window of 15s.
+                    raise ConflictError(
+                        code="refresh_in_progress",
+                        message="You just recieved a newly issued refresh token. "
+                        "Please retry after a few seconds ..",
+                    )
+
+                # revoke, commit, then raise
                 await cls.revoke_against_family(
                     family_id=existing_token.family_id,
-                    session=None
+                    session=session
                 )
 
-            # Raising here rolls back the main request `session`,
-            # but the family revocation above is already safely committed!
+                await session.commit()
+
+            # Raising here does not roll back the family revocation above
+            # as it is already (explicitly) safely committed!
             raise AuthenticationError(
+                code="invalid_refresh_token",
                 message="Your session has expired. Please login manually...",
-                reason="Invalid or reused refresh token."
+                reason="Invalid or used refresh token.",
             )
+
+        if (
+            (now - claimed_token.created_at).total_seconds()
+            <= 15
+        ):
+            return (
+                (security.create_access_token(
+                    claimed_token.user_id,
+                    claimed_token.user_role,
+                )), refresh_token
+            )
+
+        claimed_token.used_at = now
+        session.add(claimed_token)
 
         # 3. Happy path: issue the next token in the same family using
         # the main session
@@ -331,15 +364,39 @@ class AuthService:
                 .values(revoked_at=datetime.now(timezone.utc))
             )
 
-            tokens = (await db.scalars(stmt)).all()
-            logger.info(
-                f"""Revoked token for family {family_id}
-                {tokens}"""
-            )
+            await db.scalars(stmt)
 
         if session is not None:
             await _execute(session)
-            await session.commit()
+
+        else:
+            async with AsyncSessionLocal() as short_session:
+                async with short_session.begin():
+                    await _execute(short_session)
+
+    @classmethod
+    async def remove_account(
+            cls,
+            user_id: UUID,
+            role: UserRoleV2,
+            session: AsyncSession | None
+    ):
+        async def _execute(db: AsyncSession) -> None:
+            stmt = (
+                sa.delete(
+                    model := (
+                        Doctor
+                        if role is UserRoleV2.DOCTOR
+                        else Patient
+                    )
+                )
+                .where(model.id == user_id)
+            )
+
+            await db.scalar(stmt)
+
+        if session is not None:
+            await _execute(session)
 
         else:
             async with AsyncSessionLocal() as short_session:

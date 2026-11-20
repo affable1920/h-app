@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 from uuid import UUID
-from fastapi import Body, Depends, APIRouter, HTTPException, Query
+from fastapi import Body, Depends, APIRouter, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.SchedulingService import ScheduleService
@@ -28,13 +28,6 @@ router = APIRouter(
     tags=["Doctors"],
     dependencies=[Depends(get_db)]
 )
-
-ALLOWED_FIELDS = {
-    "name",
-    "phone",
-    "profile",
-    "email"
-}
 
 
 @router.get("", response_model=PaginatedResponse[DoctorHttpMinimal])
@@ -74,35 +67,22 @@ async def get_doctor(
     )
 
 
-@router.put("/me")
+@router.put(
+    "/me",
+    status_code=204
+)
 async def edit_doctor(
-    q: str = Query(),
-    val: str = Body(embed=True),
+    field_name: str = Query(alias="fieldName"),
+    field_value: str = Body(embed=True, alias="fieldValue"),
     session: AsyncSession = Depends(get_db),
     doctor: Doctor = Depends(require_doctor)
 ):
-    if q not in ALLOWED_FIELDS:
-        raise HTTPException(
-            400,
-            detail={
-                "code": "read_only_field_edit_error",
-                "message": f"{q} is not an editable field.",
-            }
-        )
-
-    if q == "email" and doctor.email_verified:
-        raise HTTPException(
-            409,
-            detail={
-                "code": "unauthorized_error",
-                "message": "You cannot change your email address as your email is already verified."
-            }
-        )
-
-    setattr(doctor, q, val)
-    await session.commit()
-
-    await session.refresh(doctor)
+    await DoctorService.update(
+        session=session,
+        doctor=doctor,
+        field_name=field_name,
+        field_value=field_value
+    )
 
 
 @router.get(

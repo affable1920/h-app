@@ -1,14 +1,19 @@
+import asyncio
 import logging
+from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi import (
     APIRouter,
-    Body,
+    BackgroundTasks,
+    Cookie,
     Depends,
+    Form,
     Query,
     Response
 )
 
+from app.services.MailService import MailService
 from app.database.entry_async import get_db
 from app.schemas.enums import UserRoleV2
 from app.schemas.user import UserResponse
@@ -17,10 +22,12 @@ from app.features.auth.service import AuthService
 from app.features.auth.EmailVerificationService import EmailVerificationService
 
 from app.core.exceptions import (
-    AuthorizationError,
-    ConflictError
+    AppException,
+    AuthenticationError,
+    AuthorizationError
 )
 from app.features.auth.dependencies import (
+    clear_auth_headers,
     extract_cookie,
     get_current_user,
     set_auth_headers
@@ -29,7 +36,6 @@ from app.schemas.doctor import (
     DoctorLogin,
     DrCreate,
     DrProfileResponse,
-    get_dr_onboarding,
 )
 from app.schemas.patient import (
     PatientProfileResponse,
@@ -58,14 +64,12 @@ async def register_patient(
     )
 
     try:
-        async with session.begin_nested():
+        async with session.begin():
             access_token, refresh_token = AuthService.issue_session(
                 session=session,
                 user_id=created.id,
                 role=UserRoleV2.PATIENT
             )
-
-            await session.commit()
 
     except Exception:
         logger.exception(
@@ -77,10 +81,8 @@ async def register_patient(
         )
 
         response.headers["x-session-issued"] = "false"
-        return """
-        Your account has been sucessfully created, but we could not log you in
-        Please login manually..
-        """
+        return """Your account has been sucessfully created, but we could not log you in
+        Please login manually ..!"""
 
     set_auth_headers(response, access_token, refresh_token)
     return created
@@ -92,7 +94,7 @@ async def register_patient(
 )
 async def register_doctor(
     response: Response,
-    data: DrCreate = Depends(get_dr_onboarding),
+    data: Annotated[DrCreate, Form()],
     session: AsyncSession = Depends(get_db)
 ):
     created = await AuthService.register_doctor(
@@ -101,14 +103,12 @@ async def register_doctor(
     )
 
     try:
-        async with session.begin_nested():
+        async with session.begin():
             access_token, refresh_token = AuthService.issue_session(
                 session,
                 created.id,
                 UserRoleV2.DOCTOR
             )
-
-            await session.commit()
 
     except Exception:
         logger.exception(
@@ -120,10 +120,12 @@ async def register_doctor(
         )
 
         response.headers["x-session-issued"] = "false"
-        return """
+        return (
+            """
         Your account has been sucessfully created, but we could not log you in 
-        Please login manually..
+        Please login manually ..
         """
+        )
 
     set_auth_headers(response, access_token, refresh_token)
     return created
@@ -196,63 +198,58 @@ async def me(
     )
 
 
-@router.delete("")
+@router.delete(
+    "",
+    status_code=204
+)
 async def remove_account(
+    cookie: str = Depends(extract_cookie),
     session: AsyncSession = Depends(get_db),
     user: Doctor | Patient = Depends(get_current_user)
 ):
-    await session.delete(user)
-    await session.commit()
-    return "Account deleted sucessfully"
+    refresh_token = await AuthService.get_refresh_token(
+        cookie,
+        session
+    )
 
-
-ALLOWED_FIELDS = {"name", "phone", "email"}
-
-
-@router.put("/edit")
-async def update_allowed_field(
-    session: AsyncSession = Depends(get_db),
-    current_user: Doctor | Patient = Depends(
-        get_current_user
-    ),
-    property_key: str = Query(),
-    property_value: str = Body(embed=True),
-):
-    if (
-        property_key not in ALLOWED_FIELDS
-    ):
-        raise AuthorizationError(
-            message="You can only edit name, phone and email.",
-            code="field_not_editable",
-            detail={
-                "code": "unauthorized_error",
-                "message": f"Bad request. You can only edit the following fields: \
-                {ALLOWED_FIELDS}"
-            }
+    if refresh_token is None:
+        raise AuthenticationError(
+            message="We could not delete your account. Please try later..",
+            reason="No refresh token record found.",
+            code="missing_token"
         )
 
-    if (
-        property_key == "email"
-        and current_user.email_verified
-    ):
-        raise ConflictError(
-            code="email_already_verified",
-            message="You cannot change your email address as "
-            "your email is already verified.",
+    try:
+        await AuthService.revoke_against_family(
+            family_id=refresh_token.family_id,
+            session=session
         )
 
-    setattr(current_user, property_key, property_value)
+        await AuthService.remove_account(
+            user.id,
+            (
+                UserRoleV2.DOCTOR
+                if isinstance(user, Doctor)
+                else UserRoleV2.PATIENT
+            ),
+            session
+        )
 
-    await session.commit()
-    await session.refresh(current_user)
+        await session.commit()
+
+    except Exception as e:
+        logger.exception(e)
+        await session.rollback()
+        raise AppException from e
 
 
-@router.post("/request-email-verify")
+@router.post(
+    "/request-email-verify",
+    status_code=201
+)
 async def request(
     session: AsyncSession = Depends(get_db),
-    current_user: Doctor | Patient = Depends(
-        get_current_user
-    )
+    current_user: Doctor | Patient = Depends(get_current_user)
 ):
     role = (
         UserRoleV2.DOCTOR
@@ -263,32 +260,52 @@ async def request(
     if current_user.email_verified:
         return "Your email is already verified."
 
-    await EmailVerificationService.send_verification_mail(
+    verification_link = await EmailVerificationService.create_verification_mail(
         session=session,
         user_id=current_user.id,
-        email=current_user.email,
         role=role
     )
 
-    return (
-        "An email containing a verification link has been sent to you email address . "
-        "Please click on the link to verify your email .."
-        "The link expires after 30 minutes from now .."
+    await session.commit()
+
+    await asyncio.to_thread(
+        MailService.send_verification_mail,
+        recipient=current_user.email,
+        verification_link=verification_link
     )
 
+    return """A mail containing a verification link has been sent to you email address.
+        Please click on the link to verify your email ..
+        The link expires after 10 minutes from now .."""
 
-@router.get("/verify-email")
+
+@router.get(
+    "/verify-email",
+    status_code=204
+)
 async def email_verification(
+    background_tasks: BackgroundTasks,
     token: str = Query(...),
     session: AsyncSession = Depends(get_db),
 ):
-    await EmailVerificationService.verify_email(
+    email = await EmailVerificationService.verify_email(
         session=session,
         link=token
     )
 
+    background_tasks.add_task(
+        MailService.send_mail,
+        recipient=email,
+        content=(
+            "Email Verification ",
+            "Your email has been verified successfully ..!"
+        )
+    )
 
-@router.post("/refresh")
+
+@router.post(
+    "/refresh"
+)
 async def refresh(
     response: Response,
     cookie: str = Depends(extract_cookie),
@@ -305,25 +322,26 @@ async def refresh(
 
 @router.post(
     "/logout",
-    status_code=204
+    status_code=204,
+    dependencies=[
+        Depends(clear_auth_headers)
+    ]
 )
 async def logout(
     response: Response,
-    cookie: str = Depends(extract_cookie),
+    refresh_token: str | None = Cookie(default=None),
     session: AsyncSession = Depends(get_db)
 ):
-    token = await AuthService.get_refresh_token(
-        token=cookie,
-        session=session
-    )
-
-    if token:
-        await AuthService.revoke_against_family(
-            family_id=token.family_id,
+    if refresh_token:
+        token = await AuthService.get_refresh_token(
+            token=refresh_token,
             session=session
         )
 
-    response.delete_cookie(
-        key="refresh_token",
-        path="/auth",
-    )
+        if token:
+            await AuthService.revoke_against_family(
+                family_id=token.family_id,
+                session=session
+            )
+
+            await session.commit()

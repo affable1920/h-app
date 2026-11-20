@@ -1,9 +1,13 @@
 import logging
+from sqlalchemy import update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.strategy_options import _AbstractLoad
 
-from app.core.exceptions import AlreadyInUseException
+from app.core.exceptions import (
+    AlreadyInUseException,
+    ConflictError,
+)
 from app.services.entities.EntityService import EntityService
 
 from app.database.models import (
@@ -14,7 +18,10 @@ from app.database.models import (
 )
 from app.schemas.patient import PatientCreate
 from app.features.auth import security
+
 logger = logging.getLogger(__name__)
+
+ALLOWED_FIELD_UPDATES = ["username", "email"]
 
 
 class PatientService(EntityService[Patient]):
@@ -67,3 +74,36 @@ class PatientService(EntityService[Patient]):
 
         session.add(created)
         return created
+
+    @classmethod
+    async def update(
+        cls,
+        session: AsyncSession,
+        patient: Patient,
+        field_name: str,
+        field_value: str
+    ):
+        if (
+            field_name not in ALLOWED_FIELD_UPDATES
+        ):
+            raise ConflictError(
+                message=f"""Field {field_name} is not allowed to be updated""",
+            )
+
+        if (
+            field_name == "email"
+        ):
+            if patient.email_verified:
+                raise ConflictError(
+                    message="You cannot change your email after verification"
+                )
+
+        stmt = (
+            update(Patient)
+            .where(Patient.id == patient.id)
+            .values(**{field_name: field_value})
+            .returning(Patient)
+        )
+
+        await session.scalar(stmt)
+        await session.flush()

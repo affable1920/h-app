@@ -3,23 +3,20 @@ import secrets
 from typing import Tuple
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
-from sqlalchemy import select
+from sqlalchemy import ColumnExpressionArgument, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.DrService import DoctorService
-from app.services.PatientService import PatientService
-from app.services.MailService import MailService
 
 from app.core.exceptions import (
+    AppException,
     ConflictError,
-    EntityNotFoundException,
     AuthenticationError
 )
 
 from app.schemas.types import Email
 from app.schemas.enums import UserRoleV2
 
-from app.database.models import EmailVerificationToken
+from app.database.models import Doctor, EmailVerificationToken, Patient
 from app.features.auth import security
 
 
@@ -31,24 +28,32 @@ class EmailVerificationService:
     async def find_verification_token(
         cls,
         session: AsyncSession,
-        token: str
+        token: str,
+        where_clauses: list[ColumnExpressionArgument] | None = [],
+        lock_: bool | None = None
     ) -> EmailVerificationToken | None:
-        return await (
-            session.scalar(
-                select(EmailVerificationToken)
-                .where(
-                    EmailVerificationToken.hash
-                    == security.hash_token(token)
-                )
+        stmt = (
+            select(EmailVerificationToken)
+            .where(
+                EmailVerificationToken.hash
+                == security.hash_token(token),
+                *(where_clauses
+                  if where_clauses is not None else []
+                  )
             )
         )
 
+        if lock_:
+            stmt = stmt.with_for_update()
+
+        return await session.scalar(stmt)
+
     @classmethod
-    def create_verification_record(
+    def create_verification_pair(
         cls,
         user_id: UUID,
         user_role: UserRoleV2,
-        exp: int = 30,
+        exp: int = 10,
     ) -> Tuple[str, EmailVerificationToken]:
         raw_token = secrets.token_urlsafe(32)
 
@@ -64,18 +69,19 @@ class EmailVerificationService:
         return raw_token, record
 
     @classmethod
-    async def send_verification_mail(
+    async def create_verification_mail(
         cls,
         session: AsyncSession,
         user_id: UUID,
-        email: Email,
         role: UserRoleV2
     ):
+        now = datetime.now(timezone.utc)
+
         stmt = (
             select(EmailVerificationToken)
             .where(
                 EmailVerificationToken.user_id == user_id,
-                EmailVerificationToken.user_role == role
+                EmailVerificationToken.user_role == role,
             )
         )
 
@@ -83,34 +89,27 @@ class EmailVerificationService:
 
         if token_record is not None:
             if (
-                (datetime.now(timezone.utc)
-                 - token_record.created_at).total_seconds()
+                (now - token_record.created_at).total_seconds()
                 <= 15
             ):
                 raise ConflictError(
                     message="You have recently sent a verification mail. "
-                    "Please wait for 15 seconds before requesting another mail."
+                    "Please wait for 15 seconds before requesting another mail .."
                 )
 
             await session.delete(token_record)
 
-        token, link = cls.create_verification_record(
+        token, link = cls.create_verification_pair(
             user_id=user_id,
             user_role=role,
         )
 
         session.add(link)
-        await session.commit()
 
-        MailService.send_mail(
-            recipient=email,
-            content=(
-                "Email Verification",
-                "Confirm your email address using the link below\n\n"
-                f"{token}\n\n"
-                "The link is only valid for 5 minutes."
-            )
-        )
+        BASE_URL = "https://localhost:8000/auth"
+        verification_link = f"{BASE_URL}/verify-email?token={token}"
+
+        return verification_link
 
     @classmethod
     async def verify_email(
@@ -118,63 +117,64 @@ class EmailVerificationService:
         link: str,
         session: AsyncSession,
     ):
-        token_record = await cls.find_verification_token(
-            token=link,
-            session=session
-        )
+        now = datetime.now(timezone.utc)
 
-        if token_record is None:
-            raise AuthenticationError(
-                message="Your email could not be verified. Please try later..",
-                details={
-                    "code": "invalid_token",
-                    "message": "Invalid token provided."
-                }
+        async with session.begin():
+            stmt = (
+                update(EmailVerificationToken)
+                .where(
+                    (
+                        EmailVerificationToken.hash
+                        == security.hash_token(link)
+                    ),
+                    EmailVerificationToken.used_at.is_(None),
+                    EmailVerificationToken.exp > now
+                )
+                .returning(
+                    EmailVerificationToken.user_id,
+                    EmailVerificationToken.user_role
+                )
+                .values({"used_at": now})
             )
 
-        if token_record.used_at is not None:
-            raise AuthenticationError(
-                message="Token already used. Your email has likely been verified. "
-                "Please re-check or request another verification mail before retrying..",
+            claimed = await session.execute(stmt)
+            row = claimed.first()
+
+            if row is None:
+                existing = await cls.find_verification_token(
+                    token=link,
+                    session=session,
+                )
+
+                if existing is not None:
+                    raise ConflictError(
+                        message="""The link is either expired or has already been used. 
+                        Please recheck your email verification status before retrying ..!""",
+                        code="token_used_or_expired"
+                    )
+
+                raise AppException(
+                    message="The verification link could not be verified. Please retry !"
+                )
+
+            user_id, user_role = row.tuple()
+
+            stmt = (
+                update(
+                    model := (Doctor
+                              if user_role is UserRoleV2.DOCTOR
+                              else Patient)
+                )
+                .where(model.id == user_id)
+                .values({"email_verified": True})
+                .returning(model.email)
             )
 
-        if token_record.exp < datetime.now(timezone.utc):
-            raise AuthenticationError(
-                message="Token expired. Please request a new one!"
-            )
+            email = await session.scalar(stmt)
 
-        user_id = token_record.user_id
-        role = token_record.user_role
+            if email is None:
+                raise AuthenticationError(
+                    message="The user associated with the email could not be found."
+                )
 
-        user = None
-
-        if role == UserRoleV2.PATIENT:
-            user = await PatientService.get(
-                session=session,
-                ident_key="id",
-                ident_val=user_id
-            )
-
-        elif role == UserRoleV2.DOCTOR:
-            user = await DoctorService.get_doctor_by_id(
-                session=session,
-                doctor_id=user_id
-            )
-
-        if user is None:
-            raise EntityNotFoundException(entity_name="user")
-
-        if user.email_verified:
-            return "Email already verified."
-
-        user.email_verified = True
-        token_record.used_at = datetime.now(timezone.utc)
-
-        await session.commit()
-        MailService.send_mail(
-            recipient=user.email,
-            content=(
-                "Email Verification ",
-                "Your email has been verified successfully ..."
-            )
-        )
+            return email

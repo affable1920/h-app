@@ -1,13 +1,20 @@
+from datetime import datetime, timezone
 import io
 import base64
 import logging
 
-from sqlalchemy import create_engine, inspect, select, update
+from sqlalchemy import (
+    create_engine,
+    delete,
+    inspect,
+    select,
+    update
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
-from app.database.models import Doctor
+from app.database.models import Doctor, VerificationToken
 from PIL import Image, UnidentifiedImageError
 
 logger = logging.getLogger(__name__)
@@ -163,6 +170,39 @@ def run_migration():
             session.commit()
 
 
+def delete_expired_tokens() -> None:
+    engine = create_engine(url=settings.database_url)
+    session_local = sessionmaker(bind=engine)
+
+    inspector = inspect(engine)
+
+    if not inspector.has_table(
+        VerificationToken.__tablename__
+    ):
+        logger.error(
+            f"Table {VerificationToken.__tablename__} not found in target database. \
+            Aborting ..."
+        )
+
+        return
+
+    with session_local() as session:
+        stmt = (
+            delete(VerificationToken)
+            .where(
+                VerificationToken.expires_at
+                < datetime.now(timezone.utc)
+            )
+            .returning(VerificationToken.id)
+        )
+
+        tokens = session.execute(stmt).all()
+
+        logger.info(
+            f"Deleted {len(tokens)} expired tokens"
+        )
+
+
 if __name__ == "__main__":
-    logger.info("Running migration")
-    run_migration()
+    logger.info("Running a one off database script ..")
+    delete_expired_tokens()

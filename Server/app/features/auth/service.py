@@ -1,8 +1,10 @@
+import asyncio
 from datetime import datetime, timedelta, timezone
 import logging
 import secrets
 import sqlalchemy as sa
 from uuid import UUID, uuid4
+from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -347,9 +349,8 @@ class AuthService:
 
         return access_token, refresh_token
 
-    @classmethod
+    @staticmethod
     async def revoke_against_family(
-        cls,
         family_id: UUID,
         session: AsyncSession | None = None
     ):
@@ -374,9 +375,8 @@ class AuthService:
                 async with short_session.begin():
                     await _execute(short_session)
 
-    @classmethod
+    @staticmethod
     async def remove_account(
-            cls,
             user_id: UUID,
             role: UserRoleV2,
             session: AsyncSession | None
@@ -402,3 +402,79 @@ class AuthService:
             async with AsyncSessionLocal() as short_session:
                 async with short_session.begin():
                     await _execute(short_session)
+
+    @staticmethod
+    async def get_user_by_email(
+        email: str,
+    ):
+        async def _fetch_doctor():
+            async with AsyncSessionLocal() as session:
+                return await DoctorService.get_by_email(
+                    session=session,
+                    email=email
+                )
+
+        async def _fetch_patient():
+            async with AsyncSessionLocal() as session:
+                return await PatientService.get_by_email(
+                    session=session,
+                    email=email
+                )
+
+        patient, doctor = await asyncio.gather(
+            _fetch_patient(),
+            _fetch_doctor()
+        )
+
+        return patient or doctor
+
+    @staticmethod
+    async def reset_password(
+        user_id: UUID,
+        role: UserRoleV2,
+        session: AsyncSession,
+        password: str
+    ):
+        hashed_pwd = await security.hash_password_aio(pwd=password)
+
+        stmt = (
+            update(
+                model := (
+                    Doctor if role is UserRoleV2.DOCTOR
+                    else Patient
+                )
+            )
+            .where(model.id == user_id)
+            .returning(model.email)
+            .values({"hash": hashed_pwd})
+        )
+
+        email = await session.scalar(stmt)
+
+        if email is None:
+            raise AuthenticationError("The user could not be identified.")
+
+        return email
+
+    @classmethod
+    async def mark_email_verified(
+            cls,
+            user_id: UUID,
+            role: UserRoleV2,
+            session: AsyncSession
+    ):
+        stmt = (
+            update(
+                model := (Doctor if (
+                    role is UserRoleV2.DOCTOR
+                ) else Patient)
+            )
+            .where(model.id == user_id)
+            .values({"email_verified": True})
+            .returning(model.email)
+        )
+
+        email = await session.scalar(stmt)
+
+        if email is not None:
+            return email

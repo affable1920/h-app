@@ -14,24 +14,27 @@ from fastapi import (
 )
 
 from app.services.MailService import MailService
+
 from app.database.entry_async import get_db
-from app.schemas.enums import UserRoleV2
-from app.schemas.user import UserResponse
 from app.database.models import Doctor, Patient
-from app.features.auth.service import AuthService
-from app.features.auth.EmailVerificationService import EmailVerificationService
+
 
 from app.core.exceptions import (
     AppException,
     AuthenticationError,
     AuthorizationError
 )
+from app.features.auth.service import AuthService
+from app.features.auth.VerificationService import VerificationService
 from app.features.auth.dependencies import (
     clear_auth_headers,
     extract_cookie,
     get_current_user,
     set_auth_headers
 )
+from app.schemas.auth import ForgottenPasswordBody, ResetPasswordBody
+from app.schemas.enums import UserRoleV2, VerificationTokenPurpose
+from app.schemas.user import UserResponse
 from app.schemas.doctor import (
     DoctorLogin,
     DrCreate,
@@ -247,7 +250,7 @@ async def remove_account(
     "/request-email-verify",
     status_code=201
 )
-async def request(
+async def request_email_verification_link(
     session: AsyncSession = Depends(get_db),
     current_user: Doctor | Patient = Depends(get_current_user)
 ):
@@ -260,10 +263,11 @@ async def request(
     if current_user.email_verified:
         return "Your email is already verified."
 
-    verification_link = await EmailVerificationService.create_verification_mail(
+    verification_link = await VerificationService.issue(
         session=session,
         user_id=current_user.id,
-        role=role
+        role=role,
+        purpose=VerificationTokenPurpose.EMAIL_VERIFICATION
     )
 
     await session.commit()
@@ -276,31 +280,40 @@ async def request(
 
     return """A mail containing a verification link has been sent to you email address.
         Please click on the link to verify your email ..
-        The link expires after 10 minutes from now .."""
+        The link expires in 3 hours .."""
 
 
 @router.get(
     "/verify-email",
     status_code=204
 )
-async def email_verification(
+async def verify_email(
     background_tasks: BackgroundTasks,
     token: str = Query(...),
     session: AsyncSession = Depends(get_db),
 ):
-    email = await EmailVerificationService.verify_email(
-        session=session,
-        link=token
-    )
-
-    background_tasks.add_task(
-        MailService.send_mail,
-        recipient=email,
-        content=(
-            "Email Verification ",
-            "Your email has been verified successfully ..!"
+    async with session.begin():
+        claimed_token = await VerificationService.consume(
+            raw=token,
+            session=session,
+            purpose=VerificationTokenPurpose.EMAIL_VERIFICATION
         )
-    )
+
+        email = await AuthService.mark_email_verified(
+            user_id=claimed_token.user_id,
+            role=claimed_token.role,
+            session=session
+        )
+
+    if email:
+        background_tasks.add_task(
+            MailService.send_mail,
+            recipient=email,
+            content=(
+                "Email Verification ",
+                "Your email has been verified successfully ..!"
+            )
+        )
 
 
 @router.post(
@@ -345,3 +358,72 @@ async def logout(
             )
 
             await session.commit()
+
+
+@router.post(
+    "/forgot-password"
+)
+async def request_password_reset(
+    body: ForgottenPasswordBody,
+    background_tasks: BackgroundTasks,
+    session: AsyncSession = Depends(get_db),
+):
+    user = await AuthService.get_user_by_email(
+        email=body.email
+    )
+
+    if user is None:
+        return "We've sent a password reset link to the given email. "
+
+    role = (
+        UserRoleV2.DOCTOR
+        if isinstance(user, Doctor)
+        else UserRoleV2.PATIENT
+    )
+
+    reset_link = await VerificationService.issue(
+        session=session,
+        user_id=user.id,
+        role=role,
+        purpose=VerificationTokenPurpose.PASSWORD_RESET
+    )
+
+    await session.commit()
+
+    background_tasks.add_task(
+        MailService.send_password_reset_mail,
+        recipient=user.email,
+        reset_link=reset_link
+    )
+
+
+@router.post(
+    "/reset-password"
+)
+async def reset_password(
+    body: ResetPasswordBody,
+    background_tasks: BackgroundTasks,
+    session: AsyncSession = Depends(get_db)
+):
+    async with session.begin():
+        user_id, role = await VerificationService.consume(
+            raw=body.token,
+            session=session,
+            purpose=VerificationTokenPurpose.PASSWORD_RESET
+        )
+
+        email = await AuthService.reset_password(
+            user_id=user_id,
+            role=role,
+            session=session,
+            password=body.password
+        )
+
+    background_tasks.add_task(
+        MailService.send_mail,
+        recipient=email,
+        content=(
+            "Password reset sucessfull ",
+            "Your password was sucessfully reset .."
+        )
+    )

@@ -46,7 +46,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
       {startIcon && startIcon}
       {children}
       {endIcon && endIcon}
-      {loading && <Spinner size={size ?? "sm"} />}
+      {loading && (
+        <Spinner
+          color={color === "white" ? "primary" : "white"}
+          size={size ?? "sm"}
+        />
+      )}
     </button>
   );
 });

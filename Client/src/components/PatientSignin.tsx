@@ -6,7 +6,7 @@ import { Input } from "./ui/Input";
 import Button from "./lib/button/Button";
 import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { APIError } from "@/types/http";
 import { useEffect } from "react";
 import { ToggledPasswordInput } from "./lib/button/ToggledPasswordInput";
@@ -56,6 +56,7 @@ export function PatientSignin() {
           <Input.Label htmlFor="email">email</Input.Label>
           <Input.Element
             autoComplete="off"
+            aria-autocomplete="none"
             id="email"
             type="email"
             {...form.register("email")}
@@ -68,8 +69,13 @@ export function PatientSignin() {
         </Input.Group>
       </Stack>
       <Stack orientation="V" className="mt-4">
-        <div className="text-red-400 text-center">
-          {errors["root"] && errors["root"].message}
+        <div className="text-right text-sm my-1">
+          <Link
+            to="forgot-password"
+            className="text-blue-400 hover:underline underline-offset-2"
+          >
+            Forgot password?
+          </Link>
         </div>
         <Button
           type="submit"

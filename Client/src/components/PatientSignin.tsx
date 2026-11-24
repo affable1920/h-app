@@ -68,13 +68,15 @@ export function PatientSignin() {
           <ToggledPasswordInput id="password" {...form.register("password")} />
         </Input.Group>
       </Stack>
-      <Stack orientation="V" className="mt-4">
-        <div className="text-right text-sm my-1">
+
+      <Stack orientation="V" gap={9} className="mt-4">
+        <div className="text-right text-sm">
           <Link
             to="forgot-password"
-            className="text-blue-400 hover:underline underline-offset-2"
+            className="text-blue-400 hover:underline underline-offset-2 outline-none focus:underline
+            focus:text-blue-300"
           >
-            Forgot password?
+            Forgot password ?
           </Link>
         </div>
         <Button

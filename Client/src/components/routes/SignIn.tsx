@@ -22,9 +22,11 @@ function SignIn() {
         {role === "doctor" ? <DrSignin /> : <PatientSignin />}
       </section>
 
-      <Stack orientation="V" className="p-4 bg-layout-raised">
-        <Stack justify="center" gap={12}>
-          <span>Don't have an account</span>
+      <Stack orientation="V" className="p-4 px-8 bg-layout-raised">
+        <Stack justify="center" className="text-sm font-bold" gap={16}>
+          <span className="inline-flex opacity-90">
+            Don't have an account ?
+          </span>
           <Link
             to="register"
             state={{ role }}
@@ -48,7 +50,7 @@ function SignIn() {
               return p === "doctor" ? "patient" : "doctor";
             });
           }}
-          className="w-fit self-center"
+          className="self-center"
         >
           {role === "doctor" ? "patient sign in" : "Doctor sign in"}
         </Button>

@@ -7,7 +7,7 @@ import { Stack } from "./ui/Stack";
 import { useState, useCallback, forwardRef } from "react";
 import { useSignin } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { ToggledPasswordInput } from "./lib/button/ToggledPasswordInput";
 
@@ -87,8 +87,6 @@ export function DrSignin() {
     [form],
   );
 
-  console.log(errors);
-
   async function submit(data: DoctorLogin) {
     await signin(
       { route: "doctor", data },
@@ -127,15 +125,27 @@ export function DrSignin() {
         </Input.Group>
       </Stack>
 
-      <Button
-        className="mt-6 w-full"
-        color="white"
-        type="submit"
-        endIcon={<ChevronRight size={6} strokeWidth={4} />}
-        loading={isSigninPending}
-      >
-        sign in
-      </Button>
+      <Stack orientation="V" gap={9} className="mt-4">
+        <div className="text-right text-sm">
+          <Link
+            to="forgot-password"
+            className="text-blue-400 hover:underline underline-offset-2 outline-none focus:underline
+            focus:text-blue-300"
+          >
+            Forgot password ?
+          </Link>
+        </div>
+
+        <Button
+          className="w-full"
+          color="white"
+          type="submit"
+          endIcon={<ChevronRight size={6} strokeWidth={4} />}
+          loading={isSigninPending}
+        >
+          sign in
+        </Button>
+      </Stack>
     </form>
   );
 }

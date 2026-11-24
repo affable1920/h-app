@@ -140,3 +140,27 @@ export const useLogout = createMutationHook(
   },
   () => [],
 );
+
+const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+export const useRequestPasswordReset = createMutationHook(function (
+  email: string,
+) {
+  if (!regex.test(email.trim())) {
+    throw new Error("A valid email id is required ..!");
+  }
+
+  return api.post(
+    "forgot-password",
+    { email },
+    {
+      timeout: 5000,
+      timeoutErrorMessage: "Request timeout. Please try again ..!",
+    },
+  );
+});
+
+export const useResetPassword = createMutationHook(
+  (data: { token: string; password: string; confirmPassword: string }) =>
+    api.post("reset-password", data).then((res) => res.data),
+);

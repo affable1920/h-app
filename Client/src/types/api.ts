@@ -115,8 +115,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Request */
-        post: operations["request"];
+        /** Request Email Verification Link */
+        post: operations["request_link"];
         delete?: never;
         options?: never;
         head?: never;
@@ -130,8 +130,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Email Verification */
-        get: operations["email_verification"];
+        /** Verify Email */
+        get: operations["verify_email"];
         put?: never;
         post?: never;
         delete?: never;
@@ -168,6 +168,40 @@ export interface paths {
         put?: never;
         /** Logout */
         post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/forgot-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request Password Reset */
+        post: operations["request_reset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset Password */
+        post: operations["reset_password"];
         delete?: never;
         options?: never;
         head?: never;
@@ -973,6 +1007,14 @@ export interface components {
             /** Imageurl */
             readonly imageUrl: string | null;
         };
+        /** ForgottenPasswordBody */
+        ForgottenPasswordBody: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+        };
         /**
          * Gender
          * @enum {string}
@@ -1122,6 +1164,15 @@ export interface components {
             emailVerified: boolean;
             /** Appointments */
             appointments?: components["schemas"]["AppointmentPatientResponse"][];
+        };
+        /** ResetPasswordBody */
+        ResetPasswordBody: {
+            /** Token */
+            token: string;
+            /** Password */
+            password: string;
+            /** Confirmpassword */
+            confirmPassword: string;
         };
         /**
          * Role
@@ -1446,7 +1497,7 @@ export interface operations {
             };
         };
     };
-    request: {
+    request_link: {
         parameters: {
             query?: never;
             header?: never;
@@ -1456,7 +1507,7 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1466,7 +1517,7 @@ export interface operations {
             };
         };
     };
-    email_verification: {
+    verify_email: {
         parameters: {
             query: {
                 token: string;
@@ -1478,13 +1529,11 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            200: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": unknown;
-                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -1534,6 +1583,72 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_reset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForgottenPasswordBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_password: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Validation Error */
             422: {

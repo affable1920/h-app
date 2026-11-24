@@ -15,6 +15,7 @@ from app.schemas.enums import (
     ScheduleKind,
     Status,
     UserRoleV2,
+    VerificationTokenPurpose,
 )
 
 PrimaryKey = Annotated[UUID, mapped_column(
@@ -542,14 +543,12 @@ class Review(
         return f"{self.__class__.__name__}(id={self.id}, entity={self.entity}, rating={self.rating})"
 
 
-class EmailVerificationToken(Base):
-    __tablename__ = "email_verification_token"
+class VerificationToken(Base):
+    __tablename__ = "verification_token"
 
     id: Mapped[PrimaryKey] = mapped_column()
 
-    user_id: Mapped[UUID] = mapped_column(
-        index=True
-    )
+    user_id: Mapped[UUID] = mapped_column(index=True)
 
     user_role: Mapped[UserRoleV2] = mapped_column(
         sa.Enum(
@@ -558,14 +557,16 @@ class EmailVerificationToken(Base):
         ),
     )
 
-    hash: Mapped[str] = mapped_column(
-        unique=True,
-        index=True
+    purpose: Mapped[VerificationTokenPurpose] = mapped_column(
+        sa.Enum(
+            VerificationTokenPurpose,
+            name="verification_token_purpose",
+        ),
+        server_default=sa.text("'EMAIL_VERIFICATION'")
     )
 
-    exp: Mapped[datetime] = mapped_column(
-        sa.DateTime(timezone=True),
-    )
+    token_hash: Mapped[str] = mapped_column(unique=True, index=True)
+    expires_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True))
 
     created_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True),

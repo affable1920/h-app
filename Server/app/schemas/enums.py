@@ -51,3 +51,8 @@ class ScheduleKind(StrEnum):
     ONE_OFF = "one-off"
     WEEKLY = "weekly"
     MONTHLY = "monthly"
+
+
+class VerificationTokenPurpose(StrEnum):
+    EMAIL_VERIFICATION = "email_verification"
+    PASSWORD_RESET = "password_reset"

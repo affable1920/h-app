@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     groq_api_key: str
     gmail_password: str
 
+    backend_url: str
+    frontend_url: str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -35,6 +35,8 @@ import {
 } from "@/routing/middleware";
 import { WorkspaceBoundary } from "@/components/WorkspaceBoundary";
 import { ensureSessionAtStartup } from "./restoreSession";
+import { ForgotPassword } from "@/components/ForgotPassword";
+import { ResetPassword } from "@/components/ResetPassword";
 
 export const router = createBrowserRouter([
   {
@@ -64,6 +66,14 @@ export const router = createBrowserRouter([
           {
             path: "register",
             Component: Register,
+          },
+          {
+            path: "forgot-password",
+            Component: ForgotPassword,
+          },
+          {
+            path: "reset-password",
+            Component: ResetPassword,
           },
         ],
       },

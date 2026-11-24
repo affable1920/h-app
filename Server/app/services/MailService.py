@@ -47,16 +47,43 @@ class MailService:
         text = (
             "Confirm your email address using the link below:\n\n"
             f"{verification_link}\n\n"
-            "The link is only valid for 10 minutes."
+            "The link is valid for 3 hours."
         )
 
         html = f"""
             <p>Confirm your email address using the link below:</p>
             <p><a href="{verification_link}"><strong><em>Verify mail</em></strong></a></p>
-            <p>The link is only valid for 10 minutes.</p>"""
+            <p>The link is valid for 3 hours.</p>"""
 
         cls.send_mail(
             recipient=recipient,
             content=("Email Verification", text),
+            html=html
+        )
+
+    @classmethod
+    def send_password_reset_mail(
+        cls,
+        recipient: EmailStr,
+        reset_link: str
+    ):
+        text = (
+            f"""We're sorry to hear you've forgotten the password to your account.
+            Use the link below to reset your password 
+            \n{reset_link} \n
+            The link will expire in 15 minutes, so make sure to use it before then.
+        """
+        )
+
+        html = (
+            f"""<p>We're sorry to hear you've forgotten the password to your account.</p>
+            <p>Use the link below to reset your password</p>
+            <p><a href="{reset_link}"><strong><em>Reset Password</em></strong></a></p>
+            The link will expire in 15 minutes, so make sure to use it before then.
+        """)
+
+        cls.send_mail(
+            recipient=recipient,
+            content=("Reset Password", text),
             html=html
         )

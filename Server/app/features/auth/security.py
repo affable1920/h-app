@@ -1,5 +1,6 @@
 import asyncio
 
+import secrets
 import jwt
 import hashlib
 from uuid import UUID
@@ -36,6 +37,10 @@ def authenticate_password(pwd: str, hash: str) -> bool:
 
 def authenticate_password_aio(pwd: str, hash: str):
     return asyncio.to_thread(authenticate_password, pwd, hash)
+
+
+def generate_secret() -> str:
+    return secrets.token_urlsafe(nbytes=32)
 
 
 def hash_token(token: str) -> str:

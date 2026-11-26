@@ -104,6 +104,7 @@ class VerificationService:
         role: UserRoleV2,
         purpose: VerificationTokenPurpose
     ) -> None:
+        # get last created token
         stmt = (
             select(VerificationToken.created_at)
             .where(
@@ -123,12 +124,12 @@ class VerificationService:
         last_created = await session.scalar(stmt)
 
         if last_created is None:
+            # a rare case, return early
             return
 
         if ((datetime.now(timezone.utc) - last_created) < TTL[purpose]):
             raise ConflictError(
-                message="You have recently sent a verification mail. "
-                "Please wait for 15 seconds before requesting another mail .."
+                message="Please wait for 15 seconds before requesting another mail .."
             )
 
     @staticmethod
@@ -192,12 +193,12 @@ class VerificationService:
             .values({"used_at": now})
         )
 
-        claimed = (await session.execute(claim_stmt)).one_or_none()
+        claimed = await session.scalar(claim_stmt)
 
         if claimed is None:
             # This is an edge case where the token exists but has either
             # expired or has been used
-            existing_stmt = (
+            existing = await session.scalar(
                 select(VerificationToken)
                 .where(
                     VerificationToken.token_hash
@@ -205,15 +206,13 @@ class VerificationService:
                 )
             )
 
-            existing = await session.scalar(existing_stmt)
-
             if existing is not None:
                 raise ConflictError(
                     "Your request has either expired or has already been used .."
                 )
 
             raise AuthorizationError(
-                "Your request could not be located. Please try again."
+                "Your request could not be completed. Please try again."
             )
 
         return ClaimedToken(*claimed)

@@ -13,6 +13,7 @@ from fastapi import (
     Response
 )
 
+from app.features.auth.Sessions import Sessions
 from app.services.MailService import MailService
 
 from app.database.entry_async import get_db
@@ -61,33 +62,38 @@ async def register_patient(
     response: Response,
     session: AsyncSession = Depends(get_db)
 ):
-    created = await AuthService.register_patient(
-        session=session,
-        payload=user
-    )
-
-    try:
-        async with session.begin():
-            access_token, refresh_token = AuthService.issue_session(
-                session=session,
-                user_id=created.id,
-                role=UserRoleV2.PATIENT
-            )
-
-    except Exception:
-        logger.exception(
-            """Session issuance failed after successfull registration ...
-            user_id: %s
-            email: %s""",
-            created.id,
-            created.email
+    async with session.begin():
+        created = await AuthService.register_patient(
+            session=session,
+            payload=user
         )
 
-        response.headers["x-session-issued"] = "false"
-        return """Your account has been sucessfully created, but we could not log you in
-        Please login manually ..!"""
+        try:
+            async with session.begin_nested():
+                access, refresh = Sessions.issue_session(
+                    session=session,
+                    user_id=created.id,
+                    role=UserRoleV2.PATIENT
+                )
+                await session.flush()
 
-    set_auth_headers(response, access_token, refresh_token)
+        except Exception:
+            logger.exception(
+                """Session issuance failed after successful registration ...
+                user_id: %s
+                email: %s""",
+                created.id,
+                created.email
+            )
+
+            response.headers["x-session-issued"] = "false"
+
+            return """
+            Your account has been successfully created, but we could not log you in
+            Please login manually ..!
+            """
+
+    set_auth_headers(response, access, refresh)
     return created
 
 
@@ -100,35 +106,34 @@ async def register_doctor(
     data: Annotated[DrCreate, Form()],
     session: AsyncSession = Depends(get_db)
 ):
-    created = await AuthService.register_doctor(
-        session=session,
-        payload=data
-    )
-
-    try:
-        async with session.begin():
-            access_token, refresh_token = AuthService.issue_session(
-                session,
-                created.id,
-                UserRoleV2.DOCTOR
-            )
-
-    except Exception:
-        logger.exception(
-            """Session issuance failed after successfull registration ...
-            user_id: %s
-            email: %s""",
-            created.id,
-            created.email
+    async with session.begin():
+        created = await AuthService.register_doctor(
+            session=session,
+            payload=data
         )
 
-        response.headers["x-session-issued"] = "false"
-        return (
-            """
-        Your account has been sucessfully created, but we could not log you in 
-        Please login manually ..
-        """
-        )
+        async with session.begin_nested():
+            try:
+                access_token, refresh_token = Sessions.issue_session(
+                    session,
+                    created.id,
+                    UserRoleV2.DOCTOR
+                )
+
+            except Exception:
+                logger.exception(
+                    """Session issuance failed after successfull registration ...
+                    user_id: %s
+                    email: %s""",
+                    created.id,
+                    created.email
+                )
+
+                response.headers["x-session-issued"] = "false"
+                return """
+                Your account has been sucessfully created, but we could not log you in 
+                Please login manually ..
+                """
 
     set_auth_headers(response, access_token, refresh_token)
     return created
@@ -143,12 +148,20 @@ async def login_patient(
     response: Response,
     session: AsyncSession = Depends(get_db)
 ):
-    access_token, refresh_token, patient = await AuthService.login_patient(
+    patient = await AuthService.validate_patient_credentials(
         session=session,
         credentials=user_cred
     )
 
-    set_auth_headers(response, access_token, refresh_token)
+    access, refresh = Sessions.issue_session(
+        session,
+        patient.id,
+        UserRoleV2.PATIENT
+    )
+
+    await session.commit()
+
+    set_auth_headers(response, access, refresh)
     return patient
 
 
@@ -161,12 +174,20 @@ async def login_doctor(
     credentials: DoctorLogin,
     session: AsyncSession = Depends(get_db)
 ):
-    access_token, refresh_token, doctor = await AuthService.login_doctor(
+    doctor = await AuthService.validate_dr_credentials(
         credentials=credentials,
         session=session
     )
 
-    set_auth_headers(response, access_token, refresh_token)
+    access, refresh = Sessions.issue_session(
+        session=session,
+        user_id=doctor.id,
+        role=UserRoleV2.DOCTOR
+    )
+
+    await session.commit()
+
+    set_auth_headers(response, access, refresh)
     return doctor
 
 
@@ -210,9 +231,9 @@ async def remove_account(
     session: AsyncSession = Depends(get_db),
     user: Doctor | Patient = Depends(get_current_user)
 ):
-    refresh_token = await AuthService.get_refresh_token(
-        cookie,
-        session
+    refresh_token = await Sessions.get_refresh_token(
+        session=session,
+        token=cookie,
     )
 
     if refresh_token is None:
@@ -223,19 +244,18 @@ async def remove_account(
         )
 
     try:
-        await AuthService.revoke_against_family(
-            family_id=refresh_token.family_id,
-            session=session
+        await Sessions.revoke_family(
+            session=session,
+            family_id=refresh_token.family_id
         )
 
         await AuthService.remove_account(
-            user.id,
-            (
-                UserRoleV2.DOCTOR
-                if isinstance(user, Doctor)
-                else UserRoleV2.PATIENT
-            ),
-            session
+            session=session,
+            user_id=user.id,
+            role=(UserRoleV2.DOCTOR
+                  if isinstance(user, Doctor)
+                  else UserRoleV2.PATIENT
+                  )
         )
 
         await session.commit()
@@ -305,6 +325,9 @@ async def verify_email(
             session=session
         )
 
+    if email is None:
+        return
+
     if email:
         background_tasks.add_task(
             MailService.send_mail,
@@ -324,13 +347,17 @@ async def refresh(
     cookie: str = Depends(extract_cookie),
     session: AsyncSession = Depends(get_db),
 ):
-    access_token, refresh_token = await AuthService.rotate_refresh_token(
+    session_pair = await Sessions.rotate(
         session=session,
-        refresh_token=cookie
+        token=cookie
     )
 
     await session.commit()
-    set_auth_headers(response, access_token, refresh_token)
+    set_auth_headers(
+        response,
+        session_pair.access,
+        session_pair.refresh
+    )
 
 
 @router.post(
@@ -346,15 +373,15 @@ async def logout(
     session: AsyncSession = Depends(get_db)
 ):
     if refresh_token:
-        token = await AuthService.get_refresh_token(
+        token = await Sessions.get_refresh_token(
             token=refresh_token,
             session=session
         )
 
         if token:
-            await AuthService.revoke_against_family(
-                family_id=token.family_id,
-                session=session
+            await Sessions.revoke_family(
+                session=session,
+                family_id=token.family_id
             )
 
             await session.commit()
@@ -369,17 +396,15 @@ async def request_password_reset(
     session: AsyncSession = Depends(get_db),
 ):
     user = await AuthService.get_user_by_email(
-        email=body.email
+        session=session,
+        email=body.email,
     )
 
     if user is None:
-        return "We've sent a password reset link to the given email. "
+        return """If the given address exists, you should have recieved a mail in your inbox."""
 
-    role = (
-        UserRoleV2.DOCTOR
-        if isinstance(user, Doctor)
-        else UserRoleV2.PATIENT
-    )
+    role = (UserRoleV2.DOCTOR if isinstance(
+        user, Doctor) else UserRoleV2.PATIENT)
 
     reset_link = await VerificationService.issue(
         session=session,
@@ -418,6 +443,15 @@ async def reset_password(
             session=session,
             password=body.password
         )
+
+        await Sessions.revoke_user_sessions(
+            session=session,
+            user_id=user_id,
+            role=role
+        )
+
+    if email is None:
+        return
 
     background_tasks.add_task(
         MailService.send_mail,

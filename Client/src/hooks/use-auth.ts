@@ -98,6 +98,12 @@ export function useFetchProfile<R extends Role>(role: R) {
 export const useDeleteAccount = createMutationHook(
   () => api.delete(""),
   (id: string) => [doctorKeys.details(id), doctorKeys.all],
+  {
+    onSuccess: function () {
+      useAuthStore.getState().clearAuth();
+      queryClient.clear();
+    },
+  },
 );
 
 // ============================================================

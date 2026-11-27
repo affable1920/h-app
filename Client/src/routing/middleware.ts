@@ -58,9 +58,7 @@ export function requireRole(expectedRole: Role) {
   };
 }
 
-export function workspaceIndex(expectedRole: Role, homePage?: string) {
-  return function () {
-    requireRole(expectedRole)();
-    return redirect(homePage ?? workspaceHomes[expectedRole]);
-  };
+export function workspaceIndex() {
+  const { role } = useAuthStore.getState();
+  return redirect(workspaceHomes[role!]);
 }

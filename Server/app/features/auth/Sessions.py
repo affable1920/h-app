@@ -201,6 +201,7 @@ class Sessions:
                 RefreshToken.expires_at > now,
                 RefreshToken.family_expires_at > now,
             )
+            .values({"revoked_at": now})
         )
 
         await session.execute(stmt)

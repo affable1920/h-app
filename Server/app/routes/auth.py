@@ -119,6 +119,7 @@ async def register_doctor(
                     created.id,
                     UserRoleV2.DOCTOR
                 )
+                await session.flush()
 
             except Exception:
                 logger.exception(
@@ -227,6 +228,7 @@ async def me(
     status_code=204
 )
 async def remove_account(
+    response: Response,
     cookie: str = Depends(extract_cookie),
     session: AsyncSession = Depends(get_db),
     user: Doctor | Patient = Depends(get_current_user)
@@ -238,26 +240,41 @@ async def remove_account(
 
     if refresh_token is None:
         raise AuthenticationError(
-            message="We could not delete your account. Please try later..",
+            message="Your session has likely expired, so we could not delete your account. "
+            "Please try after logging in again..",
             reason="No refresh token record found.",
             code="missing_token"
         )
 
+    user_role = (UserRoleV2.DOCTOR
+                 if isinstance(user, Doctor)
+                 else UserRoleV2.PATIENT)
+
+    if not (
+        refresh_token.user_id == user.id
+        and refresh_token.user_role == user_role
+    ):
+        raise AuthorizationError(
+            code="invalid_token",
+            reason="Token does not belong to the user.",
+            message="You are not allowed to perform this operation ..",
+        )
+
     try:
-        await Sessions.revoke_family(
+
+        await Sessions.revoke_user_sessions(
             session=session,
-            family_id=refresh_token.family_id
+            user_id=user.id,
+            role=user_role
         )
 
         await AuthService.remove_account(
             session=session,
             user_id=user.id,
-            role=(UserRoleV2.DOCTOR
-                  if isinstance(user, Doctor)
-                  else UserRoleV2.PATIENT
-                  )
+            role=user_role
         )
 
+        clear_auth_headers(response)
         await session.commit()
 
     except Exception as e:
@@ -400,26 +417,26 @@ async def request_password_reset(
         email=body.email,
     )
 
-    if user is None:
-        return """If the given address exists, you should have recieved a mail in your inbox."""
+    if user:
+        role = (UserRoleV2.DOCTOR if isinstance(
+            user, Doctor) else UserRoleV2.PATIENT)
 
-    role = (UserRoleV2.DOCTOR if isinstance(
-        user, Doctor) else UserRoleV2.PATIENT)
+        reset_link = await VerificationService.issue(
+            session=session,
+            user_id=user.id,
+            role=role,
+            purpose=VerificationTokenPurpose.PASSWORD_RESET
+        )
 
-    reset_link = await VerificationService.issue(
-        session=session,
-        user_id=user.id,
-        role=role,
-        purpose=VerificationTokenPurpose.PASSWORD_RESET
-    )
+        await session.commit()
 
-    await session.commit()
+        background_tasks.add_task(
+            MailService.send_password_reset_mail,
+            recipient=user.email,
+            reset_link=reset_link
+        )
 
-    background_tasks.add_task(
-        MailService.send_password_reset_mail,
-        recipient=user.email,
-        reset_link=reset_link
-    )
+    return """If the given address exists, you should have recieved a mail in your inbox."""
 
 
 @router.post(

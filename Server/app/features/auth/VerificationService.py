@@ -27,6 +27,8 @@ TTL = {
     VerificationTokenPurpose.PASSWORD_RESET: timedelta(minutes=15)
 }
 
+COOL_DOWN_WINDOW = timedelta(seconds=15)
+
 
 class ClaimedToken(NamedTuple):
     user_id: UUID
@@ -127,9 +129,10 @@ class VerificationService:
             # a rare case, return early
             return
 
-        if ((datetime.now(timezone.utc) - last_created) < TTL[purpose]):
+        if ((datetime.now(timezone.utc) - last_created) < COOL_DOWN_WINDOW):
             raise ConflictError(
-                message="Please wait for 15 seconds before requesting another mail .."
+                message=f"Please wait for {COOL_DOWN_WINDOW.total_seconds()} \
+                seconds before requesting another mail .."
             )
 
     @staticmethod

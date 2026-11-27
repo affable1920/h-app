@@ -74,3 +74,5 @@ BACKEND_SPRINT.md
 
 tests/
 .github/
+
+*.dump

@@ -24,19 +24,18 @@ import useAuthStore from "@stores/auth-store";
 import App from "@components/App";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LayoutRoute } from "@components/LayoutRoute";
-import { HydrateFallback } from "@/components/HydrateFallback";
+import { HydrateFallback } from "@components/HydrateFallback";
+import { WorkspaceBoundary } from "@components/WorkspaceBoundary";
+import { ForgotPassword } from "@components/ForgotPassword";
+import { ResetPassword } from "@components/ResetPassword";
 
 // routing services
 import {
   authMiddleware,
   requireRole,
-  workspaceIndex,
+  sessionMiddleware,
   workspaceRedirect,
 } from "@/routing/middleware";
-import { WorkspaceBoundary } from "@/components/WorkspaceBoundary";
-import { ensureSessionAtStartup } from "./restoreSession";
-import { ForgotPassword } from "@/components/ForgotPassword";
-import { ResetPassword } from "@/components/ResetPassword";
 
 export const router = createBrowserRouter([
   {
@@ -45,7 +44,6 @@ export const router = createBrowserRouter([
         <App />
       </CallProvider>
     ),
-    middleware: [ensureSessionAtStartup],
     errorElement: <ErrorBoundary />,
     children: [
       {
@@ -55,7 +53,7 @@ export const router = createBrowserRouter([
       {
         path: "auth",
         Component: function () {
-          const { token } = useAuthStore.getState();
+          const token = useAuthStore((s) => s.token);
           return token ? <Navigate to="/app" /> : <Outlet />;
         },
         children: [
@@ -149,17 +147,6 @@ export const router = createBrowserRouter([
                           };
                         },
                       },
-                      {
-                        path: "consult",
-                        loader: loaderDoctor,
-                        lazy: async function () {
-                          const { TalkOverVideo } =
-                            await import("@/features/call/components/TalkOverVideo");
-                          return {
-                            Component: TalkOverVideo,
-                          };
-                        },
-                      },
                     ],
                   },
                 ],
@@ -185,7 +172,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "workspace",
-            middleware: [authMiddleware],
+            middleware: [sessionMiddleware, authMiddleware],
             errorElement: <WorkspaceBoundary />,
             Component: Outlet,
             children: [
@@ -196,21 +183,12 @@ export const router = createBrowserRouter([
               {
                 path: "patient",
                 loader: requireRole("patient"),
-                children: [
-                  { index: true, loader: workspaceIndex("patient") },
-                  ...patientProfileRoute,
-                ],
+                children: patientProfileRoute,
               },
               {
                 path: "doctor",
                 loader: requireRole("doctor"),
-                children: [
-                  {
-                    index: true,
-                    loader: workspaceIndex("doctor"),
-                  },
-                  ...drProfileRoute,
-                ],
+                children: drProfileRoute,
               },
             ],
           },

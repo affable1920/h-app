@@ -25,7 +25,7 @@ const resetSchema = z
     },
     {
       error: "Passwords must match",
-      path: ["confirm"],
+      path: ["confirmPassword"],
     },
   );
 
@@ -43,14 +43,10 @@ export function ResetPassword() {
 
   const token = params.get("token");
 
-  if (!token) {
-    return;
-  }
-
   async function submit(data: ResetSchema) {
     try {
       await reset({
-        token,
+        token: token!,
         ...data,
       });
 
@@ -80,55 +76,64 @@ export function ResetPassword() {
 
   return (
     <PageLayout>
-      <section className="form-box w-sm max-w-full mx-auto p-8 py-6">
-        <header className="mb-8">
-          <h2 className="text-md uppercase text-center">Reset your password</h2>
-        </header>
+      {token ? (
+        <section className="form-box w-sm max-w-full mx-auto p-8 py-6">
+          <header className="mb-8">
+            <h2 className="text-md uppercase text-center">
+              Reset your password
+            </h2>
+          </header>
 
-        <form onSubmit={form.handleSubmit(submit)}>
-          <Stack gap={28} orientation="V">
-            <Input.Group
-              error={form.formState.errors["password"]?.message}
-              gap="xs"
-            >
-              <Input.Label htmlFor="password" required>
-                Password
-              </Input.Label>
+          <form onSubmit={form.handleSubmit(submit)}>
+            <Stack gap={28} orientation="V">
+              <Input.Group
+                error={form.formState.errors["password"]?.message}
+                gap="xs"
+              >
+                <Input.Label htmlFor="password" required>
+                  Password
+                </Input.Label>
 
-              <ToggledPasswordInput
-                autoComplete="off"
-                aria-autocomplete="none"
-                {...register("password")}
-                size="xs"
-                id="password"
-              />
-            </Input.Group>
+                <ToggledPasswordInput
+                  autoComplete="off"
+                  aria-autocomplete="none"
+                  {...register("password")}
+                  size="xs"
+                  id="password"
+                />
+              </Input.Group>
 
-            <Input.Group
-              error={form.formState.errors["confirmPassword"]?.message}
-              gap={"xs"}
-            >
-              <Input.Label htmlFor="confirm" required>
-                Confirm Password
-              </Input.Label>
+              <Input.Group
+                error={form.formState.errors["confirmPassword"]?.message}
+                gap={"xs"}
+              >
+                <Input.Label htmlFor="confirm" required>
+                  Confirm Password
+                </Input.Label>
 
-              <ToggledPasswordInput
-                autoComplete="off"
-                aria-autocomplete="none"
-                {...register("confirmPassword")}
-                size="xs"
-                id="confirmPassword"
-              />
-            </Input.Group>
-          </Stack>
+                <ToggledPasswordInput
+                  autoComplete="off"
+                  aria-autocomplete="none"
+                  {...register("confirmPassword")}
+                  size="xs"
+                  id="confirmPassword"
+                />
+              </Input.Group>
+            </Stack>
 
-          <div className="mt-6 flex items-center justify-end">
-            <Button type="submit" size="xs" color="white" loading={isPending}>
-              Confirm reset <ChevronRight strokeWidth={5} />
-            </Button>
-          </div>
-        </form>
-      </section>
+            <div className="mt-6 flex items-center justify-end">
+              <Button type="submit" size="xs" color="white" loading={isPending}>
+                Confirm reset <ChevronRight strokeWidth={5} />
+              </Button>
+            </div>
+          </form>
+        </section>
+      ) : (
+        <div className="text-center">
+          The link has either expired or can't be used. Please generate another
+          link
+        </div>
+      )}
     </PageLayout>
   );
 }

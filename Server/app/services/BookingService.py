@@ -10,7 +10,6 @@ from app.schemas.appointment import BookingRequestData
 from app.schemas.enums import AppointmentStatus
 from app.database.models import Appointment, CareJourney, Patient, Slot
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +18,7 @@ class BookingService:
     async def get_slot_by_id(
         slot_id: UUID,
         session: AsyncSession
-    ):
+    ) -> Slot | None:
         return await QueryService.get_by_id(
             model=Slot,
             entity_id=slot_id,
@@ -28,23 +27,6 @@ class BookingService:
                 joinedload(Slot.schedule)
             ]
         )
-
-    #
-
-    @staticmethod
-    async def find_care_journey(
-        patient_id: str,
-        session: AsyncSession
-    ) -> CareJourney | None:
-        return (
-            await session.scalar(
-                select(CareJourney).where(
-                    CareJourney.patient_id == patient_id
-                )
-            )
-        )
-
-    #
 
     @classmethod
     async def create_booking(
@@ -104,7 +86,6 @@ class BookingService:
         )
 
         session.add(created_appointment)
-
         await session.flush()
 
         await session.refresh(
@@ -125,8 +106,6 @@ class BookingService:
         booking_id: str,
         patient: Patient
     ):
-        logger.info("Appointment cancellation request recieved ...")
-
         stmt = (
             select(Appointment)
             .options(joinedload(Appointment.slot))
@@ -137,16 +116,11 @@ class BookingService:
 
         result = await session.scalar(stmt)
 
-        if not result:
+        if result is None:
             raise EntityNotFoundException(
                 entity_name="Appointment",
                 identifier=str(booking_id),
             )
 
-        logger.info(
-            f"Resetting appointment to default state ..."
-        )
-
         result.slot.is_booked = False
         result.status = AppointmentStatus.CANCELLED
-        logger.info("Appointment successfully cancelled ..")
